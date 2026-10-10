@@ -1,0 +1,3539 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Platzfrei – wo darf ich spielen?</title>
+
+<!-- PWA: macht die Seite installierbar (Icon, Name, Vollbild). -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#FFFFFF">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="mobile-web-app-capable" content="yes">
+
+<!-- Leaflet: die Kartenbibliothek. Kostenlos, kein Schlüssel nötig. -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
+<!-- Supabase: Anmeldung und Datenbank. Lädt die App auch ohne, dann läuft
+     sie im Testmodus mit den Daten aus dieser Datei. -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+/* ===========================================================================
+   Platzfrei – Oberfläche nach Apples Gestaltungsprinzipien
+   ---------------------------------------------------------------------------
+   Die Regeln stammen aus Apples WWDC-Vorträgen (Designing Fluid Interfaces,
+   The Details of UI Typography, Principles of Great Design). Wo ich eine
+   davon umsetze, steht sie im Kommentar dabei.
+   =========================================================================== */
+
+:root{
+  --gruen:#0B9463;
+  --gruen-tief:#087B51;
+  --gruen-zart:#E7F5EE;
+  --grund:#F6F8F6;
+  --flaeche:#FFFFFF;
+  --tinte:#0F1A15;
+  --tinte-2:#3D4B44;
+  --tinte-3:#7C8B83;
+  --kante:rgba(15,26,21,.07);
+
+  --frei:#0E7C43;         --frei-bg:#E4F6EA;
+  --absprache:#A8620B;    --absprache-bg:#FDF0DC;
+  --zu:#B3342A;           --zu-bg:#FCE9E7;
+  --verein:#6248B8;       --verein-bg:#EFEBFB;
+  --unklar:#6B7A72;       --unklar-bg:#EFF2F0;
+
+  --r-karte:18px;
+  --r-feld:12px;
+  --r-pille:999px;
+  --schatten:0 1px 2px rgba(15,26,21,.04), 0 6px 18px -6px rgba(15,26,21,.10);
+  --schatten-hoch:0 2px 4px rgba(15,26,21,.05), 0 14px 32px -10px rgba(15,26,21,.16);
+
+  /* §15 Typografie: Systemschrift zuerst. Sie bringt optische Größen,
+     Tracking-Tabellen und Lesbarkeitsfeinschliff bereits mit. */
+  --schrift:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI Variable',
+            'Segoe UI',system-ui,Roboto,'Helvetica Neue',sans-serif;
+
+  /* §4 Bewegung: Kurven, die einen kritisch gedämpften Feder-Verlauf
+     annähern – kein Überschwingen, weicher Auslauf. */
+  --feder:cubic-bezier(.32,.72,0,1);
+  --feder-schnell:cubic-bezier(.25,.6,.15,1);
+  --druck:100ms ease-out;          /* §1 Reaktion: Rückmeldung sofort */
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+
+/* §15 Tracking und Zeilenabstand sind größenabhängig – ein fester Wert
+   wäre irgendwo falsch. Body bleibt bei 0, große Schrift wird enger. */
+body{font-family:var(--schrift);font-size:15px;line-height:1.5;letter-spacing:0;
+  color:var(--tinte);background:var(--grund);
+  display:flex;flex-direction:column;overflow:hidden;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+::selection{background:var(--gruen);color:#fff}
+
+/* §1 Reaktion: Alles Drückbare antwortet beim Drücken, nicht beim Loslassen. */
+button,.zeile,.chip,.stern,[role="button"]{touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent}
+button:active,.zeile:active,.chip:active,.knopf:active,.adminknopf:active{
+  transform:scale(.97);transition:transform var(--druck)}
+
+/* ---------- Kopf: schwebende Materialschicht (§12) ---------- */
+header{position:relative;z-index:20;flex-shrink:0;height:62px;padding:0 22px;
+  display:flex;align-items:center;gap:14px;
+  background:rgba(255,255,255,.72);
+  backdrop-filter:saturate(180%) blur(22px);
+  -webkit-backdrop-filter:saturate(180%) blur(22px);
+  /* §12 Helle Oberkante: das Licht, das sich im Material fängt.
+     Statt harter Trennlinie unten ein weicher Kantenverlauf. */
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.65),
+             0 1px 0 rgba(15,26,21,.05)}
+header h1{font-size:19px;font-weight:700;letter-spacing:-.021em;line-height:1.2;
+  display:flex;align-items:center;gap:9px}
+header h1 em{font-style:normal;font-weight:400;font-size:13.5px;letter-spacing:-.004em;
+  color:var(--tinte-3)}
+.kopfnotiz{font-size:12.5px;letter-spacing:.004em;color:var(--tinte-3);
+  margin-right:auto;font-variant-numeric:tabular-nums}
+.adminknopf{font-family:var(--schrift);font-size:13.5px;font-weight:600;
+  letter-spacing:-.005em;padding:9px 18px;border:0;border-radius:var(--r-pille);
+  background:var(--gruen);color:#fff;cursor:pointer;
+  transition:background 160ms var(--feder-schnell),transform var(--druck)}
+.adminknopf:hover{background:var(--gruen-tief)}
+.adminknopf[hidden]{display:none}
+.adminknopf.an{background:var(--tinte)}
+.adminknopf:focus-visible{outline:2px solid var(--gruen);outline-offset:2px}
+
+/* ---------- Layout ---------- */
+main{flex:1;display:flex;min-height:0}
+#karte{flex:1;z-index:1;background:#E6EAE7}
+aside{width:420px;flex-shrink:0;background:var(--grund);
+  border-left:1px solid var(--kante);display:flex;flex-direction:column;min-height:0}
+#seite{display:flex;flex-direction:column;min-height:0;height:100%}
+
+.leaflet-control-zoom a,.leaflet-control-layers{border:0!important;
+  border-radius:14px!important;box-shadow:var(--schatten)!important;color:var(--tinte)!important}
+.leaflet-control-zoom{border:0!important;box-shadow:none!important}
+.leaflet-control-zoom a:first-child{border-radius:14px 14px 4px 4px!important}
+.leaflet-control-zoom a:last-child{border-radius:4px 4px 14px 14px!important;margin-top:3px}
+.standort-knopf{border:0!important;box-shadow:none!important}
+.standort-knopf a{display:flex!important;align-items:center;justify-content:center;
+  width:34px!important;height:34px!important;border:0!important;border-radius:14px!important;
+  box-shadow:var(--schatten)!important;color:var(--tinte)!important;background:var(--grund)}
+.leaflet-control-layers-expanded{font-family:var(--schrift)!important;font-size:13.5px!important;
+  padding:12px 14px!important;border-radius:14px!important}
+.leaflet-control-attribution{font-size:9.5px!important;background:rgba(255,255,255,.8)!important;
+  border-radius:8px 0 0 0!important;padding:2px 6px!important}
+
+/* ---------- Filter ---------- */
+.filter{padding:18px 20px 12px;flex-shrink:0}
+.filtertitel{font-size:12.5px;font-weight:600;letter-spacing:.002em;
+  color:var(--tinte-3);margin:16px 0 9px}
+.filtertitel:first-child{margin-top:0}
+.chips{display:flex;gap:7px;flex-wrap:wrap}
+.chip{font-family:var(--schrift);font-size:13.5px;font-weight:600;letter-spacing:-.005em;
+  padding:8px 15px;border:0;background:var(--flaeche);color:var(--tinte-2);
+  border-radius:var(--r-pille);cursor:pointer;line-height:1.2;
+  box-shadow:0 1px 2px rgba(15,26,21,.05);
+  transition:background 160ms var(--feder-schnell),color 160ms var(--feder-schnell),
+             box-shadow 160ms var(--feder-schnell),transform var(--druck)}
+.chip:hover{color:var(--tinte);box-shadow:0 1px 3px rgba(15,26,21,.12)}
+.chip[aria-pressed="true"]{background:var(--tinte);color:#fff;box-shadow:none}
+.chip.mehr{background:transparent;box-shadow:inset 0 0 0 1.5px var(--kante);color:var(--tinte-3)}
+.chip.mehr:hover{box-shadow:inset 0 0 0 1.5px var(--tinte-3)}
+.chip.mehr[aria-pressed="true"]{background:transparent;color:var(--tinte);
+  box-shadow:inset 0 0 0 1.5px var(--tinte-3)}
+.chip:focus-visible{outline:2px solid var(--gruen);outline-offset:2px}
+.notiz-klein{font-size:12.5px;color:var(--tinte-3);margin:-4px 0 10px;line-height:1.45}
+
+/* ---------- Suche ---------- */
+.suche{position:relative;display:flex;align-items:center;margin:16px 20px 0;flex-shrink:0}
+.suche-logo{position:absolute;left:13px;padding:2px;box-sizing:content-box}
+.suche input{width:100%;font-family:var(--schrift);font-size:16px;font-weight:500;
+  padding:12px 40px 12px 42px;border:0;border-radius:14px;background:var(--flaeche);
+  color:var(--tinte);box-shadow:inset 0 0 0 1.5px var(--kante);appearance:none;-webkit-appearance:none}
+.suche input::placeholder{color:var(--tinte-3);font-weight:450}
+.suche input:focus{outline:none;box-shadow:inset 0 0 0 2px var(--gruen)}
+.suche input::-webkit-search-cancel-button{display:none}
+.suche-weg{position:absolute;right:8px;width:28px;height:28px;border:0;border-radius:50%;
+  background:var(--unklar-bg);color:var(--tinte-2);font-size:12px;cursor:pointer}
+.chip-icon{margin-right:6px}
+.anzahl{padding:2px 20px 8px;font-size:13px;font-weight:600;color:var(--tinte-3);
+  letter-spacing:.002em;flex-shrink:0}
+
+/* Listenende: nur auf dem Handy sichtbar, am Desktop gibt es die feste Leiste. */
+.listenende{display:none}
+
+/* ---------- Status oben in der Platz-Ansicht ---------- */
+.status{display:flex;gap:14px;align-items:center;margin:0 20px 12px;padding:16px 18px;
+  border-radius:var(--r-karte);background:var(--unklar-bg);color:var(--unklar)}
+.status.frei{background:var(--frei-bg);color:var(--frei)}
+.status.absprache{background:var(--absprache-bg);color:var(--absprache)}
+.status-icon{width:40px;height:40px;flex-shrink:0;border-radius:50%;display:grid;
+  place-items:center;font-size:20px;font-weight:800;background:var(--unklar);color:#fff}
+.status.frei .status-icon{background:var(--frei)}
+.status.absprache .status-icon{background:var(--absprache)}
+.status-text{display:flex;flex-direction:column;min-width:0}
+.status-text b{font-size:18px;letter-spacing:-.015em}
+.status-text span{font-size:13.5px;color:var(--tinte-2);margin-top:1px}
+.schnell{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0 20px 14px}
+.schnell button{display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:11px 4px 10px;border:0;border-radius:14px;background:var(--flaeche);
+  box-shadow:var(--schatten);font-family:var(--schrift);font-size:12.5px;font-weight:600;
+  color:var(--tinte);cursor:pointer}
+.schnell button span{font-size:18px;line-height:1;color:var(--gruen-tief)}
+.schnell button.an span{color:#F5B400}
+/* Am Desktop bleiben Route/Merken/Melden zusätzlich unten nicht doppelt. */
+.fuss.detailfuss2{display:none}
+
+/* ---------- Liste ---------- */
+/* §12 Kantenverlauf statt harter Linie: Inhalt taucht unter die
+   schwebende Leiste ab, statt an einem Strich abgeschnitten zu werden. */
+.rolle{flex:1;overflow-y:auto;min-height:0;padding:4px 20px 20px;
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 10px,
+                                     #000 calc(100% - 16px),transparent 100%);
+  mask-image:linear-gradient(to bottom,transparent 0,#000 10px,
+                             #000 calc(100% - 16px),transparent 100%)}
+
+.zeile{width:100%;text-align:left;border:0;cursor:pointer;font-family:var(--schrift);
+  display:flex;gap:14px;align-items:flex-start;position:relative;overflow:hidden;
+  background:var(--flaeche);border-radius:var(--r-karte);box-shadow:var(--schatten);
+  padding:15px 17px 15px 20px;margin-bottom:11px;
+  transition:box-shadow 220ms var(--feder),transform 220ms var(--feder)}
+.zeile::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
+  background:var(--streifen,var(--unklar))}
+.zeile:hover{box-shadow:var(--schatten-hoch);transform:translateY(-1px)}
+.zeile:focus-visible{outline:2px solid var(--gruen);outline-offset:2px}
+.punkt{display:none}
+
+/* Satellitenausschnitt: zeigt beim Scrollen, ob Käfig oder Wiese. */
+.luftbild{width:56px;height:56px;flex-shrink:0;border-radius:12px;object-fit:cover;
+  background:#DDE3DA;box-shadow:inset 0 0 0 1px rgba(15,26,21,.08)}
+
+/* Knopf über der Karte */
+.bereich-knopf{position:absolute;left:50%;top:14px;transform:translateX(-50%);
+  z-index:500;font-family:var(--schrift);font-size:13.5px;font-weight:600;
+  letter-spacing:-.005em;padding:10px 18px;border:0;border-radius:var(--r-pille);
+  background:rgba(255,255,255,.9);backdrop-filter:saturate(180%) blur(18px);
+  -webkit-backdrop-filter:saturate(180%) blur(18px);color:var(--tinte);cursor:pointer;
+  box-shadow:0 2px 10px rgba(15,26,21,.18);
+  transition:background 160ms var(--feder-schnell),transform var(--druck)}
+.bereich-knopf:hover{background:#fff}
+.bereich-knopf[hidden]{display:none}
+.abschnitt[hidden]{display:none}
+.daemmerung.bereich{background:var(--gruen-zart)}
+.abschnitt.luecke{border-left:3px solid var(--absprache)}
+.zt{flex:1;min-width:0}
+.zname{font-size:16.5px;font-weight:600;letter-spacing:-.014em;line-height:1.28;
+  color:var(--tinte);display:block}
+.zsub{font-size:13px;letter-spacing:.002em;color:var(--tinte-3);margin-top:3px;
+  display:block;font-weight:450;line-height:1.4}
+
+.zrechts{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0}
+.zdist{font-size:17px;font-weight:600;letter-spacing:-.02em;color:var(--tinte);
+  font-variant-numeric:tabular-nums;line-height:1;display:flex;align-items:baseline;gap:3px}
+.zdist small{font-size:11.5px;font-weight:600;color:var(--tinte-3);letter-spacing:.006em}
+
+.marke{display:inline-flex;align-items:center;white-space:nowrap;max-width:100%;
+  overflow:hidden;text-overflow:ellipsis;font-size:12px;font-weight:600;
+  letter-spacing:.004em;padding:4px 10px;border-radius:var(--r-pille);
+  margin:8px 6px 0 0;line-height:1.35;background:var(--unklar-bg);color:var(--unklar)}
+.marke.frei{background:var(--frei-bg);color:var(--frei)}
+.marke.absprache{background:var(--absprache-bg);color:var(--absprache)}
+.marke.unklar{background:var(--unklar-bg);color:var(--unklar)}
+.marke.verein{background:var(--verein-bg);color:var(--verein);margin-left:0}
+.marke.boden{margin-left:0}
+.marke.boden.gut{background:var(--frei-bg);color:var(--frei)}
+.marke.boden.mittel{background:var(--absprache-bg);color:var(--absprache)}
+.marke.boden.schlecht{background:var(--zu-bg);color:var(--zu)}
+.marke.warnung{background:var(--zu-bg);color:var(--zu);margin-left:0}
+.marke.bestaetigt{background:var(--frei-bg);color:var(--frei);margin-left:0}
+
+.stern{font-size:17px;line-height:1;color:#D6DDD8;cursor:pointer;padding:2px;
+  transition:color 160ms var(--feder-schnell),transform var(--druck)}
+.stern:hover{color:var(--tinte-3)}
+.stern.an{color:#F5B400}
+.stern:active{transform:scale(1.25)}   /* §1 spürbare Rückmeldung beim Drücken */
+.stern:focus-visible{outline:2px solid var(--gruen);outline-offset:2px;border-radius:6px}
+
+.leer{padding:44px 24px;text-align:center;color:var(--tinte-3);font-size:14px;
+  line-height:1.65;background:var(--flaeche);border-radius:var(--r-karte);
+  box-shadow:var(--schatten)}
+.leer b{color:var(--tinte);font-weight:600}
+
+.daemmerung{margin:0 20px 12px;padding:13px 16px;background:var(--flaeche);
+  border-radius:var(--r-karte);box-shadow:var(--schatten);font-size:13.5px;
+  color:var(--tinte-2);line-height:1.5;display:flex;flex-wrap:wrap;gap:8px;
+  align-items:center}
+.inline-knopf{background:var(--gruen-zart);border:0;font-family:var(--schrift);
+  font-size:13px;font-weight:600;letter-spacing:-.004em;color:var(--gruen-tief);
+  cursor:pointer;padding:6px 13px;border-radius:var(--r-pille);
+  transition:background 160ms var(--feder-schnell),transform var(--druck)}
+.inline-knopf:hover{background:#D8EDE3}
+
+/* ---------- Detail ---------- */
+.dkopf{padding:22px 20px 16px;flex-shrink:0}
+.zurueck{background:none;border:0;font-family:var(--schrift);font-size:13.5px;
+  font-weight:600;letter-spacing:-.005em;color:var(--gruen);cursor:pointer;
+  padding:0 0 12px;display:block;transition:opacity 160ms var(--feder-schnell)}
+.zurueck:hover{opacity:.7}
+.zurueck:focus-visible{outline:2px solid var(--gruen);outline-offset:2px;border-radius:6px}
+/* §15 Große Schrift bekommt negatives Tracking und enge Zeilen. */
+.dname{font-size:27px;font-weight:700;letter-spacing:-.026em;line-height:1.14}
+.dort{font-size:13.5px;color:var(--tinte-3);margin-top:6px;font-weight:450;
+  letter-spacing:.002em}
+
+.daten{width:calc(100% - 40px);margin:0 20px 12px;border-collapse:collapse;
+  font-size:14.5px;background:var(--flaeche);border-radius:var(--r-karte);
+  box-shadow:var(--schatten);overflow:hidden}
+.daten th,.daten td{padding:12px 18px;text-align:left;vertical-align:top;line-height:1.45}
+.daten tr:not(:last-child) th,.daten tr:not(:last-child) td{
+  border-bottom:1px solid rgba(15,26,21,.05)}
+.daten th{font-weight:450;font-size:14px;color:var(--tinte-3);width:42%;
+  letter-spacing:.002em;text-transform:none}
+.daten td{font-weight:600;letter-spacing:-.006em}
+.daten tr.geschuetzt td{font-weight:700}
+.vermutet{color:var(--absprache);font-weight:600}
+
+.abschnitt{background:var(--flaeche);border-radius:var(--r-karte);
+  box-shadow:var(--schatten);margin:0 20px 12px;padding:16px 18px}
+.abschnitt h3{font-size:12.5px;font-weight:600;color:var(--tinte-3);
+  margin-bottom:8px;letter-spacing:.004em;text-transform:none}
+.abschnitt p{font-size:14px;line-height:1.6;color:var(--tinte-2)}
+.abschnitt p + p{margin-top:10px}
+
+/* ---------- Schildfotos ---------- */
+.schildfotos{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0 4px}
+.schildfoto{display:flex;flex-direction:column;gap:6px;width:112px}
+.schildfoto a{display:block;border-radius:var(--r-feld);overflow:hidden;
+  box-shadow:var(--schatten)}
+.schildfoto img{display:block;width:112px;height:112px;object-fit:cover}
+.schildfoto.offen img{outline:2px dashed var(--absprache);outline-offset:-2px}
+.schildfoto .inline-knopf{padding:5px 8px;font-size:12px}
+.schildfoto .inline-knopf.weg{background:var(--zu-bg);color:var(--zu)}
+.knopf.zweit.loeschen{color:var(--zu)}
+label.inline-knopf{display:inline-block;margin-top:10px}
+
+/* ---------- Formular ---------- */
+.form{padding:4px 20px 20px}
+.form label{display:block;font-size:13px;font-weight:600;color:var(--tinte-2);
+  margin:18px 0 7px;letter-spacing:-.002em;text-transform:none}
+.form input,.form select,.form textarea{width:100%;font-family:var(--schrift);
+  font-size:15px;padding:13px 15px;border:1.5px solid transparent;
+  background:var(--flaeche);color:var(--tinte);border-radius:var(--r-feld);
+  box-shadow:0 1px 2px rgba(15,26,21,.05);appearance:none;-webkit-appearance:none;
+  font-weight:450;letter-spacing:-.002em;
+  transition:border-color 160ms var(--feder-schnell),box-shadow 160ms var(--feder-schnell)}
+.form select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1.5 1.5L6 6l4.5-4.5' stroke='%237C8B83' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 15px center;padding-right:38px}
+.form input:focus,.form select:focus,.form textarea:focus{outline:0;
+  border-color:var(--gruen);box-shadow:0 0 0 4px rgba(11,148,99,.13)}
+.form textarea{resize:vertical;min-height:74px;line-height:1.55}
+.gesperrt{opacity:.5}
+.hinweis{font-size:13px;color:var(--tinte-3);margin-top:14px;line-height:1.6}
+.rechtliches-link{display:block;text-align:center;font-size:12px;color:var(--tinte-3);
+  padding:4px 20px 16px;line-height:1.5}
+.rechtliches-link button{background:none;border:0;padding:0;font:inherit;
+  color:inherit;text-decoration:underline;cursor:pointer}
+.abschnitt h4{font-size:14px;font-weight:600;color:var(--tinte);margin:14px 0 4px}
+.abschnitt ul{margin:6px 0 0 18px;font-size:14px;line-height:1.6;color:var(--tinte-2)}
+.abschnitt a{color:var(--gruen-tief)}
+.platzhalter{background:var(--absprache-bg);color:var(--absprache);font-weight:600;
+  padding:0 4px;border-radius:4px}
+.form hr{margin:24px 0 2px!important;border:0!important;
+  border-top:1px solid var(--kante)!important}
+
+/* ---------- Fußleiste: zweite Materialschicht (§12) ---------- */
+.fuss{padding:14px 20px calc(14px + env(safe-area-inset-bottom,0));flex-shrink:0;
+  display:flex;gap:9px;
+  background:rgba(246,248,246,.78);
+  backdrop-filter:saturate(180%) blur(22px);
+  -webkit-backdrop-filter:saturate(180%) blur(22px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7)}
+.knopf{flex:1;font-family:var(--schrift);font-size:14.5px;font-weight:600;
+  letter-spacing:-.008em;padding:14px 16px;border:0;border-radius:var(--r-pille);
+  background:var(--gruen);color:#fff;cursor:pointer;line-height:1.25;
+  transition:background 160ms var(--feder-schnell),box-shadow 200ms var(--feder),
+             transform var(--druck)}
+.knopf:hover{background:var(--gruen-tief)}
+/* §12 Nie helles Milchglas auf hellem Milchglas – der Zweitknopf ist deckend. */
+.knopf.zweit{background:var(--flaeche);color:var(--tinte);box-shadow:var(--schatten)}
+.knopf.zweit:hover{box-shadow:var(--schatten-hoch)}
+.knopf:focus-visible{outline:2px solid var(--gruen);outline-offset:2px}
+
+/* ---------- Meldung ---------- */
+/* §7 Räumliche Konsistenz: taucht von unten auf und verschwindet nach unten. */
+#meldung{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(90px);
+  background:var(--tinte);color:#fff;padding:14px 24px;font-size:14px;font-weight:600;
+  letter-spacing:-.006em;border-radius:var(--r-pille);z-index:1000;
+  max-width:88vw;text-align:center;box-shadow:0 10px 34px rgba(15,26,21,.28);
+  transition:transform 420ms var(--feder)}
+#meldung.zeigen{transform:translateX(-50%) translateY(0)}
+
+/* ---------- Ansichtswechsel ---------- */
+/* §7 Symmetrische Wege: Detail kommt von rechts herein, geht nach rechts hinaus.
+   §11 Nur transform und opacity – die beiden Eigenschaften, die der Compositor
+   ohne Neuberechnung des Layouts bewegen kann. */
+@keyframes hereinRechts{
+  from{opacity:0;transform:translate3d(14px,0,0)}
+  to  {opacity:1;transform:translate3d(0,0,0)}
+}
+@keyframes hereinLinks{
+  from{opacity:0;transform:translate3d(-14px,0,0)}
+  to  {opacity:1;transform:translate3d(0,0,0)}
+}
+.wechsel-vor{animation:hereinRechts 320ms var(--feder) both}
+.wechsel-zurueck{animation:hereinLinks 320ms var(--feder) both}
+
+/* ---------- Marker ---------- */
+.eigenermarker{background:none;border:0}
+.mk{width:15px;height:15px;border:3px solid #fff;border-radius:50%;
+  box-shadow:0 2px 6px rgba(15,26,21,.3);transition:transform 180ms var(--feder)}
+.eigenermarker:hover .mk{transform:scale(1.25)}
+/* Bündel: mehrere Orte nah beieinander, Zahl in der Mitte. Der farbige
+   Ring zeigt die beste Zugangsangabe darin (grün = mindestens ein freier). */
+.buendel{background:none;border:0}
+.buendel span{display:flex;align-items:center;justify-content:center;box-sizing:border-box;
+  border-radius:50%;background:rgba(255,255,255,.95);border:3px solid var(--ring);
+  color:#0F1A15;font:700 12.5px/1 var(--schrift);letter-spacing:-.01em;
+  box-shadow:0 2px 8px rgba(15,26,21,.25);cursor:pointer;
+  transition:transform 180ms var(--feder)}
+.buendel:hover span{transform:scale(1.08)}
+
+/* ---------- Griff (nur mobil sichtbar) ---------- */
+.griff{display:none}
+
+/* ---------- Mobil: echtes Bottom-Sheet ---------- */
+@media(max-width:880px){
+  /* Standort-Knopf schwebt knapp über der Oberkante des Blatts. */
+  .leaflet-bottom.leaflet-left{bottom:calc(var(--blatt-sichtbar, 42vh) + 4px)}
+  main{display:block;position:relative}
+
+  /* Karte füllt den Bildschirm, das Sheet liegt darüber – so bleibt
+     die Karte sichtbar, egal wie weit das Sheet gezogen ist. */
+  #karte{position:absolute;inset:0;height:100%}
+
+  aside{position:fixed;left:0;right:0;bottom:0;z-index:10;
+    height:94dvh;width:100%;border-left:0;
+    border-radius:22px 22px 0 0;
+    background:rgba(246,248,246,.94);
+    backdrop-filter:saturate(180%) blur(24px);
+    -webkit-backdrop-filter:saturate(180%) blur(24px);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.8),
+               0 -8px 34px -10px rgba(15,26,21,.22);
+    /* Startposition wird beim Laden per JS gesetzt. */
+    transform:translateY(52vh);
+    will-change:transform;
+    touch-action:none}
+
+  /* §2 Der Griff ist die Anfassfläche – großzügig, damit man ihn trifft. */
+  .griff{display:block;height:34px;flex-shrink:0;position:relative;cursor:grab;
+    touch-action:none;-webkit-tap-highlight-color:transparent}
+  .griff::before{content:"";position:absolute;top:11px;left:50%;
+    transform:translateX(-50%);width:40px;height:5px;border-radius:3px;
+    background:#C9D2CC;transition:background 160ms var(--feder-schnell)}
+  .griff:active{cursor:grabbing}
+  .griff:active::before{background:#A9B5AD}
+  .griff:focus-visible{outline:2px solid var(--gruen);outline-offset:-4px;border-radius:12px}
+
+  #seite{height:calc(var(--sichtbar, 68dvh) - 34px);min-height:0}
+
+  /* Ziehen geht auch über Kopfbereich und Filterleiste: dort wischt man
+     waagerecht durch die Filter, senkrecht bewegt man das Blatt. Die Liste
+     scrollt senkrecht und gibt das Ziehen am oberen Rand ans Blatt ab. */
+  .rolle{touch-action:pan-y;overscroll-behavior:contain}
+  .filter{touch-action:pan-x;overscroll-behavior-x:contain}
+
+  /* Keine Kopfleiste auf dem Handy: Die Karte geht bis oben, das Logo
+     sitzt im Suchfeld. So wirkt es wie eine App statt wie eine Webseite. */
+  header{display:none}
+  .leaflet-control-zoom{display:none}
+  .leaflet-top{top:env(safe-area-inset-top,0)}
+  #meldung{bottom:auto;top:calc(14px + env(safe-area-inset-top,0));
+    font-size:13.5px;padding:11px 18px;max-width:80vw;
+    transform:translateX(-50%) translateY(-120px)}
+  #meldung.zeigen{transform:translateX(-50%) translateY(0)}
+
+  .suche{margin:4px 16px 0}
+  .filter{padding:10px 16px 10px}
+  .anzahl{padding:0 16px 6px}
+  .rolle{padding:2px 16px 24px}
+  .listenfuss{display:none!important}
+  .listenende{display:block;padding:6px 0 calc(10px + env(safe-area-inset-bottom,0))}
+  .eintragen-karte{width:100%;display:flex;gap:14px;align-items:center;text-align:left;
+    padding:16px 18px;border-radius:var(--r-karte);border:1.5px dashed var(--tinte-3);
+    background:transparent;color:var(--tinte-2);font-family:var(--schrift);font-size:14px;
+    line-height:1.4;cursor:pointer}
+  .eintragen-karte > span:first-child{width:40px;height:40px;flex-shrink:0;border-radius:50%;
+    display:grid;place-items:center;background:var(--gruen);color:#fff;font-size:22px;font-weight:700}
+  .eintragen-karte b{color:var(--tinte);font-size:15.5px}
+  .admin-reihe{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+  .admin-reihe .knopf{font-size:13.5px;padding:11px 8px}
+  .listenende .rechtliches-link{margin-top:18px}
+
+  /* Kompaktere Karten: mehr Plätze auf einen Blick. */
+  .zeile{padding:12px 14px 12px 17px;margin-bottom:10px;gap:12px;align-items:center}
+  .luftbild{width:64px;height:64px;border-radius:14px}
+  .zname{font-size:16.5px}
+  .zsub{font-size:13px;margin-top:1px}
+
+  .dkopf{padding:6px 20px 14px}
+  .status,.schnell{margin-left:0;margin-right:0}
+  .daten{width:100%;margin:0 0 12px}
+  .abschnitt{margin:0 0 12px}
+
+  /* Größere Tippflächen (mind. ca. 40 px). */
+  .chip{padding:10px 16px;font-size:14px}
+  .stern{font-size:20px;padding:10px;margin:-10px -10px -10px 0}
+  .zurueck{padding:10px 0;margin:-10px 0 0}
+  /* 16 px in Eingabefeldern verhindert, dass iPhones beim Antippen hineinzoomen. */
+  .form input,.form select,.form textarea{font-size:16px}
+  .leaflet-touch .leaflet-bar a{width:38px;height:38px;line-height:38px}
+  .standort-knopf a{width:40px!important;height:40px!important}
+  /* Karte bekommt unten Luft, damit Marker nicht hinter dem Sheet liegen. */
+  .leaflet-control-attribution{margin-bottom:2px}
+
+  header{height:56px;padding:0 16px;gap:10px}
+  header h1{font-size:18px}
+  header h1 em,.kopfnotiz{display:none}
+  header .adminknopf{margin-left:auto}
+
+  /* §6 Einfachheit: EINE Filterzeile statt drei beschrifteter Blöcke.
+     display:contents löst die Gruppen auf, ohne das HTML zu ändern. */
+  .filter{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:7px;
+    padding:12px 20px 10px;scrollbar-width:none;-ms-overflow-style:none;
+    scroll-snap-type:x proximity}
+  .filter::-webkit-scrollbar{display:none}
+  .filtertitel,.notiz-klein{display:none}
+  .chips{display:contents}
+  .chip{flex-shrink:0;scroll-snap-align:start}
+  /* §Gruppierung: kleiner Abstand markiert den Wechsel der Filtergruppe. */
+  .chips:not(:first-of-type) > .chip:first-child{margin-left:11px}
+
+  .daemmerung{margin:0 20px 10px;padding:11px 14px;font-size:13px}
+  .dkopf,.form{padding-left:16px;padding-right:16px}
+  .fuss{padding:12px 20px calc(12px + env(safe-area-inset-bottom,0));
+    background:rgba(246,248,246,.86)}
+  .dname{font-size:24px;letter-spacing:-.024em}
+
+  /* Beschriftungsspalte schmaler, sonst brechen kurze Wörter um. */
+  .daten th{width:36%;font-size:13.5px}
+  .daten th,.daten td{padding:11px 15px}
+
+  /* Sekundäre Aktionen in eine Reihe, kompakter beschriftet. */
+  .fuss + .fuss{padding-top:0;border-top:0}
+  .fuss + .fuss .knopf{font-size:13.5px;padding:12px 8px}
+
+  /* Etwas mehr Luft in den Karten, damit nichts gestaucht wirkt. */
+
+}
+
+/* ===========================================================================
+   Dunkelmodus – wichtig, weil die App vor allem abends benutzt wird,
+   wenn man einen freien Platz sucht. Nur die Variablen werden getauscht,
+   die Struktur bleibt gleich.
+   =========================================================================== */
+@media(prefers-color-scheme:dark){
+  :root{
+    --gruen:#2BC98A;
+    --gruen-tief:#22B27A;
+    --gruen-zart:#12332A;
+    --grund:#0E1512;
+    --flaeche:#18211D;
+    --tinte:#EDF2EF;
+    --tinte-2:#B6C2BC;
+    --tinte-3:#86978E;
+    --kante:rgba(255,255,255,.10);
+
+    --frei:#4FD182;         --frei-bg:#14331F;
+    --absprache:#F0AE4E;    --absprache-bg:#35270F;
+    --zu:#F2705F;           --zu-bg:#3A1B18;
+    --verein:#A996F5;       --verein-bg:#241E3D;
+    --unklar:#93A39B;       --unklar-bg:#1E2724;
+
+    --schatten:0 1px 2px rgba(0,0,0,.4), 0 6px 18px -6px rgba(0,0,0,.5);
+    --schatten-hoch:0 2px 4px rgba(0,0,0,.45), 0 14px 32px -10px rgba(0,0,0,.6);
+  }
+  header{background:rgba(24,33,29,.72);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 1px 0 rgba(0,0,0,.35)}
+  .fuss{background:rgba(14,21,18,.78);box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+  .adminknopf{color:#08211A}
+  /* Aktiver Filter: heller Grund braucht dunkle Schrift, sonst Weiß auf Weiß. */
+  .chip[aria-pressed="true"]{color:var(--grund)}
+  .knopf{color:#08211A}
+  .knopf.zweit{color:var(--tinte)}
+  .inline-knopf{color:var(--gruen)}
+  #karte{background:#141B18}
+  .luftbild{background:#141B18;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+  .bereich-knopf{background:rgba(24,33,29,.9);color:var(--tinte)}
+  .bereich-knopf:hover{background:#18211D}
+  .buendel span{background:rgba(24,33,29,.95);color:var(--tinte)}
+  #meldung{background:#E9F0EC;color:#0E1512}
+  .stern{color:#3A4844}
+  .form input,.form select,.form textarea{border-color:var(--kante)}
+  .form select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1.5 1.5L6 6l4.5-4.5' stroke='%2386978E' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
+  .daten tr:not(:last-child) th,.daten tr:not(:last-child) td{
+    border-bottom:1px solid rgba(255,255,255,.07)}
+  aside{background:rgba(14,21,18,.94)}
+  .griff::before{background:#3A4844}
+  .griff:active::before{background:#4E605A}
+  .leaflet-control-zoom a,.leaflet-control-layers,.standort-knopf a{background:#18211D!important;
+    color:var(--tinte)!important}
+}
+
+/* ===========================================================================
+   §14 Barrierefreiheit: drei unabhängige Signale, drei Antworten.
+   Weniger Bewegung heißt nicht keine Rückmeldung, sondern eine sanftere.
+   =========================================================================== */
+
+@media(prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;animation-iteration-count:1!important}
+  .zeile:hover{transform:none}
+  .wechsel-vor,.wechsel-zurueck{animation:none}
+  /* Rückmeldung bleibt – nur als Überblendung statt Bewegung. */
+  .zeile,.chip,.knopf,.adminknopf{transition:opacity 160ms ease,background 160ms ease}
+  button:active,.zeile:active,.chip:active,.knopf:active{transform:none;opacity:.7}
+  #meldung{transition:opacity 200ms ease;transform:translateX(-50%) translateY(0);opacity:0}
+  #meldung.zeigen{opacity:1}
+}
+
+@media(prefers-reduced-transparency:reduce){
+  header{background:#fff;backdrop-filter:none;-webkit-backdrop-filter:none}
+  .fuss{background:var(--grund);backdrop-filter:none;-webkit-backdrop-filter:none;
+    border-top:1px solid var(--kante)}
+  .rolle{-webkit-mask-image:none;mask-image:none}
+}
+
+@media(prefers-contrast:more){
+  :root{--kante:rgba(15,26,21,.35);--tinte-3:#4A574F}
+  header,.fuss{background:#fff;backdrop-filter:none;-webkit-backdrop-filter:none}
+  .zeile,.abschnitt,.daten,.leer,.daemmerung{border:1.5px solid var(--kante)}
+  .chip{border:1.5px solid var(--kante)}
+  .marke{outline:1px solid currentColor;outline-offset:-1px}
+  .rolle{-webkit-mask-image:none;mask-image:none}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1 style="display:flex;align-items:center;gap:8px">
+    <svg width="22" height="22" viewBox="0 0 512 512" aria-hidden="true"><path fill="#2CA93F" d="M256 484C232 440 196 402 160 368C116 326 84 280 84 218a172 172 0 1 1 344 0c0 62-32 108-76 150c-36 34-72 72-96 116Z"/><g stroke="#FFF" stroke-width="25" fill="none"><circle cx="256" cy="218" r="136"/><line x1="120" y1="218" x2="392" y2="218"/><circle cx="256" cy="218" r="50"/><rect x="198" y="70" width="116" height="56" rx="10"/><rect x="198" y="310" width="116" height="56" rx="10"/></g></svg>
+    platzfrei <em>— wo darf ich spielen?</em>
+  </h1>
+  <span class="kopfnotiz" id="kopfnotiz">Version 0.1</span>
+  <button class="adminknopf" id="adminknopf" hidden>Abmelden</button>
+</header>
+
+<main>
+  <div id="karte"></div>
+  <aside>
+    <div class="griff" id="griff" role="button" tabindex="0"
+         aria-label="Liste größer oder kleiner ziehen"></div>
+    <div id="seite"></div>
+  </aside>
+</main>
+
+<div id="meldung" role="status" aria-live="polite"></div>
+
+<script>
+/* ==========================================================================
+   0. KONFIGURATION
+   --------------------------------------------------------------------------
+   Hier trägst DU deine eigenen zwei Werte ein, nachdem du dein Supabase-
+   Projekt angelegt hast. Du findest sie im Dashboard unter
+   Settings -> API Keys (oder im "Connect"-Dialog oben).
+
+   Beim zweiten Wert nimm den "Publishable key" (beginnt mit sb_publishable_).
+   Zeigt dein Projekt noch keinen, nimm unter "Legacy API Keys" den anon key –
+   beide funktionieren gleich.
+
+   Solange hier die Platzhalter stehen, läuft die App im TESTMODUS: Daten
+   aus dieser Datei, Admin-Knopf ohne echte Prüfung. Zum Ausprobieren gut,
+   zum Veröffentlichen nicht.
+
+   Wichtig: Dieser Schlüssel DARF öffentlich im Code stehen. Er ist kein
+   Passwort, sondern nur eine Projekt-Kennung. Was er darf, entscheidet
+   allein die Datenbank über die Regeln aus supabase-einrichtung.sql.
+   Den "Secret key" bzw. "service_role key" dagegen NIEMALS hier eintragen –
+   der umgeht alle Regeln und gehört nur auf einen Server.
+   ========================================================================== */
+
+const KONFIG = {
+  url:     "https://swagzrwtfbaxouunudsp.supabase.co",
+  anonKey: "sb_publishable_2ENolaXEdMAJASGfvodbXA_DKTxvwD1"
+};
+
+const ECHT = !KONFIG.url.startsWith("HIER_") && typeof window.supabase !== "undefined";
+const db   = ECHT ? window.supabase.createClient(KONFIG.url, KONFIG.anonKey) : null;
+
+
+/* ==========================================================================
+   1. DIE DATEN
+   --------------------------------------------------------------------------
+   Vorläufig direkt hier in der Datei. Später kommen sie aus Supabase –
+   dann ändert sich nur die Funktion datenLaden() weiter unten, sonst nichts.
+
+   Felder wie in der Erfassungstabelle. "bestaetigtDurch" ist das
+   wichtigste Feld: es sagt, wie verlässlich die Zugangsangabe ist.
+   ========================================================================== */
+
+let DATEN = [
+  {
+    id:"O01", name:"Bolzplatz Krailling", ort:"Krailling, Brahmsstraße",
+    lat:48.092293, lon:11.418003,
+    sportarten:["Fußball","Basketball"],
+    zugang:"öffentlich", zeiten:"08:00–22:00", bestaetigtDurch:"nur vermutet",
+    untergrund:"Kunstrasen", groesse:"Kleinfeld",
+    ausstattung:"2 Tore mit Netz", umzaeunt:"ja", beleuchtung:"nein",
+    zustand:4, drumherum:"Bank, Dixi-Klo, Bus 967",
+    geprueft:"2026-07-12",
+    notizen:"Kleiner umzäunter Platz, nachmittags meist Kinder."
+  },
+  {
+    id:"O02", name:"Sportplatz Krailling", ort:"Krailling, Sportplatzweg",
+    lat:48.103228, lon:11.409580,
+    sportarten:["Fußball"],
+    zugang:"Vereinsgelände nach Absprache", zeiten:"unbekannt",
+    bestaetigtDurch:"nur vermutet",
+    untergrund:"Asche", groesse:"Großfeld",
+    ausstattung:"2 Tore mit Netz", umzaeunt:"ja", beleuchtung:"ja",
+    zustand:3, drumherum:"Parkplatz",
+    geprueft:null,
+    notizen:"Tor war beim ersten Vorbeifahren zu. Verein noch nicht gefragt."
+  },
+  {
+    id:"O03", name:"TV Stockdorf", ort:"Stockdorf, Maria-Eich-Straße",
+    lat:48.095412, lon:11.398259,
+    sportarten:["Fußball"],
+    zugang:"Vereinsgelände frei betretbar", zeiten:"außerhalb der Trainingszeiten",
+    bestaetigtDurch:"Auskunft Verein",
+    untergrund:"Kunstrasen", groesse:"Großfeld",
+    ausstattung:"2 Tore mit Netz, Jugendtore", umzaeunt:"ja", beleuchtung:"ja",
+    zustand:5, drumherum:"Bank, WC, Wasser, Parkplatz",
+    geprueft:"2026-07-26",
+    notizen:"Di/Do 17–19 Uhr Training. Flutlicht nach 20 Uhr auf Anfrage."
+  },
+  {
+    id:"O04", name:"Sportplatz Birkenstraße", ort:"Gauting, Birkenstraße",
+    lat:48.077396, lon:11.373404,
+    sportarten:["Fußball"],
+    zugang:"öffentlich", zeiten:"unbekannt", bestaetigtDurch:"nur vermutet",
+    untergrund:"Asche", groesse:"Kleinfeld",
+    ausstattung:"2 Tore ohne Netz", umzaeunt:"nein", beleuchtung:"nein",
+    zustand:2, drumherum:"nichts",
+    geprueft:"2026-07-12",
+    notizen:"Ohne Netze rennt man dem Ball nach. Bei Nässe schmierig."
+  },
+  {
+    id:"O05", name:"Postwiese", ort:"Gauting, Buchendorfer Straße",
+    lat:48.065064, lon:11.387755,
+    sportarten:["Fußball","Laufen"],
+    zugang:"öffentlich", zeiten:"unbekannt", bestaetigtDurch:"nur vermutet",
+    untergrund:"Naturrasen", groesse:"Großfeld",
+    ausstattung:"keine Tore", umzaeunt:"nein", beleuchtung:"nein",
+    zustand:3, drumherum:"Bank",
+    geprueft:"2026-07-12",
+    notizen:"Große Wiese, Trikots als Tore. Im Winter Rodelhügel."
+  },
+  {
+    id:"O06", name:"Fußballplatz Unterbrunn", ort:"Gauting-Unterbrunn",
+    lat:48.065463, lon:11.326016,
+    sportarten:["Fußball"],
+    zugang:"öffentlich", zeiten:"unbekannt", bestaetigtDurch:"nur vermutet",
+    untergrund:"Naturrasen", groesse:"Kleinfeld",
+    ausstattung:"2 Tore mit Netz", umzaeunt:"nein", beleuchtung:"nein",
+    zustand:4, drumherum:"Bank, Dorfweiher daneben",
+    geprueft:null,
+    notizen:"Noch nicht besucht. Angaben nur aus OpenStreetMap."
+  }
+];
+
+// Vorschläge von Nutzern, die auf Freigabe warten.
+// Später eine eigene Tabelle in Supabase.
+let VORSCHLAEGE = [];
+let FEHLERBERICHTE = [];   // nur für Admins, offene Fehlermeldungen
+
+/* Auswahllisten – identisch mit den Dropdowns in der Erfassungstabelle,
+   damit App und Tabelle nicht auseinanderlaufen. */
+const AUSWAHL = {
+  sportarten:["Fußball","Basketball","Tischtennis","Beachvolleyball","Laufen",
+              "Calisthenics","Skaten"],
+  zugang:["öffentlich","Vereinsgelände frei betretbar","Vereinsgelände nach Absprache",
+          "Vereinsgelände abgeschlossen","Schulhof nach Unterricht","unklar"],
+  bestaetigtDurch:["Schild vor Ort","Auskunft Gemeinde","Auskunft Verein",
+                   "Auskunft Schule","nur vermutet"],
+  untergrund:["Kunstrasen","Naturrasen","Asche","Beton/Asphalt","Tartan","Sand","gemischt"],
+  groesse:["Großfeld","Kleinfeld","Mini/Käfig","Einzelfläche","Mehrfachanlage"],
+  janein:["ja","nein"]
+};
+
+/* Diese Felder darf nur der Admin ändern – ein Fehler hier richtet echten
+   Schaden an (jemand steht ungefragt auf dem Vereinsrasen). */
+const NUR_ADMIN = ["zugang","zeiten","bestaetigtDurch"];
+
+/* ==========================================================================
+   2. ZUSTAND DER APP
+   ========================================================================== */
+
+const STANDARD_POSITION = { lat:48.1374, lon:11.5755 };   // München (Marienplatz) als Rückfall
+
+let Z = {
+  ansicht:"liste",        // "liste" | "detail" | "bearbeiten" | "neu" | "anmelden" | "importieren" | "melden"
+  auswahlId:null,
+  sportart:"alle",
+  nurFrei:false,
+  maxKm:null,             // null = alle Entfernungen zeigen
+  nurGemerkt:false,
+  nurLicht:false,
+  nurBelegt:false,          // nur Plätze mit belegter Zugangsangabe
+  sortierung:"entfernung",  // "entfernung" | "zustand" | "geprueft"
+  bereich:null,             // Kartenausschnitt, wenn "hier suchen" aktiv ist
+  suche:"",                 // Text aus dem Suchfeld (Name, Ort, Sportart)
+  filterOffen:false,        // erweiterte Filter eingeblendet?
+  admin:false,            // wird nur durch die Datenbank auf true gesetzt
+  email:null,             // wer angemeldet ist
+  position:{ ...STANDARD_POSITION },
+  positionEcht:false,
+  neuerPunkt:null,        // {lat,lon} beim Anlegen eines neuen Ortes
+  laden:false,
+  meldungen:{},           // ort_id -> Anzahl offener Meldungen
+  bestaetigungen:{},      // ort_id -> wie viele Geräte "hier gespielt" sagten
+  schilder:{},            // ort_id -> [{id, url, pfad, freigegeben}]
+  vorgabeBeleg:null,      // beim Übernehmen eines Schildfotos: Beleg vorbelegen
+  wetter:null             // Vorhersage für die nächsten Stunden
+};
+
+/* --------------------------------------------------------------------------
+   Merkliste
+   --------------------------------------------------------------------------
+   Bewusst im Browser gespeichert, nicht in der Datenbank: So braucht man
+   kein Konto, um sich Plätze zu merken. Wer das Gerät wechselt, verliert
+   die Liste – das ist der Preis, und er ist es wert.
+   -------------------------------------------------------------------------- */
+const MERK_SCHLUESSEL = "platzfrei.gemerkt";
+
+function gemerkteLaden(){
+  try { return new Set(JSON.parse(localStorage.getItem(MERK_SCHLUESSEL) || "[]")); }
+  catch { return new Set(); }
+}
+let GEMERKT = gemerkteLaden();
+
+function merkenUmschalten(id){
+  if (GEMERKT.has(id)) GEMERKT.delete(id); else GEMERKT.add(id);
+  try { localStorage.setItem(MERK_SCHLUESSEL, JSON.stringify([...GEMERKT])); } catch {}
+  zeichne();
+  melde(GEMERKT.has(id) ? "Gemerkt." : "Aus der Merkliste entfernt.");
+}
+
+/* --------------------------------------------------------------------------
+   Geräte-Kennung
+   --------------------------------------------------------------------------
+   Eine Zufallszahl pro Gerät, damit "Hier gespielt" je Platz und Gerät nur
+   einmal zählt. Kein Konto, keine Daten über die Person – nur eine Nummer.
+   -------------------------------------------------------------------------- */
+const GERAET_SCHLUESSEL = "platzfrei.geraet";
+const BESTAETIGT_SCHLUESSEL = "platzfrei.bestaetigt";
+
+function geraetId(){
+  if (geraetId.wert) return geraetId.wert;
+  let id = null;
+  try { id = localStorage.getItem(GERAET_SCHLUESSEL); } catch {}
+  if (!id) {
+    id = (crypto.randomUUID ? crypto.randomUUID()
+          : Date.now().toString(36) + Math.random().toString(36).slice(2));
+    try { localStorage.setItem(GERAET_SCHLUESSEL, id); } catch {}
+  }
+  return (geraetId.wert = id);
+}
+
+function bestaetigteLaden(){
+  try { return new Set(JSON.parse(localStorage.getItem(BESTAETIGT_SCHLUESSEL) || "[]")); }
+  catch { return new Set(); }
+}
+let BESTAETIGT = bestaetigteLaden();
+
+/* ==========================================================================
+   3. KARTE
+   ========================================================================== */
+
+/* Nicht weiter rauszoomen als bis Europa und nicht über den Weltrand hinaus
+   schieben, damit die Erde nie mehrfach nebeneinander erscheint. */
+const karte = L.map("karte", {
+  zoomControl:true, minZoom:4,
+  maxBounds:[[-85,-180],[85,180]], maxBoundsViscosity:1, worldCopyJump:false
+})
+               .setView([STANDARD_POSITION.lat, STANDARD_POSITION.lon], 12);
+
+/* Straßenkarte von CARTO (Voyager, im Dunkelmodus Dark Matter), Satellit von
+   Esri. CARTO braucht seit 2026 einen kostenlosen Schlüssel
+   (carto.com/basemaps/apikey), sonst steht „API KEY REQUIRED“ auf jeder
+   Kachel. Ist CARTO_SCHLUESSEL leer, nimmt die App die schlüsselfreien
+   grauen Esri-Kacheln. */
+const CARTO_SCHLUESSEL = "cb1_4f5p_1_9d0286c3078c08148622ccfa";
+const dunkel = window.matchMedia("(prefers-color-scheme: dark)");
+const esriAttribution = 'Kartendaten &copy; Esri, HERE, Garmin, &copy; OpenStreetMap';
+
+function grauEbene(dunkelModus){
+  const stil = dunkelModus ? "World_Dark_Gray" : "World_Light_Gray";
+  const url = n => `https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/${stil}_${n}/MapServer/tile/{z}/{y}/{x}`;
+  /* Grundkarte plus Beschriftung als eigene Schicht darüber. Die Kacheln gibt
+     es bis Zoom 16, darüber vergrößert Leaflet sie einfach. */
+  return L.layerGroup([
+    L.tileLayer(url("Base"), { noWrap:true, maxZoom:20, maxNativeZoom:16, attribution:esriAttribution }),
+    L.tileLayer(url("Reference"), { noWrap:true, maxZoom:20, maxNativeZoom:16 })
+  ]);
+}
+
+function cartoEbene(dunkelModus){
+  const stil = dunkelModus ? "dark_all" : "rastertiles/voyager";
+  return L.tileLayer(`https://{s}.basemaps.cartocdn.com/${stil}/{z}/{x}/{y}{r}.png?key=${CARTO_SCHLUESSEL}`, {
+    subdomains:"abcd", noWrap:true, maxZoom:20,
+    attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>'
+  });
+}
+const strassenKarte = d => CARTO_SCHLUESSEL ? cartoEbene(d) : grauEbene(d);
+
+let strassenEbene = strassenKarte(dunkel.matches).addTo(karte);
+
+/* Wechselt der Systemmodus, wechselt auch die Karte. */
+dunkel.addEventListener("change", e => {
+  const warAktiv = karte.hasLayer(strassenEbene);
+  karte.removeLayer(strassenEbene);
+  ebenenSchalter.removeLayer(strassenEbene);
+  strassenEbene = strassenKarte(e.matches);
+  ebenenSchalter.addBaseLayer(strassenEbene, "Karte");
+  if (warAktiv) strassenEbene.addTo(karte);
+});
+
+/* Satellitenbilder von Esri. Praktisch fürs Prüfen aus der Ferne:
+   Belag, Tore und Zäune erkennt man oft schon von oben. */
+const satellitEbene = L.tileLayer(
+  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+  noWrap:true, maxZoom:19,
+  attribution:'&copy; Esri, Maxar'
+});
+
+const ebenenSchalter = L.control.layers(
+  { "Karte": strassenEbene, "Satellit": satellitEbene },
+  null,
+  { position:"topright" }
+).addTo(karte);
+
+let markerEbene = L.layerGroup().addTo(karte);
+let ichMarker = null;
+
+const FARBE = {
+  "öffentlich":"#34C759",
+  "Vereinsgelände frei betretbar":"#34C759",
+  "Vereinsgelände nach Absprache":"#FF9F0A",
+  "Schulhof nach Unterricht":"#FF9F0A",
+  "Vereinsgelände abgeschlossen":"#FF3B30",
+  "unklar":"#8E8E93"
+};
+function farbe(o){
+  // Ungeklärt, aber Vereinshinweis: eigene Farbe, damit man auf der Karte
+  // sofort sieht, wo man besser erst fragt.
+  if (o.zugang === "unklar" && vereinsMarke(o)) return "#7A5EA8";
+  return FARBE[o.zugang] || "#8E8E93";
+}
+
+/* Bei wenigen Orten wären einzelne HTML-Marker fein – bei tausenden wird der
+   Browser damit zäh. Canvas zeichnet alle Punkte in eine einzige Fläche und
+   bleibt auch bei 5.000 Orten flüssig. */
+const stift = L.canvas({ padding: 0.4 });
+
+/* Bei fast 30.000 Orten in ganz Deutschland nur zeichnen, was im
+   Kartenausschnitt (plus Rand) liegt – und beim Verschieben nachzeichnen.
+
+   Damit die Karte nicht wie Konfetti aussieht:
+   - Weiter herausgezoomt fassen Bündel nahe Orte zu einem Kreis mit Zahl
+     zusammen. Ein Tipp darauf zoomt hinein.
+   - Ungeklärte Orte (grau) sind kleiner und blasser und liegen unten –
+     die Orte mit bekanntem Zugang stechen heraus.
+   - Der gerade geöffnete Ort bekommt einen dunklen Ring. */
+const BUENDEL_BIS_ZOOM = 13;   // bis hier bündeln, ab 14 einzelne Punkte
+const BUENDEL_ZELLE = 90;      // Bündelgröße in Bildschirmpunkten
+
+/* Welche Farbe ein Bündel bekommt: die "beste" Nachricht darin gewinnt. */
+const BUENDEL_RANG = ["#34C759", "#FF9F0A", "#7A5EA8", "#FF3B30", "#8E8E93"];
+
+function punktZeichnen(o){
+  const grau = farbe(o) === "#8E8E93";
+  const gewaehlt = String(o.id) === String(Z.auswahlId);
+  const klein = karte.getZoom() < 15;
+  L.circleMarker([o.lat, o.lon], {
+    renderer: stift,
+    radius: gewaehlt ? 9 : grau ? (klein ? 4 : 5) : (klein ? 6 : 7),
+    color: gewaehlt ? "#0F1A15" : "#fff",
+    weight: gewaehlt ? 3 : grau ? 1.5 : 2,
+    fillColor: farbe(o), fillOpacity: grau && !gewaehlt ? .6 : 1
+  })
+  .on("click", () => {
+    Z.auswahlId=o.id; Z.ansicht="detail"; zeichne();
+    sheet.mitte();
+    karte.flyTo([o.lat, o.lon], Math.max(karte.getZoom(), 16), { duration:.6 });
+  })
+  .addTo(markerEbene);
+}
+
+function buendelZeichnen(gruppe){
+  const n = gruppe.length;
+  let lat = 0, lon = 0, rang = BUENDEL_RANG.length - 1;
+  for (const o of gruppe) {
+    lat += o.lat; lon += o.lon;
+    const r = BUENDEL_RANG.indexOf(farbe(o));
+    if (r >= 0 && r < rang) rang = r;
+  }
+  const groesse = Math.round(Math.min(48, 26 + Math.log10(n) * 9));
+  const text = n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(".", ",") + "k" : n;
+  L.marker([lat / n, lon / n], {
+    icon: L.divIcon({
+      className: "buendel",
+      html: `<span style="--ring:${BUENDEL_RANG[rang]};width:${groesse}px;height:${groesse}px">${text}</span>`,
+      iconSize: [groesse, groesse]
+    }),
+    keyboard: false
+  })
+  .on("click", () => {
+    karte.flyToBounds(L.latLngBounds(gruppe.map(o => [o.lat, o.lon])),
+      { padding:[50,50], maxZoom:16, duration:.6 });
+  })
+  .addTo(markerEbene);
+}
+
+function bildMitte(orte, zoom){
+  let x = 0, y = 0;
+  for (const o of orte) { const p = karte.project([o.lat, o.lon], zoom); x += p.x; y += p.y; }
+  return L.point(x / orte.length, y / orte.length);
+}
+
+function markerZeichnen(){
+  markerEbene.clearLayers();
+  const rahmen = karte.getBounds().pad(0.5);
+  const imBild = sichtbareOrte().filter(o => rahmen.contains([o.lat, o.lon]));
+
+  /* Graue zuerst, damit die farbigen obenauf liegen. */
+  const grauZuerst = (a,b) => (farbe(b) === "#8E8E93") - (farbe(a) === "#8E8E93");
+
+  if (karte.getZoom() > BUENDEL_BIS_ZOOM) {
+    imBild.sort(grauZuerst).forEach(punktZeichnen);
+    return;
+  }
+
+  /* Bündeln über ein Raster in Bildschirmpunkten – schnell genug für
+     zehntausende Orte und ohne zusätzliche Bibliothek. */
+  const zoom = karte.getZoom();
+  const zellen = new Map();
+  for (const o of imBild) {
+    const p = karte.project([o.lat, o.lon], zoom);
+    const schluessel = Math.floor(p.x / BUENDEL_ZELLE) + ":" + Math.floor(p.y / BUENDEL_ZELLE);
+    if (!zellen.has(schluessel)) zellen.set(schluessel, []);
+    zellen.get(schluessel).push(o);
+  }
+  /* Rasterzellen schneiden Nachbarn mitten durch – dann lägen zwei Kreise
+     übereinander. Zu nahe Gruppen deshalb noch zusammenlegen. */
+  const gruppen = [];
+  for (const gruppe of [...zellen.values()].sort((a,b) => b.length - a.length)) {
+    const mitte = bildMitte(gruppe, zoom);
+    const nah = gruppen.find(g => g.mitte.distanceTo(mitte) < BUENDEL_ZELLE * 0.75);
+    if (nah) { nah.orte.push(...gruppe); nah.mitte = bildMitte(nah.orte, zoom); }
+    else gruppen.push({ orte: gruppe, mitte });
+  }
+  const einzelne = [];
+  for (const { orte: gruppe } of gruppen) {
+    if (gruppe.length === 1 || gruppe.some(o => String(o.id) === String(Z.auswahlId))) einzelne.push(...gruppe);
+    else buendelZeichnen(gruppe);
+  }
+  einzelne.sort(grauZuerst).forEach(punktZeichnen);
+}
+
+/* --------------------------------------------------------------------------
+   "In diesem Bereich suchen"
+   --------------------------------------------------------------------------
+   Erscheint, sobald man die Karte spürbar verschoben hat. Damit findet man
+   Plätze am Auswärtsort, statt immer nur die eigene Umgebung zu sehen.
+   -------------------------------------------------------------------------- */
+const bereichKnopf = document.createElement("button");
+bereichKnopf.className = "bereich-knopf";
+bereichKnopf.textContent = "In diesem Bereich suchen";
+bereichKnopf.hidden = true;
+document.getElementById("karte").appendChild(bereichKnopf);
+
+/* Gleich beim Start setzen – sonst wird die erste Kartenbewegung
+   verschluckt und der Knopf erscheint erst beim zweiten Mal. */
+let mitteBeimZeichnen = karte.getCenter();
+
+karte.on("moveend", () => {
+  markerZeichnen();
+  if (Z.ansicht !== "liste") { bereichKnopf.hidden = true; return; }
+  const jetzt = karte.getCenter();
+  /* Erst ab einer halben Kartenbreite Versatz – sonst blinkt der Knopf
+     schon beim kleinsten Verschieben auf. */
+  const versatz = jetzt.distanceTo(mitteBeimZeichnen);
+  const breite = karte.getBounds().getNorthWest()
+                      .distanceTo(karte.getBounds().getNorthEast());
+  bereichKnopf.hidden = versatz < breite * 0.35;
+});
+
+bereichKnopf.addEventListener("click", () => {
+  Z.bereich = karte.getBounds();
+  mitteBeimZeichnen = karte.getCenter();
+  bereichKnopf.hidden = true;
+  zeichne();
+  melde(`${sichtbareOrte().length} Plätze in diesem Bereich.`);
+});
+
+// Klick auf die Karte im Modus "neuer Ort" setzt die Koordinaten.
+karte.on("click", e => {
+  if (Z.ansicht !== "neu") return;
+  Z.neuerPunkt = { lat:+e.latlng.lat.toFixed(6), lon:+e.latlng.lng.toFixed(6) };
+  zeichne();
+});
+
+/* ==========================================================================
+   4. HILFSFUNKTIONEN
+   ========================================================================== */
+
+function entfernungKm(a,b){
+  const R=6371, rad=Math.PI/180;
+  const dLat=(b.lat-a.lat)*rad;
+  const dLon=(b.lon-a.lon)*rad*Math.cos((a.lat+b.lat)/2*rad);
+  return Math.sqrt(dLat*dLat+dLon*dLon)*R;
+}
+function entfText(km){
+  if (km < 0.1) return "hier";
+  if (km < 10) return km.toFixed(1).replace(".",",")+" km";
+  return Math.round(km)+" km";
+}
+function ort(id){ return DATEN.find(o=>o.id===id); }
+function esc(s){
+  return String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+                      .replace(/"/g,"&quot;");
+}
+function heute(){ return new Date().toISOString().slice(0,10); }
+function frei(o){
+  return o.zugang==="öffentlich" || o.zugang==="Vereinsgelände frei betretbar";
+}
+function markeArt(o){
+  if (frei(o)) return ["frei","frei zugänglich"];
+  if (o.zugang.includes("Absprache")||o.zugang.includes("Schulhof"))
+    return ["absprache","nach Absprache"];
+  return ["unklar", o.zugang==="unklar" ? "Zugang unklar" : "nicht zugänglich"];
+}
+
+/* Vereinsanlage: sicher, wenn der Zugang es sagt – sonst Verdacht aus dem
+   Namen (Vereinskürzel, "Sportanlage", "Bezirkssportanlage" …). Der Verdacht
+   ändert NICHTS an den Daten, er ist nur eine Anzeige. So bleibt die Regel
+   intakt: Der Zugang wird nur mit Beleg gesetzt. */
+const VEREINSMUSTER = /\b(fc|tsv|sv|sc|djk|tv|spvgg|vfl|vfb|esv|asv|fsv|sg)\b|sportanlage|sportpark|sportzentrum|sportgelände|bezirkssportanlage|vereins/i;
+
+function vereinsMarke(o){
+  if (o.zugang.startsWith("Vereinsgelände"))
+    return ["Vereinsanlage", false];
+  if (o.verein)
+    return ["vermutlich Vereinsanlage · " + o.verein, true];
+  if (VEREINSMUSTER.test(o.name + " " + (o.notizen || "")))
+    return ["vermutlich Vereinsanlage", true];
+  return null;
+}
+
+/* Ist die Zugangsangabe belegt oder nur geraten? */
+function belegt(o){
+  return ["Auskunft Gemeinde","Auskunft Verein","Auskunft Schule","Schild vor Ort"]
+    .includes(o.bestaetigtDurch);
+}
+
+/* Von Nutzern bestätigt: mindestens drei Geräte haben "Hier gespielt"
+   gedrückt, und es gibt mehr Bestätigungen als Meldungen. Das ändert den
+   Zugang nicht – es ist eine eigene, schwächere Stufe neben dem Beleg. */
+const NUTZER_SCHWELLE = 3;
+function nutzerBestaetigt(o){
+  const n = Z.bestaetigungen[o.id] || 0;
+  return n >= NUTZER_SCHWELLE && n > (Z.meldungen[o.id] || 0);
+}
+
+/* Für die Suche: Groß/klein, Akzente und ß egal. */
+function normal(t){
+  return String(t || "").toLowerCase().normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "").replace(/ß/g, "ss");
+}
+function passtZurSuche(o){
+  const woerter = normal(Z.suche).split(/\s+/).filter(Boolean);
+  if (!woerter.length) return true;
+  const text = normal(o.name + " " + o.ort + " " + o.sportarten.join(" "));
+  return woerter.every(w => text.includes(w));
+}
+
+function sichtbareOrte(){
+  const sucht = !!Z.suche.trim();
+  const gefiltert = DATEN
+    .filter(o => !sucht || passtZurSuche(o))
+    .filter(o => Z.sportart==="alle" || o.sportarten.includes(Z.sportart))
+    .filter(o => !Z.nurFrei || frei(o))
+    .filter(o => !Z.nurBelegt || belegt(o) || nutzerBestaetigt(o))
+    .filter(o => !Z.nurGemerkt || GEMERKT.has(o.id))
+    .filter(o => !Z.nurLicht || o.beleuchtung === "ja")
+    .filter(o => sucht || !Z.maxKm || entfernungKm(Z.position,o) <= Z.maxKm)
+    /* "In diesem Bereich suchen": zeigt, was man gerade auf der Karte sieht,
+       statt was in der Nähe ist – für Auswärtsspiele und Urlaub. */
+    .filter(o => sucht || !Z.bereich || Z.bereich.contains([o.lat, o.lon]));
+
+  const bezug = Z.bereich
+    ? { lat:Z.bereich.getCenter().lat, lon:Z.bereich.getCenter().lng }
+    : Z.position;
+
+  const nachEntfernung = (a,b) => entfernungKm(bezug,a) - entfernungKm(bezug,b);
+
+  if (Z.sortierung === "zustand")
+    return gefiltert.sort((a,b) => (b.zustand||0) - (a.zustand||0) || nachEntfernung(a,b));
+
+  if (Z.sortierung === "geprueft")
+    return gefiltert.sort((a,b) =>
+      (b.geprueft || "").localeCompare(a.geprueft || "") || nachEntfernung(a,b));
+
+  return gefiltert.sort(nachEntfernung);
+}
+
+/* Welche offenen Felder fehlen noch? Steuert den Lücken-Hinweis. */
+const PFLEGBAR = [
+  ["untergrund","Untergrund"], ["groesse","Größe"], ["ausstattung","Ausstattung"],
+  ["umzaeunt","Umzäunung"], ["beleuchtung","Beleuchtung"], ["drumherum","Drumherum"]
+];
+function luecken(o){
+  return PFLEGBAR.filter(([feld]) => {
+    const w = o[feld];
+    return !w || w === "—" || w === "";
+  }).map(([, titel]) => titel);
+}
+
+/* Satellitenausschnitt für die Listenkarte. Ein Bild pro Platz über den
+   Export-Dienst von Esri – lädt erst, wenn die Zeile sichtbar wird. */
+function satellitBild(o, px = 132){
+  const dLat = 0.00042, dLon = 0.00063;      // rund 90 Meter Kantenlänge
+  const bbox = [(o.lon - dLon).toFixed(6), (o.lat - dLat).toFixed(6),
+                (o.lon + dLon).toFixed(6), (o.lat + dLat).toFixed(6)].join(",");
+  return "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/"
+       + "MapServer/export?bbox=" + bbox
+       + "&bboxSR=4326&imageSR=3857&size=" + px + "," + px
+       + "&format=jpg&transparent=false&f=image";
+}
+
+/* ==========================================================================
+   4b. WETTER UND LICHT
+   --------------------------------------------------------------------------
+   Open-Meteo: kostenlos, ohne Schlüssel, ohne Anmeldung. Wir holen den
+   Regen der letzten und nächsten Stunden sowie den Sonnenuntergang.
+   ========================================================================== */
+
+async function wetterLaden(){
+  try {
+    const u = new URL("https://api.open-meteo.com/v1/forecast");
+    u.searchParams.set("latitude",  Z.position.lat.toFixed(3));
+    u.searchParams.set("longitude", Z.position.lon.toFixed(3));
+    u.searchParams.set("hourly", "precipitation");
+    u.searchParams.set("daily", "sunset");
+    u.searchParams.set("past_hours", "12");
+    u.searchParams.set("forecast_hours", "6");
+    u.searchParams.set("timezone", "auto");
+
+    const antwort = await fetch(u);
+    if (!antwort.ok) return;
+    const d = await antwort.json();
+
+    const regen = d.hourly?.precipitation || [];
+    Z.wetter = {
+      // Wie nass ist der Boden? Summe der letzten 12 Stunden.
+      nassMm: regen.slice(0, 12).reduce((a,b)=>a+(b||0), 0),
+      // Regnet es gleich? Nächste 3 Stunden.
+      regnetGleich: regen.slice(12, 15).some(v => (v||0) > 0.3),
+      sonnenuntergang: d.daily?.sunset?.[0] ? new Date(d.daily.sunset[0]) : null
+    };
+    zeichne();
+  } catch { /* ohne Wetter läuft die App genauso */ }
+}
+
+/* Minuten bis Sonnenuntergang, oder null wenn schon dunkel/unbekannt. */
+function minutenBisDunkel(){
+  const su = Z.wetter?.sonnenuntergang;
+  if (!su) return null;
+  const m = Math.round((su - new Date()) / 60000);
+  return m > 0 ? m : null;
+}
+
+/* Wie gut ist der Belag bei der aktuellen Wetterlage bespielbar? */
+function bespielbarkeit(o){
+  const w = Z.wetter;
+  if (!w || w.nassMm < 2) return null;          // trocken: kein Hinweis nötig
+  const u = (o.untergrund || "").toLowerCase();
+
+  if (u.includes("kunstrasen") || u.includes("tartan"))
+    return ["gut", "auch bei Nässe bespielbar"];
+  if (u.includes("asche"))
+    return ["schlecht", "Asche: bei Nässe schmierig"];
+  if (u.includes("naturrasen"))
+    return w.nassMm > 8 ? ["schlecht", "Rasen: nach Regen weich"]
+                        : ["mittel", "Rasen: evtl. weich"];
+  if (u.includes("beton") || u.includes("asphalt"))
+    return ["mittel", "nass, aber spielbar"];
+  if (u.includes("sand"))
+    return ["mittel", "Sand: nach Regen schwer"];
+  return null;
+}
+
+function melde(text){
+  const m = document.getElementById("meldung");
+  m.textContent = text;
+  m.classList.add("zeigen");
+  clearTimeout(melde.t);
+  melde.t = setTimeout(()=>m.classList.remove("zeigen"), 3200);
+}
+
+function auswahlFeld(name, liste, wert, gesperrt){
+  const opt = liste.map(v=>
+    `<option value="${esc(v)}"${v===wert?" selected":""}>${esc(v)}</option>`).join("");
+  return `<select name="${name}"${gesperrt?" disabled":""}
+            class="${gesperrt?"gesperrt":""}">${opt}</select>`;
+}
+
+/* ==========================================================================
+   5. ANSICHTEN
+   ========================================================================== */
+
+const seite = document.getElementById("seite");
+
+const SPORT_ICON = { "Fußball":"⚽", "Basketball":"🏀", "Tischtennis":"🏓",
+  "Beachvolleyball":"🏐", "Laufen":"🏃", "Calisthenics":"💪", "Skaten":"🛹" };
+
+function ansichtListe(nurListe){
+  const alleOrte = sichtbareOrte();
+  const orte = alleOrte.slice(0, 150);   // Liste zeigt die 150 nächsten;
+                                         // die Karte zeigt weiterhin alle.
+
+  /* Wird es bald dunkel? Dann Hinweis samt Weg zu den Flutlichtplätzen. */
+  const bisDunkel = minutenBisDunkel();
+  const mitLicht = alleOrte.filter(o => o.beleuchtung === "ja").length;
+  const daemmerung = (bisDunkel !== null && bisDunkel <= 90)
+    ? (Z.nurLicht
+        ? `Nur Plätze mit Flutlicht. <button class="inline-knopf" data-nurlicht="0">Alle zeigen</button>`
+        : `In ${bisDunkel} Minuten wird es dunkel.` +
+          (mitLicht ? ` <button class="inline-knopf" data-nurlicht="1">${mitLicht} mit Flutlicht zeigen</button>` : ``))
+    : (Z.nurLicht
+        ? `Nur Plätze mit Flutlicht. <button class="inline-knopf" data-nurlicht="0">Alle zeigen</button>`
+        : null);
+
+  const sportChips = ["alle", ...AUSWAHL.sportarten].map(s=>
+    `<button class="chip" data-sport="${esc(s)}" aria-pressed="${Z.sportart===s}">${
+       SPORT_ICON[s] ? `<span class="chip-icon" aria-hidden="true">${SPORT_ICON[s]}</span>` : ``}${
+       s==="alle"?"Alle Sportarten":esc(s)}</button>`).join("");
+
+  const zeilen = orte.length ? orte.map(o=>{
+    const [cls,text] = markeArt(o);
+    const v = vereinsMarke(o);
+    const bs = bespielbarkeit(o);
+    const anzMeld = Z.meldungen[o.id] || 0;
+    const km = entfernungKm(Z.position,o);
+    return `<button class="zeile" data-ort="${o.id}" style="--streifen:${farbe(o)}">
+      <img class="luftbild" src="${satellitBild(o)}" alt="" loading="lazy" decoding="async"
+           onerror="this.remove()">
+      <span class="zt">
+        <span class="zname">${esc(o.name)}</span>
+        <span class="zsub">${esc(o.sportarten.join(" · "))} · ${esc(o.untergrund)}</span>
+        <span class="marke ${cls}">${text}</span>${v ? `
+        <span class="marke verein">${v[0]}</span>` : ``}${bs ? `
+        <span class="marke boden ${bs[0]}">${bs[1]}</span>` : ``}${anzMeld >= 3 ? `
+        <span class="marke warnung">${anzMeld}× weggeschickt</span>` : ``}${
+          !belegt(o) && nutzerBestaetigt(o) ? `
+        <span class="marke bestaetigt">✓ von Nutzern bestätigt</span>` : ``}
+      </span>
+      <span class="zrechts">
+        <span class="zdist">${km < 0.1 ? "0" : (km < 10 ? km.toFixed(1).replace(".",",") : Math.round(km))}<small>${km < 0.1 ? "hier" : "km"}</small></span>
+        <span class="stern${GEMERKT.has(o.id) ? " an" : ""}" data-merken="${o.id}"
+              role="button" tabindex="0"
+              aria-label="${GEMERKT.has(o.id) ? "Aus Merkliste entfernen" : "Merken"}">★</span>
+      </span>
+    </button>`;
+  }).join("") : Z.suche.trim() ? `<div class="leer"><b>Nichts gefunden für „${esc(Z.suche.trim())}“.</b><br>
+      Anders schreiben, Filter lockern – oder den Platz selbst eintragen.</div>`
+    : `<div class="leer"><b>Kein Platz passt zu den Filtern.</b><br>
+      Filter lockern – oder unten den fehlenden Platz eintragen.</div>`;
+
+  /* Ende der Liste: Auf dem Handy stehen "Ort eintragen" und die Links hier
+     statt in einer festen Leiste – so bleibt mehr Platz für die Plätze. */
+  const listenende = `<div class="listenende">
+      <button class="eintragen-karte" data-gehe="neu"><span aria-hidden="true">＋</span>
+        <span><b>Fehlt ein Platz?</b><br>Trag ihn ein – dauert eine Minute.</span></button>
+      ${Z.admin ? `<div class="admin-reihe">
+        <button class="knopf zweit" data-gehe="importieren">Import</button>
+        <button class="knopf zweit" data-gehe="fehlerliste">Fehler (${FEHLERBERICHTE.length})</button>
+        <button class="knopf zweit" data-export="1">Export</button>
+        <button class="knopf zweit" data-abmelden="1">Abmelden</button></div>` : ``}
+      <div class="rechtliches-link">Alle Angaben ohne Gewähr – vor Ort gilt das Schild.<br>
+        <button data-gehe="rechtliches">Impressum &amp; Datenschutz</button> ·
+        <button data-gehe="fehler">Fehler melden</button></div>
+    </div>`;
+
+  const anzahl = alleOrte.length;
+  const ueberschrift = Z.suche.trim()
+    ? `${anzahl} Treffer`
+    : Z.bereich ? `${anzahl} ${anzahl === 1 ? "Platz" : "Plätze"} im Kartenausschnitt`
+    : `${anzahl} ${anzahl === 1 ? "Platz" : "Plätze"} in deiner Nähe`;
+
+  const rolleInhalt = `${zeilen}${alleOrte.length > orte.length
+      ? `<div class="leer">… und ${alleOrte.length - orte.length} weitere.<br>
+         Filter setzen, suchen oder auf der Karte zoomen.</div>` : ``}${listenende}`;
+
+  /* Beim Tippen im Suchfeld nur die Liste tauschen – sonst würde das Feld
+     neu gebaut und die Tastatur ginge zu. */
+  if (nurListe) {
+    const r = seite.querySelector(".rolle");
+    const u = seite.querySelector(".anzahl");
+    if (r) { r.innerHTML = rolleInhalt; r.scrollTop = 0; }
+    if (u) u.textContent = ueberschrift;
+    return;
+  }
+
+  seite.innerHTML = `
+    <div class="suche">
+      <svg class="suche-logo" width="20" height="20" viewBox="0 0 512 512" aria-hidden="true"><path fill="#2CA93F" d="M256 484C232 440 196 402 160 368C116 326 84 280 84 218a172 172 0 1 1 344 0c0 62-32 108-76 150c-36 34-72 72-96 116Z"/><g stroke="#FFF" stroke-width="25" fill="none"><circle cx="256" cy="218" r="136"/><line x1="120" y1="218" x2="392" y2="218"/><circle cx="256" cy="218" r="50"/></g></svg>
+      <input id="suchfeld" type="search" enterkeyhint="search" autocomplete="off"
+        placeholder="Platz, Ort oder Sportart suchen" value="${esc(Z.suche)}"
+        aria-label="Platz, Ort oder Sportart suchen">
+      ${Z.suche ? `<button class="suche-weg" data-suchweg="1" aria-label="Suche löschen">✕</button>` : ``}
+    </div>
+    <div class="filter">
+      <div class="filtertitel">Sportart</div>
+      <div class="chips">${sportChips}</div>
+      <div class="filtertitel" style="margin-top:12px">Zugang</div>
+      <div class="chips">
+        <button class="chip" data-nurfrei="0" aria-pressed="${!Z.nurFrei}">Alles zeigen</button>
+        <button class="chip" data-nurfrei="1" aria-pressed="${Z.nurFrei}">Nur frei zugänglich</button>
+        <button class="chip" data-belegt="1" aria-pressed="${Z.nurBelegt}">Nur wo ich sicher darf</button>
+        <button class="chip mehr" data-mehr="${Z.filterOffen ? "0" : "1"}"
+          aria-pressed="${Z.filterOffen}">${Z.filterOffen ? "Weniger" : "Mehr Filter"}</button>
+      </div>
+      ${Z.filterOffen ? `
+      <div class="filtertitel" style="margin-top:12px">Entfernung</div>
+      ${Z.positionEcht ? `` : `<div class="notiz-klein">Gemessen ab München-Mitte – Standort nicht freigegeben.</div>`}
+      <div class="chips">
+        ${[[0,"Alle"],[2,"bis 2 km"],[5,"bis 5 km"],[10,"bis 10 km"],[25,"bis 25 km"]]
+          .map(([km,text]) =>
+            `<button class="chip" data-km="${km}"
+               aria-pressed="${(Z.maxKm || 0) === km}">${text}</button>`).join("")}
+      </div>
+      <div class="filtertitel" style="margin-top:12px">Sortieren</div>
+      <div class="chips">
+        ${[["entfernung","Entfernung"],["zustand","Zustand"],["geprueft","Zuletzt geprüft"]]
+          .map(([wert,text]) =>
+            `<button class="chip" data-sortierung="${wert}"
+               aria-pressed="${Z.sortierung===wert}">${text}</button>`).join("")}
+      </div>
+      ${GEMERKT.size ? `
+      <div class="filtertitel" style="margin-top:12px">Merkliste</div>
+      <div class="chips">
+        <button class="chip" data-gemerkt="0" aria-pressed="${!Z.nurGemerkt}">Alle Plätze</button>
+        <button class="chip" data-gemerkt="1" aria-pressed="${Z.nurGemerkt}">Nur gemerkte (${GEMERKT.size})</button>
+      </div>` : ``}` : ``}
+    </div>
+    ${Z.bereich ? `<div class="daemmerung bereich">Zeigt den Kartenausschnitt.
+      <button class="inline-knopf" data-bereich="aus">Wieder Umgebung zeigen</button></div>` : ``}
+    ${daemmerung ? `<div class="daemmerung">${daemmerung}</div>` : ``}
+    <div class="anzahl">${ueberschrift}</div>
+    <div class="rolle">${rolleInhalt}</div>
+    <div class="fuss listenfuss">
+      <button class="knopf" data-gehe="neu">Ort eintragen</button>
+      ${Z.admin ? `<button class="knopf zweit" data-gehe="importieren">Import</button>` : ``}
+      ${Z.admin ? `<button class="knopf zweit" data-gehe="fehlerliste">Fehler (${FEHLERBERICHTE.length})</button>` : ``}
+      ${Z.admin ? `<button class="knopf zweit" data-export="1">Export</button>` : ``}
+    </div>
+    <div class="rechtliches-link listenfuss">Alle Angaben ohne Gewähr – vor Ort gilt das Schild.<br>
+      <button data-gehe="rechtliches">Impressum &amp; Datenschutz</button> ·
+      <button data-gehe="fehler">Fehler melden</button></div>`;
+}
+
+/* Suchfeld: tippen filtert sofort, Enter zeigt die Treffer auf der Karte. */
+let suchTimer = null;
+document.addEventListener("input", e => {
+  if (e.target.id !== "suchfeld") return;
+  Z.suche = e.target.value;
+  const weg = seite.querySelector(".suche-weg");
+  if (!Z.suche && weg) weg.remove();
+  if (Z.suche && !weg) e.target.insertAdjacentHTML("afterend",
+    `<button class="suche-weg" data-suchweg="1" aria-label="Suche löschen">✕</button>`);
+  clearTimeout(suchTimer);
+  suchTimer = setTimeout(() => { ansichtListe(true); markerZeichnen(); }, 140);
+});
+document.addEventListener("focusin", e => {
+  if (e.target.id === "suchfeld") sheet.aufmachen();
+});
+document.addEventListener("keydown", e => {
+  if (e.target.id !== "suchfeld" || e.key !== "Enter") return;
+  e.preventDefault();
+  e.target.blur();
+  const treffer = sichtbareOrte().slice(0, 25);
+  if (!treffer.length) return;
+  if (treffer.length === 1) karte.flyTo([treffer[0].lat, treffer[0].lon], 16, { duration:.6 });
+  else karte.flyToBounds(L.latLngBounds(treffer.map(o => [o.lat, o.lon])).pad(0.2),
+                         { maxZoom:15, duration:.6 });
+  sheet.mitte();
+});
+
+function ansichtDetail(){
+  const o = ort(Z.auswahlId);
+  if (!o) { Z.ansicht="liste"; return ansichtListe(); }
+
+  const vermutet = o.bestaetigtDurch==="nur vermutet";
+  const gepruefttext = o.geprueft
+    ? o.geprueft.split("-").reverse().join(".")
+    : `<span class="vermutet">nie geprüft</span>`;
+
+  const offen = VORSCHLAEGE.filter(v=>v.ortId===o.id).length;
+  const verein = vereinsMarke(o);
+  const bs = bespielbarkeit(o);
+  const anzMeld = Z.meldungen[o.id] || 0;
+  const fehlt = luecken(o);
+  const anzGespielt = Z.bestaetigungen[o.id] || 0;
+  const vonNutzern = nutzerBestaetigt(o);
+  const fotos = (Z.schilder[o.id] || []).filter(f => f.freigegeben || Z.admin);
+  const schildKnopf = `<label class="inline-knopf">Schild fotografieren
+        <input type="file" id="schild-datei" accept="image/*" hidden></label>
+        <p class="hinweis">Bitte nur das Schild, keine Personen oder Autokennzeichen.</p>`;
+
+  const [statusArt, statusText] = markeArt(o);
+  const statusIcon = statusArt === "frei" ? "✓" : statusArt === "absprache" ? "!" : "?";
+
+  seite.innerHTML = `
+    <div class="dkopf">
+      <button class="zurueck" data-gehe="liste">← Liste</button>
+      <div class="dname">${esc(o.name)}</div>
+      <div class="dort">${esc(o.ort)} · ${entfText(entfernungKm(Z.position,o))} entfernt</div>
+      ${verein ? `<span class="marke verein">${verein[0]}</span>` : ``}
+    </div>
+    <div class="rolle">
+      <!-- Das Wichtigste zuerst: Darf ich hier spielen, und wann? -->
+      <div class="status ${statusArt}">
+        <span class="status-icon" aria-hidden="true">${statusIcon}</span>
+        <span class="status-text"><b>${statusText.charAt(0).toUpperCase() + statusText.slice(1)}</b>
+          <span>${esc(o.zugang)}${o.zeiten && o.zeiten !== "unbekannt" ? ` · ${esc(o.zeiten)}` : ``}</span></span>
+      </div>
+      <div class="schnell">
+        <button data-route="${o.id}"><span aria-hidden="true">➜</span>Route</button>
+        <button data-merken="${o.id}" class="${GEMERKT.has(o.id) ? "an" : ""}"><span aria-hidden="true">${GEMERKT.has(o.id) ? "★" : "☆"}</span>${GEMERKT.has(o.id) ? "Gemerkt" : "Merken"}</button>
+        <button data-teilen="${o.id}"><span aria-hidden="true">↗</span>Teilen</button>
+        <button data-gehe="melden"><span aria-hidden="true">⚑</span>Melden</button>
+      </div>
+      <table class="daten">
+        <tr class="geschuetzt"><th>Zugang</th><td><b>${esc(o.zugang)}</b></td></tr>
+        <tr class="geschuetzt"><th>Erlaubte Zeiten</th><td>${esc(o.zeiten)}</td></tr>
+        <tr class="geschuetzt"><th>Bestätigt durch</th>
+          <td class="${vermutet && !vonNutzern?"vermutet":""}">${esc(o.bestaetigtDurch)}${
+            vonNutzern && !belegt(o) ? ` · aber ${anzGespielt} Leute haben hier gespielt` : ``}</td></tr>
+        ${anzGespielt ? `<tr><th>Hier gespielt</th>
+          <td>${anzGespielt}× im letzten Jahr bestätigt</td></tr>` : ``}
+        <tr><th>Sportarten</th><td>${esc(o.sportarten.join(", "))}</td></tr>
+        <tr><th>Untergrund</th><td>${esc(o.untergrund)}</td></tr>
+        <tr><th>Größe</th><td>${esc(o.groesse)}</td></tr>
+        <tr><th>Ausstattung</th><td>${esc(o.ausstattung)}</td></tr>
+        <tr><th>Umzäunt</th><td>${esc(o.umzaeunt)}</td></tr>
+        <tr><th>Beleuchtung</th><td>${esc(o.beleuchtung)}</td></tr>
+        <tr><th>Zustand</th><td>${o.zustand} von 5</td></tr>
+        <tr><th>Drumherum</th><td>${esc(o.drumherum)}</td></tr>
+        <tr><th>Geprüft am</th><td>${gepruefttext}</td></tr>
+      </table>
+      ${vermutet && vonNutzern ? `<div class="abschnitt">
+        <h3>Von Nutzern bestätigt</h3>
+        <p>Amtlich ist der Zugang nicht belegt, aber ${anzGespielt} Leute haben
+        hier im letzten Jahr ohne Ärger gespielt. Hängt ein Schild am Platz,
+        mach ein Foto davon – dann tragen wir die Regeln fest ein.</p>
+        ${schildKnopf}</div>` : vermutet ? `<div class="abschnitt">
+        <h3>Achtung</h3>
+        <p>Die Zugangsangabe ist nicht belegt – sie stammt aus OpenStreetMap oder
+        einer Vermutung. Wer dort war: bitte korrigieren.</p>
+        <p>Am besten mit einem Foto vom Schild am Eingang. Das ist der Beleg,
+        mit dem wir den Zugang fest eintragen.</p>
+        ${schildKnopf}</div>` : ``}
+      ${fotos.length ? `<div class="abschnitt">
+        <h3>Schild am Platz</h3>
+        <div class="schildfotos">${fotos.map(f => `
+          <div class="schildfoto${f.freigegeben ? "" : " offen"}">
+            <a href="${esc(f.url)}" target="_blank" rel="noopener">
+              <img src="${esc(f.url)}" alt="Foto vom Schild" loading="lazy"></a>${
+            Z.admin && !f.freigegeben ? `
+            <button class="inline-knopf" data-schildok="${f.id}">Übernehmen</button>
+            <button class="inline-knopf weg" data-schildweg="${f.id}">Verwerfen</button>` : ``}
+          </div>`).join("")}</div>${
+        Z.admin && fotos.some(f => !f.freigegeben)
+          ? `<p>Gestrichelt: wartet auf deine Prüfung. „Übernehmen“ zeigt das Foto
+             allen und öffnet den Zugang zum Eintragen.</p>` : ``}
+      </div>` : ``}
+      ${verein && verein[1] && o.zugang === "unklar" ? `<div class="abschnitt">
+        <h3>Vermutlich Vereinsanlage</h3>
+        <p>Name oder Beschreibung deuten auf einen Verein hin. Dort gilt
+        Hausrecht – vor dem Spielen beim Verein fragen, nicht einfach
+        hingehen.</p></div>` : ``}
+      ${bs ? `<div class="abschnitt">
+        <h3>Boden heute</h3>
+        <p><span class="marke boden ${bs[0]}">${bs[1]}</span>${
+          Z.wetter.regnetGleich ? " In den nächsten Stunden ist Regen gemeldet." : ""
+        }</p></div>` : ``}
+      ${anzMeld ? `<div class="abschnitt">
+        <h3>Meldungen</h3>
+        <p>${anzMeld}× wurde gemeldet, dass hier nicht gespielt werden durfte.${
+          anzMeld >= 3 ? " Wir prüfen den Zugang – bis dahin lieber vorher fragen." : ""
+        }</p></div>` : ``}
+      <div class="abschnitt">
+        <h3>Notiz</h3>
+        <p>${esc(o.notizen)}</p>
+      </div>
+      ${fehlt.length ? `<div class="abschnitt luecke">
+        <h3>Was hier noch fehlt</h3>
+        <p>${fehlt.join(", ")} ${fehlt.length === 1 ? "ist" : "sind"} noch nicht
+        eingetragen. Wenn du dort warst:
+        <button class="inline-knopf" data-gehe="bearbeiten">Jetzt ergänzen</button></p>
+      </div>` : ``}
+      ${offen ? `<div class="abschnitt"><h3>Offene Vorschläge</h3>
+        <p>${offen} Änderung${offen>1?"en":""} wartet auf Freigabe.</p></div>` : ``}
+    </div>
+    <div class="fuss">
+      <button class="knopf" data-gehe="bearbeiten">Angaben ergänzen</button>
+      <button class="knopf zweit" data-geprueft="${o.id}">${
+        BESTAETIGT.has(o.id) ? "✓ Hier gespielt" : "Hier gespielt"}</button>
+    </div>
+    <div class="fuss detailfuss2" style="padding-top:0;border-top:0">
+      <button class="knopf zweit" data-route="${o.id}">Route</button>
+      <button class="knopf zweit" data-merken="${o.id}">${GEMERKT.has(o.id) ? "★ Gemerkt" : "☆ Merken"}</button>
+      <button class="knopf zweit" data-gehe="melden">Melden</button>
+    </div>
+    ${Z.admin ? `<div class="fuss" style="padding-top:0;border-top:0">
+      <button class="knopf zweit loeschen" data-loeschen="${o.id}">Platz löschen</button>
+    </div>` : ``}`;
+}
+
+function ansichtBearbeiten(){
+  const o = ort(Z.auswahlId);
+  const sperr = !Z.admin;   // Nicht-Admins sehen die Zugangsfelder, dürfen sie
+                            // aber nur vorschlagen, nicht direkt ändern.
+
+  seite.innerHTML = `
+    <div class="dkopf">
+      <button class="zurueck" data-gehe="detail">← Abbrechen</button>
+      <div class="dname">Angaben ergänzen</div>
+      <div class="dort">${esc(o.name)}</div>
+    </div>
+    <div class="rolle">
+      <form class="form" id="formular">
+        <label>Untergrund</label>
+        ${auswahlFeld("untergrund", AUSWAHL.untergrund, o.untergrund, false)}
+
+        <label>Größe</label>
+        ${auswahlFeld("groesse", AUSWAHL.groesse, o.groesse, false)}
+
+        <label>Ausstattung</label>
+        <input name="ausstattung" value="${esc(o.ausstattung)}">
+
+        <label>Umzäunt</label>
+        ${auswahlFeld("umzaeunt", AUSWAHL.janein, o.umzaeunt, false)}
+
+        <label>Beleuchtung</label>
+        ${auswahlFeld("beleuchtung", AUSWAHL.janein, o.beleuchtung, false)}
+
+        <label>Zustand (1 schlecht – 5 top)</label>
+        <input name="zustand" type="number" min="1" max="5" value="${o.zustand}">
+
+        <label>Drumherum</label>
+        <input name="drumherum" value="${esc(o.drumherum)}">
+
+        <label>Notiz</label>
+        <textarea name="notizen">${esc(o.notizen)}</textarea>
+
+        <hr style="margin:16px 0;border:0;border-top:2px solid var(--tinte)">
+
+        <label>Zugang ${sperr?"(Vorschlag)":""}</label>
+        ${auswahlFeld("zugang", AUSWAHL.zugang, o.zugang, false)}
+
+        <label>Erlaubte Zeiten ${sperr?"(Vorschlag)":""}</label>
+        <input name="zeiten" value="${esc(o.zeiten)}">
+
+        <label>Bestätigt durch</label>
+        ${auswahlFeld("bestaetigtDurch", AUSWAHL.bestaetigtDurch,
+                      Z.vorgabeBeleg || o.bestaetigtDurch, sperr)}
+
+        <p class="hinweis">${sperr
+          ? "Änderungen an Zugang und Zeiten gehen als Vorschlag ein und werden erst nach Prüfung sichtbar. Alles andere ist sofort live."
+          : "Admin-Modus: alle Felder werden direkt übernommen."}</p>
+      </form>
+    </div>
+    <div class="fuss">
+      <button class="knopf" data-speichern="1">Speichern</button>
+    </div>`;
+}
+
+function ansichtNeu(){
+  const p = Z.neuerPunkt;
+  seite.innerHTML = `
+    <div class="dkopf">
+      <button class="zurueck" data-gehe="liste">← Abbrechen</button>
+      <div class="dname">Ort eintragen</div>
+      <div class="dort">${p ? "Position gesetzt" : "Tippe auf die Karte, um die Position zu setzen"}</div>
+    </div>
+    <div class="rolle">
+      <form class="form" id="formular">
+        <label>Position</label>
+        <input value="${p ? p.lat+", "+p.lon : "noch nicht gesetzt"}" readonly
+               class="${p?"":"gesperrt"}">
+
+        <label>Name</label>
+        <input name="name" placeholder="z. B. Bolzplatz am Waldweg">
+
+        <label>Ort / Stadtteil</label>
+        <input name="ort" placeholder="z. B. Gauting, Bahnhofstraße">
+
+        <label>Sportarten (mit Komma trennen)</label>
+        <input name="sportarten" placeholder="Fußball, Basketball">
+
+        <label>Untergrund</label>
+        ${auswahlFeld("untergrund", AUSWAHL.untergrund, "Naturrasen", false)}
+
+        <label>Ausstattung</label>
+        <input name="ausstattung" placeholder="2 Tore mit Netz">
+
+        <label>Zugang</label>
+        ${auswahlFeld("zugang", AUSWAHL.zugang, "unklar", false)}
+
+        <p class="hinweis">Neue Orte werden immer erst freigegeben, bevor sie
+        öffentlich erscheinen. Zugang und Zeiten prüfen wir vor Ort oder bei der
+        Gemeinde nach.</p>
+      </form>
+    </div>
+    <div class="fuss">
+      <button class="knopf" data-neuspeichern="1">${Z.admin?"Anlegen":"Vorschlagen"}</button>
+    </div>`;
+}
+
+function ansichtAnmelden(){
+  seite.innerHTML = `
+    <div class="dkopf">
+      <button class="zurueck" data-gehe="liste">← Zurück</button>
+      <div class="dname">Admin-Anmeldung</div>
+      <div class="dort">Nur für die Freigabe von Zugangsangaben</div>
+    </div>
+    <div class="rolle">
+      <form class="form" id="anmeldeformular" autocomplete="on">
+        <label for="feld-email">E-Mail</label>
+        <input id="feld-email" name="email" type="email" autocomplete="username"
+               inputmode="email" placeholder="du@beispiel.de">
+
+        <label for="feld-passwort">Passwort</label>
+        <input id="feld-passwort" name="passwort" type="password"
+               autocomplete="current-password">
+
+        <p class="hinweis" id="anmeldehinweis">${ECHT
+          ? "Die Prüfung läuft auf dem Server. Auch wer den Code hier verändert, kommt an die geschützten Felder nicht heran."
+          : "<b>Testmodus.</b> Es ist noch kein Supabase-Projekt eingetragen (Abschnitt 0 im Code). Der Knopf unten schaltet den Admin-Modus nur zum Ausprobieren um – das ist keine Sicherung."}</p>
+      </form>
+    </div>
+    <div class="fuss">
+      <button class="knopf" data-anmelden="1">${Z.laden ? "…" : (ECHT ? "Anmelden" : "Testmodus einschalten")}</button>
+    </div>`;
+}
+
+/* Reihenfolge der Ansichten – daraus leitet sich ab, ob ein Wechsel
+   "vorwärts" (von rechts herein) oder "zurück" (von links herein) ist.
+   §7 Räumliche Konsistenz: Was nach rechts hinausging, kommt von rechts zurück. */
+const ANSICHTS_TIEFE = {
+  liste:0, importieren:1, anmelden:1, neu:1,
+  detail:1, bearbeiten:2, melden:2, rechtliches:1, fehler:1, fehlerliste:1
+};
+let letzteTiefe = 0;
+let letzterSchluessel = "liste";
+const SCROLL = {};                 // Scrollposition je Ansicht
+
+function zeichne(){
+  if (Z.ansicht !== "bearbeiten") Z.vorgabeBeleg = null;
+  const tiefe = ANSICHTS_TIEFE[Z.ansicht] ?? 0;
+  const richtung = tiefe >= letzteTiefe ? "wechsel-vor" : "wechsel-zurueck";
+  letzteTiefe = tiefe;
+
+  /* Beim Antippen eines Filters wird die Liste neu gebaut. Damit die
+     Filterleiste nicht jedes Mal an den Anfang springt, merken wir uns
+     vorher, wie weit sie und die Liste gescrollt waren. */
+  const schluessel = Z.ansicht === "liste" ? "liste" : Z.ansicht + ":" + (Z.auswahlId || "");
+  const gleich = schluessel === letzterSchluessel;
+  const vorher = { filter: seite.querySelector(".filter")?.scrollLeft || 0,
+                   rolle:  seite.querySelector(".rolle")?.scrollTop || 0 };
+  SCROLL[letzterSchluessel] = vorher;
+  letzterSchluessel = schluessel;
+
+  ({ liste:ansichtListe, detail:ansichtDetail, bearbeiten:ansichtBearbeiten,
+     neu:ansichtNeu, anmelden:ansichtAnmelden, importieren:ansichtImportieren,
+     melden:ansichtMelden, rechtliches:ansichtRechtliches, fehler:ansichtFehler, fehlerliste:ansichtFehlerliste })[Z.ansicht]();
+
+  /* §11 Nur transform und opacity bewegen – beides läuft im Compositor,
+     ohne dass der Browser das Layout neu rechnen muss. */
+  const merk = gleich ? vorher : (schluessel === "liste" ? SCROLL.liste : null);
+  if (merk) {
+    const f = seite.querySelector(".filter"), r = seite.querySelector(".rolle");
+    if (f) f.scrollLeft = merk.filter;
+    if (r) r.scrollTop = merk.rolle;
+  }
+
+  /* Nur beim Wechsel der Ansicht animieren, nicht bei jedem Filter. */
+  if (!gleich) {
+    seite.classList.remove("wechsel-vor", "wechsel-zurueck");
+    void seite.offsetWidth;                // Animation neu starten erzwingen
+    seite.classList.add(richtung);
+  }
+  markerZeichnen();
+
+  /* Zurück-Taste am Handy: Solange ein Platz oder ein Formular offen ist,
+     liegt ein Eintrag im Verlauf. "Zurück" führt dann zur Liste, statt
+     die App zu verlassen. */
+  if (tiefe > 0 && !history.state?.platzfrei) history.pushState({ platzfrei:1 }, "");
+  if (tiefe === 0 && history.state?.platzfrei) history.back();
+
+  const k = document.getElementById("adminknopf");
+  /* Der Knopf erscheint nur, wenn man als Admin angemeldet ist.
+     Zur Anmeldung führt platzfrei.app/#admin oder fünfmal aufs Logo tippen. */
+  k.hidden = !Z.admin;
+  k.textContent = Z.admin ? "Abmelden" : "";
+  k.title = Z.admin ? "Angemeldet als " + (Z.email || "Test") : "";
+  k.classList.toggle("an", Z.admin);
+
+  const w = VORSCHLAEGE.length;
+  document.getElementById("kopfnotiz").textContent =
+    `Version 0.1 · ${DATEN.length} Orte`
+    + (w ? ` · ${w} Vorschläge offen` : "")
+    + (ECHT ? "" : " · Testmodus");
+}
+
+/* ==========================================================================
+   6. AKTIONEN
+   --------------------------------------------------------------------------
+   Alles hier schreibt in die Datenbank, wenn eine eingerichtet ist, und
+   sonst nur in den Arbeitsspeicher. Deshalb steht überall dasselbe Muster:
+   erst prüfen, ob ECHT gilt, dann schreiben.
+   ========================================================================== */
+
+/* Namen der Spalten in der Datenbank weichen an drei Stellen von den
+   Namen in der App ab (Postgres mag keine Großbuchstaben). */
+const DB_SPALTE = { bestaetigtDurch:"bestaetigt_durch", geprueft:"geprueft_am" };
+const OFFENE_FELDER = ["untergrund","groesse","ausstattung","umzaeunt",
+                       "beleuchtung","zustand","drumherum","notizen"];
+
+/* Eine Zeile aus der Datenbank in die Form bringen, die die App benutzt. */
+function ausDb(r){
+  return {
+    id:r.id, name:r.name, ort:r.ort || "—",
+    lat:r.lat, lon:r.lon,
+    sportarten:r.sportarten || [],
+    zugang:r.zugang, zeiten:r.zeiten, bestaetigtDurch:r.bestaetigt_durch,
+    untergrund:r.untergrund || "—", groesse:r.groesse || "—",
+    ausstattung:r.ausstattung || "—", umzaeunt:r.umzaeunt || "nein",
+    beleuchtung:r.beleuchtung || "nein", zustand:r.zustand || 3,
+    drumherum:r.drumherum || "—", notizen:r.notizen || "",
+    verein:r.verein || null,
+    geprueft:r.geprueft_am, freigegeben:r.freigegeben
+  };
+}
+
+/* Orte aus der Datenbank holen. Klappt das nicht, bleiben die Daten aus
+   Abschnitt 1 stehen – die App ist dann trotzdem benutzbar. */
+async function datenLaden(){
+  if (!ECHT) return;
+
+  /* Supabase liefert höchstens 1000 Zeilen pro Anfrage. Seit dem
+     deutschlandweiten Import sind es fast 30.000 – also erst zählen und dann
+     mehrere Seiten gleichzeitig holen statt eine nach der anderen. */
+  const fehler = error => {
+    melde("Datenbank nicht erreichbar. Schon das SQL-Skript ausgeführt?");
+    console.error("Fehler beim Laden:", error);
+  };
+  const { count, error: zaehlFehler } = await db.from("orte")
+    .select("id", { count:"exact", head:true });
+  if (zaehlFehler) { fehler(zaehlFehler); return; }
+
+  const SEITE = 1000, GLEICHZEITIG = 6;
+  const anfaenge = [];
+  for (let von = 0; von < (count || 0) + SEITE; von += SEITE) anfaenge.push(von);
+  const alle = [];
+  for (let i = 0; i < anfaenge.length; i += GLEICHZEITIG) {
+    const antworten = await Promise.all(anfaenge.slice(i, i + GLEICHZEITIG).map(von =>
+      db.from("orte").select("*").order("id").range(von, von + SEITE - 1)));
+    for (const { data, error } of antworten) {
+      if (error) { fehler(error); return; }
+      alle.push(...data);
+    }
+  }
+  alle.sort((a,b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
+
+  if (!alle.length) {
+    melde("Die Datenbank ist noch leer – Abschnitt 7 im SQL-Skript fehlt.");
+    return;
+  }
+
+  DATEN = alle.map(ausDb);
+  VORSCHLAEGE = [];
+  if (Z.admin) await Promise.all([vorschlaegeLaden(), fehlerLaden()]);
+  zeichne();
+}
+
+/* Offene Fehlermeldungen. Lesen darf die Tabelle nur der Admin (RLS);
+   fehlt sie noch, bleibt die Liste einfach leer. */
+async function fehlerLaden(){
+  if (!ECHT) return;
+  const { data } = await db.from("fehlerberichte")
+                           .select("*").eq("erledigt", false)
+                           .order("erstellt", { ascending:false });
+  FEHLERBERICHTE = data || [];
+}
+
+async function vorschlaegeLaden(){
+  if (!ECHT) return;
+  const { data } = await db.from("vorschlaege")
+                           .select("*").eq("erledigt", false);
+  VORSCHLAEGE = data || [];
+}
+
+function formularWerte(){
+  const f = document.getElementById("formular");
+  const w = {};
+  for (const el of f.querySelectorAll("input[name],select[name],textarea[name]"))
+    w[el.name] = el.value.trim();
+  return w;
+}
+
+async function speichern(){
+  const o = ort(Z.auswahlId);
+  const w = formularWerte();
+
+  const offen = {};          // darf jeder ändern
+  const geschuetzt = {};     // nur Admins, und nur über die Datenbankfunktion
+
+  for (const [feld, wert] of Object.entries(w)) {
+    if (wert === "") continue;
+    const neu = feld === "zustand"
+      ? Math.max(1, Math.min(5, +wert || o.zustand))
+      : wert;
+    if (String(o[feld]) === String(neu)) continue;
+
+    if (NUR_ADMIN.includes(feld)) geschuetzt[feld] = neu;
+    else if (OFFENE_FELDER.includes(feld)) offen[feld] = neu;
+  }
+
+  let vorgeschlagen = 0;
+
+  // ----- offene Felder: direkt schreiben -----
+  if (Object.keys(offen).length) {
+    if (ECHT) {
+      const zeile = { geprueft_am: heute() };
+      for (const [f, v] of Object.entries(offen)) zeile[DB_SPALTE[f] || f] = v;
+
+      const { error } = await db.from("orte").update(zeile).eq("id", o.id);
+      if (error) { console.error(error); return melde("Speichern abgelehnt: " + error.message); }
+    }
+    Object.assign(o, offen);
+    o.geprueft = heute();
+  }
+
+  // ----- geschützte Felder -----
+  if (Object.keys(geschuetzt).length) {
+    if (Z.admin) {
+      const ok = await zugangSetzen(
+        o.id,
+        geschuetzt.zugang          ?? o.zugang,
+        geschuetzt.zeiten          ?? o.zeiten,
+        geschuetzt.bestaetigtDurch ?? o.bestaetigtDurch
+      );
+      if (ok) { Object.assign(o, geschuetzt); o.geprueft = heute(); }
+    } else {
+      for (const [feld, neu] of Object.entries(geschuetzt)) {
+        if (ECHT) {
+          const { error } = await db.from("vorschlaege").insert({
+            ort_id: o.id,
+            feld: DB_SPALTE[feld] || feld,
+            alter_wert: String(o[feld]),
+            neuer_wert: String(neu)
+          });
+          if (error) { console.error(error); continue; }
+        }
+        VORSCHLAEGE.push({ ort_id:o.id, feld, alter_wert:o[feld], neuer_wert:neu });
+        vorgeschlagen++;
+      }
+    }
+  }
+
+  Z.ansicht = "detail";
+  zeichne();
+  melde(vorgeschlagen
+    ? `Gespeichert. ${vorgeschlagen} Änderung${vorgeschlagen>1?"en":""} wartet auf Freigabe.`
+    : "Gespeichert.");
+}
+
+async function neuSpeichern(){
+  if (!Z.neuerPunkt) return melde("Bitte zuerst auf die Karte tippen.");
+  const w = formularWerte();
+  if (!w.name) return melde("Ein Name fehlt noch.");
+
+  const zeile = {
+    name: w.name,
+    ort: w.ort || null,
+    lat: Z.neuerPunkt.lat,
+    lon: Z.neuerPunkt.lon,
+    sportarten: (w.sportarten || "Fußball").split(",").map(s=>s.trim()).filter(Boolean),
+    zugang: w.zugang,
+    zeiten: "unbekannt",
+    bestaetigt_durch: "nur vermutet",
+    untergrund: w.untergrund,
+    groesse: "Kleinfeld",
+    ausstattung: w.ausstattung || null,
+    umzaeunt: "nein",
+    beleuchtung: "nein",
+    zustand: 3,
+    notizen: Z.admin ? "" : "Von einem Nutzer eingetragen, noch nicht vor Ort geprüft.",
+    geprueft_am: heute(),
+    freigegeben: false          // immer erst in die Prüfung, auch bei Admins
+  };
+
+  if (ECHT) {
+    const { data, error } = await db.from("orte").insert(zeile).select().single();
+    if (error) {
+      console.error(error);
+      if ((error.message || "").includes("duplicate key"))
+        return melde("Diesen Ort gibt es schon – ergänze lieber den bestehenden Eintrag.");
+      return melde("Anlegen abgelehnt: " + error.message);
+    }
+    DATEN.push(ausDb(data));
+  } else {
+    DATEN.push(ausDb({ ...zeile, id:"O"+String(DATEN.length+1).padStart(2,"0") }));
+  }
+
+  Z.neuerPunkt = null;
+  Z.ansicht = "liste";
+  zeichne();
+  melde("Danke – der Ort geht in die Prüfung.");
+}
+
+/* "Hier gespielt": der billigste und deshalb häufigste Pflegevorgang.
+   Zählt als Bestätigung (einmal pro Gerät) und setzt das Prüfdatum hoch. */
+async function alsGepruefT(id){
+  const neu = !BESTAETIGT.has(id);
+  if (ECHT && neu) {
+    const { error } = await db.from("bestaetigungen")
+                             .insert({ ort_id:id, art:"gespielt", geraet:geraetId() });
+    /* 23505 = dieses Gerät hat schon bestätigt (z. B. Speicher gelöscht). */
+    if (error && error.code !== "23505") {
+      console.error(error);
+      return melde("Konnte nicht gespeichert werden.");
+    }
+  }
+  if (ECHT) {
+    const { error } = await db.from("orte")
+                             .update({ geprueft_am: heute() }).eq("id", id);
+    if (error) console.error(error);
+  }
+  if (neu) {
+    Z.bestaetigungen[id] = (Z.bestaetigungen[id] || 0) + 1;
+    BESTAETIGT.add(id);
+    try { localStorage.setItem(BESTAETIGT_SCHLUESSEL, JSON.stringify([...BESTAETIGT])); } catch {}
+  }
+  ort(id).geprueft = heute();
+  zeichne();
+  melde(neu ? "Danke – deine Bestätigung zählt." : "Danke – als heute geprüft vermerkt.");
+}
+
+/* Export bleibt als Sicherheitsnetz: alles als JSON herunterladen. */
+function exportieren(){
+  if (!Z.admin) return;
+  const inhalt = JSON.stringify({ orte:DATEN, vorschlaege:VORSCHLAEGE }, null, 2);
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([inhalt], {type:"application/json"}));
+  a.download = "sportflaechen-"+heute()+".json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+  melde("Datei heruntergeladen.");
+}
+
+/* --------------------------------------------------------------------------
+   Meldungen
+   -------------------------------------------------------------------------- */
+
+async function meldungAbgeben(grund){
+  const o = ort(Z.auswahlId);
+  if (!o) return;
+
+  if (ECHT) {
+    const { error } = await db.from("meldungen").insert({ ort_id:o.id, grund });
+    if (error) { console.error(error); return melde("Konnte nicht gemeldet werden."); }
+  }
+  Z.meldungen[o.id] = (Z.meldungen[o.id] || 0) + 1;
+
+  Z.ansicht = "detail";
+  zeichne();
+  melde("Danke – die Meldung ist angekommen.");
+}
+
+/* Anzahl offener Meldungen je Ort holen. Ein Aufruf für alle. */
+async function meldungenLaden(){
+  if (!ECHT) return;
+  const { data, error } = await db.from("meldungen")
+                                 .select("ort_id").eq("erledigt", false);
+  if (error) return;
+  const zaehler = {};
+  for (const m of data) zaehler[m.ort_id] = (zaehler[m.ort_id] || 0) + 1;
+  Z.meldungen = zaehler;
+}
+
+/* --------------------------------------------------------------------------
+   Bestätigungen und Schildfotos
+   -------------------------------------------------------------------------- */
+
+/* Alles in einem Rutsch: "Hier gespielt" der letzten zwölf Monate zählen,
+   Fotos einsammeln. Fotos sieht die Datenbank-Regel nach nur freigegeben –
+   außer für den Admin. Fehlt die Tabelle noch, bleibt einfach alles leer. */
+async function bestaetigungenLaden(){
+  if (!ECHT) return;
+  const seit = new Date(Date.now() - 365 * 864e5).toISOString();
+  const zeilen = [];
+  const SEITE = 1000;
+  for (let von = 0; ; von += SEITE) {
+    const { data, error } = await db.from("bestaetigungen")
+      .select("id,ort_id,art,foto,freigegeben,erstellt")
+      .eq("verworfen", false)
+      .order("id").range(von, von + SEITE - 1);
+    if (error) { console.warn("Bestätigungen:", error.message); return; }
+    zeilen.push(...data);
+    if (data.length < SEITE) break;
+  }
+  const zaehler = {}, schilder = {};
+  for (const b of zeilen) {
+    if (b.art === "gespielt" && b.erstellt >= seit)
+      zaehler[b.ort_id] = (zaehler[b.ort_id] || 0) + 1;
+    if (b.art === "schild" && b.foto)
+      (schilder[b.ort_id] ||= []).push({
+        id:b.id, pfad:b.foto, freigegeben:b.freigegeben,
+        url: db.storage.from("schilder").getPublicUrl(b.foto).data.publicUrl
+      });
+  }
+  Z.bestaetigungen = zaehler;
+  Z.schilder = schilder;
+}
+
+/* Handyfotos sind 4–12 MB groß. Vor dem Hochladen auf 1600 px verkleinern:
+   spart Datenvolumen, und das Neuzeichnen wirft nebenbei die GPS-Daten
+   aus dem Foto (EXIF) weg. */
+async function bildVerkleinern(datei, maxPx = 1600, qualitaet = 0.82){
+  let bild;
+  try { bild = await createImageBitmap(datei, { imageOrientation:"from-image" }); }
+  catch {
+    bild = await new Promise((ok, fehler) => {
+      const img = new Image();
+      img.onload = () => ok(img);
+      img.onerror = fehler;
+      img.src = URL.createObjectURL(datei);
+    });
+  }
+  const b = bild.width, h = bild.height;
+  const faktor = Math.min(1, maxPx / Math.max(b, h));
+  const c = document.createElement("canvas");
+  c.width = Math.round(b * faktor);
+  c.height = Math.round(h * faktor);
+  c.getContext("2d").drawImage(bild, 0, 0, c.width, c.height);
+  return await new Promise((ok, fehler) =>
+    c.toBlob(blob => blob ? ok(blob) : fehler(new Error("leer")), "image/jpeg", qualitaet));
+}
+
+async function schildHochladen(datei){
+  const o = ort(Z.auswahlId);
+  if (!o || !datei) return;
+  if (!datei.type.startsWith("image/")) return melde("Bitte ein Foto auswählen.");
+
+  melde("Foto wird hochgeladen …");
+  let blob;
+  try { blob = await bildVerkleinern(datei); }
+  catch { return melde("Das Foto ließ sich nicht lesen."); }
+
+  let eintrag;
+  if (ECHT) {
+    const pfad = `${o.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+    const { error:e1 } = await db.storage.from("schilder")
+                                 .upload(pfad, blob, { contentType:"image/jpeg" });
+    if (e1) { console.error(e1); return melde("Hochladen hat nicht geklappt."); }
+    const { error:e2 } = await db.from("bestaetigungen")
+      .insert({ ort_id:o.id, art:"schild", foto:pfad, geraet:geraetId() });
+    if (e2) { console.error(e2); return melde("Hochladen hat nicht geklappt."); }
+    eintrag = { id:null, pfad, freigegeben:false,
+                url: db.storage.from("schilder").getPublicUrl(pfad).data.publicUrl };
+  } else {
+    eintrag = { id:"lokal-" + Date.now(), pfad:null, freigegeben:false,
+                url: URL.createObjectURL(blob) };
+  }
+
+  /* Der Admin sieht das Foto sofort (mit echter id nach dem Neuladen),
+     alle anderen erst nach der Freigabe. */
+  if (Z.admin && ECHT) await bestaetigungenLaden();
+  else (Z.schilder[o.id] ||= []).push(eintrag);
+  zeichne();
+  melde("Danke! Das Foto geht in die Prüfung.");
+}
+
+/* Admin: Foto freigeben und gleich den Zugang mit "Schild vor Ort"
+   eintragen lassen – oder verwerfen. */
+async function schildPruefen(id, ok){
+  const o = ort(Z.auswahlId);
+  const liste = Z.schilder[o?.id] || [];
+  const f = liste.find(x => String(x.id) === String(id));
+  if (!f) return;
+
+  if (ECHT) {
+    const { error } = await db.from("bestaetigungen")
+      .update(ok ? { freigegeben:true } : { verworfen:true }).eq("id", f.id);
+    if (error) { console.error(error); return melde("Abgelehnt: " + error.message); }
+    if (!ok && f.pfad) await db.storage.from("schilder").remove([f.pfad]);
+  }
+
+  if (ok) {
+    f.freigegeben = true;
+    Z.vorgabeBeleg = "Schild vor Ort";
+    Z.ansicht = "bearbeiten";
+    zeichne();
+    melde("Freigegeben. Jetzt Zugang und Zeiten vom Schild eintragen.");
+  } else {
+    Z.schilder[o.id] = liste.filter(x => x !== f);
+    zeichne();
+    melde("Foto verworfen.");
+  }
+}
+
+/* Route: öffnet die Karten-App des Geräts mit dem Platz als Ziel.
+   Apple Maps auf iOS und Mac, sonst Google Maps. */
+/* Teilen: Link direkt auf den Platz – zum Verabreden mit Freunden. */
+async function teilen(id){
+  const o = ort(id);
+  if (!o) return;
+  const url = location.origin + location.pathname + "#platz=" + encodeURIComponent(id);
+  const text = `${o.name} – ${markeArt(o)[1]}. Lass uns da spielen!`;
+  if (navigator.share) {
+    try { await navigator.share({ title:o.name, text, url }); } catch {}
+    return;
+  }
+  try { await navigator.clipboard.writeText(url); melde("Link kopiert."); }
+  catch { prompt("Link zum Platz:", url); }
+}
+function platzAusAdresse(){
+  const m = location.hash.match(/^#platz=(.+)$/);
+  if (!m) return;
+  const o = ort(decodeURIComponent(m[1]));
+  history.replaceState(history.state, "", location.pathname + location.search);
+  if (!o) return;
+  Z.auswahlId = o.id; Z.ansicht = "detail"; zeichne();
+  karte.setView([o.lat, o.lon], 16);
+  sheet.mitte();
+}
+
+function routeOeffnen(id){
+  const o = ort(id);
+  if (!o) return;
+  const apple = /iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent);
+  const url = apple
+    ? `https://maps.apple.com/?daddr=${o.lat},${o.lon}&dirflg=w`
+    : `https://www.google.com/maps/dir/?api=1&destination=${o.lat},${o.lon}&travelmode=walking`;
+  window.open(url, "_blank", "noopener");
+}
+
+/* ==========================================================================
+   6b. ANMELDUNG
+   --------------------------------------------------------------------------
+   Der Browser fragt nur: "bin ich Admin?" Die Antwort kommt aus der
+   Datenbank über die Funktion ist_admin(). Wer Z.admin im Browser von
+   Hand auf true setzt, sieht zwar mehr Knöpfe – aber jeder Schreibversuch
+   auf die geschützten Spalten wird von Postgres abgelehnt.
+   ========================================================================== */
+
+async function anmelden(){
+  if (!ECHT) {                      // Testmodus: nur umschalten
+    Z.admin = !Z.admin;
+    Z.ansicht = "liste";
+    zeichne();
+    return melde(Z.admin ? "Testmodus: Admin an (keine echte Sicherung)."
+                         : "Testmodus: Admin aus.");
+  }
+
+  const f = document.getElementById("anmeldeformular");
+  const email    = f.email.value.trim();
+  const passwort = f.passwort.value;
+  if (!email || !passwort) return melde("E-Mail und Passwort ausfüllen.");
+
+  Z.laden = true; zeichne();
+
+  const { error } = await db.auth.signInWithPassword({ email, password: passwort });
+
+  Z.laden = false;
+  if (error) {
+    zeichne();
+    console.error("Anmeldung:", error);
+    const m = (error.message || "").toLowerCase();
+    if (m.includes("invalid login credentials"))
+      return melde("E-Mail oder Passwort stimmen nicht – oder der Nutzer existiert noch nicht.");
+    if (m.includes("email not confirmed"))
+      return melde("Der Nutzer ist angelegt, aber die E-Mail nicht bestätigt. In Supabase: Nutzer öffnen → E-Mail bestätigen.");
+    if (m.includes("failed to fetch") || m.includes("network"))
+      return melde("Keine Verbindung zu Supabase – Internet oder Project-URL prüfen.");
+    return melde("Anmeldung fehlgeschlagen: " + error.message);
+  }
+
+  await adminPruefen();
+  if (Z.admin) await Promise.all([vorschlaegeLaden(), bestaetigungenLaden(), fehlerLaden()]);
+  Z.ansicht = "liste";
+  zeichne();
+  melde(Z.admin ? "Angemeldet als Admin." : "Angemeldet – aber nicht als Admin freigeschaltet.");
+}
+
+async function abmelden(){
+  if (ECHT) await db.auth.signOut();
+  Z.admin = false; Z.email = null;
+  await bestaetigungenLaden();   // ungeprüfte Fotos wieder ausblenden
+  zeichne();
+  melde("Abgemeldet.");
+}
+
+/* Fragt die Datenbank, ob der angemeldete Nutzer in der Tabelle admins steht. */
+async function adminPruefen(){
+  if (!ECHT) return;
+  const { data: sitzung } = await db.auth.getSession();
+  if (!sitzung?.session) { Z.admin = false; Z.email = null; return; }
+
+  Z.email = sitzung.session.user.email;
+  const { data, error } = await db.rpc("ist_admin");
+  Z.admin = !error && data === true;
+}
+
+/* Admin: Platz endgültig löschen. Läuft über die Datenbankfunktion
+   ort_loeschen(), die selbst prüft, ob der Aufrufer Admin ist, und auch die
+   Meldungen, Vorschläge und Bestätigungen zu diesem Platz entfernt. */
+async function ortLoeschen(ortId){
+  const o = ort(ortId);
+  if (!o || !Z.admin) return;
+  if (!confirm(`„${o.name}“ endgültig löschen?\n\nDas lässt sich nicht rückgängig machen.`)) return;
+  if (ECHT) {
+    const { error } = await db.rpc("ort_loeschen", { p_ort_id: ortId });
+    if (error) { console.error(error); return melde("Löschen abgelehnt: " + error.message); }
+  }
+  DATEN = DATEN.filter(x => x.id !== ortId);
+  if (GEMERKT.delete(ortId)) {
+    try { localStorage.setItem(MERK_SCHLUESSEL, JSON.stringify([...GEMERKT])); } catch {}
+  }
+  Z.auswahlId = null;
+  Z.ansicht = "liste";
+  zeichne();
+  melde(`„${o.name}“ gelöscht.`);
+}
+
+/* Geschützte Felder gehen nie per normalem Update raus, sondern immer über
+   die Datenbankfunktion – die prüft selbst, ob der Aufrufer Admin ist. */
+async function zugangSetzen(ortId, zugang, zeiten, bestaetigtDurch){
+  if (!ECHT) return true;
+  const { error } = await db.rpc("zugang_setzen", {
+    p_ort_id: ortId, p_zugang: zugang,
+    p_zeiten: zeiten, p_bestaetigt_durch: bestaetigtDurch
+  });
+  if (error) { melde("Abgelehnt: " + error.message); return false; }
+  return true;
+}
+
+
+/* ==========================================================================
+   6c. IMPORT AUS OPENSTREETMAP
+   --------------------------------------------------------------------------
+   Nimmt eine GeoJSON-Datei aus overpass-turbo.eu entgegen und übersetzt sie
+   in unsere Orte. Grundsatz dabei: Der Zugang wird IMMER als "unklar" mit
+   "nur vermutet" gespeichert – OSM weiß nicht, ob man dort spielen darf.
+   Genau das ist ja die Frage, die nur ihr vor Ort beantworten könnt.
+   ========================================================================== */
+
+/* Welcher OSM-Sportwert wird welche unserer Sportarten? Alles andere
+   (Tennis, Golf, Reiten …) wird bewusst übersprungen. */
+const OSM_SPORT = {
+  soccer:"Fußball", football:"Fußball",
+  basketball:"Basketball", streetball:"Basketball",
+  table_tennis:"Tischtennis",
+  beachvolleyball:"Beachvolleyball", volleyball:"Beachvolleyball",
+  running:"Laufen", athletics:"Laufen",
+  fitness:"Calisthenics", calisthenics:"Calisthenics", exercise:"Calisthenics",
+  skateboard:"Skaten",
+  multi:"Fußball"   // Multifunktionsfelder sind fast immer Bolzplätze
+};
+
+const OSM_BELAG = {
+  grass:"Naturrasen",
+  artificial_turf:"Kunstrasen", artificial_grass:"Kunstrasen",
+  asphalt:"Beton/Asphalt", concrete:"Beton/Asphalt", paved:"Beton/Asphalt",
+  clay:"Asche", dirt:"Asche", earth:"Asche", fine_gravel:"Asche", compacted:"Asche",
+  tartan:"Tartan", sand:"Sand"
+};
+
+function sportartenAusTags(t){
+  const roh = (t.sport || "").split(";").map(s=>s.trim().toLowerCase()).filter(Boolean);
+  const menge = new Set();
+  for (const r of roh) {
+    if (OSM_SPORT[r]) menge.add(OSM_SPORT[r]);
+    if (r === "multi") menge.add("Basketball");
+  }
+  if (!menge.size && t.leisure === "fitness_station") menge.add("Calisthenics");
+  return [...menge];
+}
+
+/* Overpass liefert Punkte, Linien und Flächen. Für Flächen nehmen wir die
+   Mitte des Umrisses – für "wo ist der Platz" ist das genau genug. */
+function mittelpunkt(g){
+  if (!g) return null;
+  if (g.type === "Point") return { lat:g.coordinates[1], lon:g.coordinates[0] };
+  let ring = null;
+  if (g.type === "Polygon")           ring = g.coordinates[0];
+  else if (g.type === "MultiPolygon") ring = g.coordinates[0][0];
+  else if (g.type === "LineString")   ring = g.coordinates;
+  if (!ring || !ring.length) return null;
+  let lat = 0, lon = 0;
+  for (const p of ring) { lon += p[0]; lat += p[1]; }
+  return { lat:+(lat/ring.length).toFixed(6), lon:+(lon/ring.length).toFixed(6) };
+}
+
+function ortSchluessel(name, lat, lon){
+  return name + "|" + lat.toFixed(5) + "|" + lon.toFixed(5);
+}
+
+/* --------------------------------------------------------------------------
+   CSV aus dem Open-Data-Portal München
+   --------------------------------------------------------------------------
+   Der Datensatz "Öffentliche Spielplätze München" listet in der Spalte
+   "Besondere Angebote" genau das, was uns interessiert: Bolzplatz,
+   Streetball, Tischtennis, Skateanlage, Beachvolleyball, Fitness Parcours.
+   Alles andere (Wasserspiel, Rodelhügel, Klettern …) wird übersprungen.
+
+   Eigenheiten des Datensatzes, die der Import abfangen muss:
+   - Felder können Kommas UND Zeilenumbrüche enthalten, in "" eingeschlossen
+   - mehrere Angebote pro Feld, durch Zeilenumbruch getrennt
+   - derselbe Ort erscheint mehrfach mit verschiedenen SERVICE.IDs
+   -------------------------------------------------------------------------- */
+
+/* Kleiner, aber vollständiger CSV-Parser: kommt mit Anführungszeichen,
+   verdoppelten Anführungszeichen und Umbrüchen im Feld zurecht. */
+function csvLesen(text){
+  const zeilen = [];
+  let feld = "", zeile = [], inAnf = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const z = text[i];
+
+    if (inAnf) {
+      if (z === '"') {
+        if (text[i+1] === '"') { feld += '"'; i++; }   // "" = ein "
+        else inAnf = false;
+      } else feld += z;
+      continue;
+    }
+
+    if (z === '"')       { inAnf = true; }
+    else if (z === ",")  { zeile.push(feld); feld = ""; }
+    else if (z === "\n") { zeile.push(feld); zeilen.push(zeile); zeile = []; feld = ""; }
+    else if (z !== "\r") { feld += z; }
+  }
+  if (feld !== "" || zeile.length) { zeile.push(feld); zeilen.push(zeile); }
+  return zeilen;
+}
+
+/* Angebot aus dem München-Datensatz -> unsere Sportart */
+const MUC_SPORT = {
+  "bolzplatz":"Fußball",
+  "streetball":"Basketball",
+  "tischtennis":"Tischtennis",
+  "skateanlage":"Skaten",
+  "beachvolleyball":"Beachvolleyball",
+  "fitness parcours":"Calisthenics"
+};
+
+/* "Spielplatz ""Luitpoldpark Bolzplatz""" -> "Luitpoldpark Bolzplatz" */
+function mucName(roh){
+  let n = (roh || "").replace(/\s+/g, " ").trim();
+  const treffer = n.match(/"([^"]+)"/);
+  if (treffer) n = treffer[1].trim();
+  n = n.replace(/^(Service\s+)?Spielplatz\s*/i, "").trim();
+  return n || "Sportfläche";
+}
+
+async function importMuenchen(text){
+  const zeilen = csvLesen(text);
+  if (zeilen.length < 2) return melde("Die CSV-Datei ist leer.");
+
+  const kopf = zeilen[0].map(s => s.trim());
+  const sp = {
+    id:      kopf.indexOf("ADDRESS.ID"),
+    name:    kopf.indexOf("ADDRESS.Bezeichnung"),
+    lat:     kopf.indexOf("ADDRESS.Lat"),
+    lon:     kopf.indexOf("ADDRESS.Lon"),
+    angebot: kopf.indexOf("Besondere Angebote")
+  };
+  if (sp.lat < 0 || sp.angebot < 0)
+    return melde("Das sieht nicht nach dem Münchner Spielplatz-Datensatz aus.");
+
+  /* Erst alle Zeilen je Ort zusammenfassen – ein Ort kann mehrfach vorkommen. */
+  const orte = new Map();
+  for (let i = 1; i < zeilen.length; i++) {
+    const r = zeilen[i];
+    if (!r[sp.lat]) continue;
+
+    const schluessel = r[sp.id] || (r[sp.lat] + "," + r[sp.lon]);
+    if (!orte.has(schluessel))
+      orte.set(schluessel, {
+        name: mucName(r[sp.name]),
+        lat: +(+r[sp.lat]).toFixed(6),
+        lon: +(+r[sp.lon]).toFixed(6),
+        sportarten: new Set()
+      });
+
+    const o = orte.get(schluessel);
+    for (const a of (r[sp.angebot] || "").split(/[\n;]/)) {
+      const treffer = MUC_SPORT[a.trim().toLowerCase()];
+      if (treffer) o.sportarten.add(treffer);
+    }
+  }
+
+  const vorhanden = new Set(DATEN.map(o => ortSchluessel(o.name, o.lat, o.lon)));
+  const zeilenNeu = [];
+  let ohneSportart = 0, schonDa = 0;
+
+  for (const o of orte.values()) {
+    if (!o.sportarten.size) { ohneSportart++; continue; }
+    if (!Number.isFinite(o.lat) || !Number.isFinite(o.lon)) continue;
+
+    const schluessel = ortSchluessel(o.name, o.lat, o.lon);
+    if (vorhanden.has(schluessel)) { schonDa++; continue; }
+    vorhanden.add(schluessel);
+
+    zeilenNeu.push({
+      name: o.name, ort: "München",
+      lat: o.lat, lon: o.lon,
+      sportarten: [...o.sportarten],
+      zugang: "öffentlich",          // öffentliche Spielplätze der Stadt
+      zeiten: "unbekannt",
+      bestaetigt_durch: "Auskunft Gemeinde",
+      notizen: "Aus dem Open-Data-Datensatz der Stadt München. Ausstattung und Zustand vor Ort prüfen.",
+      freigegeben: true
+    });
+  }
+
+  await stapelEinfuegen(zeilenNeu, { schonDa, ohneSportart });
+}
+
+/* Gemeinsames Einfügen in Stapeln – von beiden Importwegen benutzt. */
+async function stapelEinfuegen(zeilen, zaehler){
+  let uebernommen = 0, dubletten = 0;
+
+  if (!zeilen.length) {
+    Z.importText = `Nichts Neues: ${zaehler.schonDa} schon vorhanden, `
+                 + `${zaehler.ohneSportart} ohne passende Sportart.`;
+    return zeichne();
+  }
+
+  if (ECHT) {
+    for (let i = 0; i < zeilen.length; i += 100) {
+      const stapel = zeilen.slice(i, i + 100);
+      melde(`Importiere … ${Math.min(i + 100, zeilen.length)} / ${zeilen.length}`);
+
+      const { data, error } = await db.from("orte").insert(stapel).select();
+      if (!error) { uebernommen += data.length; DATEN.push(...data.map(ausDb)); continue; }
+
+      if (!(error.message || "").includes("duplicate")) {
+        console.error(error);
+        melde("Import abgebrochen: " + error.message);
+        break;
+      }
+      for (const z of stapel) {
+        const r = await db.from("orte").insert(z).select().single();
+        if (r.error) {
+          if ((r.error.message || "").includes("duplicate")) dubletten++;
+          else console.error(r.error);
+        } else { uebernommen++; DATEN.push(ausDb(r.data)); }
+      }
+    }
+  } else {
+    for (const z of zeilen) DATEN.push(ausDb({ ...z, id:"T" + (DATEN.length + 1) }));
+    uebernommen = zeilen.length;
+  }
+
+  Z.importText = `${uebernommen} Orte übernommen · `
+               + `${zaehler.schonDa + dubletten} lagen auf bekannten Flächen`
+               + (zaehler.alsOeffentlichErkannt
+                   ? ` (davon ${zaehler.alsOeffentlichErkannt} amtlich als öffentlich bestätigt)` : ``)
+               + ` · ${zaehler.ohneSportart} ohne passende Sportart übersprungen.`;
+  zeichne();
+  melde(`Fertig: ${uebernommen} Orte übernommen.`);
+}
+
+/* --------------------------------------------------------------------------
+   Kodierung reparieren
+   --------------------------------------------------------------------------
+   Behördliche CSV-Exporte kommen in drei Varianten daher, und man sieht es
+   erst am Ergebnis:
+     1. saubere UTF-8-Datei                        -> nichts zu tun
+     2. Windows-1252 / Latin-1                     -> als UTF-8 gelesen gibt
+                                                      es Ersatzzeichen
+     3. UTF-8, die schon einmal falsch gelesen und
+        wieder gespeichert wurde ("StraÃŸe")       -> doppelt kodiert
+   Diese Funktion erkennt alle drei Fälle und macht daraus lesbaren Text.
+   -------------------------------------------------------------------------- */
+function textReparieren(puffer){
+  let text = new TextDecoder("utf-8").decode(puffer);
+
+  // Fall 2: Ersatzzeichen im Text -> die Datei war gar kein UTF-8.
+  if (text.includes("\uFFFD")) {
+    const latin = new TextDecoder("windows-1252").decode(puffer);
+    console.info("Kodierung: Datei als Windows-1252 gelesen.");
+    return latin;
+  }
+
+  // Fall 3: typische Doppelkodierung. Ã¤ Ã¶ Ã¼ ÃŸ Ã„ Ã– Ãœ
+  if (/Ã[¤¶¼\u009f„–œ]/.test(text)) {
+    try {
+      const bytes = new Uint8Array([...text].map(z => z.charCodeAt(0) & 0xFF));
+      const repariert = new TextDecoder("utf-8", { fatal:true }).decode(bytes);
+      console.info("Kodierung: Doppelkodierung repariert.");
+      return repariert;
+    } catch {
+      console.warn("Kodierung: Doppelkodierung erkannt, Reparatur fehlgeschlagen.");
+    }
+  }
+
+  return text;
+}
+
+/* Weiche: GeoJSON oder CSV? */
+async function importVerarbeiten(datei){
+  const text = textReparieren(await datei.arrayBuffer());
+  const anfang = text.trimStart().slice(0, 1);
+
+  if (anfang === "{" || anfang === "[") return importGeoJson(text);
+  return importMuenchen(text);
+}
+
+/* Sucht einen schon bekannten Ort in der Nähe. 100 Meter Radius – nah genug,
+   dass es dieselbe Anlage ist, weit genug für unterschiedliche Messpunkte
+   (Stadt misst den Spielplatz-Eingang, OSM die Flächenmitte). */
+const MISCH_RADIUS_M = 100;
+
+function bekannterOrtInDerNaehe(lat, lon, radiusM = MISCH_RADIUS_M){
+  for (const o of DATEN) {
+    if (entfernungKm({lat, lon}, o) * 1000 <= radiusM) return o;
+  }
+  return null;
+}
+
+/* Versucht, einen neuen Eintrag mit einem bereits gesammelten neuen Eintrag
+   zu verschmelzen. Regeln wie im Aufräum-SQL:
+     gleiche Sportart bis 100 m, beliebige Sportart bis 40 m.
+   So wird eine Calisthenics-Anlage aus fünf Geräte-Punkten EIN Ort. */
+function mitNeuenMischen(gesammelt, k){
+  for (const z of gesammelt) {
+    const abstand = entfernungKm({lat:z.lat, lon:z.lon}, {lat:k.lat, lon:k.lon}) * 1000;
+    const gleicherSport = z.sportarten.some(s => k.sportarten.includes(s));
+    if (!(abstand <= 40 || (gleicherSport && abstand <= MISCH_RADIUS_M))) continue;
+
+    for (const s of k.sportarten)
+      if (!z.sportarten.includes(s)) z.sportarten.push(s);
+    if (!z.untergrund && k.untergrund) z.untergrund = k.untergrund;
+
+    // Ein echter Name schlägt den Platzhalter "…-Fläche".
+    if (/-Fläche$/.test(z.name) && !/-Fläche$/.test(k.name)) z.name = k.name;
+
+    z._teile = (z._teile || 1) + 1;
+    return true;
+  }
+  return false;
+}
+
+async function importGeoJson(text){
+  let geo;
+  try { geo = JSON.parse(text); }
+  catch { return melde("Das ist keine gültige GeoJSON-Datei."); }
+
+  const features = geo.features || [];
+  if (!features.length) return melde("Die Datei enthält keine Einträge.");
+
+  const vorhanden = new Set(DATEN.map(o => ortSchluessel(o.name, o.lat, o.lon)));
+
+  /* Erster Durchgang: Vereinsgelände einsammeln (sports_centre, club=sport).
+     Sie werden nicht selbst als Orte importiert – sie dienen als Anker:
+     Jeder ungeklärte Platz im Umkreis von 180 m gilt als vermutliche
+     Vereinsanlage und bekommt den Vereinsnamen. */
+  const vereine = [];
+  for (const f of features) {
+    const t = f.properties || {};
+    if (t.leisure === "sports_centre" || t.club === "sport") {
+      const p = mittelpunkt(f.geometry);
+      if (p) vereine.push({ lat:p.lat, lon:p.lon, name:(t.name || "").trim() });
+    }
+  }
+  function vereinInDerNaehe(lat, lon){
+    for (const v of vereine)
+      if (entfernungKm({lat, lon}, {lat:v.lat, lon:v.lon}) * 1000 <= 180) return v;
+    return null;
+  }
+
+  const zeilen = [];
+  let ohneSportart = 0, schonDa = 0, alsOeffentlichErkannt = 0;
+
+  for (const f of features) {
+    const t = f.properties || {};
+
+    /* Vereinsgelände selbst überspringen – die Spielfelder darauf kommen
+       als eigene OSM-Einträge und werden gleich richtig eingefärbt. */
+    if (t.leisure === "sports_centre" || t.club === "sport") continue;
+
+    const sp = sportartenAusTags(t);
+    if (!sp.length) { ohneSportart++; continue; }
+
+    const p = mittelpunkt(f.geometry);
+    if (!p) continue;
+
+    /* Abgleich: Liegt hier schon eine Fläche aus einer amtlichen Liste?
+       Dann ist es dieselbe Anlage – wir übernehmen sie nicht doppelt,
+       ergänzen aber fehlende Sportarten und den Untergrund aus OSM. */
+    const treffer = bekannterOrtInDerNaehe(p.lat, p.lon);
+    if (treffer) {
+      schonDa++;
+      if (treffer.bestaetigt_durch === "Auskunft Gemeinde" || treffer.zugang === "öffentlich")
+        alsOeffentlichErkannt++;
+
+      /* Liegt der bekannte Ort ungeklärt neben einem Verein? Dann jetzt
+         kennzeichnen – so bekommen auch früher importierte Punkte die Farbe. */
+      if (treffer.zugang === "unklar" && !treffer.verein) {
+        const v = vereinInDerNaehe(p.lat, p.lon);
+        if (v) {
+          const name = v.name || "Verein in der Nähe";
+          if (ECHT) {
+            const { error } = await db.from("orte").update({ verein:name }).eq("id", treffer.id);
+            if (!error) treffer.verein = name;
+          } else treffer.verein = name;
+        }
+      }
+
+      const fehlende = sp.filter(s => !treffer.sportarten.includes(s));
+      const belag = OSM_BELAG[(t.surface || "").toLowerCase()];
+      if (ECHT && (fehlende.length || (belag && (!treffer.untergrund || treffer.untergrund === "—")))) {
+        const zeile = {};
+        if (fehlende.length) zeile.sportarten = [...treffer.sportarten, ...fehlende];
+        if (belag && (!treffer.untergrund || treffer.untergrund === "—")) zeile.untergrund = belag;
+        const { error } = await db.from("orte").update(zeile).eq("id", treffer.id);
+        if (!error) Object.assign(treffer, {
+          sportarten: zeile.sportarten || treffer.sportarten,
+          untergrund: zeile.untergrund || treffer.untergrund
+        });
+      }
+      continue;
+    }
+
+    const name = t.name || sp[0] + "-Fläche";
+    const vereinHier = vereinInDerNaehe(p.lat, p.lon);
+
+    const neuerEintrag = {
+      name, ort: t["addr:city"] || null,
+      lat: p.lat, lon: p.lon,
+      sportarten: sp,
+      zugang: "unklar", zeiten: "unbekannt", bestaetigt_durch: "nur vermutet",
+      untergrund: OSM_BELAG[(t.surface || "").toLowerCase()] || null,
+      beleuchtung: t.lit === "yes" ? "ja" : (t.lit === "no" ? "nein" : null),
+      verein: vereinHier ? (vereinHier.name || "Verein in der Nähe") : null,
+      notizen: "",
+      freigegeben: true
+    };
+    neuerEintrag._verdacht = !!vereinHier
+                          || t.access === "private" || t.access === "customers"
+                          || !!t.club || t.leisure === "sports_centre"
+                          || /verein|sv |tsv |sc |fc |sportanlage|sportzentrum/i.test(name);
+
+    /* Gehört der Punkt zu einem schon gesammelten neuen Ort (Gerät derselben
+       Anlage, zweites Feld desselben Geländes)? Dann verschmelzen statt anhängen. */
+    if (mitNeuenMischen(zeilen, neuerEintrag)) { continue; }
+
+    const schluessel = ortSchluessel(name, p.lat, p.lon);
+    if (vorhanden.has(schluessel)) { schonDa++; continue; }
+    vorhanden.add(schluessel);
+
+    zeilen.push(neuerEintrag);
+  }
+
+  /* Notizen erst jetzt schreiben – nach dem Verschmelzen wissen wir,
+     aus wie vielen OSM-Punkten ein Ort besteht. */
+  for (const z of zeilen) {
+    const basis = z._verdacht
+      ? "Aus OpenStreetMap. Steht in keiner amtlichen Liste öffentlicher Flächen und trägt Hinweise auf eine Vereins- oder Schulanlage – Zugang beim Betreiber klären."
+      : "Aus OpenStreetMap. Steht in keiner amtlichen Liste öffentlicher Flächen. Zugang ungeklärt, vor Ort oder bei der Gemeinde prüfen.";
+    z.notizen = basis + (z._teile > 1 ? ` ${z._teile} OSM-Einträge zu einer Anlage zusammengefasst.` : "");
+    delete z._teile;
+    delete z._verdacht;
+  }
+
+  await stapelEinfuegen(zeilen, { schonDa, ohneSportart, alsOeffentlichErkannt });
+}
+
+function ansichtMelden(){
+  const o = ort(Z.auswahlId);
+  if (!o) { Z.ansicht = "liste"; return ansichtListe(); }
+
+  const gruende = [
+    ["weggeschickt",        "Ich wurde weggeschickt", "Jemand hat mich vom Platz verwiesen"],
+    ["abgesperrt",          "Tor war zu",             "Kein Zugang, abgesperrt oder verschlossen"],
+    ["belegt",              "Platz war belegt",       "Training, Spiel oder andere Gruppe"],
+    ["existiert nicht mehr","Gibt es nicht mehr",     "Fläche ist verschwunden oder umgebaut"]
+  ];
+
+  seite.innerHTML = `
+    <div class="dkopf">
+      <button class="zurueck" data-gehe="detail">← Abbrechen</button>
+      <div class="dname">Problem melden</div>
+      <div class="dort">${esc(o.name)}</div>
+    </div>
+    <div class="rolle">
+      <div class="abschnitt" style="margin-top:8px">
+        <h3>Was war los?</h3>
+        <p>Danke, dass du das meldest – solche Hinweise sind für die Karte
+        das Wertvollste, was es gibt. Kein Konto nötig.</p>
+      </div>
+      ${gruende.map(([wert,titel,text]) => `
+        <button class="zeile" data-melden="${wert}" style="--streifen:var(--zu)">
+          <span class="zt">
+            <span class="zname" style="font-size:15px">${esc(titel)}</span>
+            <span class="zsub">${esc(text)}</span>
+          </span>
+        </button>`).join("")}
+      <div class="abschnitt">
+        <h3>Was damit passiert</h3>
+        <p>Die Meldung ändert den Zugang nicht automatisch – das wäre zu
+        anfällig für Fehler und Scherze. Ab drei Meldungen erscheint hier
+        eine Warnung, und wir gehen der Sache nach.</p>
+      </div>
+    </div>`;
+}
+
+/* --------------------------------------------------------------------------
+   Impressum und Datenschutz
+   --------------------------------------------------------------------------
+   Gelb markierte Platzhalter (RECHT) vor dem Veröffentlichen ausfüllen.
+   -------------------------------------------------------------------------- */
+const RECHT = {
+  namen:   "Cornelius Oellers (Platzfrei)",
+  strasse: "Rupprechtstraße 11",
+  ort:     "95444 Bayreuth",
+  email:   "platzfrei.app@outlook.com",
+  stand:   "Oktober 2026"
+};
+function rechtFeld(w){
+  return w.startsWith("[") || w.includes("[")
+    ? esc(w).replace(/\[([^\]]+)\]/g, `<span class="platzhalter">[$1]</span>`)
+    : esc(w);
+}
+
+// Datenschutzerklärung von PrivacyBee. Das Skript wird erst geladen, wenn
+// jemand diese Seite öffnet. Lädt es nicht, erscheint unsere eigene Fassung.
+function privacyBeeLaden(){
+  const eigen = () => {
+    const w = document.getElementById("datenschutzWidget");
+    const e = document.getElementById("datenschutzEigen");
+    if (w && e){ w.hidden = true; e.hidden = false; }
+  };
+  if (window.customElements && customElements.get("privacybee-widget")) return;
+  let sk = document.getElementById("privacybeeSkript");
+  if (!sk){
+    sk = document.createElement("script");
+    sk.id = "privacybeeSkript";
+    sk.src = "https://app.privacybee.io/widget.js";
+    sk.defer = true;
+    sk.addEventListener("error", () => { sk.dataset.fehler = "1"; eigen(); });
+    document.head.appendChild(sk);
+  } else if (sk.dataset.fehler){
+    eigen();
+  }
+}
+
+/* Fehler melden: Die Meldung landet in der Supabase-Tabelle
+   "fehlerberichte", der Admin sieht sie in der App unter "Fehler". Technische
+   Angaben (Gerät, Ansicht, gewählter Platz) hängen automatisch dran, damit
+   sich der Fehler nachstellen lässt. Klappt das Speichern nicht, bietet die
+   App als Notlösung eine Mail an RECHT.email an. */
+function ansichtFehler(){
+  seite.innerHTML = `
+    <div class="dkopf">
+      <button class="zurueck" data-gehe="liste">← Liste</button>
+      <div class="dname">Fehler melden</div>
+      <div class="dort">Etwas funktioniert nicht?</div>
+    </div>
+    <div class="rolle">
+      <div class="abschnitt" style="margin-top:8px">
+        <p>Beschreib kurz, was passiert ist und was du erwartet hättest.
+        Kein Konto nötig. Wenn wir nachfragen dürfen, gib gern deine
+        Mailadresse an.</p>
+      </div>
+      <div class="form">
+        <label>Was ist passiert?</label>
+        <textarea id="fehlertext" maxlength="4000" style="min-height:140px"
+          placeholder="z. B. Beim Tippen auf „Route“ passiert nichts."></textarea>
+        <label>Deine Mail für Rückfragen (freiwillig)</label>
+        <input id="fehlerkontakt" type="email" maxlength="200" autocomplete="email">
+      </div>
+      <div class="fuss">
+        <button class="knopf" data-fehlersenden="1">Senden</button>
+      </div>
+    </div>`;
+}
+
+function fehlerTechnik(){
+  const o = ort(Z.auswahlId);
+  return [
+    "Version: 0.1",
+    "Seite: " + location.href,
+    "Gerät: " + navigator.userAgent,
+    "Bildschirm: " + innerWidth + " × " + innerHeight,
+    o ? "Zuletzt geöffneter Platz: " + o.name + " (" + o.id + ")" : null,
+    "Admin: " + (Z.admin ? "ja" : "nein")
+  ].filter(Boolean).join("\n");
+}
+
+async function fehlerSenden(){
+  const text = (document.getElementById("fehlertext")?.value || "").trim();
+  const kontakt = (document.getElementById("fehlerkontakt")?.value || "").trim();
+  if (!text) return melde("Bitte kurz beschreiben, was passiert ist.");
+  const technik = fehlerTechnik();
+
+  if (ECHT) {
+    const { error } = await db.from("fehlerberichte")
+      .insert({ text, kontakt: kontakt || null, technik });
+    if (!error) {
+      Z.ansicht = "liste"; zeichne();
+      return melde("Danke! Deine Meldung ist angekommen.");
+    }
+    console.error(error);
+  }
+  /* Notlösung: Mailprogramm mit fertiger Nachricht öffnen. */
+  if (!confirm("Die Meldung konnte nicht gespeichert werden. Stattdessen per Mail schicken?")) return;
+  location.href = "mailto:" + RECHT.email
+    + "?subject=" + encodeURIComponent("Platzfrei Fehlermeldung")
+    + "&body=" + encodeURIComponent(text + (kontakt ? "\n\nKontakt: " + kontakt : "")
+                                    + "\n\n--- Technische Angaben ---\n" + technik);
+}
+
+/* Admin: Liste der offenen Fehlermeldungen. */
+function ansichtFehlerliste(){
+  if (!Z.admin) { Z.ansicht = "liste"; return ansichtListe(); }
+  const datum = t => new Date(t).toLocaleString("de-DE",
+    { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" });
+  seite.innerHTML = `
+    <div class="dkopf">
+      <button class="zurueck" data-gehe="liste">← Liste</button>
+      <div class="dname">Fehlermeldungen</div>
+      <div class="dort">${FEHLERBERICHTE.length} offen</div>
+    </div>
+    <div class="rolle">
+      ${FEHLERBERICHTE.length ? FEHLERBERICHTE.map(f => `
+        <div class="abschnitt" style="margin-top:8px">
+          <h3>${esc(datum(f.erstellt))}${f.kontakt
+            ? ` · <a href="mailto:${esc(f.kontakt)}">${esc(f.kontakt)}</a>` : ``}</h3>
+          <p style="white-space:pre-wrap">${esc(f.text)}</p>
+          <details><summary>Technische Angaben</summary>
+            <p style="white-space:pre-wrap;font-size:12px">${esc(f.technik || "")}</p></details>
+          <p><button class="inline-knopf" data-fehlererledigt="${f.id}">Erledigt</button></p>
+        </div>`).join("")
+        : `<div class="leer">Keine offenen Fehlermeldungen.</div>`}
+    </div>`;
+}
+
+async function fehlerErledigt(id){
+  if (ECHT) {
+    const { error } = await db.from("fehlerberichte").update({ erledigt:true }).eq("id", id);
+    if (error) { console.error(error); return melde("Abgelehnt: " + error.message); }
+  }
+  FEHLERBERICHTE = FEHLERBERICHTE.filter(f => String(f.id) !== String(id));
+  zeichne();
+  melde("Als erledigt markiert.");
+}
+
+function ansichtRechtliches(){
+  const r = RECHT;
+  seite.innerHTML = `
+    <div class="dkopf">
+      <button class="zurueck" data-gehe="liste">← Liste</button>
+      <div class="dname">Impressum &amp; Datenschutz</div>
+      <div class="dort">Stand: ${esc(r.stand)}</div>
+    </div>
+    <div class="rolle">
+      <div class="abschnitt" style="margin-top:8px">
+        <h3>Impressum</h3>
+        <p>Angaben gemäß § 5 DDG</p>
+        <p>${rechtFeld(r.namen)}<br>${rechtFeld(r.strasse)}<br>${rechtFeld(r.ort)}</p>
+        <p>E-Mail: ${rechtFeld(r.email)}</p>
+        <p>Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV:
+        Cornelius Oellers, Anschrift wie oben.</p>
+      </div>
+
+      <div class="abschnitt">
+        <h3>Ohne Gewähr</h3>
+        <p>Platzfrei sammelt Angaben dazu, wo man frei Sport treiben darf. Die
+        Angaben stammen aus Gemeinden, offenen Daten und von Nutzern und können
+        veraltet oder falsch sein. Vor Ort gelten immer die Schilder und die
+        Anweisungen der Eigentümer, Vereine und Platzwarte. Wir haften nicht
+        für Schäden, die aus falschen Angaben entstehen.</p>
+        <p>Für Inhalte verlinkter Seiten (z. B. Karten-Apps) sind allein
+        deren Betreiber verantwortlich.</p>
+      </div>
+
+      <div class="abschnitt" id="datenschutzWidget">
+        <h3>Datenschutzerklärung</h3>
+        <privacybee-widget website-id="cmuzozv6q07nq300bn466najq" type="dsgvo" lang="de"></privacybee-widget>
+      </div>
+
+      <div class="abschnitt" id="datenschutzEigen" hidden>
+        <h3>Datenschutzerklärung</h3>
+        <h4>Wer verantwortlich ist</h4>
+        <p>${rechtFeld(r.namen)}, ${rechtFeld(r.strasse)}, ${rechtFeld(r.ort)},
+        ${rechtFeld(r.email)}.</p>
+
+        <h4>Kurz gesagt</h4>
+        <p>Du brauchst kein Konto. Wir wollen nicht wissen, wer du bist, und
+        speichern nichts, was dich direkt erkennbar macht. Es gibt keine
+        Werbung, kein Tracking und keine Analyse-Werkzeuge.</p>
+
+        <h4>Hosting</h4>
+        <p>Die App liegt bei Netlify (Netlify Inc., USA). Beim Aufruf
+        verarbeitet Netlify technisch nötige Daten wie deine IP-Adresse und
+        den Zeitpunkt, um die Seite auszuliefern und vor Angriffen zu
+        schützen. Rechtsgrundlage ist unser berechtigtes Interesse an einem
+        sicheren Betrieb (Art. 6 Abs. 1 lit. f DSGVO). Die Übermittlung in die
+        USA stützt sich auf das EU-US Data Privacy Framework bzw.
+        Standardvertragsklauseln.</p>
+
+        <h4>Datenbank</h4>
+        <p>Plätze, Meldungen, Bestätigungen und Schildfotos speichern wir bei
+        Supabase (Supabase Inc.), Serverstandort Irland (EU).
+        Wenn du einen Platz meldest, „Hier gespielt“ drückst, Angaben ergänzt
+        oder ein Foto hochlädst, speichern wir genau diese Angabe mit Datum.
+        Für „Hier gespielt“ legt die App eine zufällige Geräte-Nummer an,
+        damit jede Bestätigung nur einmal zählt. Sie lässt keinen Rückschluss
+        auf deine Person zu und ist öffentlich nicht sichtbar. Rechtsgrundlage
+        ist Art. 6 Abs. 1 lit. f DSGVO (eine verlässliche Platzkarte).</p>
+
+        <h4>Fotos</h4>
+        <p>Fotos werden vor dem Hochladen verkleinert, dabei werden
+        Ortungs- und Kameradaten aus der Datei entfernt. Wir prüfen jedes
+        Foto, bevor es öffentlich sichtbar wird, und löschen Fotos mit
+        erkennbaren Personen oder Kennzeichen.</p>
+
+        <h4>Standort</h4>
+        <p>Wenn du es erlaubst, nutzt die App deinen Standort, um die
+        Entfernung zu Plätzen zu berechnen. Der Standort bleibt auf deinem
+        Gerät, nur für die Wettervorhersage geht eine ungefähre Position an
+        Open-Meteo (Schweiz). Ohne Freigabe rechnen wir ab München-Mitte.</p>
+
+        <h4>Karten, Bilder und Bibliotheken</h4>
+        <p>Kartenbilder und Luftbilder laden wir von Esri (USA), die
+        Programmbibliotheken von cdnjs (Cloudflare) und jsDelivr. Dabei
+        erfahren diese Anbieter technisch bedingt deine IP-Adresse.
+        Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (Darstellung der
+        Karte).</p>
+
+        <h4>Auf deinem Gerät</h4>
+        <p>Merkliste, Geräte-Nummer und deine Bestätigungen speichert die App
+        im Speicher deines Browsers (localStorage). Das ist für diese
+        Funktionen unbedingt nötig (§ 25 Abs. 2 TDDDG). Du kannst es jederzeit
+        über die Browsereinstellungen löschen. Cookies setzen wir nicht.</p>
+
+        <h4>Deine Rechte</h4>
+        <p>Du hast das Recht auf Auskunft, Berichtigung, Löschung,
+        Einschränkung, Datenübertragbarkeit und Widerspruch (Art. 15–21
+        DSGVO). Schreib uns dazu an ${rechtFeld(r.email)}. Außerdem kannst du
+        dich beim Bayerischen Landesamt für Datenschutzaufsicht (BayLDA)
+        beschweren.</p>
+      </div>
+
+      <div class="abschnitt">
+        <h3>Quellen</h3>
+        <p>Kartendaten © OpenStreetMap-Mitwirkende (ODbL) ·
+        Kartenbilder © CARTO, © Esri, Maxar und Partner · Offene Daten der Landeshauptstadt
+        München · Angaben der Gemeinde Gauting · Wetter: Open-Meteo.com
+        (CC BY 4.0)</p>
+      </div>
+    </div>`;
+  privacyBeeLaden();
+}
+
+function ansichtImportieren(){
+  const abfrage =
+`[out:json][timeout:120];
+(
+  nwr["leisure"="pitch"](around:30000,48.0954,11.3982);
+  nwr["leisure"="track"]["sport"](around:30000,48.0954,11.3982);
+  nwr["leisure"="fitness_station"](around:30000,48.0954,11.3982);
+  nwr["leisure"="sports_centre"](around:30000,48.0954,11.3982);
+  nwr["club"="sport"](around:30000,48.0954,11.3982);
+);
+out center tags;`;
+
+  seite.innerHTML = `
+    <div class="dkopf">
+      <button class="zurueck" data-gehe="liste">← Liste</button>
+      <div class="dname">Import</div>
+      <div class="dort">Einmalig befüllen, danach pflegen</div>
+    </div>
+    <div class="rolle">
+      <div class="abschnitt" style="margin-top:8px">
+        <h3>Weg A – Stadt München (empfohlen, 1 Minute)</h3>
+        <p>Der offene Datensatz der Stadt München enthält alle öffentlichen
+        Bolzplätze, Streetball- und Tischtennisflächen, Skateanlagen,
+        Beachvolleyballfelder und Fitness-Parcours – mit Koordinaten.
+        <b>opendata.muenchen.de</b> öffnen, Datensatz „Öffentliche Spielplätze
+        München“ suchen, die CSV herunterladen, unten einlesen.
+        Weil die Stadt die Quelle ist, gilt hier
+        <b>Zugang: öffentlich, bestätigt durch Gemeinde</b>.</p>
+      </div>
+      <div class="abschnitt">
+        <h3>Weg B – OpenStreetMap (alles außerhalb Münchens)</h3>
+        <p>Für Landkreis-Gemeinden ohne offene Daten. Abfrage unten kopieren,
+        auf <b>overpass-turbo.eu</b> einfügen, Ausführen, dann
+        <b>Export → Daten → GeoJSON</b>. Hier bleibt der
+        <b>Zugang „unklar“</b> – OSM weiß nicht, ob man spielen darf.</p>
+      </div>
+      <div class="form" style="padding-top:0">
+        <label>Overpass-Abfrage – 30 km rund um Stockdorf</label>
+        <textarea readonly style="min-height:158px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px">${abfrage}</textarea>
+        <p class="hinweis">Radius ändern: die 30000 (Meter) an allen drei Stellen
+        anpassen. Kleinere Zahl = weniger, dafür näher.</p>
+      </div>
+      ${Z.importText ? `<div class="abschnitt"><h3>Ergebnis</h3>
+        <p>${esc(Z.importText)}</p></div>` : ``}
+    </div>
+    <div class="fuss">
+      <label class="knopf" style="text-align:center;cursor:pointer">
+        Datei wählen (CSV oder GeoJSON)
+        <input type="file" id="importdatei" accept=".geojson,.json,.csv,text/csv,application/geo+json" hidden>
+      </label>
+    </div>`;
+}
+
+
+/* ==========================================================================
+   9. BOTTOM-SHEET (nur mobil)
+   --------------------------------------------------------------------------
+   Hier stecken die Prinzipien aus Apples "Designing Fluid Interfaces":
+     §2  Der Inhalt klebt 1:1 am Finger, mit Rücksicht auf den Greifpunkt.
+     §3  Jede Bewegung ist unterbrechbar – Anfassen stoppt die Feder sofort.
+     §5  Beim Loslassen übernimmt die Feder die Geschwindigkeit des Fingers.
+     §6  Das Ziel wird aus dem Schwung projiziert, nicht aus der Endposition.
+     §9  An den Rändern wird gummiartig gebremst statt hart gestoppt.
+   ========================================================================== */
+
+const sheet = (function(){
+  const aside  = document.querySelector("aside");
+  const griff  = document.getElementById("griff");
+  const mobil  = window.matchMedia("(max-width: 880px)");
+  const sanft  = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  /* Rastpunkte als Anteil der Bildschirmhöhe, den das Sheet einnimmt. */
+  const RASTEN = [0.42, 0.68, 0.94];
+  const HOEHE  = 0.94;              // muss zur CSS-Höhe passen
+
+  let y = 0;                        // aktuelle Verschiebung in Pixeln
+  let ziel = 0;
+  let v = 0;                        // Geschwindigkeit in px/s
+  let laeuft = false;
+  let zieht = false;
+  let griffOffset = 0;
+  let verlauf = [];                 // die letzten Punkte für die Geschwindigkeit
+
+  const vh = () => window.innerHeight;
+  const yFuer = anteil => (HOEHE - anteil) * vh();
+  const minY = () => yFuer(RASTEN[RASTEN.length - 1]);   // ganz offen
+  const maxY = () => yFuer(RASTEN[0]);                   // ganz zu
+
+  function setzen(neu){
+    y = neu;
+    aside.style.transform = `translateY(${y}px)`;
+    /* Die Innenhöhe folgt dem sichtbaren Teil – sonst rutscht die
+       Fußleiste unter den Bildschirmrand, sobald das Sheet halb zu ist. */
+    /* Das Sheet ist HOEHE hoch und um y nach unten geschoben –
+       sichtbar bleibt also HOEHE minus y, nicht Fensterhöhe minus y. */
+    aside.style.setProperty("--sichtbar", Math.max(0, HOEHE * vh() - y) + "px");
+    /* Für den Standort-Knopf, der auf dem Handy über dem Blatt schwebt. */
+    document.documentElement.style.setProperty("--blatt-sichtbar", Math.max(0, HOEHE * vh() - y) + "px");
+  }
+
+  /* §9 Je weiter über den Rand, desto weniger folgt das Sheet. */
+  function gummi(ueber, groesse, k = 0.55){
+    return (ueber * groesse * k) / (groesse + k * Math.abs(ueber));
+  }
+
+  function begrenzen(roh){
+    if (roh < minY()) return minY() - gummi(minY() - roh, vh());
+    if (roh > maxY()) return maxY() + gummi(roh - maxY(), vh());
+    return roh;
+  }
+
+  /* §6 Wohin würde der Schwung das Sheet tragen? Exponentieller Auslauf,
+     dieselbe Formel wie beim Scrollen. */
+  function projektion(geschwindigkeit, bremse = 0.998){
+    return (geschwindigkeit / 1000) * bremse / (1 - bremse);
+  }
+
+  function naechsteRaste(punkt){
+    let beste = yFuer(RASTEN[0]), abstand = Infinity;
+    for (const r of RASTEN) {
+      const py = yFuer(r);
+      if (Math.abs(py - punkt) < abstand) { abstand = Math.abs(py - punkt); beste = py; }
+    }
+    return beste;
+  }
+
+  /* §4 Kritisch gedämpfte Feder – kein Überschwingen. Sie startet immer
+     beim aktuellen Bildschirmwert und mit der übergebenen Geschwindigkeit,
+     damit zwischen Ziehen und Animieren keine Naht entsteht (§5). */
+  function federZu(neuesZiel, startGeschwindigkeit = 0){
+    ziel = neuesZiel;
+    v = startGeschwindigkeit;
+
+    if (sanft.matches) { setzen(ziel); laeuft = false; return; }
+    if (laeuft) return;                 // läuft schon, neues Ziel reicht
+    laeuft = true;
+
+    const steifheit = 170, daempfung = 26;   // daempfung ≈ 2·√steifheit
+    let zuletzt = performance.now();
+
+    (function schritt(jetzt){
+      if (!laeuft) return;
+      const dt = Math.min((jetzt - zuletzt) / 1000, 1 / 30);
+      zuletzt = jetzt;
+
+      const kraft = -steifheit * (y - ziel) - daempfung * v;
+      v += kraft * dt;
+      setzen(y + v * dt);
+
+      if (Math.abs(y - ziel) < 0.4 && Math.abs(v) < 12) {
+        setzen(ziel); v = 0; laeuft = false; return;
+      }
+      requestAnimationFrame(schritt);
+    })(zuletzt);
+  }
+
+  // ----- Gesten -----
+
+  griff.addEventListener("pointerdown", e => {
+    if (!mobil.matches) return;
+    griff.setPointerCapture(e.pointerId);
+    laeuft = false;                    // §3 Anfassen unterbricht sofort
+    zieht = true;
+    griffOffset = e.clientY - y;       // §2 Greifpunkt respektieren
+    verlauf = [{ y: e.clientY, t: performance.now() }];
+    e.preventDefault();
+  });
+
+  griff.addEventListener("pointermove", e => {
+    if (!zieht) return;
+    setzen(begrenzen(e.clientY - griffOffset));
+    verlauf.push({ y: e.clientY, t: performance.now() });
+    if (verlauf.length > 6) verlauf.shift();
+  });
+
+  function loslassen(e){
+    if (!zieht) return;
+    try { griff.releasePointerCapture(e.pointerId); } catch {}
+    abschliessen();
+  }
+
+  let letzteRaste = null;
+  function abschliessen(){
+    zieht = false;
+    /* Geschwindigkeit aus den letzten Punkten, nicht nur dem letzten. */
+    const a = verlauf[0], b = verlauf[verlauf.length - 1];
+    const dt = b && a ? (b.t - a.t) / 1000 : 0;
+    const geschwindigkeit = dt > 0.008 ? (b.y - a.y) / dt : 0;
+
+    const projiziert = y + projektion(geschwindigkeit);
+    const raste = naechsteRaste(projiziert);
+    /* Kurzes Ticken beim Einrasten auf einer neuen Stufe (nur Android). */
+    if (letzteRaste !== null && Math.abs(raste - letzteRaste) > 1) {
+      try { navigator.vibrate?.(8); } catch {}
+    }
+    letzteRaste = raste;
+    federZu(raste, geschwindigkeit);
+  }
+
+  /* Größere Anfassfläche: Nicht nur der Griff, auch Kopfbereich,
+     Filterleiste und Fußleiste ziehen das Blatt. In der Liste gilt wie in
+     Apple Karten: Ist das Blatt noch nicht ganz offen, zieht ein Wisch nach
+     oben zuerst das Blatt auf; steht die Liste ganz oben, zieht ein Wisch
+     nach unten das Blatt wieder zu. */
+  let beruehrung = null;
+  let gezogenBis = 0;
+
+  aside.addEventListener("touchstart", e => {
+    beruehrung = null;
+    if (!mobil.matches || e.touches.length !== 1) return;
+    if (e.target.closest("#griff, input, textarea, select")) return;
+    const t = e.touches[0];
+    beruehrung = { x:t.clientX, y:t.clientY, modus:"?",
+                   liste:e.target.closest(".rolle") };
+  }, { passive:true });
+
+  aside.addEventListener("touchmove", e => {
+    const b = beruehrung;
+    if (!b || e.touches.length !== 1) return;
+    const t = e.touches[0];
+    if (b.modus === "?") {
+      const dx = t.clientX - b.x, dy = t.clientY - b.y;
+      if (Math.abs(dx) < 4 && Math.abs(dy) < 4) return;
+      if (Math.abs(dx) > Math.abs(dy)) { b.modus = "lassen"; return; }
+      let ziehen = true;
+      if (b.liste) {
+        const ganzOffen = y <= minY() + 2;
+        ziehen = (dy < 0 && !ganzOffen) || (dy > 0 && b.liste.scrollTop <= 0);
+      }
+      if (!ziehen) { b.modus = "lassen"; return; }
+      b.modus = "ziehen";
+      laeuft = false;                  // §3 Anfassen unterbricht sofort
+      zieht = true;
+      griffOffset = t.clientY - y;
+      verlauf = [{ y:t.clientY, t:performance.now() }];
+    }
+    if (b.modus !== "ziehen") return;
+    if (e.cancelable) e.preventDefault();
+    setzen(begrenzen(t.clientY - griffOffset));
+    verlauf.push({ y:t.clientY, t:performance.now() });
+    if (verlauf.length > 6) verlauf.shift();
+  }, { passive:false });
+
+  function beruehrungEnde(){
+    if (beruehrung?.modus === "ziehen") { gezogenBis = Date.now() + 350; abschliessen(); }
+    beruehrung = null;
+  }
+  aside.addEventListener("touchend", beruehrungEnde);
+  aside.addEventListener("touchcancel", beruehrungEnde);
+
+  /* Nach dem Ziehen soll kein Platz aus Versehen aufgehen. */
+  aside.addEventListener("click", e => {
+    if (Date.now() < gezogenBis) { e.stopPropagation(); e.preventDefault(); }
+  }, true);
+
+  griff.addEventListener("pointerup", loslassen);
+  griff.addEventListener("pointercancel", loslassen);
+
+  /* Tippen auf den Griff schaltet zwischen klein und groß um –
+     §2 Agency: es gibt immer auch einen Weg ohne Geste. */
+  griff.addEventListener("click", () => {
+    if (!mobil.matches || verlauf.length > 3) return;
+    const offen = y < (yFuer(RASTEN[0]) + yFuer(RASTEN[2])) / 2;
+    federZu(yFuer(offen ? RASTEN[0] : RASTEN[2]));
+  });
+  griff.addEventListener("keydown", e => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    e.preventDefault();
+    griff.click();
+  });
+
+  function ausrichten(){
+    if (!mobil.matches) { aside.style.transform = ""; return; }
+    setzen(naechsteRaste(y || yFuer(RASTEN[1])));
+  }
+
+  window.addEventListener("resize", ausrichten);
+  mobil.addEventListener("change", ausrichten);
+
+  return {
+    start(){ if (mobil.matches) setzen(yFuer(RASTEN[1])); },
+    /* Beim Öffnen eines Platzes soll die Liste Platz machen. */
+    aufmachen(){ if (mobil.matches) federZu(yFuer(RASTEN[2])); },
+    /* Mindestens halb offen, damit man die Angaben eines Platzes sieht. */
+    mitte(){ if (mobil.matches && y > yFuer(RASTEN[1]) + 1) federZu(yFuer(RASTEN[1])); },
+    /* Wer die Karte verschiebt, will die Karte sehen. */
+    klein(){ if (mobil.matches && !zieht && y < maxY() - 1) federZu(maxY()); }
+  };
+})();
+
+
+/* ==========================================================================
+   10. KLICKS
+   ========================================================================== */
+
+document.addEventListener("click", e=>{
+  const t = e.target.closest("[data-sport],[data-nurfrei],[data-ort],[data-gehe],"+
+                             "[data-speichern],[data-neuspeichern],[data-geprueft],"+
+                             "[data-export],[data-anmelden],[data-km],"+
+                             "[data-merken],[data-gemerkt],[data-melden],[data-route],"+
+                             "[data-nurlicht],[data-belegt],[data-sortierung],[data-bereich],[data-mehr],"+
+                             "[data-schildok],[data-schildweg],[data-loeschen],[data-fehlersenden],[data-fehlererledigt],"+
+                             "[data-suchweg],[data-teilen],[data-abmelden]");
+  if (!t) return;
+
+  if (t.dataset.belegt)     { Z.nurBelegt = !Z.nurBelegt; return zeichne(); }
+  if (t.dataset.suchweg)    { Z.suche = ""; zeichne(); return; }
+  if (t.dataset.teilen)     { return teilen(t.dataset.teilen); }
+  if (t.dataset.abmelden)   { return abmelden(); }
+  if (t.dataset.schildok)   { return schildPruefen(t.dataset.schildok, true); }
+  if (t.dataset.schildweg)  { return schildPruefen(t.dataset.schildweg, false); }
+  if (t.dataset.loeschen)   { return ortLoeschen(t.dataset.loeschen); }
+  if (t.dataset.fehlersenden) { return fehlerSenden(); }
+  if (t.dataset.fehlererledigt) { return fehlerErledigt(t.dataset.fehlererledigt); }
+  if (t.dataset.mehr)       { Z.filterOffen = t.dataset.mehr === "1"; return zeichne(); }
+  if (t.dataset.sortierung) { Z.sortierung = t.dataset.sortierung; return zeichne(); }
+  if (t.dataset.bereich)    { Z.bereich = null; mitteBeimZeichnen = karte.getCenter();
+                              return zeichne(); }
+
+  /* Stern zuerst prüfen: er sitzt innerhalb der Zeile und darf nicht
+     gleichzeitig den Platz öffnen. */
+  if (t.dataset.merken)     { e.stopPropagation(); return merkenUmschalten(t.dataset.merken); }
+  if (t.dataset.gemerkt)    { Z.nurGemerkt = t.dataset.gemerkt === "1"; return zeichne(); }
+  if (t.dataset.melden)     { return meldungAbgeben(t.dataset.melden); }
+  if (t.dataset.route)      { return routeOeffnen(t.dataset.route); }
+  if (t.dataset.nurlicht)   { Z.nurLicht = t.dataset.nurlicht === "1"; return zeichne(); }
+  if (t.dataset.km !== undefined) { Z.maxKm = +t.dataset.km || null; return zeichne(); }
+  if (t.dataset.anmelden)   { return anmelden(); }
+
+  if (t.dataset.sport)      { Z.sportart = t.dataset.sport; return zeichne(); }
+  if (t.dataset.nurfrei)    { Z.nurFrei = t.dataset.nurfrei==="1"; return zeichne(); }
+  if (t.dataset.ort) {
+    Z.auswahlId = t.dataset.ort; Z.ansicht = "detail"; zeichne();
+    const o = ort(t.dataset.ort);
+    if (o) karte.flyTo([o.lat, o.lon], Math.max(karte.getZoom(), 16), { duration:.6 });
+    sheet.aufmachen();
+    return;
+  }
+  if (t.dataset.gehe)       { Z.ansicht=t.dataset.gehe; return zeichne(); }
+  if (t.dataset.speichern)  { return speichern(); }
+  if (t.dataset.neuspeichern){ return neuSpeichern(); }
+  if (t.dataset.export)     { return exportieren(); }
+  if (t.dataset.geprueft)   { return alsGepruefT(t.dataset.geprueft); }
+});
+
+document.getElementById("adminknopf").addEventListener("click", ()=>{
+  if (Z.admin) return abmelden();
+});
+
+/* Versteckter Weg zur Admin-Anmeldung: Es gibt keinen sichtbaren Knopf.
+   Entweder die Adresse mit #admin öffnen oder fünfmal schnell aufs Logo
+   tippen. Das ist nur Sichtschutz – die eigentliche Sicherheit liegt in
+   Supabase (Passwort, Zeilenrechte, ist_admin()). */
+function anmeldungOeffnen(){
+  if (Z.admin) return;
+  Z.ansicht = "anmelden";
+  zeichne();
+  sheet.aufmachen();
+  setTimeout(()=>document.getElementById("feld-email")?.focus(), 30);
+}
+function adminAdresseOeffnen(){
+  if (location.hash !== "#admin") return;
+  history.replaceState(history.state, "", location.pathname + location.search);
+  anmeldungOeffnen();
+}
+window.addEventListener("hashchange", adminAdresseOeffnen);
+let logoTipps = [];
+/* Logo oben (Desktop) oder Logo im Suchfeld (Handy). */
+document.addEventListener("click", e => {
+  if (!e.target.closest("header h1, .suche-logo")) return;
+  const jetzt = Date.now();
+  logoTipps = logoTipps.filter(t => jetzt - t < 2500);
+  logoTipps.push(jetzt);
+  if (logoTipps.length >= 5) { logoTipps = []; anmeldungOeffnen(); }
+});
+
+window.addEventListener("popstate", () => {
+  if (Z.ansicht !== "liste") { Z.ansicht = "liste"; zeichne(); }
+});
+
+/* Dateiauswahl beim Import – "change" steigt nicht wie "click" im Baum auf,
+   deshalb ein eigener Lauscher. */
+document.addEventListener("change", e=>{
+  if (e.target.id === "importdatei" && e.target.files?.[0])
+    importVerarbeiten(e.target.files[0]);
+  if (e.target.id === "schild-datei" && e.target.files?.[0])
+    schildHochladen(e.target.files[0]);
+});
+
+/* ==========================================================================
+   8. START
+   ========================================================================== */
+
+function standortHolen(){
+  if (!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(
+    p => {
+      Z.position = { lat:p.coords.latitude, lon:p.coords.longitude };
+      Z.positionEcht = true;
+      if (ichMarker) karte.removeLayer(ichMarker);
+      ichMarker = L.circleMarker([Z.position.lat, Z.position.lon], {
+        radius:7, color:"#fff", weight:2.5, fillColor:"#2E6BE0", fillOpacity:1
+      }).addTo(karte);
+      zeichne();
+      wetterLaden();   // jetzt mit der echten Position
+    },
+    () => {}   // kein Standort: München-Mitte bleibt der Bezugspunkt
+  );
+}
+
+/* Knopf unten links: springt zum eigenen Standort. Fragt beim ersten Mal
+   nach der Freigabe, falls das beim Start noch nicht passiert ist. */
+function zuMeinemStandort(){
+  if (!navigator.geolocation) return melde("Dein Browser kann keinen Standort bestimmen.");
+  navigator.geolocation.getCurrentPosition(
+    p => {
+      const neu = !Z.positionEcht;
+      Z.position = { lat:p.coords.latitude, lon:p.coords.longitude };
+      Z.positionEcht = true;
+      if (ichMarker) karte.removeLayer(ichMarker);
+      ichMarker = L.circleMarker([Z.position.lat, Z.position.lon], {
+        radius:7, color:"#fff", weight:2.5, fillColor:"#2E6BE0", fillOpacity:1
+      }).addTo(karte);
+      karte.flyTo([Z.position.lat, Z.position.lon], Math.max(karte.getZoom(), 15), { duration:.6 });
+      if (neu) { zeichne(); wetterLaden(); }
+    },
+    () => melde("Standort nicht freigegeben. Erlaube ihn in den Browser-Einstellungen."),
+    { enableHighAccuracy:true, timeout:10000, maximumAge:30000 }
+  );
+}
+
+const StandortKnopf = L.Control.extend({
+  options:{ position:"bottomleft" },
+  onAdd(){
+    const box = L.DomUtil.create("div", "leaflet-bar standort-knopf");
+    box.innerHTML = `<a href="#" role="button" title="Zu meinem Standort" aria-label="Zu meinem Standort">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></a>`;
+    L.DomEvent.disableClickPropagation(box);
+    L.DomEvent.on(box.firstElementChild, "click", e => { L.DomEvent.preventDefault(e); zuMeinemStandort(); });
+    return box;
+  }
+});
+new StandortKnopf().addTo(karte);
+
+zeichne();
+standortHolen();
+
+/* Reihenfolge beim Start: erst schauen, ob eine Sitzung aus einem früheren
+   Besuch noch gilt, dann die Orte laden. Supabase merkt sich die Anmeldung
+   selbst, deshalb muss man sich nicht bei jedem Neuladen neu anmelden. */
+sheet.start();
+karte.on("dragstart", () => sheet.klein());
+adminAdresseOeffnen();
+
+(async function start(){
+  await adminPruefen();
+  await datenLaden();
+  platzAusAdresse();
+  await Promise.all([meldungenLaden(), bestaetigungenLaden()]);
+  zeichne();
+  wetterLaden();          // läuft nebenher, blockiert den Start nicht
+})();
+
+/* Service Worker: sorgt dafür, dass die App nach dem ersten Besuch auch mit
+   schlechtem oder ohne Netz aufgeht. Funktioniert nur unter https – lokal
+   aus der Datei geöffnet passiert hier einfach nichts. */
+if ("serviceWorker" in navigator && location.protocol === "https:")
+  navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>
