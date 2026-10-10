@@ -860,11 +860,25 @@ let BESTAETIGT = bestaetigteLaden();
 
 /* Nicht weiter rauszoomen als bis Europa und nicht über den Weltrand hinaus
    schieben, damit die Erde nie mehrfach nebeneinander erscheint. */
+/* Platzfrei gibt es nur in Deutschland: Weiter raus als bis ganz
+   Deutschland lässt sich nicht zoomen, und die Karte bleibt beim Verschieben
+   in der Nähe (etwas Rand, damit Grenzorte nicht am Bildrand kleben). */
+const DEUTSCHLAND = L.latLngBounds([[47.2, 5.8], [55.1, 15.1]]);
+const KARTEN_RAHMEN = L.latLngBounds([[45.8, 3.0], [56.4, 18.0]]);
 const karte = L.map("karte", {
-  zoomControl:true, minZoom:4,
-  maxBounds:[[-85,-180],[85,180]], maxBoundsViscosity:1, worldCopyJump:false
+  zoomControl:true, minZoom:5,
+  maxBounds:KARTEN_RAHMEN, maxBoundsViscosity:1, worldCopyJump:false
 })
                .setView([STANDARD_POSITION.lat, STANDARD_POSITION.lon], 12);
+
+/* Kleinste Zoomstufe so wählen, dass Deutschland gerade ganz hineinpasst –
+   auf dem Handy also eine Stufe weiter raus als am großen Bildschirm. */
+function deutschlandZoom(){
+  const z = Math.max(4, karte.getBoundsZoom(DEUTSCHLAND, false));
+  karte.setMinZoom(z);
+}
+deutschlandZoom();
+window.addEventListener("resize", deutschlandZoom);
 
 /* Straßenkarte von CARTO (Voyager, im Dunkelmodus Dark Matter), Satellit von
    Esri. CARTO braucht seit 2026 einen kostenlosen Schlüssel
