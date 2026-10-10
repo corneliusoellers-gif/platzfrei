@@ -1374,6 +1374,8 @@ function ansichtListe(nurListe){
         <button data-gehe="fehler">Fehler melden</button></div>
     </div>`;
 
+  orte.slice(0, 6).forEach(adresseErgaenzen);
+
   const anzahl = alleOrte.length;
   const ueberschrift = Z.suche.trim()
     ? `${anzahl} Treffer`
@@ -1501,6 +1503,7 @@ function ansichtDetail(){
         <p class="hinweis">Bitte nur das Schild, keine Personen oder Autokennzeichen.</p>`;
 
   const [statusArt, statusText] = markeArt(o);
+  adresseErgaenzen(o);
   const statusIcon = statusArt === "frei" ? "✓" : statusArt === "absprache" ? "!" : "?";
 
   seite.innerHTML = `
@@ -2207,6 +2210,67 @@ async function schildPruefen(id, ok){
 
 /* Route: öffnet die Karten-App des Geräts mit dem Platz als Ziel.
    Apple Maps auf iOS und Mac, sonst Google Maps. */
+/* --------------------------------------------------------------------------
+   Straße ergänzen: Viele Plätze aus OpenStreetMap heißen nur „Fußballplatz
+   Krailling“. Öffnet jemand so einen Platz, fragen wir bei Nominatim
+   (OpenStreetMap) die Straße ab und speichern sie für alle. Nominatim
+   erlaubt höchstens eine Anfrage pro Sekunde – deshalb eine Warteschlange.
+   -------------------------------------------------------------------------- */
+const ADRESSE_WARTE = [];
+const ADRESSE_VERSUCHT = new Set();
+let adresseLaeuft = false;
+
+function adresseErgaenzen(o){
+  if (!o || (o.ort && o.ort.includes(",")) || ADRESSE_VERSUCHT.has(o.id)) return;
+  ADRESSE_VERSUCHT.add(o.id);
+  ADRESSE_WARTE.push(o);
+  if (!adresseLaeuft) adresseNaechste();
+}
+
+async function adresseNaechste(){
+  const o = ADRESSE_WARTE.shift();
+  if (!o) { adresseLaeuft = false; return; }
+  adresseLaeuft = true;
+  try {
+    const u = new URL("https://nominatim.openstreetmap.org/reverse");
+    u.search = new URLSearchParams({ format:"jsonv2", lat:o.lat, lon:o.lon, zoom:"17",
+                                     addressdetails:"1", "accept-language":"de" });
+    const a = (await (await fetch(u)).json()).address || {};
+    const strasse = a.road || a.pedestrian || a.footway || a.path || a.cycleway
+                 || a.square || a.park || a.neighbourhood || a.hamlet;
+    const stadt = a.city || a.town || a.village || a.municipality;
+    const teil  = a.city && (a.suburb || a.city_district);
+    const ortNeu = stadt ? (teil && teil !== stadt ? `${stadt}-${teil}` : stadt) : null;
+    if (strasse && ortNeu) adresseUebernehmen(o, ortNeu, strasse);
+  } catch {}
+  setTimeout(adresseNaechste, 1100);
+}
+
+/* Gleiche Regel wie die Datenbankfunktion adresse_ergaenzen: Endet der Name
+   auf den alten Ort, wird der Ort ersetzt und die Straße angehängt. */
+function neuerNameMitAdresse(name, altOrt, ortNeu, strasse){
+  if (altOrt && altOrt !== "—" && name.endsWith(" " + altOrt))
+    return name.slice(0, name.length - altOrt.length) + ortNeu + ", " + strasse;
+  return name;
+}
+
+async function adresseUebernehmen(o, ortNeu, strasse){
+  const nameNeu = neuerNameMitAdresse(o.name, o.ort, ortNeu, strasse);
+  o.name = nameNeu;
+  o.ort = ortNeu + ", " + strasse;
+  if (ECHT) {
+    try { await db.rpc("adresse_ergaenzen", { p_id:o.id, p_ort:ortNeu, p_strasse:strasse }); } catch {}
+  }
+  /* Nur das Nötigste neu zeichnen, damit nichts springt. */
+  if (Z.ansicht === "detail" && Z.auswahlId === o.id) {
+    const n = seite.querySelector(".dname"), d = seite.querySelector(".dort");
+    if (n) n.textContent = o.name;
+    if (d) d.textContent = `${o.ort} · ${entfText(entfernungKm(Z.position,o))} entfernt`;
+  }
+  const zeile = seite.querySelector(`.zeile[data-ort="${CSS.escape(String(o.id))}"] .zname`);
+  if (zeile) zeile.textContent = o.name;
+}
+
 /* Teilen: Link direkt auf den Platz – zum Verabreden mit Freunden. */
 async function teilen(id){
   const o = ort(id);
@@ -3002,8 +3066,9 @@ function ansichtRechtliches(){
         Werbung, kein Tracking und keine Analyse-Werkzeuge.</p>
 
         <h4>Hosting</h4>
-        <p>Die App liegt bei Netlify (Netlify Inc., USA). Beim Aufruf
-        verarbeitet Netlify technisch nötige Daten wie deine IP-Adresse und
+        <p>Die App liegt bei GitHub Pages (GitHub Inc., USA), die Domain
+        verwaltet Netlify (Netlify Inc., USA). Beim Aufruf verarbeitet GitHub
+        technisch nötige Daten wie deine IP-Adresse und
         den Zeitpunkt, um die Seite auszuliefern und vor Angriffen zu
         schützen. Rechtsgrundlage ist unser berechtigtes Interesse an einem
         sicheren Betrieb (Art. 6 Abs. 1 lit. f DSGVO). Die Übermittlung in die
@@ -3033,8 +3098,10 @@ function ansichtRechtliches(){
         Open-Meteo (Schweiz). Ohne Freigabe rechnen wir ab München-Mitte.</p>
 
         <h4>Karten, Bilder und Bibliotheken</h4>
-        <p>Kartenbilder und Luftbilder laden wir von Esri (USA), die
-        Programmbibliotheken von cdnjs (Cloudflare) und jsDelivr. Dabei
+        <p>Kartenbilder laden wir von CARTO (USA), Luftbilder von Esri (USA), die
+        Programmbibliotheken von cdnjs (Cloudflare) und jsDelivr. Öffnest du
+        einen Platz ohne Straßenangabe, fragen wir die Adresse dieses Platzes
+        bei Nominatim (OpenStreetMap Foundation, Großbritannien) ab. Dabei
         erfahren diese Anbieter technisch bedingt deine IP-Adresse.
         Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (Darstellung der
         Karte).</p>
