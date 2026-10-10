@@ -3136,7 +3136,21 @@ const sheet = (function(){
   const sanft  = window.matchMedia("(prefers-reduced-motion: reduce)");
 
   /* Rastpunkte als Anteil der Bildschirmhöhe, den das Sheet einnimmt. */
-  const RASTEN = [0.42, 0.68, 0.94];
+  /* Unterste Stufe: nur Griff und Suchfeld schauen heraus, die Karte hat
+     fast den ganzen Bildschirm. Ihr Anteil hängt von der Bildschirmhöhe ab. */
+  const RASTEN = [0.14, 0.42, 0.68, 0.94];
+  const sicherUnten = (() => {        // Höhe des Home-Balkens beim iPhone
+    const d = document.createElement("div");
+    d.style.cssText = "position:fixed;bottom:0;padding-bottom:env(safe-area-inset-bottom,0px);visibility:hidden";
+    document.body.appendChild(d);
+    const h = parseFloat(getComputedStyle(d).paddingBottom) || 0;
+    d.remove();
+    return h;
+  })();
+  const untersteRaste = () => {
+    RASTEN[0] = Math.min(0.2, (92 + sicherUnten) / window.innerHeight);
+  };
+  untersteRaste();
   const HOEHE  = 0.94;              // muss zur CSS-Höhe passen
 
   let y = 0;                        // aktuelle Verschiebung in Pixeln
@@ -3326,8 +3340,8 @@ const sheet = (function(){
      §2 Agency: es gibt immer auch einen Weg ohne Geste. */
   griff.addEventListener("click", () => {
     if (!mobil.matches || verlauf.length > 3) return;
-    const offen = y < (yFuer(RASTEN[0]) + yFuer(RASTEN[2])) / 2;
-    federZu(yFuer(offen ? RASTEN[0] : RASTEN[2]));
+    const offen = y < (yFuer(RASTEN[1]) + yFuer(RASTEN[3])) / 2;
+    federZu(yFuer(offen ? RASTEN[1] : RASTEN[3]));
   });
   griff.addEventListener("keydown", e => {
     if (e.key !== "Enter" && e.key !== " ") return;
@@ -3337,20 +3351,21 @@ const sheet = (function(){
 
   function ausrichten(){
     if (!mobil.matches) { aside.style.transform = ""; return; }
-    setzen(naechsteRaste(y || yFuer(RASTEN[1])));
+    untersteRaste();
+    setzen(naechsteRaste(y || yFuer(RASTEN[2])));
   }
 
   window.addEventListener("resize", ausrichten);
   mobil.addEventListener("change", ausrichten);
 
   return {
-    start(){ if (mobil.matches) setzen(yFuer(RASTEN[1])); },
+    start(){ if (mobil.matches) setzen(yFuer(RASTEN[2])); },
     /* Beim Öffnen eines Platzes soll die Liste Platz machen. */
-    aufmachen(){ if (mobil.matches) federZu(yFuer(RASTEN[2])); },
+    aufmachen(){ if (mobil.matches) federZu(yFuer(RASTEN[3])); },
     /* Mindestens halb offen, damit man die Angaben eines Platzes sieht. */
-    mitte(){ if (mobil.matches && y > yFuer(RASTEN[1]) + 1) federZu(yFuer(RASTEN[1])); },
+    mitte(){ if (mobil.matches && y > yFuer(RASTEN[2]) + 1) federZu(yFuer(RASTEN[2])); },
     /* Wer die Karte verschiebt, will die Karte sehen. */
-    klein(){ if (mobil.matches && !zieht && y < maxY() - 1) federZu(maxY()); }
+    klein(){ if (mobil.matches && !zieht && y < yFuer(RASTEN[1]) - 1) federZu(yFuer(RASTEN[1])); }
   };
 })();
 
