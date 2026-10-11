@@ -118,6 +118,7 @@ aside{width:420px;flex-shrink:0;background:var(--grund);
 .leaflet-control-zoom a:first-child{border-radius:14px 14px 4px 4px!important}
 .leaflet-control-zoom a:last-child{border-radius:4px 4px 14px 14px!important;margin-top:3px}
 .standort-knopf{border:0!important;box-shadow:none!important}
+.standort-knopf .neu-knopf{margin-top:8px}
 .standort-knopf a{display:flex!important;align-items:center;justify-content:center;
   width:34px!important;height:34px!important;border:0!important;border-radius:14px!important;
   box-shadow:var(--schatten)!important;color:var(--tinte)!important;background:var(--grund)}
@@ -3901,9 +3902,18 @@ const StandortKnopf = L.Control.extend({
     box.innerHTML = `<a href="#" role="button" title="Zu meinem Standort" aria-label="Zu meinem Standort">
       <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none"
         stroke="currentColor" stroke-width="2" stroke-linecap="round">
-        <circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></a>`;
+        <circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></a>
+      <a href="#" role="button" class="neu-knopf" title="Platz hinzufügen" aria-label="Platz hinzufügen">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none"
+        stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></a>`;
     L.DomEvent.disableClickPropagation(box);
     L.DomEvent.on(box.firstElementChild, "click", e => { L.DomEvent.preventDefault(e); zuMeinemStandort(); });
+    L.DomEvent.on(box.lastElementChild, "click", e => {
+      L.DomEvent.preventDefault(e);
+      Z.ansicht = "neu"; zeichne();
+      sheet.mitte();
+      melde("Tippe auf die Karte, wo der Platz ist.");
+    });
     return box;
   }
 });
