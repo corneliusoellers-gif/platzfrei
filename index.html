@@ -3625,28 +3625,6 @@ function rechtFeld(w){
     : esc(w);
 }
 
-// Datenschutzerklärung von PrivacyBee. Das Skript wird erst geladen, wenn
-// jemand diese Seite öffnet. Lädt es nicht, erscheint unsere eigene Fassung.
-function privacyBeeLaden(){
-  const eigen = () => {
-    const w = document.getElementById("datenschutzWidget");
-    const e = document.getElementById("datenschutzEigen");
-    if (w && e){ w.hidden = true; e.hidden = false; }
-  };
-  if (window.customElements && customElements.get("privacybee-widget")) return;
-  let sk = document.getElementById("privacybeeSkript");
-  if (!sk){
-    sk = document.createElement("script");
-    sk.id = "privacybeeSkript";
-    sk.src = "https://app.privacybee.io/widget.js";
-    sk.defer = true;
-    sk.addEventListener("error", () => { sk.dataset.fehler = "1"; eigen(); });
-    document.head.appendChild(sk);
-  } else if (sk.dataset.fehler){
-    eigen();
-  }
-}
-
 /* Fehler melden: Die Meldung landet in der Supabase-Tabelle
    "fehlerberichte", der Admin sieht sie in der App unter "Fehler". Technische
    Angaben (Gerät, Ansicht, gewählter Platz) hängen automatisch dran, damit
@@ -3759,11 +3737,18 @@ function ansichtRechtliches(){
     <div class="rolle">
       <div class="abschnitt" style="margin-top:8px">
         <h3>Impressum</h3>
-        <p>Angaben gemäß § 5 DDG</p>
-        <p>${rechtFeld(r.namen)}<br>${rechtFeld(r.strasse)}<br>${rechtFeld(r.ort)}</p>
-        <p>E-Mail: ${rechtFeld(r.email)}</p>
-        <p>Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV:
-        Cornelius Oellers, Anschrift wie oben.</p>
+        <h4>Angaben gemäß § 5 DDG</h4>
+        <p>${rechtFeld(r.namen)}<br>${rechtFeld(r.strasse)}<br>${rechtFeld(r.ort)}<br>Deutschland</p>
+        <h4>Kontakt</h4>
+        <p>E-Mail: ${rechtFeld(r.email)}<br>
+        Schnell erreichbar auch über <button class="inline-knopf" data-gehe="fehler">Fehler melden</button>
+        in der App.</p>
+        <h4>Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV</h4>
+        <p>Cornelius Oellers, Anschrift wie oben.</p>
+        <h4>Verbraucherstreitbeilegung</h4>
+        <p>Wir sind nicht bereit und nicht verpflichtet, an
+        Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle
+        teilzunehmen.</p>
       </div>
 
       <div class="abschnitt">
@@ -3772,101 +3757,126 @@ function ansichtRechtliches(){
         Angaben stammen aus Gemeinden, offenen Daten und von Nutzern und können
         veraltet oder falsch sein. Vor Ort gelten immer die Schilder und die
         Anweisungen der Eigentümer, Vereine und Platzwarte. Wir haften nicht
-        für Schäden, die aus falschen Angaben entstehen.</p>
-        <p>Für Inhalte verlinkter Seiten (z. B. Karten-Apps) sind allein
-        deren Betreiber verantwortlich.</p>
+        für Schäden, die aus falschen Angaben entstehen, außer bei Vorsatz oder
+        grober Fahrlässigkeit.</p>
+        <h4>Inhalte von Nutzern</h4>
+        <p>Angaben, Tipps, Spiele und Fotos von Nutzern prüfen wir, soweit es
+        möglich ist. Fällt dir etwas auf, das nicht stimmt oder nicht in Ordnung
+        ist, melde es bitte über „Melden“ am Platz oder per E-Mail. Wir
+        entfernen es dann umgehend.</p>
+        <h4>Links</h4>
+        <p>Für Inhalte verlinkter Seiten (z. B. Karten-Apps) sind allein deren
+        Betreiber verantwortlich. Bei Bekanntwerden von Rechtsverstößen
+        entfernen wir solche Links umgehend.</p>
+        <h4>Urheberrecht</h4>
+        <p>Texte, Logo und Gestaltung von Platzfrei sind urheberrechtlich
+        geschützt. Kartendaten und offene Daten Dritter stehen unter den unten
+        genannten Lizenzen.</p>
       </div>
 
-      <div class="abschnitt" id="datenschutzWidget">
+      <div class="abschnitt" id="datenschutz">
         <h3>Datenschutzerklärung</h3>
-        <privacybee-widget website-id="cmuzozv6q07nq300bn466najq" type="dsgvo" lang="de"></privacybee-widget>
-      </div>
-
-      <div class="abschnitt" id="datenschutzEigen" hidden>
-        <h3>Datenschutzerklärung</h3>
-        <h4>Wer verantwortlich ist</h4>
-        <p>${rechtFeld(r.namen)}, ${rechtFeld(r.strasse)}, ${rechtFeld(r.ort)},
-        ${rechtFeld(r.email)}.</p>
 
         <h4>Kurz gesagt</h4>
-        <p>Du brauchst kein Konto. Wir wollen nicht wissen, wer du bist, und
-        speichern nichts, was dich direkt erkennbar macht. Es gibt keine
-        Werbung, kein Tracking und keine Analyse-Werkzeuge.</p>
+        <p>Du brauchst kein Konto. Wir fragen nie nach Namen, Alter oder
+        Telefonnummer und speichern nichts, was dich direkt erkennbar macht.
+        Es gibt keine Werbung, keine Cookies, kein Tracking und keine Profile.
+        Die Besucherzählung ist anonym. Platzfrei richtet sich auch an Kinder
+        und Jugendliche, deshalb gibt es keinen Chat und keine Freitexte, die
+        andere sehen können.</p>
 
-        <h4>Hosting</h4>
-        <p>Die App liegt bei GitHub Pages (GitHub Inc., USA), die Domain
-        verwaltet Netlify (Netlify Inc., USA). Beim Aufruf verarbeitet GitHub
-        technisch nötige Daten wie deine IP-Adresse und
-        den Zeitpunkt, um die Seite auszuliefern und vor Angriffen zu
-        schützen. Rechtsgrundlage ist unser berechtigtes Interesse an einem
-        sicheren Betrieb (Art. 6 Abs. 1 lit. f DSGVO). Die Übermittlung in die
-        USA stützt sich auf das EU-US Data Privacy Framework bzw.
-        Standardvertragsklauseln.</p>
+        <h4>1. Wer verantwortlich ist</h4>
+        <p>${rechtFeld(r.namen)}, ${rechtFeld(r.strasse)}, ${rechtFeld(r.ort)},
+        E-Mail: ${rechtFeld(r.email)}. Einen Datenschutzbeauftragten müssen
+        wir nicht benennen. Bei Fragen schreib einfach an diese Adresse.</p>
 
-        <h4>Datenbank</h4>
-        <p>Plätze, Meldungen, Bestätigungen und Schildfotos speichern wir bei
-        Supabase (Supabase Inc.), Serverstandort Irland (EU).
-        Wenn du einen Platz meldest, „Hier gespielt“ drückst, Angaben ergänzt
-        oder ein Foto hochlädst, speichern wir genau diese Angabe mit Datum.
-        Für „Hier gespielt“ legt die App eine zufällige Geräte-Nummer an,
-        damit jede Bestätigung nur einmal zählt. Sie lässt keinen Rückschluss
-        auf deine Person zu und ist öffentlich nicht sichtbar. Rechtsgrundlage
-        ist Art. 6 Abs. 1 lit. f DSGVO (eine verlässliche Platzkarte).</p>
+        <h4>2. Aufruf der App und Hosting</h4>
+        <p>Die App liegt bei GitHub Pages (GitHub Inc., 88 Colin P. Kelly Jr.
+        Street, San Francisco, USA). Die Domain ist bei Netlify (Netlify Inc.,
+        San Francisco, USA) registriert, Netlify beantwortet dafür die
+        DNS-Anfragen. Beim Aufruf verarbeiten diese Anbieter technisch nötige
+        Daten wie deine IP-Adresse, Uhrzeit, aufgerufene Adresse und
+        Browserkennung, um die Seite auszuliefern und vor Angriffen zu
+        schützen. Wir selbst sehen diese Daten nicht. Rechtsgrundlage ist
+        unser berechtigtes Interesse an einem sicheren Betrieb (Art. 6 Abs. 1
+        lit. f DSGVO). Die Übermittlung in die USA stützt sich auf das EU-US
+        Data Privacy Framework und Standardvertragsklauseln.</p>
 
-        <h4>„Ich bin gerade hier“</h4>
-        <p>Wenn du an einem Platz eincheckst, prüft die App einmal deinen
-        Standort, ob du höchstens 300 m vom Platz entfernt bist. Der Standort
-        selbst wird nicht gespeichert. Gespeichert werden nur der Platz, die
-        zufällige Geräte-Nummer und die Uhrzeit, bis wann der Check-in gilt
-        (zwei Stunden). Andere sehen nur, wie viele Leute gerade an einem
-        Platz sind, und das erst ab zwei Personen. Nach einem Tag wird der
-        Eintrag gelöscht. Du kannst jederzeit mit „Wieder weg“ auschecken.
-        Rechtsgrundlage ist Art. 6 Abs. 1 lit. a DSGVO (deine Einwilligung
-        durch das Einchecken).</p>
+        <h4>3. Datenbank</h4>
+        <p>Plätze und alles, was Nutzer beitragen, speichern wir bei Supabase
+        (Supabase Inc., USA) auf Servern in Irland (EU). Mit Supabase besteht
+        ein Vertrag zur Auftragsverarbeitung mit Standardvertragsklauseln.</p>
 
-        <h4>Mitspieler gesucht und Platz-Tipps</h4>
-        <p>Wenn du ein Spiel ansetzt, zusagst oder einen Tipp gibst, speichern
-        wir genau das (Platz, Zeit, Sportart, Anzahl oder den gewählten Tipp)
-        zusammen mit der zufälligen Geräte-Nummer, damit jede Zusage und jeder
-        Tipp nur einmal zählt. Öffentlich sichtbar sind nur Zeit, Sportart und
-        Anzahlen, nie die Geräte-Nummer. Es gibt keine Namen und keinen freien
-        Text. Vergangene Spiele löschen wir nach einem Tag. Rechtsgrundlage ist
-        Art. 6 Abs. 1 lit. a DSGVO.</p>
+        <h4>4. Die zufällige Geräte-Nummer</h4>
+        <p>Für einige Funktionen legt die App beim ersten Mal eine zufällige
+        Nummer auf deinem Gerät an. Sie sorgt dafür, dass zum Beispiel eine
+        Bestätigung oder ein Tipp pro Gerät nur einmal zählt. Die Nummer
+        enthält nichts über dich, ist öffentlich nie sichtbar und wird nicht
+        mit anderen Daten zusammengeführt. Löschst du die Website-Daten in
+        deinem Browser, entsteht beim nächsten Mal eine neue Nummer.</p>
 
-        <h4>Abzeichen</h4>
-        <p>Abzeichen werden nur auf deinem Gerät gezählt und nie an uns
-        übertragen.</p>
+        <h4>5. Was du beitragen kannst</h4>
+        <p><b>„Hier gespielt“ und Meldungen:</b> Wir speichern den Platz, das
+        Datum und die Geräte-Nummer. Öffentlich sichtbar ist nur die Anzahl.</p>
+        <p><b>„Ich bin gerade hier“:</b> Beim Einchecken prüft die App einmal
+        deinen Standort, ob du höchstens 300 m vom Platz entfernt bist. Der
+        Standort selbst wird nicht gespeichert. Gespeichert werden der Platz,
+        die Geräte-Nummer und die Uhrzeit, bis wann der Check-in gilt (zwei
+        Stunden). Andere sehen nur, wie viele Leute gerade an einem Platz sind,
+        und das erst ab zwei Personen. Mit „Wieder weg“ checkst du sofort aus,
+        spätestens nach einem Tag wird der Eintrag gelöscht.</p>
+        <p><b>Mitspieler gesucht:</b> Wenn du ein Spiel ansetzt oder zusagst,
+        speichern wir Platz, Zeit, Sportart, die gewünschte Anzahl und die
+        Geräte-Nummer. Öffentlich sichtbar sind nur Zeit, Sportart und wie
+        viele zugesagt haben. Vergangene Spiele löschen wir nach einem Tag.</p>
+        <p><b>Platz-Tipps:</b> Wir speichern den Platz, den gewählten Tipp aus
+        einer festen Liste, das Datum und die Geräte-Nummer. Öffentlich
+        sichtbar ist nur, wie oft ein Tipp gegeben wurde. Du kannst deinen
+        Tipp jederzeit zurücknehmen.</p>
+        <p><b>Angaben ergänzen und neue Plätze:</b> Wir speichern genau die
+        Angaben, die du einträgst, mit Datum. Schlägst du einen neuen Platz
+        vor und erlaubst den Standort, speichern wir zusätzlich, wie weit du
+        vom eingetragenen Punkt entfernt warst. Das sehen nur wir, um den
+        Vorschlag zu prüfen.</p>
+        <p><b>Fotos:</b> Fotos werden vor dem Hochladen auf deinem Gerät
+        verkleinert, dabei werden Ortungs- und Kameradaten aus der Datei
+        entfernt. Wir prüfen jedes Foto, bevor es öffentlich sichtbar wird,
+        und löschen Fotos mit erkennbaren Personen oder Kennzeichen.</p>
+        <p><b>Platzzeiten von Vereinen:</b> Trägt jemand für einen Verein
+        Platzzeiten ein, speichern wir Name, Funktion und E-Mail, um bei
+        Rückfragen nachzuhaken. Diese Angaben werden nicht veröffentlicht und
+        nach der Prüfung nicht weiter genutzt.</p>
+        <p><b>Fehler melden:</b> Wir speichern deine Beschreibung, freiwillig
+        deine Mailadresse und technische Angaben (Browser und Gerätetyp,
+        Bildschirmgröße, aufgerufene Seite, zuletzt geöffneter Platz), damit
+        wir den Fehler finden. Das sehen nur wir.</p>
+        <p>Rechtsgrundlage für all das ist unser berechtigtes Interesse
+        (Art. 6 Abs. 1 lit. f DSGVO): eine verlässliche, aktuelle Karte, auf
+        der Kinder und Jugendliche erlaubte Plätze finden und sich zum Spielen
+        verabreden können, ohne dass dafür persönliche Daten nötig sind.</p>
 
-        <h4>Fotos</h4>
-        <p>Fotos werden vor dem Hochladen verkleinert, dabei werden
-        Ortungs- und Kameradaten aus der Datei entfernt. Wir prüfen jedes
-        Foto, bevor es öffentlich sichtbar wird, und löschen Fotos mit
-        erkennbaren Personen oder Kennzeichen. Schlägst du einen neuen Platz
-        vor, sehen nur wir das Foto und den Abstand zu deinem Standort (falls
-        freigegeben), um den Vorschlag zu prüfen.</p>
-
-        <h4>Platzzeiten von Vereinen</h4>
-        <p>Trägt jemand für einen Verein Platzzeiten ein, speichern wir Name,
-        Funktion und E-Mail nur, um bei Rückfragen nachzuhaken. Diese Angaben
-        werden nicht veröffentlicht und nach der Prüfung nicht weiter genutzt.
-        Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO.</p>
-
-        <h4>Standort</h4>
+        <h4>6. Standort</h4>
         <p>Wenn du es erlaubst, nutzt die App deinen Standort, um die
         Entfernung zu Plätzen zu berechnen. Der Standort bleibt auf deinem
-        Gerät, nur für die Wettervorhersage geht eine ungefähre Position an
-        Open-Meteo (Schweiz). Ohne Freigabe rechnen wir ab München-Mitte.</p>
+        Gerät. Nur für die Wettervorhersage geht eine ungefähre Position an
+        Open-Meteo (Schweiz, angemessenes Datenschutzniveau laut
+        EU-Kommission), und beim Einchecken einmal an unsere Datenbank zur
+        Abstandsprüfung (siehe oben). Ohne Freigabe rechnet die App ab
+        München-Mitte. Die Freigabe kannst du jederzeit in den Einstellungen
+        deines Geräts zurücknehmen.</p>
 
-        <h4>Karten, Bilder und Bibliotheken</h4>
-        <p>Kartenbilder laden wir von CARTO (USA), Luftbilder von Esri (USA), die
-        Programmbibliotheken von cdnjs (Cloudflare) und jsDelivr. Öffnest du
-        einen Platz ohne Straßenangabe, fragen wir die Adresse dieses Platzes
-        bei Nominatim (OpenStreetMap Foundation, Großbritannien) ab. Dabei
-        erfahren diese Anbieter technisch bedingt deine IP-Adresse.
-        Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (Darstellung der
-        Karte).</p>
+        <h4>7. Karten, Bilder und Bibliotheken</h4>
+        <p>Kartenbilder laden wir von CARTO (USA) bzw. Esri (USA), Luftbilder
+        von Esri, die Programmbibliotheken von cdnjs (Cloudflare, USA) und
+        jsDelivr. Öffnest du einen Platz ohne Straßenangabe, fragen wir die
+        Adresse dieses Platzes bei Nominatim (OpenStreetMap Foundation,
+        Großbritannien) ab. Dabei erfahren diese Anbieter technisch bedingt
+        deine IP-Adresse. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO
+        (Darstellung der Karte).</p>
+        <p>Tippst du auf „Route“, öffnet sich Apple Karten oder Google Maps.
+        Ab dann gelten die Datenschutzbestimmungen dieser Anbieter.</p>
 
-        <h4>Besucherstatistik</h4>
+        <h4>8. Besucherstatistik</h4>
         <p>Um zu sehen, wie viele Menschen Platzfrei nutzen, zählen wir
         Seitenaufrufe mit GoatCounter (goatcounter.com, Niederlande). Dabei
         werden aufgerufene Seite, Herkunftsseite, Browser, Bildschirmgröße
@@ -3875,18 +3885,51 @@ function ansichtRechtliches(){
         Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (Verbesserung des
         Angebots).</p>
 
-        <h4>Auf deinem Gerät</h4>
-        <p>Merkliste, Geräte-Nummer und deine Bestätigungen speichert die App
-        im Speicher deines Browsers (localStorage). Das ist für diese
-        Funktionen unbedingt nötig (§ 25 Abs. 2 TDDDG). Du kannst es jederzeit
-        über die Browsereinstellungen löschen. Cookies setzen wir nicht.</p>
+        <h4>9. Auf deinem Gerät</h4>
+        <p>Merkliste, Geräte-Nummer, eigene Bestätigungen, Zusagen und Tipps,
+        dein aktueller Check-in und deine Abzeichen speichert die App im
+        Speicher deines Browsers (localStorage). Damit die App auch ohne Netz
+        startet, legt sie außerdem eine Kopie ihrer Dateien im Browser ab.
+        Das ist für diese Funktionen unbedingt nötig (§ 25 Abs. 2 Nr. 2
+        TDDDG) und wird nicht an uns übertragen, außer wie oben beschrieben.
+        Du kannst alles jederzeit über die Browsereinstellungen löschen.
+        Cookies setzen wir nicht.</p>
 
-        <h4>Deine Rechte</h4>
+        <h4>10. Wie lange wir speichern</h4>
+        <p>Check-ins löschen wir nach einem Tag, vergangene Spiele ebenfalls.
+        Bestätigungen, Tipps, Meldungen und Fotos bleiben gespeichert, solange
+        der Platz in der App ist, oder bis du sie zurücknimmst bzw. uns um
+        Löschung bittest. Fehlermeldungen und Vereinsangaben löschen wir,
+        sobald wir sie nicht mehr brauchen.</p>
+
+        <h4>11. Kinder und Jugendliche</h4>
+        <p>Platzfrei ist kostenlos und für alle Altersgruppen gedacht. Weil wir
+        keine Namen, kein Alter und keine Kontaktdaten abfragen (außer
+        freiwillig beim Fehler melden und bei Vereinsangaben), keine
+        Freitexte veröffentlichen und keine Nachrichten zwischen Nutzern
+        ermöglichen, können Kinder die App nutzen, ohne persönliche Daten
+        preiszugeben. Eltern können sich jederzeit an uns wenden.</p>
+
+        <h4>12. Deine Rechte</h4>
         <p>Du hast das Recht auf Auskunft, Berichtigung, Löschung,
-        Einschränkung, Datenübertragbarkeit und Widerspruch (Art. 15–21
-        DSGVO). Schreib uns dazu an ${rechtFeld(r.email)}. Außerdem kannst du
-        dich beim Bayerischen Landesamt für Datenschutzaufsicht (BayLDA)
-        beschweren.</p>
+        Einschränkung der Verarbeitung und Datenübertragbarkeit (Art. 15–20
+        DSGVO). Schreib uns dazu an ${rechtFeld(r.email)}. Weil wir dich nicht
+        kennen, hilft es, wenn du uns sagst, um welchen Platz und welchen Tag
+        es geht.</p>
+        <p><b>Widerspruchsrecht (Art. 21 DSGVO):</b> Du kannst jederzeit aus
+        Gründen, die sich aus deiner besonderen Situation ergeben, der
+        Verarbeitung widersprechen, die auf Art. 6 Abs. 1 lit. f DSGVO
+        beruht.</p>
+        <p>Außerdem kannst du dich bei einer Datenschutz-Aufsichtsbehörde
+        beschweren, zum Beispiel beim Bayerischen Landesamt für
+        Datenschutzaufsicht (BayLDA), Promenade 18, 91522 Ansbach.</p>
+
+        <h4>13. Sonstiges</h4>
+        <p>Du musst keine Daten angeben, um Platzfrei zu nutzen. Es gibt keine
+        automatisierten Entscheidungen über dich. Die Verbindung zur App und
+        zur Datenbank ist verschlüsselt (HTTPS). Wenn sich die App ändert,
+        passen wir diese Erklärung an. Es gilt die Fassung mit dem Stand oben
+        auf dieser Seite.</p>
       </div>
 
       <div class="abschnitt">
@@ -3897,7 +3940,6 @@ function ansichtRechtliches(){
         (CC BY 4.0)</p>
       </div>
     </div>`;
-  privacyBeeLaden();
 }
 
 function ansichtImportieren(){
