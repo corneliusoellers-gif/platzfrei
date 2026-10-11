@@ -253,6 +253,45 @@ aside{width:420px;flex-shrink:0;background:var(--grund);
 .marke.bestaetigt{background:var(--frei-bg);color:var(--frei);margin-left:0}
 .marke.live{background:var(--frei-bg);color:var(--frei);margin-left:0}
 
+/* ---------- Mitspieler gesucht ---------- */
+.spiel{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--kante)}
+.spiel:first-of-type{border-top:0;padding-top:2px}
+.spiel .spiel-text{flex:1;min-width:0;font-size:14px;line-height:1.35;color:var(--tinte)}
+.spiel .spiel-text small{display:block;color:var(--tinte-3);font-size:12.5px;margin-top:2px}
+.spiel .inline-knopf.dabei{background:var(--frei-bg);color:var(--frei)}
+.spiel .weg{background:none;border:0;color:var(--tinte-3);font-size:18px;cursor:pointer;padding:4px 6px;line-height:1}
+.spielform{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;margin-top:10px}
+.spielform label{font-size:12.5px;font-weight:600;color:var(--tinte-2);display:flex;flex-direction:column;gap:4px}
+.spielform select{width:100%;font-family:var(--schrift);font-size:16px;padding:9px 10px;
+  border-radius:var(--r-feld);border:1.5px solid var(--kante);background:var(--flaeche);color:var(--tinte)}
+.spielform .reihe{grid-column:1 / -1;display:flex;gap:8px;margin-top:4px}
+.marke.spiel-marke{background:var(--gruen-zart);color:var(--gruen-tief);margin-left:0}
+
+/* ---------- Platz-Tipps ---------- */
+.tipps{display:flex;flex-wrap:wrap;gap:8px}
+.tipp{font-family:var(--schrift);font-size:13px;font-weight:600;padding:7px 12px;
+  border-radius:var(--r-pille);border:1.5px solid var(--kante);background:var(--flaeche);
+  color:var(--tinte-2);cursor:pointer;transition:transform var(--druck)}
+.tipp b{margin-left:4px;color:var(--tinte-3);font-weight:700}
+.tipp[aria-pressed="true"]{background:var(--frei-bg);border-color:transparent;color:var(--frei)}
+.tipp[aria-pressed="true"] b{color:var(--frei)}
+.tipp:active{transform:scale(.96)}
+.tipps-neu{margin-top:12px;padding-top:12px;border-top:1px dashed var(--kante)}
+
+/* ---------- Abzeichen ---------- */
+.abzeichen-gitter{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin:0 20px 12px}
+.abzeichen{background:var(--flaeche);border-radius:var(--r-karte);box-shadow:var(--schatten);
+  padding:14px;text-align:center}
+.abzeichen .ab-icon{font-size:34px;line-height:1.1}
+.abzeichen b{display:block;font-size:14px;margin-top:6px;color:var(--tinte)}
+.abzeichen small{display:block;font-size:12px;color:var(--tinte-3);margin-top:4px;line-height:1.4}
+.abzeichen.zu .ab-icon{filter:grayscale(1);opacity:.35}
+.abzeichen .ab-balken{height:5px;border-radius:3px;background:var(--kante);margin-top:8px;overflow:hidden}
+.abzeichen .ab-balken span{display:block;height:100%;background:#34C759}
+.abzeichen-link{display:block;margin:0 auto 12px;font-family:var(--schrift);font-size:14px;font-weight:600;
+  background:var(--flaeche);border:0;border-radius:var(--r-pille);padding:10px 18px;
+  box-shadow:var(--schatten);color:var(--tinte);cursor:pointer}
+
 /* ---------- Gerade hier (Community) ---------- */
 .puls{display:inline-block;width:8px;height:8px;border-radius:50%;background:#34C759;
   margin-right:6px;flex:none;animation:puls 1.8s ease-out infinite}
@@ -514,6 +553,7 @@ label.inline-knopf{display:inline-block;margin-top:10px}
   .status,.schnell{margin-left:0;margin-right:0}
   .daten{width:100%;margin:0 0 12px}
   .abschnitt{margin:0 0 12px}
+  .abzeichen-gitter{margin:0 0 12px}
 
   /* Größere Tippflächen (mind. ca. 40 px). */
   .chip{padding:10px 16px;font-size:14px}
@@ -835,6 +875,10 @@ let Z = {
   meldungen:{},           // ort_id -> Anzahl offener Meldungen
   bestaetigungen:{},      // ort_id -> wie viele Geräte "hier gespielt" sagten
   aktiv:{},               // ort_id -> wie viele gerade dort sind (erst ab 2)
+  spiele:[],              // kommende Spiele "Mitspieler gesucht"
+  spielFormOffen:false,   // Formular "Spiel ansetzen" im Detail offen?
+  tipps:{},               // ort_id -> { tipp: Anzahl } (wird beim Öffnen geladen)
+  tippsOffen:false,       // Auswahl "Tipp geben" offen?
   schilder:{},            // ort_id -> [{id, url, pfad, freigegeben}]
   vorgabeBeleg:null,      // beim Übernehmen eines Schildfotos: Beleg vorbelegen
   wetter:null             // Vorhersage für die nächsten Stunden
@@ -909,6 +953,65 @@ function meinCheckin(){
 function hierHier(id){
   const c = meinCheckin();
   return !!c && String(c.ort) === String(id);
+}
+
+/* Kleine Mengen im Gerät: eigene Spiele, Zusagen und Tipps. Damit die
+   Knöpfe wissen, was man selbst schon gedrückt hat. */
+function mengeLaden(schluessel){
+  try { return new Set(JSON.parse(localStorage.getItem(schluessel) || "[]")); }
+  catch { return new Set(); }
+}
+function mengeSpeichern(schluessel, menge){
+  try { localStorage.setItem(schluessel, JSON.stringify([...menge])); } catch {}
+}
+const MEINE_SPIELE = mengeLaden("platzfrei.meinespiele");
+const ZUSAGEN = mengeLaden("platzfrei.zusagen");
+const MEINE_TIPPS = mengeLaden("platzfrei.tipps");   // "ort|tipp"
+
+/* Platz-Tipps: nur feste Texte, kein Freitext. */
+const TIPPS = {
+  netz:"🥅 Tore mit Netz", ohne_netz:"Tore ohne Netz", korb_netz:"🏀 Körbe mit Netz",
+  oft_voll:"👥 Oft voll", meist_frei:"🙌 Meist frei", anfaenger:"🌱 Gut für Anfänger",
+  aeltere:"🧑 Meist Ältere da", eben:"✅ Boden eben", uneben:"⚠️ Boden uneben",
+  schatten:"🌳 Schatten", wasser:"🚰 Trinkwasser nah", toilette:"🚻 Toilette nah",
+  nass:"💧 Oft nass", licht_an:"💡 Licht abends an"
+};
+
+/* --------------------------------------------------------------------------
+   Abzeichen
+   --------------------------------------------------------------------------
+   Nur auf diesem Gerät gezählt. Keine Rangliste, kein Vergleich mit
+   anderen – es soll Spaß machen mitzuhelfen, nicht Druck erzeugen.
+   -------------------------------------------------------------------------- */
+const STAT_SCHLUESSEL = "platzfrei.statistik";
+function statistik(){
+  try { return { checkinOrte:[], ...JSON.parse(localStorage.getItem(STAT_SCHLUESSEL) || "{}") }; }
+  catch { return { checkinOrte:[] }; }
+}
+const ABZEICHEN = [
+  { icon:"🟢", name:"Angepfiffen",     text:"Zum ersten Mal eingecheckt",      wert:s => s.checkins || 0, ziel:1 },
+  { icon:"🧭", name:"Platzentdecker",  text:"An 5 verschiedenen Plätzen eingecheckt", wert:s => s.checkinOrte.length, ziel:5 },
+  { icon:"🏠", name:"Stammgast",       text:"10-mal eingecheckt",              wert:s => s.checkins || 0, ziel:10 },
+  { icon:"✅", name:"Platzprüfer",     text:"10 Plätze mit „Hier gespielt“ bestätigt", wert:() => BESTAETIGT.size, ziel:10 },
+  { icon:"📅", name:"Organisator",     text:"Ein Spiel angesetzt",             wert:s => s.spiele || 0, ziel:1 },
+  { icon:"🤝", name:"Teamplayer",      text:"Bei 5 Spielen zugesagt",          wert:s => s.zusagen || 0, ziel:5 },
+  { icon:"💡", name:"Tippgeber",       text:"5 Tipps zu Plätzen gegeben",      wert:s => s.tipps || 0, ziel:5 },
+  { icon:"📸", name:"Schild-Fotograf", text:"Ein Schild am Platz fotografiert", wert:s => s.fotos || 0, ziel:1 },
+  { icon:"🗺️", name:"Kartograf",       text:"Einen fehlenden Platz eingetragen", wert:s => s.neueOrte || 0, ziel:1 }
+];
+function abzeichenErreicht(s = statistik()){
+  return ABZEICHEN.filter(a => a.wert(s) >= a.ziel);
+}
+/* Zählt eine Aktion und meldet ein neu erreichtes Abzeichen. */
+function zaehle(art, ortId){
+  const s = statistik();
+  const vorher = new Set(abzeichenErreicht(s).map(a => a.name));
+  if (art) s[art] = (s[art] || 0) + 1;
+  if (art === "checkins" && ortId != null && !s.checkinOrte.includes(String(ortId)))
+    s.checkinOrte.push(String(ortId));
+  try { localStorage.setItem(STAT_SCHLUESSEL, JSON.stringify(s)); } catch {}
+  const neu = abzeichenErreicht(s).find(a => !vorher.has(a.name));
+  if (neu) setTimeout(() => melde(`${neu.icon} Neues Abzeichen: ${neu.name}!`), 1600);
 }
 
 /* ==========================================================================
@@ -1422,6 +1525,8 @@ function ansichtListe(nurListe){
         <span class="marke verein">${v[0]}</span>` : ``}${bs ? `
         <span class="marke boden ${bs[0]}">${bs[1]}</span>` : ``}${anzMeld >= 3 ? `
         <span class="marke warnung">${anzMeld}× weggeschickt</span>` : ``}${
+          naechstesSpiel(o.id) ? `
+        <span class="marke spiel-marke">📅 Spiel ${spielZeit(naechstesSpiel(o.id).beginn)}</span>` : ``}${
           (Z.aktiv[o.id] || 0) >= 2 ? `
         <span class="marke live"><span class="puls" aria-hidden="true"></span>${Z.aktiv[o.id]} spielen gerade</span>` : ``}${
           !belegt(o) && nutzerBestaetigt(o) ? `
@@ -1450,6 +1555,7 @@ function ansichtListe(nurListe){
         <button class="knopf zweit" data-gehe="fehlerliste">Fehler (${FEHLERBERICHTE.length})</button>
         <button class="knopf zweit" data-export="1">Export</button>
         <button class="knopf zweit" data-abmelden="1">Abmelden</button></div>` : ``}
+      <button class="abzeichen-link" data-gehe="abzeichen">🏅 Meine Abzeichen · ${abzeichenErreicht().length} von ${ABZEICHEN.length}</button>
       <div class="rechtliches-link">Alle Angaben ohne Gewähr – vor Ort gilt das Schild.<br>
         <button data-gehe="rechtliches">Impressum &amp; Datenschutz</button> ·
         <button data-gehe="fehler">Fehler melden</button></div>
@@ -1563,6 +1669,217 @@ document.addEventListener("keydown", e => {
   sheet.mitte();
 });
 
+/* --------------------------------------------------------------------------
+   Mitspieler gesucht
+   -------------------------------------------------------------------------- */
+function spielZeit(iso){
+  const d = new Date(iso), jetzt = new Date();
+  const tage = Math.round((new Date(d.toDateString()) - new Date(jetzt.toDateString())) / 864e5);
+  const uhr = d.toLocaleTimeString("de-DE", { hour:"2-digit", minute:"2-digit" });
+  if (d <= jetzt) return "läuft seit " + uhr;
+  const tag = tage === 0 ? "heute" : tage === 1 ? "morgen"
+    : d.toLocaleDateString("de-DE", { weekday:"short", day:"numeric", month:"numeric" });
+  return `${tag} ${uhr}`;
+}
+function spieleAm(id){
+  return Z.spiele.filter(s => String(s.ort_id) === String(id));
+}
+function naechstesSpiel(id){
+  return spieleAm(id).find(s => new Date(s.beginn) > new Date());
+}
+
+function spieleBlock(o){
+  const liste = spieleAm(o.id);
+  const zeilen = liste.map(s => {
+    const dabei = ZUSAGEN.has(String(s.id));
+    const meins = MEINE_SPIELE.has(String(s.id));
+    return `<div class="spiel">
+      <span class="spiel-text"><b>${esc(spielZeit(s.beginn)).replace(/^./, c => c.toUpperCase())}</b>
+        <small>${SPORT_ICON[s.sportart] || ""} ${esc(s.sportart)} · ${s.dabei} von ${s.brauchen} dabei${meins ? " · von dir" : ""}</small></span>
+      ${meins ? `` : `<button class="inline-knopf${dabei ? " dabei" : ""}" data-zusage="${s.id}">${dabei ? "✓ Dabei" : "Bin dabei"}</button>`}
+      ${meins || Z.admin ? `<button class="weg" data-spielweg="${s.id}" aria-label="Spiel löschen">×</button>` : ``}
+    </div>`;
+  }).join("");
+
+  let form = `<p style="margin-top:${liste.length ? 10 : 0}px">
+      <button class="inline-knopf" data-spielform="1">＋ Spiel ansetzen</button></p>`;
+  if (Z.spielFormOffen) {
+    const jetzt = new Date();
+    const tage = [...Array(7)].map((_, i) => {
+      const d = new Date(jetzt); d.setDate(d.getDate() + i);
+      return `<option value="${i}">${i === 0 ? "Heute" : i === 1 ? "Morgen"
+        : d.toLocaleDateString("de-DE", { weekday:"long", day:"numeric", month:"numeric" })}</option>`;
+    }).join("");
+    const uhrzeiten = [];
+    for (let m = 8 * 60; m <= 21 * 60 + 30; m += 30)
+      uhrzeiten.push(`${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`);
+    const vorschlag = uhrzeiten.find(u => +u.slice(0, 2) * 60 + +u.slice(3) > jetzt.getHours() * 60 + jetzt.getMinutes() + 30) || "16:00";
+    form = `<div class="spielform">
+        <label>Tag<select id="spiel-tag">${tage}</select></label>
+        <label>Uhrzeit<select id="spiel-uhr">${uhrzeiten.map(u =>
+          `<option${u === vorschlag ? " selected" : ""}>${u}</option>`).join("")}</select></label>
+        <label>Sportart<select id="spiel-sport">${o.sportarten.map(s =>
+          `<option>${esc(s)}</option>`).join("")}</select></label>
+        <label>Wie viele insgesamt?<select id="spiel-anzahl">${[4,6,8,10,12,14,16,22].map(n =>
+          `<option${n === 10 ? " selected" : ""}>${n}</option>`).join("")}</select></label>
+        <div class="reihe">
+          <button class="inline-knopf" data-spielansetzen="${o.id}">Ansetzen</button>
+          <button class="inline-knopf" data-spielform="0" style="background:none">Abbrechen</button>
+        </div>
+      </div>
+      <p class="hinweis" style="margin-top:8px">Ohne Namen und ohne Chat. Alle sehen nur Zeit,
+      Sportart und wie viele kommen. Triff dich am besten mit Leuten, die du kennst.</p>`;
+  }
+  return `<div class="abschnitt" style="margin:12px 0 0">
+      <h3>Mitspieler gesucht</h3>
+      ${zeilen || (Z.spielFormOffen ? `` : `<p>Noch kein Spiel geplant. Setz eins an, dann sehen andere, wann sie dazukommen können.</p>`)}
+      ${form}
+    </div>`;
+}
+
+async function spieleLaden(){
+  if (!ECHT) return false;
+  const { data, error } = await db.rpc("spiele_offen");
+  if (error) { console.warn("Spiele:", error.message); return false; }
+  const neu = data || [];
+  const geaendert = JSON.stringify(neu) !== JSON.stringify(Z.spiele);
+  Z.spiele = neu;
+  return geaendert;
+}
+
+async function spielAnsetzen(){
+  const o = ort(Z.auswahlId);
+  if (!o) return;
+  const tag = +document.getElementById("spiel-tag").value;
+  const [h, m] = document.getElementById("spiel-uhr").value.split(":").map(Number);
+  const beginn = new Date(); beginn.setDate(beginn.getDate() + tag); beginn.setHours(h, m, 0, 0);
+  if (beginn < new Date()) return melde("Die Uhrzeit ist schon vorbei.");
+  const sportart = document.getElementById("spiel-sport").value;
+  const brauchen = +document.getElementById("spiel-anzahl").value;
+  if (!ECHT) return melde("Geht nur in der echten App.");
+  const { data, error } = await db.rpc("spiel_ansetzen", {
+    p_ort:String(o.id), p_geraet:geraetId(), p_sportart:sportart,
+    p_beginn:beginn.toISOString(), p_brauchen:brauchen });
+  if (error) {
+    console.warn("Spiel ansetzen:", error.message);
+    return melde(/3 offene/.test(error.message) ? "Du hast schon 3 offene Spiele." : "Konnte das Spiel nicht ansetzen.");
+  }
+  MEINE_SPIELE.add(String(data)); mengeSpeichern("platzfrei.meinespiele", MEINE_SPIELE);
+  ZUSAGEN.add(String(data));     mengeSpeichern("platzfrei.zusagen", ZUSAGEN);
+  Z.spielFormOffen = false;
+  await spieleLaden();
+  zeichne();
+  melde("Spiel angesetzt. Andere sehen es jetzt am Platz.");
+  zaehle("spiele");
+}
+
+async function spielZusagen(spielId){
+  const dabei = !ZUSAGEN.has(String(spielId));
+  if (ECHT) {
+    const { error } = await db.rpc("spiel_zusagen", { p_spiel:+spielId, p_geraet:geraetId(), p_dabei:dabei });
+    if (error) { console.warn("Zusagen:", error.message); return melde("Hat nicht geklappt."); }
+  }
+  if (dabei) ZUSAGEN.add(String(spielId)); else ZUSAGEN.delete(String(spielId));
+  mengeSpeichern("platzfrei.zusagen", ZUSAGEN);
+  await spieleLaden();
+  zeichne();
+  melde(dabei ? "Du bist dabei!" : "Abgesagt.");
+  if (dabei) zaehle("zusagen");
+}
+
+async function spielLoeschen(spielId){
+  if (!confirm("Spiel wirklich löschen?")) return;
+  if (ECHT) {
+    const { error } = await db.rpc("spiel_loeschen", { p_spiel:+spielId, p_geraet:geraetId() });
+    if (error) { console.warn("Spiel löschen:", error.message); return melde("Hat nicht geklappt."); }
+  }
+  MEINE_SPIELE.delete(String(spielId)); mengeSpeichern("platzfrei.meinespiele", MEINE_SPIELE);
+  await spieleLaden();
+  zeichne();
+  melde("Spiel gelöscht.");
+}
+
+/* --------------------------------------------------------------------------
+   Platz-Tipps
+   -------------------------------------------------------------------------- */
+function tippsBlock(o){
+  const zahlen = Z.tipps[o.id];
+  if (zahlen === undefined) tippsLaden(o.id);
+  const z = zahlen || {};
+  const meins = k => MEINE_TIPPS.has(o.id + "|" + k);
+  const knopf = k => `<button class="tipp" data-tipp="${k}" aria-pressed="${meins(k)}">${TIPPS[k]}${
+    z[k] ? `<b>${z[k]}</b>` : ``}</button>`;
+  const da = Object.keys(TIPPS).filter(k => z[k] || meins(k)).sort((a, b) => (z[b] || 0) - (z[a] || 0));
+  const rest = Object.keys(TIPPS).filter(k => !da.includes(k));
+  return `<div class="abschnitt" style="margin:12px 0 0">
+      <h3>Tipps von Spielern</h3>
+      ${da.length ? `<div class="tipps">${da.map(knopf).join("")}</div>`
+                  : `<p>Noch keine Tipps. Warst du schon hier? Dann hilf den Nächsten.</p>`}
+      ${Z.tippsOffen
+        ? `<div class="tipps tipps-neu">${rest.map(knopf).join("")}</div>
+           <p style="margin-top:10px"><button class="inline-knopf" data-tippsoffen="0">Fertig</button></p>`
+        : `<p style="margin-top:10px"><button class="inline-knopf" data-tippsoffen="1">Tipp geben</button></p>`}
+    </div>`;
+}
+
+async function tippsLaden(id){
+  Z.tipps[id] = Z.tipps[id] || null;   // nicht doppelt laden
+  if (!ECHT) { Z.tipps[id] = {}; return; }
+  const { data, error } = await db.rpc("tipps_fuer", { p_ort:String(id) });
+  if (error) { console.warn("Tipps:", error.message); Z.tipps[id] = {}; return; }
+  const z = {};
+  for (const r of data || []) z[r.tipp] = r.anzahl;
+  Z.tipps[id] = z;
+  if (Z.ansicht === "detail" && String(Z.auswahlId) === String(id)) zeichne();
+}
+
+async function tippUmschalten(k){
+  const o = ort(Z.auswahlId);
+  if (!o) return;
+  const schl = o.id + "|" + k;
+  const an = !MEINE_TIPPS.has(schl);
+  if (ECHT) {
+    const { error } = await db.rpc("tipp_setzen", { p_ort:String(o.id), p_tipp:k, p_geraet:geraetId(), p_an:an });
+    if (error) { console.warn("Tipp:", error.message); return melde("Hat nicht geklappt."); }
+  }
+  const z = Z.tipps[o.id] || (Z.tipps[o.id] = {});
+  z[k] = Math.max(0, (z[k] || 0) + (an ? 1 : -1));
+  if (an) MEINE_TIPPS.add(schl); else MEINE_TIPPS.delete(schl);
+  mengeSpeichern("platzfrei.tipps", MEINE_TIPPS);
+  zeichne();
+  if (an) zaehle("tipps");
+}
+
+/* --------------------------------------------------------------------------
+   Abzeichen-Seite
+   -------------------------------------------------------------------------- */
+function ansichtAbzeichen(){
+  const s = statistik();
+  const n = abzeichenErreicht(s).length;
+  seite.innerHTML = `
+    <div class="dkopf">
+      <button class="zurueck" data-gehe="liste">← Liste</button>
+      <div class="dname">Meine Abzeichen</div>
+      <div class="dort">${n} von ${ABZEICHEN.length} geschafft</div>
+    </div>
+    <div class="rolle">
+      <div class="abschnitt" style="margin-top:8px">
+        <p>Für jedes Mithelfen gibt es Abzeichen: einchecken, Plätze bestätigen,
+        Spiele ansetzen, Tipps geben. Sie werden nur auf diesem Gerät gezählt.
+        Es gibt kein Konto und keine Rangliste.</p>
+      </div>
+      <div class="abzeichen-gitter">${ABZEICHEN.map(a => {
+        const w = Math.min(a.wert(s), a.ziel);
+        return `<div class="abzeichen${w >= a.ziel ? "" : " zu"}">
+          <div class="ab-icon" aria-hidden="true">${a.icon}</div>
+          <b>${a.name}</b><small>${a.text}</small>
+          ${w >= a.ziel ? `` : `<div class="ab-balken"><span style="width:${Math.round(w / a.ziel * 100)}%"></span></div>
+          <small>${w} von ${a.ziel}</small>`}
+        </div>`; }).join("")}
+      </div>
+    </div>`;
+}
+
 /* Der grüne Kasten im Detail: wer gerade da ist, und der Knopf dazu. */
 function liveBlock(o){
   const n = Z.aktiv[o.id] || 0;
@@ -1626,6 +1943,8 @@ function ansichtDetail(){
         <button data-teilen="${o.id}"><span aria-hidden="true">↗</span>Teilen</button>
         <button data-gehe="melden"><span aria-hidden="true">⚑</span>Melden</button>
       </div>
+      ${spieleBlock(o)}
+      ${tippsBlock(o)}
       <table class="daten">
         <tr class="geschuetzt"><th>Zugang</th><td><b>${esc(o.zugang)}</b></td></tr>
         <tr class="geschuetzt"><th>Erlaubte Zeiten</th><td>${esc(o.zeiten)}</td></tr>
@@ -2041,7 +2360,7 @@ function ansichtAnmelden(){
 const ANSICHTS_TIEFE = {
   liste:0, importieren:1, anmelden:1, neu:1,
   detail:1, bearbeiten:2, melden:2, rechtliches:1, fehler:1, fehlerliste:1,
-  vereinszeiten:2, pruefen:1
+  vereinszeiten:2, pruefen:1, abzeichen:1
 };
 let letzteTiefe = 0;
 let letzterSchluessel = "liste";
@@ -2049,6 +2368,10 @@ const SCROLL = {};                 // Scrollposition je Ansicht
 
 function zeichne(){
   if (Z.ansicht !== "bearbeiten") Z.vorgabeBeleg = null;
+  if (Z.ansicht !== "detail" || String(Z.auswahlId) !== String(zeichne.letzterOrt)) {
+    Z.spielFormOffen = false; Z.tippsOffen = false;
+  }
+  zeichne.letzterOrt = Z.ansicht === "detail" ? Z.auswahlId : null;
   const tiefe = ANSICHTS_TIEFE[Z.ansicht] ?? 0;
   const richtung = tiefe >= letzteTiefe ? "wechsel-vor" : "wechsel-zurueck";
   letzteTiefe = tiefe;
@@ -2065,7 +2388,7 @@ function zeichne(){
 
   ({ liste:ansichtListe, detail:ansichtDetail, bearbeiten:ansichtBearbeiten,
      neu:ansichtNeu, anmelden:ansichtAnmelden, importieren:ansichtImportieren,
-     melden:ansichtMelden, rechtliches:ansichtRechtliches, vereinszeiten:ansichtVereinszeiten, pruefen:ansichtPruefen, fehler:ansichtFehler, fehlerliste:ansichtFehlerliste })[Z.ansicht]();
+     melden:ansichtMelden, rechtliches:ansichtRechtliches, vereinszeiten:ansichtVereinszeiten, pruefen:ansichtPruefen, fehler:ansichtFehler, fehlerliste:ansichtFehlerliste, abzeichen:ansichtAbzeichen })[Z.ansicht]();
 
   /* §11 Nur transform und opacity bewegen – beides läuft im Compositor,
      ohne dass der Browser das Layout neu rechnen muss. */
@@ -2309,6 +2632,7 @@ async function neuVorschlagen(w){
   Z.ansicht = "liste";
   zeichne();
   melde("Danke! Wir prüfen den Platz und schalten ihn dann frei.");
+  zaehle("neueOrte");
 }
 
 async function neuSpeichern(){
@@ -2379,6 +2703,7 @@ function hierEinchecken(id){
     await aktivLaden();
     zeichne();
     melde("Eingecheckt für 2 Stunden. Viel Spaß!");
+    zaehle("checkins", id);
   },
   () => melde("Ohne Standort geht Einchecken nicht. Erlaube ihn in den Einstellungen."),
   { enableHighAccuracy:true, timeout:10000, maximumAge:30000 });
@@ -2411,10 +2736,11 @@ async function aktivLaden(){
    Karte und die Liste neu zeichnen – ein offenes Formular bleibt in Ruhe. */
 setInterval(async () => {
   if (document.hidden) return;
-  if (!(await aktivLaden())) return;
+  const [a, b] = await Promise.all([aktivLaden(), spieleLaden()]);
+  if (!a && !b) return;
   markerZeichnen();
   if (Z.ansicht === "liste") ansichtListe(true);
-  else if (Z.ansicht === "detail") zeichne();
+  else if (Z.ansicht === "detail" && !Z.spielFormOffen) zeichne();
 }, 60000);
 
 /* "Hier gespielt": der billigste und deshalb häufigste Pflegevorgang.
@@ -2443,6 +2769,7 @@ async function alsGepruefT(id){
   ort(id).geprueft = heute();
   zeichne();
   melde(neu ? "Danke – deine Bestätigung zählt." : "Danke – als heute geprüft vermerkt.");
+  if (neu) zaehle(null);   // Platzprüfer zählt BESTAETIGT direkt
 }
 
 /* Export bleibt als Sicherheitsnetz: alles als JSON herunterladen. */
@@ -2578,6 +2905,7 @@ async function schildHochladen(datei){
   else (Z.schilder[o.id] ||= []).push(eintrag);
   zeichne();
   melde("Danke! Das Foto geht in die Prüfung.");
+  zaehle("fotos");
 }
 
 /* Admin: Foto freigeben und gleich den Zugang mit "Schild vor Ort"
@@ -3496,6 +3824,19 @@ function ansichtRechtliches(){
         Rechtsgrundlage ist Art. 6 Abs. 1 lit. a DSGVO (deine Einwilligung
         durch das Einchecken).</p>
 
+        <h4>Mitspieler gesucht und Platz-Tipps</h4>
+        <p>Wenn du ein Spiel ansetzt, zusagst oder einen Tipp gibst, speichern
+        wir genau das (Platz, Zeit, Sportart, Anzahl oder den gewählten Tipp)
+        zusammen mit der zufälligen Geräte-Nummer, damit jede Zusage und jeder
+        Tipp nur einmal zählt. Öffentlich sichtbar sind nur Zeit, Sportart und
+        Anzahlen, nie die Geräte-Nummer. Es gibt keine Namen und keinen freien
+        Text. Vergangene Spiele löschen wir nach einem Tag. Rechtsgrundlage ist
+        Art. 6 Abs. 1 lit. a DSGVO.</p>
+
+        <h4>Abzeichen</h4>
+        <p>Abzeichen werden nur auf deinem Gerät gezählt und nie an uns
+        übertragen.</p>
+
         <h4>Fotos</h4>
         <p>Fotos werden vor dem Hochladen verkleinert, dabei werden
         Ortungs- und Kameradaten aus der Datei entfernt. Wir prüfen jedes
@@ -3877,12 +4218,19 @@ document.addEventListener("click", e=>{
                              "[data-nurlicht],[data-belegt],[data-sortierung],[data-bereich],[data-mehr],"+
                              "[data-schildok],[data-schildweg],[data-loeschen],[data-fehlersenden],[data-fehlererledigt],"+
                              "[data-suchweg],[data-teilen],[data-abmelden],[data-hierpunkt],[data-vereinszeitensenden],"+
-                             "[data-neuok],[data-neuweg],[data-vzok],[data-vzweg],[data-hier],[data-hierweg]");
+                             "[data-neuok],[data-neuweg],[data-vzok],[data-vzweg],[data-hier],[data-hierweg],"+
+                             "[data-zusage],[data-spielweg],[data-spielform],[data-spielansetzen],[data-tipp],[data-tippsoffen]");
   if (!t) return;
 
   if (t.dataset.hierpunkt)  { return hierPunktSetzen(); }
   if (t.dataset.hier)       { return hierEinchecken(t.dataset.hier); }
   if (t.dataset.hierweg)    { return hierAuschecken(); }
+  if (t.dataset.zusage)     { return spielZusagen(t.dataset.zusage); }
+  if (t.dataset.spielweg)   { return spielLoeschen(t.dataset.spielweg); }
+  if (t.dataset.spielform)  { Z.spielFormOffen = t.dataset.spielform === "1"; return zeichne(); }
+  if (t.dataset.spielansetzen) { return spielAnsetzen(); }
+  if (t.dataset.tipp)       { return tippUmschalten(t.dataset.tipp); }
+  if (t.dataset.tippsoffen) { Z.tippsOffen = t.dataset.tippsoffen === "1"; return zeichne(); }
   if (t.dataset.vereinszeitensenden) { return vereinszeitenSenden(); }
   if (t.dataset.neuok)      { return neuenOrtPruefen(t.dataset.neuok, true); }
   if (t.dataset.neuweg)     { return neuenOrtPruefen(t.dataset.neuweg, false); }
@@ -4078,7 +4426,7 @@ adminAdresseOeffnen();
   await adminPruefen();
   await datenLaden();
   platzAusAdresse();
-  await Promise.all([meldungenLaden(), bestaetigungenLaden(), aktivLaden()]);
+  await Promise.all([meldungenLaden(), bestaetigungenLaden(), aktivLaden(), spieleLaden()]);
   zeichne();
   wetterLaden();          // läuft nebenher, blockiert den Start nicht
 })();
