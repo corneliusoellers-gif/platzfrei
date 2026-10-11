@@ -3983,90 +3983,114 @@ function ansichtRechtliches(){
 }
 
 /* --------------------------------------------------------------------------
-   Ganze Regionen aus OpenStreetMap
+   Ganz Deutschland aus OpenStreetMap, Kachel für Kachel
    --------------------------------------------------------------------------
-   Ganz Deutschland auf einmal schafft Overpass nicht. Deshalb pro
-   Bundesland, die großen Länder pro Regierungsbezirk (Regionalschlüssel).
+   Große Gebiete auf einmal lehnen die Overpass-Server ab. Deshalb wird
+   Deutschland in Kacheln von 0,5° × 0,5° (etwa 55 × 35 km) zerlegt und
+   nacheinander geladen, die nächsten zuerst. Fertige Kacheln merkt sich
+   das Gerät, man kann also jederzeit anhalten und später weitermachen.
    -------------------------------------------------------------------------- */
-const OSM_REGIONEN = [
-  ["rs:091","Bayern – Oberbayern"], ["rs:092","Bayern – Niederbayern"], ["rs:093","Bayern – Oberpfalz"],
-  ["rs:094","Bayern – Oberfranken"], ["rs:095","Bayern – Mittelfranken"], ["rs:096","Bayern – Unterfranken"],
-  ["rs:097","Bayern – Schwaben"],
-  ["rs:081","Baden-Württemberg – Stuttgart"], ["rs:082","Baden-Württemberg – Karlsruhe"],
-  ["rs:083","Baden-Württemberg – Freiburg"], ["rs:084","Baden-Württemberg – Tübingen"],
-  ["rs:051","NRW – Düsseldorf"], ["rs:053","NRW – Köln"], ["rs:055","NRW – Münster"],
-  ["rs:057","NRW – Detmold"], ["rs:059","NRW – Arnsberg"],
-  ["rs:064","Hessen – Darmstadt"], ["rs:065","Hessen – Gießen"], ["rs:066","Hessen – Kassel"],
-  ["iso:DE-NI","Niedersachsen"], ["iso:DE-SH","Schleswig-Holstein"], ["iso:DE-HH","Hamburg"],
-  ["iso:DE-HB","Bremen"], ["iso:DE-BE","Berlin"], ["iso:DE-BB","Brandenburg"],
-  ["iso:DE-MV","Mecklenburg-Vorpommern"], ["iso:DE-SN","Sachsen"], ["iso:DE-ST","Sachsen-Anhalt"],
-  ["iso:DE-TH","Thüringen"], ["iso:DE-RP","Rheinland-Pfalz"], ["iso:DE-SL","Saarland"]
-];
-const OSM_GELADEN_SCHLUESSEL = "platzfrei.osmgeladen";
-function osmGeladen(){ return mengeLaden(OSM_GELADEN_SCHLUESSEL); }
+const KACHEL = 0.5;
+const DE_KACHELN = [];
+for (let lat = 47.0; lat < 55.0; lat += KACHEL)
+  for (let lon = 5.5; lon < 15.0; lon += KACHEL)
+    DE_KACHELN.push(lat.toFixed(1) + "," + lon.toFixed(1));
+const OSM_KACHEL_SCHLUESSEL = "platzfrei.osmkacheln";
+function osmKachelnFertig(){ return mengeLaden(OSM_KACHEL_SCHLUESSEL); }
 
-function osmRegionAbfrage(region){
-  const [art, wert] = region.split(":");
-  const gebiet = art === "iso"
-    ? `area["ISO3166-2"="${wert}"]["admin_level"="4"]->.a;`
-    : `area["de:regionalschluessel"="${wert}"]["boundary"="administrative"]->.a;`;
-  return `[out:json][timeout:300];
-${gebiet}
+function osmKachelAbfrage(kachel){
+  const [s, w] = kachel.split(",").map(Number);
+  const box = `${s},${w},${(s + KACHEL).toFixed(1)},${(w + KACHEL).toFixed(1)}`;
+  return `[out:json][timeout:120][bbox:${box}];
 (
-  nwr["leisure"="pitch"]["sport"~"soccer|football|basketball|streetball|table_tennis|beachvolleyball|volleyball|multi|skateboard"](area.a);
-  nwr["leisure"="track"]["sport"~"running|athletics"](area.a);
-  nwr["leisure"="fitness_station"](area.a);
-  nwr["leisure"="playground"]["sport"](area.a);
-  nwr["playground"~"basketball|football|table_tennis|soccer"](area.a);
-  nwr["leisure"="sports_centre"](area.a);
-  nwr["club"="sport"](area.a);
+  nwr["leisure"="pitch"]["sport"~"soccer|football|basketball|streetball|table_tennis|beachvolleyball|volleyball|multi|skateboard"];
+  nwr["leisure"="track"]["sport"~"running|athletics"];
+  nwr["leisure"="fitness_station"];
+  nwr["leisure"="playground"]["sport"];
+  nwr["playground"~"basketball|football|table_tennis|soccer"];
+  nwr["leisure"="sports_centre"];
+  nwr["club"="sport"];
 );
 out center tags;`;
 }
 
-async function osmRegionLaden(){
-  if (!Z.admin) return;
-  const region = document.getElementById("osm-region").value;
-  const name = (OSM_REGIONEN.find(r => r[0] === region) || [, region])[1];
-  melde(`Lade ${name} aus OpenStreetMap … das dauert etwas.`);
-  /* Mehrere öffentliche Overpass-Server: ist einer überlastet,
-     nimmt die App den nächsten. */
-  const SERVER = [
-    "https://overpass-api.de/api/interpreter",
-    "https://overpass.private.coffee/api/interpreter",
-    "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
-    "https://overpass.kumi.systems/api/interpreter"
-  ];
-  let text = null, letzterFehler = "";
-  for (const [i, url] of SERVER.entries()) {
-    if (i) melde(`Server ${i} überlastet, versuche Server ${i + 1} von ${SERVER.length} …`);
+/* Mehrere öffentliche Overpass-Server: ist einer überlastet, nimmt die App
+   den nächsten. Gibt den Antworttext zurück oder null. */
+const OSM_SERVER = [
+  "https://overpass-api.de/api/interpreter",
+  "https://overpass.private.coffee/api/interpreter",
+  "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
+  "https://overpass.kumi.systems/api/interpreter"
+];
+async function overpassHolen(abfrage){
+  for (const url of OSM_SERVER) {
     try {
       const antwort = await fetch(url, {
         method:"POST",
         headers:{ "Content-Type":"application/x-www-form-urlencoded" },
-        body:"data=" + encodeURIComponent(osmRegionAbfrage(region))
+        body:"data=" + encodeURIComponent(abfrage)
       });
       const inhalt = await antwort.text();
-      /* Overpass meldet Zeitüberschreitung manchmal mit Status 200 und
-         einer "remark" statt Daten. */
-      if (antwort.ok && inhalt.trimStart().startsWith("{") && !/"remark":\s*"runtime error/.test(inhalt)) {
-        text = inhalt; break;
-      }
-      letzterFehler = "Fehler " + antwort.status;
+      /* Zeitüberschreitung kommt manchmal mit Status 200 und einer "remark". */
+      if (antwort.ok && inhalt.trimStart().startsWith("{") && !/"remark":\s*"runtime error/.test(inhalt))
+        return inhalt;
+      Z.osmFehler = url.split("/")[2] + ": Fehler " + antwort.status;
     } catch (e) {
       console.warn(url, e);
-      letzterFehler = "nicht erreichbar";
+      Z.osmFehler = url.split("/")[2] + ": nicht erreichbar";
     }
   }
-  if (!text) return melde(`Alle Overpass-Server sind gerade ausgelastet (${letzterFehler}). Bitte später nochmal.`);
-  let anzahl = 0;
-  try { anzahl = (JSON.parse(text).elements || []).length; } catch {}
-  if (!anzahl) return melde(`Für ${name} kam nichts zurück. Später nochmal versuchen.`);
-  melde(`${anzahl} Einträge geladen, werden abgeglichen …`);
-  await importGeoJson(text);
-  const g = osmGeladen(); g.add(region); mengeSpeichern(OSM_GELADEN_SCHLUESSEL, g);
-  Z.importText = name + ": " + (Z.importText || "fertig");
+  return null;
+}
+
+const warte = ms => new Promise(r => setTimeout(r, ms));
+
+async function osmDeutschlandLaden(){
+  if (!Z.admin || Z.osmLaeuft) return;
+  Z.osmLaeuft = true; Z.osmStop = false; Z.osmFehler = "";
+  const fertig = osmKachelnFertig();
+  const m = karte.getCenter();
+  const offen = DE_KACHELN.filter(k => !fertig.has(k)).sort((a, b) => {
+    const d = k => { const [s, w] = k.split(",").map(Number);
+      return (s + KACHEL / 2 - m.lat) ** 2 + ((w + KACHEL / 2 - m.lng) * 0.65) ** 2; };
+    return d(a) - d(b);
+  });
+  let neu = 0, fehlversuche = 0;
   zeichne();
+  for (let i = 0; i < offen.length && !Z.osmStop; i++) {
+    const k = offen[i];
+    Z.osmStand = `Kachel ${fertig.size + 1} von ${DE_KACHELN.length} · bisher ${neu} neue Plätze`;
+    melde(Z.osmStand);
+    const ansichtText = document.getElementById("osm-stand");
+    if (ansichtText) ansichtText.textContent = Z.osmStand;
+
+    const text = await overpassHolen(osmKachelAbfrage(k));
+    if (!text) {
+      /* Alle Server voll: kurz warten und dieselbe Kachel nochmal. */
+      if (++fehlversuche > 3) {
+        melde("Server bleiben ausgelastet. Später auf „Weiter laden“ drücken.");
+        break;
+      }
+      melde(`Server ausgelastet (${Z.osmFehler}). Neuer Versuch in 30 Sekunden …`);
+      await warte(30000); i--; continue;
+    }
+    fehlversuche = 0;
+    let anzahl = 0;
+    try { anzahl = (JSON.parse(text).elements || []).length; } catch {}
+    if (anzahl) {
+      const vorher = DATEN.length;
+      await importGeoJson(text);
+      neu += DATEN.length - vorher;
+    }
+    fertig.add(k); mengeSpeichern(OSM_KACHEL_SCHLUESSEL, fertig);
+    await warte(1000);   // die Server nicht überrennen
+  }
+  Z.osmLaeuft = false;
+  Z.osmStand = fertig.size >= DE_KACHELN.length
+    ? `Fertig: alle ${DE_KACHELN.length} Kacheln geladen, ${neu} neue Plätze in diesem Durchgang.`
+    : `${fertig.size} von ${DE_KACHELN.length} Kacheln geladen, ${neu} neue Plätze in diesem Durchgang.`;
+  melde(Z.osmStand);
+  if (Z.ansicht === "importieren") zeichne();
 }
 
 /* Raster für die Umkreissuche beim Import: statt jeden Ort mit jedem zu
@@ -4136,17 +4160,17 @@ out center tags;`;
         anpassen.</p>
       </div>
       <div class="abschnitt">
-        <h3>Weg C – Ganze Region direkt aus OpenStreetMap laden</h3>
-        <p>Region wählen und laden. Die App holt alle Bolzplätze, Körbe,
-        Tischtennisplatten, Beachvolleyballfelder, Skate- und Fitnessanlagen
-        direkt bei Overpass und importiert sie. Schon vorhandene Plätze werden
-        nicht doppelt angelegt. Eine Region dauert ein bis drei Minuten,
-        bitte die Seite so lange offen lassen. ✓ = schon geladen.</p>
-        <div class="form" style="padding:10px 0 0">
-          <select id="osm-region">${OSM_REGIONEN.map(([k, n]) =>
-            `<option value="${k}">${osmGeladen().has(k) ? "✓ " : ""}${esc(n)}</option>`).join("")}</select>
-        </div>
-        <p style="margin-top:10px"><button class="inline-knopf" data-osmladen="1">Region laden</button></p>
+        <h3>Weg C – Ganz Deutschland aus OpenStreetMap laden</h3>
+        <p>Die App lädt Deutschland in ${DE_KACHELN.length} kleinen Kacheln direkt bei
+        OpenStreetMap, die Gegend der Kartenmitte zuerst. Schon vorhandene
+        Plätze werden nicht doppelt angelegt. Alles dauert grob eine halbe
+        Stunde. Du kannst jederzeit anhalten und später weitermachen, fertige
+        Kacheln merkt sich dieses Gerät.</p>
+        <p id="osm-stand" style="margin-top:8px"><b>${esc(Z.osmStand ||
+          `${osmKachelnFertig().size} von ${DE_KACHELN.length} Kacheln geladen.`)}</b></p>
+        <p style="margin-top:10px">${Z.osmLaeuft
+          ? `<button class="inline-knopf" data-osmstop="1">Anhalten</button>`
+          : `<button class="inline-knopf" data-osmladen="1">${osmKachelnFertig().size ? "Weiter laden" : "Deutschland laden"}</button>`}</p>
       </div>
       ${Z.importText ? `<div class="abschnitt"><h3>Ergebnis</h3>
         <p>${esc(Z.importText)}</p></div>` : ``}
@@ -4425,7 +4449,7 @@ document.addEventListener("click", e=>{
                              "[data-schildok],[data-schildweg],[data-loeschen],[data-fehlersenden],[data-fehlererledigt],"+
                              "[data-suchweg],[data-teilen],[data-abmelden],[data-hierpunkt],[data-vereinszeitensenden],"+
                              "[data-neuok],[data-neuweg],[data-vzok],[data-vzweg],[data-hier],[data-hierweg],"+
-                             "[data-zusage],[data-spielweg],[data-spielform],[data-spielansetzen],[data-tipp],[data-tippsoffen],[data-osmladen]");
+                             "[data-zusage],[data-spielweg],[data-spielform],[data-spielansetzen],[data-tipp],[data-tippsoffen],[data-osmladen],[data-osmstop]");
   if (!t) return;
 
   if (t.dataset.hierpunkt)  { return hierPunktSetzen(); }
@@ -4436,7 +4460,8 @@ document.addEventListener("click", e=>{
   if (t.dataset.spielform)  { Z.spielFormOffen = t.dataset.spielform === "1"; return zeichne(); }
   if (t.dataset.spielansetzen) { return spielAnsetzen(); }
   if (t.dataset.tipp)       { return tippUmschalten(t.dataset.tipp); }
-  if (t.dataset.osmladen)   { return osmRegionLaden(); }
+  if (t.dataset.osmladen)   { return osmDeutschlandLaden(); }
+  if (t.dataset.osmstop)    { Z.osmStop = true; return melde("Wird nach dieser Kachel angehalten …"); }
   if (t.dataset.tippsoffen) { Z.tippsOffen = t.dataset.tippsoffen === "1"; return zeichne(); }
   if (t.dataset.vereinszeitensenden) { return vereinszeitenSenden(); }
   if (t.dataset.neuok)      { return neuenOrtPruefen(t.dataset.neuok, true); }
