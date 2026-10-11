@@ -266,6 +266,14 @@ aside{width:420px;flex-shrink:0;background:var(--grund);
   border-radius:var(--r-karte);box-shadow:var(--schatten);font-size:13.5px;
   color:var(--tinte-2);line-height:1.5;display:flex;flex-wrap:wrap;gap:8px;
   align-items:center}
+.sportwahl{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:4px}
+.form .sportwahl-punkt{display:flex;align-items:center;gap:6px;font-weight:500;font-size:14px;color:var(--tinte);margin:0}
+.form .sportwahl-punkt input,.form .zeitraster-tag input{-webkit-appearance:checkbox;appearance:auto;width:20px;height:20px;min-height:0;padding:0;margin:0;border:0;box-shadow:none;background:none;accent-color:var(--gruen);flex-shrink:0}
+.zeitraster{display:grid;grid-template-columns:auto 1fr auto 1fr;gap:8px 10px;align-items:center;margin-top:6px}
+.form .zeitraster-tag{display:flex;align-items:center;gap:6px;margin:0;font-size:14px;color:var(--tinte)}
+.zeitraster span{font-size:13px;color:var(--tinte-2)}
+.zeitraster input[type=time]{padding:8px 10px}
+.fotowahl{cursor:pointer}
 .inline-knopf{background:var(--gruen-zart);border:0;font-family:var(--schrift);
   font-size:13px;font-weight:600;letter-spacing:-.004em;color:var(--gruen-tief);
   cursor:pointer;padding:6px 13px;border-radius:var(--r-pille);
@@ -1104,6 +1112,7 @@ bereichKnopf.addEventListener("click", () => {
 // Klick auf die Karte im Modus "neuer Ort" setzt die Koordinaten.
 karte.on("click", e => {
   if (Z.ansicht !== "neu") return;
+  Z.neuEntwurf = neuFormularWerte();
   Z.neuerPunkt = { lat:+e.latlng.lat.toFixed(6), lon:+e.latlng.lng.toFixed(6) };
   zeichne();
 });
@@ -1382,6 +1391,7 @@ function ansichtListe(nurListe){
         <span><b>Fehlt ein Platz?</b><br>Trag ihn ein – dauert eine Minute.</span></button>
       ${Z.admin ? `<div class="admin-reihe">
         <button class="knopf zweit" data-gehe="importieren">Import</button>
+        <button class="knopf zweit" data-gehe="pruefen">Prüfen (${pruefAnzahl()})</button>
         <button class="knopf zweit" data-gehe="fehlerliste">Fehler (${FEHLERBERICHTE.length})</button>
         <button class="knopf zweit" data-export="1">Export</button>
         <button class="knopf zweit" data-abmelden="1">Abmelden</button></div>` : ``}
@@ -1462,7 +1472,8 @@ function ansichtListe(nurListe){
     <div class="fuss listenfuss">
       <button class="knopf" data-gehe="neu">Ort eintragen</button>
       ${Z.admin ? `<button class="knopf zweit" data-gehe="importieren">Import</button>` : ``}
-      ${Z.admin ? `<button class="knopf zweit" data-gehe="fehlerliste">Fehler (${FEHLERBERICHTE.length})</button>` : ``}
+      ${Z.admin ? `<button class="knopf zweit" data-gehe="pruefen">Prüfen (${pruefAnzahl()})</button>
+      <button class="knopf zweit" data-gehe="fehlerliste">Fehler (${FEHLERBERICHTE.length})</button>` : ``}
       ${Z.admin ? `<button class="knopf zweit" data-export="1">Export</button>` : ``}
     </div>
     <div class="rechtliches-link listenfuss">Alle Angaben ohne Gewähr – vor Ort gilt das Schild.<br>
@@ -1506,7 +1517,7 @@ function ansichtDetail(){
     ? o.geprueft.split("-").reverse().join(".")
     : `<span class="vermutet">nie geprüft</span>`;
 
-  const offen = VORSCHLAEGE.filter(v=>v.ortId===o.id).length;
+  const offen = VORSCHLAEGE.filter(v=>String(v.ort_id)===String(o.id)).length;
   const verein = vereinsMarke(o);
   const bs = bespielbarkeit(o);
   const anzMeld = Z.meldungen[o.id] || 0;
@@ -1611,6 +1622,11 @@ function ansichtDetail(){
         eingetragen. Wenn du dort warst:
         <button class="inline-knopf" data-gehe="bearbeiten">Jetzt ergänzen</button></p>
       </div>` : ``}
+      ${verein ? `<div class="abschnitt">
+        <h3>Bist du vom Verein?</h3>
+        <p>Trag ein, wann Kinder und Jugendliche euren Platz frei nutzen dürfen.
+        <button class="inline-knopf" data-gehe="vereinszeiten">Platzzeiten eintragen</button></p>
+      </div>` : ``}
       ${offen ? `<div class="abschnitt"><h3>Offene Vorschläge</h3>
         <p>${offen} Änderung${offen>1?"en":""} wartet auf Freigabe.</p></div>` : ``}
     </div>
@@ -1690,44 +1706,233 @@ function ansichtBearbeiten(){
 
 function ansichtNeu(){
   const p = Z.neuerPunkt;
+  const e = Z.neuEntwurf || {};
+  const abstand = p && Z.positionEcht ? Math.round(entfernungKm(Z.position, p) * 1000) : null;
   seite.innerHTML = `
     <div class="dkopf">
       <button class="zurueck" data-gehe="liste">← Abbrechen</button>
-      <div class="dname">Ort eintragen</div>
-      <div class="dort">${p ? "Position gesetzt" : "Tippe auf die Karte, um die Position zu setzen"}</div>
+      <div class="dname">Ort hinzufügen</div>
+      <div class="dort">${p ? "Position gesetzt ✓" : "Tippe auf die Karte, um die Position zu setzen"}</div>
     </div>
     <div class="rolle">
       <form class="form" id="formular">
         <label>Position</label>
         <input value="${p ? p.lat+", "+p.lon : "noch nicht gesetzt"}" readonly
                class="${p?"":"gesperrt"}">
+        <button type="button" class="inline-knopf" data-hierpunkt="1">📍 Ich stehe gerade dort</button>
+        ${abstand !== null && abstand > 300 ? `<p class="hinweis">Der Punkt liegt ${abstand >= 1000
+          ? (abstand/1000).toFixed(1).replace(".",",")+" km" : abstand+" m"} von deinem Standort entfernt.</p>` : ``}
 
         <label>Name</label>
-        <input name="name" placeholder="z. B. Bolzplatz am Waldweg">
+        <input name="name" placeholder="z. B. Bolzplatz am Waldweg" value="${esc(e.name||"")}">
 
-        <label>Ort / Stadtteil</label>
-        <input name="ort" placeholder="z. B. Gauting, Bahnhofstraße">
+        <label>Ort / Straße</label>
+        <input name="ort" placeholder="z. B. Gauting, Bahnhofstraße" value="${esc(e.ort||"")}">
 
-        <label>Sportarten (mit Komma trennen)</label>
-        <input name="sportarten" placeholder="Fußball, Basketball">
+        <label>Sportarten</label>
+        <div class="sportwahl">${AUSWAHL.sportarten.map(sp => `
+          <label class="sportwahl-punkt"><input type="checkbox" name="sp-${esc(sp)}"
+            ${(e.sportarten||"Fußball").split(",").map(x=>x.trim()).includes(sp) ? "checked" : ""}>
+            ${SPORT_ICON[sp]||""} ${esc(sp)}</label>`).join("")}</div>
 
         <label>Untergrund</label>
-        ${auswahlFeld("untergrund", AUSWAHL.untergrund, "Naturrasen", false)}
+        ${auswahlFeld("untergrund", AUSWAHL.untergrund, e.untergrund || "Naturrasen", false)}
 
         <label>Ausstattung</label>
-        <input name="ausstattung" placeholder="2 Tore mit Netz">
+        <input name="ausstattung" placeholder="2 Tore mit Netz" value="${esc(e.ausstattung||"")}">
 
         <label>Zugang</label>
-        ${auswahlFeld("zugang", AUSWAHL.zugang, "unklar", false)}
+        ${auswahlFeld("zugang", AUSWAHL.zugang, e.zugang || "unklar", false)}
 
-        <p class="hinweis">Neue Orte werden immer erst freigegeben, bevor sie
-        öffentlich erscheinen. Zugang und Zeiten prüfen wir vor Ort oder bei der
-        Gemeinde nach.</p>
+        ${Z.admin ? `` : `
+        <label>Foto vom Platz (Pflicht)</label>
+        <label class="inline-knopf fotowahl">${Z.neuFoto ? "✓ Foto gewählt – ändern" : "📷 Foto aufnehmen oder wählen"}
+          <input type="file" id="neu-foto" accept="image/*" hidden></label>
+        <p class="hinweis">Damit wir sehen, dass es den Platz wirklich gibt. Am besten mit
+        Toren oder Körben und gern mit dem Schild am Eingang. Bitte keine Personen
+        oder Autokennzeichen.</p>
+
+        <label>Woher weißt du, dass man dort spielen darf? (freiwillig)</label>
+        <textarea name="hinweis" placeholder="z. B. Schild am Eingang, spielen dort jeden Tag">${esc(e.hinweis||"")}</textarea>`}
+
+        <p class="hinweis">Neue Orte prüfen wir, bevor sie auf der Karte erscheinen.</p>
       </form>
     </div>
     <div class="fuss">
       <button class="knopf" data-neuspeichern="1">${Z.admin?"Anlegen":"Vorschlagen"}</button>
     </div>`;
+}
+
+/* Vereine tragen selbst ein, wann ihr Platz frei nutzbar ist. Geht als
+   Vorschlag mit Kontakt ein, der Admin nimmt ihn unter "Prüfen" an. */
+const WOCHENTAGE = ["Mo","Di","Mi","Do","Fr","Sa","So"];
+function ansichtVereinszeiten(){
+  const o = ort(Z.auswahlId);
+  if (!o) { Z.ansicht = "liste"; return ansichtListe(); }
+  const v = vereinsMarke(o);
+  seite.innerHTML = `
+    <div class="dkopf">
+      <button class="zurueck" data-gehe="detail">← Abbrechen</button>
+      <div class="dname">Platzzeiten eintragen</div>
+      <div class="dort">${esc(o.name)}</div>
+    </div>
+    <div class="rolle">
+      <form class="form" id="formular">
+        <p class="hinweis" style="margin-top:0">Für Vereine: Wann dürfen Kinder und
+        Jugendliche euren Platz frei nutzen, also ohne Training und ohne
+        Anmeldung? Hak die Tage an und trag die Uhrzeit ein.</p>
+        <div class="zeitraster">${WOCHENTAGE.map((t,i) => `
+          <label class="zeitraster-tag"><input type="checkbox" name="tag-${i}"> ${t}</label>
+          <input type="time" name="von-${i}" value="${i<5?"17:00":"10:00"}" aria-label="${t} von">
+          <span>bis</span>
+          <input type="time" name="bis-${i}" value="${i<5?"20:00":"18:00"}" aria-label="${t} bis">`).join("")}
+        </div>
+
+        <label>Zusatz (freiwillig)</label>
+        <input name="zusatz" placeholder="z. B. nicht bei Heimspielen, nur Kleinfeld">
+
+        <hr style="margin:16px 0;border:0;border-top:2px solid var(--tinte)">
+
+        <label>Verein</label>
+        <input name="verein" value="${esc(o.verein || "")}" placeholder="z. B. TSV Musterstadt">
+
+        <label>Dein Name</label>
+        <input name="name" autocomplete="name">
+
+        <label>Deine Funktion im Verein</label>
+        <input name="funktion" placeholder="z. B. Jugendleiter, Platzwart">
+
+        <label>E-Mail (für Rückfragen, wird nicht veröffentlicht)</label>
+        <input name="kontakt" type="email" autocomplete="email">
+
+        <p class="hinweis">Wir prüfen kurz, ob die Angabe vom Verein kommt, und
+        tragen die Zeiten dann mit „Auskunft Verein“ am Platz ein.</p>
+      </form>
+    </div>
+    <div class="fuss">
+      <button class="knopf" data-vereinszeitensenden="1">Zeiten senden</button>
+    </div>`;
+}
+
+/* Aus den Häkchen einen kurzen Text machen: gleiche Zeiten an
+   aufeinanderfolgenden Tagen zusammenfassen, z. B. "Mo–Fr 17:00–20:00". */
+function zeitenAusRaster(w){
+  const tage = WOCHENTAGE.map((t,i) => w["tag-"+i] ? (w["von-"+i]||"") + "–" + (w["bis-"+i]||"") : null);
+  const teile = [];
+  for (let i = 0; i < 7; i++) {
+    if (!tage[i]) continue;
+    let j = i;
+    while (j + 1 < 7 && tage[j+1] === tage[i]) j++;
+    teile.push((j > i ? WOCHENTAGE[i] + (j > i+1 ? "–" : ", ") + WOCHENTAGE[j] : WOCHENTAGE[i]) + " " + tage[i]);
+    i = j;
+  }
+  return teile.join(", ");
+}
+
+async function vereinszeitenSenden(){
+  const o = ort(Z.auswahlId);
+  const f = document.getElementById("formular");
+  const w = formularWerte();
+  for (const el of f.querySelectorAll("input[type=checkbox]")) w[el.name] = el.checked;
+  let zeiten = zeitenAusRaster(w);
+  if (!zeiten) return melde("Bitte mindestens einen Tag anhaken.");
+  if (w.zusatz) zeiten += " (" + w.zusatz + ")";
+  if (!w.verein || w.verein.length < 2) return melde("Bitte den Verein eintragen.");
+  if (!w.name || w.name.length < 2) return melde("Bitte deinen Namen eintragen.");
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(w.kontakt || "")) return melde("Bitte eine gültige E-Mail eintragen.");
+  if (ECHT) {
+    const { error } = await db.from("vereinszeiten").insert({
+      ort_id:String(o.id), zeiten:zeiten.slice(0,300), verein:w.verein, name:w.name,
+      funktion:w.funktion || null, kontakt:w.kontakt });
+    if (error) { console.error(error); return melde("Senden hat nicht geklappt: " + error.message); }
+  }
+  Z.ansicht = "detail";
+  zeichne();
+  melde("Danke! Wir prüfen die Zeiten und tragen sie dann ein.");
+}
+
+/* Admin: neue Orte und Vereinszeiten annehmen oder ablehnen. */
+let NEUE_ORTE = [], VEREINSZEITEN = [];
+async function pruefungLaden(){
+  if (!ECHT) return;
+  const [a, b] = await Promise.all([
+    db.from("neue_orte").select("*").eq("status","offen").order("erstellt"),
+    db.from("vereinszeiten").select("*").eq("status","offen").order("erstellt")]);
+  NEUE_ORTE = a.data || [];
+  VEREINSZEITEN = b.data || [];
+}
+function pruefAnzahl(){ return NEUE_ORTE.length + VEREINSZEITEN.length; }
+
+function ansichtPruefen(){
+  if (!Z.admin) { Z.ansicht = "liste"; return ansichtListe(); }
+  const datum = t => new Date(t).toLocaleString("de-DE",
+    { day:"2-digit", month:"2-digit", hour:"2-digit", minute:"2-digit" });
+  const fotoUrl = pfad => db.storage.from("schilder").getPublicUrl(pfad).data.publicUrl;
+  seite.innerHTML = `
+    <div class="dkopf">
+      <button class="zurueck" data-gehe="liste">← Liste</button>
+      <div class="dname">Prüfen</div>
+      <div class="dort">${pruefAnzahl()} offen</div>
+    </div>
+    <div class="rolle">
+      <div class="abschnitt" style="margin-top:8px"><h3>Neue Orte (${NEUE_ORTE.length})</h3></div>
+      ${NEUE_ORTE.map(n => `
+        <div class="abschnitt" style="margin-top:8px">
+          <h3>${esc(n.name)} · ${esc(datum(n.erstellt))}</h3>
+          <p>${esc((n.sportarten||[]).join(", "))}${n.ort ? " · " + esc(n.ort) : ""} · Zugang: ${esc(n.zugang||"unklar")}</p>
+          ${n.ausstattung ? `<p>Ausstattung: ${esc(n.ausstattung)}</p>` : ``}
+          ${n.hinweis ? `<p>„${esc(n.hinweis)}“</p>` : ``}
+          <p>${n.abstand_m !== null && n.abstand_m !== undefined ? `Standort beim Eintragen: ${n.abstand_m} m entfernt` : `Standort nicht freigegeben`}
+            · <a href="https://www.google.com/maps?q=${n.lat},${n.lon}&t=k" target="_blank" rel="noopener">Luftbild</a></p>
+          <a href="${esc(fotoUrl(n.foto))}" target="_blank" rel="noopener">
+            <img src="${esc(fotoUrl(n.foto))}" alt="Foto vom Platz" style="width:100%;max-height:260px;object-fit:cover;border-radius:12px"></a>
+          <p><button class="inline-knopf" data-neuok="${n.id}">Annehmen</button>
+             <button class="inline-knopf" data-neuweg="${n.id}">Ablehnen</button></p>
+        </div>`).join("") || `<div class="leer">Keine neuen Orte.</div>`}
+      <div class="abschnitt" style="margin-top:16px"><h3>Platzzeiten von Vereinen (${VEREINSZEITEN.length})</h3></div>
+      ${VEREINSZEITEN.map(v => { const o = ort(v.ort_id); return `
+        <div class="abschnitt" style="margin-top:8px">
+          <h3>${esc(o ? o.name : "Platz " + v.ort_id)} · ${esc(datum(v.erstellt))}</h3>
+          <p><b>${esc(v.zeiten)}</b></p>
+          <p>${esc(v.verein)} · ${esc(v.name)}${v.funktion ? " (" + esc(v.funktion) + ")" : ""} ·
+            <a href="mailto:${esc(v.kontakt)}">${esc(v.kontakt)}</a></p>
+          ${o ? `<p>Bisher: ${esc(o.zeiten)} · ${esc(o.zugang)}</p>` : ``}
+          <p><button class="inline-knopf" data-vzok="${v.id}">Annehmen</button>
+             <button class="inline-knopf" data-vzweg="${v.id}">Ablehnen</button></p>
+        </div>`; }).join("") || `<div class="leer">Keine Vereinszeiten.</div>`}
+    </div>`;
+}
+
+async function neuenOrtPruefen(id, annehmen){
+  if (ECHT) {
+    const { data, error } = await db.rpc("neuen_ort_pruefen", { p_id:+id, p_annehmen:annehmen });
+    if (error) { console.error(error); return melde("Abgelehnt: " + error.message); }
+    if (annehmen && data) {
+      const { data:zeile } = await db.from("orte").select("*").eq("id", data).single();
+      if (zeile) DATEN.push(ausDb(zeile));
+    }
+  }
+  NEUE_ORTE = NEUE_ORTE.filter(n => String(n.id) !== String(id));
+  zeichne();
+  melde(annehmen ? "Angenommen – der Platz ist jetzt auf der Karte." : "Abgelehnt.");
+}
+
+async function vereinszeitenPruefen(id, annehmen){
+  const v = VEREINSZEITEN.find(x => String(x.id) === String(id));
+  if (ECHT) {
+    const { error } = await db.rpc("vereinszeiten_pruefen", { p_id:+id, p_annehmen:annehmen });
+    if (error) { console.error(error); return melde("Abgelehnt: " + error.message); }
+  }
+  const o = v && ort(v.ort_id);
+  if (annehmen && o) {
+    o.zeiten = v.zeiten; o.bestaetigtDurch = "Auskunft Verein"; o.geprueft = heute();
+    if (!o.verein) o.verein = v.verein;
+    if (o.zugang === "unklar" || o.zugang === "Vereinsgelände abgeschlossen")
+      o.zugang = "Vereinsgelände frei betretbar";
+  }
+  VEREINSZEITEN = VEREINSZEITEN.filter(x => String(x.id) !== String(id));
+  zeichne();
+  melde(annehmen ? "Zeiten übernommen." : "Abgelehnt.");
 }
 
 function ansichtAnmelden(){
@@ -1762,7 +1967,8 @@ function ansichtAnmelden(){
    §7 Räumliche Konsistenz: Was nach rechts hinausging, kommt von rechts zurück. */
 const ANSICHTS_TIEFE = {
   liste:0, importieren:1, anmelden:1, neu:1,
-  detail:1, bearbeiten:2, melden:2, rechtliches:1, fehler:1, fehlerliste:1
+  detail:1, bearbeiten:2, melden:2, rechtliches:1, fehler:1, fehlerliste:1,
+  vereinszeiten:2, pruefen:1
 };
 let letzteTiefe = 0;
 let letzterSchluessel = "liste";
@@ -1786,7 +1992,7 @@ function zeichne(){
 
   ({ liste:ansichtListe, detail:ansichtDetail, bearbeiten:ansichtBearbeiten,
      neu:ansichtNeu, anmelden:ansichtAnmelden, importieren:ansichtImportieren,
-     melden:ansichtMelden, rechtliches:ansichtRechtliches, fehler:ansichtFehler, fehlerliste:ansichtFehlerliste })[Z.ansicht]();
+     melden:ansichtMelden, rechtliches:ansichtRechtliches, vereinszeiten:ansichtVereinszeiten, pruefen:ansichtPruefen, fehler:ansichtFehler, fehlerliste:ansichtFehlerliste })[Z.ansicht]();
 
   /* §11 Nur transform und opacity bewegen – beides läuft im Compositor,
      ohne dass der Browser das Layout neu rechnen muss. */
@@ -1893,7 +2099,7 @@ async function datenLaden(){
 
   DATEN = alle.map(ausDb);
   VORSCHLAEGE = [];
-  if (Z.admin) await Promise.all([vorschlaegeLaden(), fehlerLaden()]);
+  if (Z.admin) await Promise.all([vorschlaegeLaden(), fehlerLaden(), pruefungLaden()]);
   zeichne();
 }
 
@@ -1989,10 +2195,55 @@ async function speichern(){
     : "Gespeichert.");
 }
 
+/* Formular "Ort hinzufügen" lesen, Sportarten aus den Häkchen. */
+function neuFormularWerte(){
+  const f = document.getElementById("formular");
+  if (!f) return Z.neuEntwurf || {};
+  const w = formularWerte();
+  const sp = [];
+  for (const el of f.querySelectorAll("input[type=checkbox][name^='sp-']")) {
+    if (el.checked) sp.push(el.name.slice(3));
+    delete w[el.name];
+  }
+  w.sportarten = sp.join(", ");
+  return w;
+}
+
+/* Nutzer: Vorschlag mit Pflichtfoto in "neue_orte". Erscheint erst nach
+   der Prüfung durch den Admin auf der Karte. */
+async function neuVorschlagen(w){
+  if (!Z.neuFoto) return melde("Bitte noch ein Foto vom Platz hinzufügen.");
+  melde("Wird gesendet …");
+  let blob;
+  try { blob = await bildVerkleinern(Z.neuFoto); }
+  catch { return melde("Das Foto ließ sich nicht lesen."); }
+  const p = Z.neuerPunkt;
+  if (ECHT) {
+    const pfad = `neu/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+    const { error:e1 } = await db.storage.from("schilder")
+                                 .upload(pfad, blob, { contentType:"image/jpeg" });
+    if (e1) { console.error(e1); return melde("Foto hochladen hat nicht geklappt."); }
+    const { error:e2 } = await db.from("neue_orte").insert({
+      name:w.name.slice(0,120), ort:w.ort || null, lat:p.lat, lon:p.lon,
+      sportarten:w.sportarten.split(",").map(s=>s.trim()).filter(Boolean),
+      zugang:w.zugang || null, untergrund:w.untergrund || null,
+      ausstattung:w.ausstattung || null, hinweis:w.hinweis || null, foto:pfad,
+      abstand_m: Z.positionEcht ? Math.round(entfernungKm(Z.position, p) * 1000) : null,
+      geraet:geraetId() });
+    if (e2) { console.error(e2); return melde("Senden hat nicht geklappt: " + e2.message); }
+  }
+  Z.neuerPunkt = null; Z.neuFoto = null; Z.neuEntwurf = null;
+  Z.ansicht = "liste";
+  zeichne();
+  melde("Danke! Wir prüfen den Platz und schalten ihn dann frei.");
+}
+
 async function neuSpeichern(){
   if (!Z.neuerPunkt) return melde("Bitte zuerst auf die Karte tippen.");
-  const w = formularWerte();
+  const w = neuFormularWerte();
   if (!w.name) return melde("Ein Name fehlt noch.");
+  if (!w.sportarten) return melde("Bitte mindestens eine Sportart wählen.");
+  if (!Z.admin) return neuVorschlagen(w);
 
   const zeile = {
     name: w.name,
@@ -2027,7 +2278,7 @@ async function neuSpeichern(){
     DATEN.push(ausDb({ ...zeile, id:"O"+String(DATEN.length+1).padStart(2,"0") }));
   }
 
-  Z.neuerPunkt = null;
+  Z.neuerPunkt = null; Z.neuEntwurf = null;
   Z.ansicht = "liste";
   zeichne();
   melde("Danke – der Ort geht in die Prüfung.");
@@ -2363,7 +2614,7 @@ async function anmelden(){
   }
 
   await adminPruefen();
-  if (Z.admin) await Promise.all([vorschlaegeLaden(), bestaetigungenLaden(), fehlerLaden()]);
+  if (Z.admin) await Promise.all([vorschlaegeLaden(), bestaetigungenLaden(), fehlerLaden(), pruefungLaden()]);
   Z.ansicht = "liste";
   zeichne();
   melde(Z.admin ? "Angemeldet als Admin." : "Angemeldet – aber nicht als Admin freigeschaltet.");
@@ -3105,7 +3356,15 @@ function ansichtRechtliches(){
         <p>Fotos werden vor dem Hochladen verkleinert, dabei werden
         Ortungs- und Kameradaten aus der Datei entfernt. Wir prüfen jedes
         Foto, bevor es öffentlich sichtbar wird, und löschen Fotos mit
-        erkennbaren Personen oder Kennzeichen.</p>
+        erkennbaren Personen oder Kennzeichen. Schlägst du einen neuen Platz
+        vor, sehen nur wir das Foto und den Abstand zu deinem Standort (falls
+        freigegeben), um den Vorschlag zu prüfen.</p>
+
+        <h4>Platzzeiten von Vereinen</h4>
+        <p>Trägt jemand für einen Verein Platzzeiten ein, speichern wir Name,
+        Funktion und E-Mail nur, um bei Rückfragen nachzuhaken. Diese Angaben
+        werden nicht veröffentlicht und nach der Prüfung nicht weiter genutzt.
+        Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO.</p>
 
         <h4>Standort</h4>
         <p>Wenn du es erlaubst, nutzt die App deinen Standort, um die
@@ -3473,9 +3732,16 @@ document.addEventListener("click", e=>{
                              "[data-merken],[data-gemerkt],[data-melden],[data-route],"+
                              "[data-nurlicht],[data-belegt],[data-sortierung],[data-bereich],[data-mehr],"+
                              "[data-schildok],[data-schildweg],[data-loeschen],[data-fehlersenden],[data-fehlererledigt],"+
-                             "[data-suchweg],[data-teilen],[data-abmelden]");
+                             "[data-suchweg],[data-teilen],[data-abmelden],[data-hierpunkt],[data-vereinszeitensenden],"+
+                             "[data-neuok],[data-neuweg],[data-vzok],[data-vzweg]");
   if (!t) return;
 
+  if (t.dataset.hierpunkt)  { return hierPunktSetzen(); }
+  if (t.dataset.vereinszeitensenden) { return vereinszeitenSenden(); }
+  if (t.dataset.neuok)      { return neuenOrtPruefen(t.dataset.neuok, true); }
+  if (t.dataset.neuweg)     { return neuenOrtPruefen(t.dataset.neuweg, false); }
+  if (t.dataset.vzok)       { return vereinszeitenPruefen(t.dataset.vzok, true); }
+  if (t.dataset.vzweg)      { return vereinszeitenPruefen(t.dataset.vzweg, false); }
   if (t.dataset.belegt)     { Z.nurBelegt = !Z.nurBelegt; return zeichne(); }
   if (t.dataset.suchweg)    { Z.suche = ""; zeichne(); return; }
   if (t.dataset.teilen)     { return teilen(t.dataset.teilen); }
@@ -3558,11 +3824,37 @@ document.addEventListener("change", e=>{
     importVerarbeiten(e.target.files[0]);
   if (e.target.id === "schild-datei" && e.target.files?.[0])
     schildHochladen(e.target.files[0]);
+  if (e.target.id === "neu-foto" && e.target.files?.[0]) {
+    if (!e.target.files[0].type.startsWith("image/")) return melde("Bitte ein Foto auswählen.");
+    Z.neuFoto = e.target.files[0];
+    Z.neuEntwurf = neuFormularWerte();
+    zeichne();
+    melde("Foto gewählt.");
+  }
 });
 
 /* ==========================================================================
    8. START
    ========================================================================== */
+
+/* "Ich stehe gerade dort": Standort holen und als Position des neuen
+   Ortes nehmen. */
+function hierPunktSetzen(){
+  if (!navigator.geolocation) return melde("Dein Gerät gibt keinen Standort heraus.");
+  Z.neuEntwurf = neuFormularWerte();
+  melde("Standort wird gesucht …");
+  navigator.geolocation.getCurrentPosition(
+    p => {
+      Z.position = { lat:p.coords.latitude, lon:p.coords.longitude };
+      Z.positionEcht = true;
+      Z.neuerPunkt = { lat:+p.coords.latitude.toFixed(6), lon:+p.coords.longitude.toFixed(6) };
+      karte.setView([Z.neuerPunkt.lat, Z.neuerPunkt.lon], Math.max(karte.getZoom(), 17));
+      zeichne();
+      melde("Position gesetzt.");
+    },
+    () => melde("Standort nicht freigegeben. Tippe stattdessen auf die Karte."),
+    { enableHighAccuracy:true, timeout:10000 });
+}
 
 function standortHolen(){
   if (!navigator.geolocation) return;
