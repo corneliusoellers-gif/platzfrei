@@ -251,6 +251,23 @@ aside{width:420px;flex-shrink:0;background:var(--grund);
 .marke.boden.schlecht{background:var(--zu-bg);color:var(--zu)}
 .marke.warnung{background:var(--zu-bg);color:var(--zu);margin-left:0}
 .marke.bestaetigt{background:var(--frei-bg);color:var(--frei);margin-left:0}
+.marke.live{background:var(--frei-bg);color:var(--frei);margin-left:0}
+
+/* ---------- Gerade hier (Community) ---------- */
+.puls{display:inline-block;width:8px;height:8px;border-radius:50%;background:#34C759;
+  margin-right:6px;flex:none;animation:puls 1.8s ease-out infinite}
+@keyframes puls{0%{box-shadow:0 0 0 0 rgba(52,199,89,.55)}100%{box-shadow:0 0 0 8px rgba(52,199,89,0)}}
+@media (prefers-reduced-motion:reduce){.puls{animation:none}}
+.live-kasten{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0 2px;
+  padding:12px 14px;border-radius:var(--r-feld);background:var(--frei-bg)}
+.live-kasten .live-text{flex:1 1 180px;font-size:14px;line-height:1.35;color:var(--tinte);display:flex;align-items:center}
+.live-kasten .live-text small{display:block;color:var(--tinte-3);font-size:12px;margin-top:2px}
+.live-kasten .inline-knopf{margin:0}
+.live-ring{pointer-events:none}
+.live-ring span{display:block;width:30px;height:30px;border-radius:50%;
+  border:2px solid #34C759;animation:ring 1.8s ease-out infinite}
+@keyframes ring{0%{transform:scale(.5);opacity:1}100%{transform:scale(1.4);opacity:0}}
+@media (prefers-reduced-motion:reduce){.live-ring span{animation:none;opacity:.8}}
 
 .stern{font-size:17px;line-height:1;color:#D6DDD8;cursor:pointer;padding:2px;
   transition:color 160ms var(--feder-schnell),transform var(--druck)}
@@ -410,6 +427,11 @@ label.inline-knopf{display:inline-block;margin-top:10px}
   box-shadow:0 2px 8px rgba(15,26,21,.25);cursor:pointer;
   transition:transform 180ms var(--feder)}
 .buendel:hover span{transform:scale(1.08)}
+/* Im Bündel wird gerade gespielt: kleiner grüner Punkt oben rechts. */
+.buendel{position:relative}
+.buendel i{position:absolute;top:-2px;right:-2px;width:10px;height:10px;border-radius:50%;
+  background:#34C759;border:2px solid #fff;animation:puls 1.8s ease-out infinite}
+@media (prefers-reduced-motion:reduce){.buendel i{animation:none}}
 
 /* ---------- Griff (nur mobil sichtbar) ---------- */
 .griff{display:none}
@@ -812,6 +834,7 @@ let Z = {
   laden:false,
   meldungen:{},           // ort_id -> Anzahl offener Meldungen
   bestaetigungen:{},      // ort_id -> wie viele Geräte "hier gespielt" sagten
+  aktiv:{},               // ort_id -> wie viele gerade dort sind (erst ab 2)
   schilder:{},            // ort_id -> [{id, url, pfad, freigegeben}]
   vorgabeBeleg:null,      // beim Übernehmen eines Schildfotos: Beleg vorbelegen
   wetter:null             // Vorhersage für die nächsten Stunden
@@ -865,6 +888,28 @@ function bestaetigteLaden(){
   catch { return new Set(); }
 }
 let BESTAETIGT = bestaetigteLaden();
+
+/* --------------------------------------------------------------------------
+   "Ich bin gerade hier"
+   --------------------------------------------------------------------------
+   Wer auf einem Platz steht, checkt für zwei Stunden ein. Andere sehen nur
+   die Anzahl, und die erst ab zwei Leuten – ein einzelnes Kind taucht nie
+   auf der Karte auf. Kein Name, kein Text, der Standort wird nur geprüft
+   (höchstens 300 m vom Platz), nicht gespeichert.
+   -------------------------------------------------------------------------- */
+const HIER_SCHLUESSEL = "platzfrei.hier";
+
+function meinCheckin(){
+  try {
+    const c = JSON.parse(localStorage.getItem(HIER_SCHLUESSEL) || "null");
+    if (c && new Date(c.bis) > new Date()) return c;
+  } catch {}
+  return null;
+}
+function hierHier(id){
+  const c = meinCheckin();
+  return !!c && String(c.ort) === String(id);
+}
 
 /* ==========================================================================
    3. KARTE
@@ -986,6 +1031,11 @@ const BUENDEL_ZELLE = 90;      // Bündelgröße in Bildschirmpunkten
 const BUENDEL_RANG = ["#34C759", "#FF9F0A", "#7A5EA8", "#FF3B30", "#8E8E93"];
 
 function punktZeichnen(o){
+  if ((Z.aktiv[o.id] || 0) >= 2 || hierHier(o.id))
+    L.marker([o.lat, o.lon], {
+      icon: L.divIcon({ className:"live-ring", html:"<span></span>", iconSize:[30,30] }),
+      interactive:false, keyboard:false
+    }).addTo(markerEbene);
   const grau = farbe(o) === "#8E8E93";
   const gewaehlt = String(o.id) === String(Z.auswahlId);
   const klein = karte.getZoom() < 15;
@@ -1017,7 +1067,8 @@ function buendelZeichnen(gruppe){
   L.marker([lat / n, lon / n], {
     icon: L.divIcon({
       className: "buendel",
-      html: `<span style="--ring:${BUENDEL_RANG[rang]};width:${groesse}px;height:${groesse}px">${text}</span>`,
+      html: `<span style="--ring:${BUENDEL_RANG[rang]};width:${groesse}px;height:${groesse}px">${text}</span>${
+        gruppe.some(o => (Z.aktiv[o.id] || 0) >= 2) ? `<i title="Hier wird gerade gespielt"></i>` : ``}`,
       iconSize: [groesse, groesse]
     }),
     keyboard: false
@@ -1371,6 +1422,8 @@ function ansichtListe(nurListe){
         <span class="marke verein">${v[0]}</span>` : ``}${bs ? `
         <span class="marke boden ${bs[0]}">${bs[1]}</span>` : ``}${anzMeld >= 3 ? `
         <span class="marke warnung">${anzMeld}× weggeschickt</span>` : ``}${
+          (Z.aktiv[o.id] || 0) >= 2 ? `
+        <span class="marke live"><span class="puls" aria-hidden="true"></span>${Z.aktiv[o.id]} spielen gerade</span>` : ``}${
           !belegt(o) && nutzerBestaetigt(o) ? `
         <span class="marke bestaetigt">✓ von Nutzern bestätigt</span>` : ``}
       </span>
@@ -1510,6 +1563,23 @@ document.addEventListener("keydown", e => {
   sheet.mitte();
 });
 
+/* Der grüne Kasten im Detail: wer gerade da ist, und der Knopf dazu. */
+function liveBlock(o){
+  const n = Z.aktiv[o.id] || 0;
+  const ich = hierHier(o.id);
+  const bis = ich ? new Date(meinCheckin().bis)
+    .toLocaleTimeString("de-DE", { hour:"2-digit", minute:"2-digit" }) : "";
+  const text = ich && n >= 2 ? `<b>Du und ${n - 1} ${n - 1 === 1 ? "weiterer" : "weitere"} seid gerade hier</b>`
+    : ich ? `<span><b>Du bist hier eingecheckt</b><small>bis ${bis} Uhr · andere sehen es, sobald ihr zu zweit seid</small></span>`
+    : n >= 2 ? `<b>${n} spielen gerade hier</b>`
+    : `<span><b>Bist du gerade hier?</b><small>Zeig anderen, dass hier gespielt wird. Anonym, ohne Namen, gilt 2 Stunden.</small></span>`;
+  return `<div class="live-kasten">
+      <span class="live-text">${n >= 2 || ich ? `<span class="puls" aria-hidden="true"></span>` : ``}${text}</span>
+      ${ich ? `<button class="inline-knopf" data-hierweg="1">Wieder weg</button>`
+            : `<button class="inline-knopf" data-hier="${o.id}">${n >= 2 ? "Ich bin auch hier" : "Ich bin gerade hier"}</button>`}
+    </div>`;
+}
+
 function ansichtDetail(){
   const o = ort(Z.auswahlId);
   if (!o) { Z.ansicht="liste"; return ansichtListe(); }
@@ -1549,6 +1619,7 @@ function ansichtDetail(){
         <span class="status-text"><b>${statusText.charAt(0).toUpperCase() + statusText.slice(1)}</b>
           <span>${esc(o.zugang)}${o.zeiten && o.zeiten !== "unbekannt" ? ` · ${esc(o.zeiten)}` : ``}</span></span>
       </div>
+      ${liveBlock(o)}
       <div class="schnell">
         <button data-route="${o.id}"><span aria-hidden="true">➜</span>Route</button>
         <button data-merken="${o.id}" class="${GEMERKT.has(o.id) ? "an" : ""}"><span aria-hidden="true">${GEMERKT.has(o.id) ? "★" : "☆"}</span>${GEMERKT.has(o.id) ? "Gemerkt" : "Merken"}</button>
@@ -2285,6 +2356,66 @@ async function neuSpeichern(){
   zeichne();
   melde("Danke – der Ort geht in die Prüfung.");
 }
+
+/* "Ich bin gerade hier": Standort holen, die Datenbank prüft den Abstand. */
+function hierEinchecken(id){
+  if (!ECHT) return melde("Geht nur in der echten App.");
+  if (!navigator.geolocation) return melde("Dein Gerät gibt keinen Standort heraus.");
+  melde("Standort wird geprüft …");
+  navigator.geolocation.getCurrentPosition(async p => {
+    Z.position = { lat:p.coords.latitude, lon:p.coords.longitude };
+    Z.positionEcht = true;
+    const { data, error } = await db.rpc("bin_hier", {
+      p_ort:String(id), p_geraet:geraetId(),
+      p_lat:p.coords.latitude, p_lon:p.coords.longitude });
+    if (error) {
+      const weit = /zu weit weg: (\d+)/.exec(error.message || "");
+      console.warn("Einchecken:", error.message);
+      return melde(weit
+        ? `Du bist ${weit[1]} m entfernt. Einchecken geht nur direkt am Platz.`
+        : "Konnte nicht einchecken.");
+    }
+    try { localStorage.setItem(HIER_SCHLUESSEL, JSON.stringify({ ort:String(id), bis:data })); } catch {}
+    await aktivLaden();
+    zeichne();
+    melde("Eingecheckt für 2 Stunden. Viel Spaß!");
+  },
+  () => melde("Ohne Standort geht Einchecken nicht. Erlaube ihn in den Einstellungen."),
+  { enableHighAccuracy:true, timeout:10000, maximumAge:30000 });
+}
+
+async function hierAuschecken(){
+  try { localStorage.removeItem(HIER_SCHLUESSEL); } catch {}
+  if (ECHT) {
+    const { error } = await db.rpc("bin_weg", { p_geraet:geraetId() });
+    if (error) console.warn("Auschecken:", error.message);
+    await aktivLaden();
+  }
+  zeichne();
+  melde("Ausgecheckt.");
+}
+
+/* Wer ist gerade wo? Nur Anzahlen, die Datenbank liefert erst ab 2. */
+async function aktivLaden(){
+  if (!ECHT) return false;
+  const { data, error } = await db.rpc("gerade_aktiv");
+  if (error) { console.warn("Gerade aktiv:", error.message); return false; }
+  const neu = {};
+  for (const z of data || []) neu[z.ort_id] = z.anzahl;
+  const geaendert = JSON.stringify(neu) !== JSON.stringify(Z.aktiv);
+  Z.aktiv = neu;
+  return geaendert;
+}
+
+/* Jede Minute nachsehen, solange die App offen und sichtbar ist. Nur die
+   Karte und die Liste neu zeichnen – ein offenes Formular bleibt in Ruhe. */
+setInterval(async () => {
+  if (document.hidden) return;
+  if (!(await aktivLaden())) return;
+  markerZeichnen();
+  if (Z.ansicht === "liste") ansichtListe(true);
+  else if (Z.ansicht === "detail") zeichne();
+}, 60000);
 
 /* "Hier gespielt": der billigste und deshalb häufigste Pflegevorgang.
    Zählt als Bestätigung (einmal pro Gerät) und setzt das Prüfdatum hoch. */
@@ -3354,6 +3485,17 @@ function ansichtRechtliches(){
         auf deine Person zu und ist öffentlich nicht sichtbar. Rechtsgrundlage
         ist Art. 6 Abs. 1 lit. f DSGVO (eine verlässliche Platzkarte).</p>
 
+        <h4>„Ich bin gerade hier“</h4>
+        <p>Wenn du an einem Platz eincheckst, prüft die App einmal deinen
+        Standort, ob du höchstens 300 m vom Platz entfernt bist. Der Standort
+        selbst wird nicht gespeichert. Gespeichert werden nur der Platz, die
+        zufällige Geräte-Nummer und die Uhrzeit, bis wann der Check-in gilt
+        (zwei Stunden). Andere sehen nur, wie viele Leute gerade an einem
+        Platz sind, und das erst ab zwei Personen. Nach einem Tag wird der
+        Eintrag gelöscht. Du kannst jederzeit mit „Wieder weg“ auschecken.
+        Rechtsgrundlage ist Art. 6 Abs. 1 lit. a DSGVO (deine Einwilligung
+        durch das Einchecken).</p>
+
         <h4>Fotos</h4>
         <p>Fotos werden vor dem Hochladen verkleinert, dabei werden
         Ortungs- und Kameradaten aus der Datei entfernt. Wir prüfen jedes
@@ -3735,10 +3877,12 @@ document.addEventListener("click", e=>{
                              "[data-nurlicht],[data-belegt],[data-sortierung],[data-bereich],[data-mehr],"+
                              "[data-schildok],[data-schildweg],[data-loeschen],[data-fehlersenden],[data-fehlererledigt],"+
                              "[data-suchweg],[data-teilen],[data-abmelden],[data-hierpunkt],[data-vereinszeitensenden],"+
-                             "[data-neuok],[data-neuweg],[data-vzok],[data-vzweg]");
+                             "[data-neuok],[data-neuweg],[data-vzok],[data-vzweg],[data-hier],[data-hierweg]");
   if (!t) return;
 
   if (t.dataset.hierpunkt)  { return hierPunktSetzen(); }
+  if (t.dataset.hier)       { return hierEinchecken(t.dataset.hier); }
+  if (t.dataset.hierweg)    { return hierAuschecken(); }
   if (t.dataset.vereinszeitensenden) { return vereinszeitenSenden(); }
   if (t.dataset.neuok)      { return neuenOrtPruefen(t.dataset.neuok, true); }
   if (t.dataset.neuweg)     { return neuenOrtPruefen(t.dataset.neuweg, false); }
@@ -3934,7 +4078,7 @@ adminAdresseOeffnen();
   await adminPruefen();
   await datenLaden();
   platzAusAdresse();
-  await Promise.all([meldungenLaden(), bestaetigungenLaden()]);
+  await Promise.all([meldungenLaden(), bestaetigungenLaden(), aktivLaden()]);
   zeichne();
   wetterLaden();          // läuft nebenher, blockiert den Start nicht
 })();
