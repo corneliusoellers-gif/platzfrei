@@ -1411,8 +1411,8 @@ function satellitBild(o, px = 132){
 async function wetterLaden(){
   try {
     const u = new URL("https://api.open-meteo.com/v1/forecast");
-    u.searchParams.set("latitude",  Z.position.lat.toFixed(3));
-    u.searchParams.set("longitude", Z.position.lon.toFixed(3));
+    u.searchParams.set("latitude",  Z.position.lat.toFixed(2));
+    u.searchParams.set("longitude", Z.position.lon.toFixed(2));
     u.searchParams.set("hourly", "precipitation");
     u.searchParams.set("daily", "sunset");
     u.searchParams.set("past_hours", "12");
@@ -3171,6 +3171,10 @@ function sportartenAusTags(t){
     if (OSM_SPORT[r]) menge.add(OSM_SPORT[r]);
     if (r === "multi") menge.add("Basketball");
   }
+  /* Basketballkorb oder Tor auf einem Spielplatz (playground=basketball usw.) */
+  const spielgeraet = { basketball:"Basketball", football:"Fußball", soccer:"Fußball",
+                        table_tennis:"Tischtennis" }[(t.playground || "").toLowerCase()];
+  if (spielgeraet) menge.add(spielgeraet);
   if (!menge.size && t.leisure === "fitness_station") menge.add("Calisthenics");
   return [...menge];
 }
@@ -3448,25 +3452,33 @@ async function importGeoJson(text){
   try { geo = JSON.parse(text); }
   catch { return melde("Das ist keine gültige GeoJSON-Datei."); }
 
-  const features = geo.features || [];
+  /* Auch rohes Overpass-JSON annehmen (elements statt features). */
+  const features = geo.features || (geo.elements || []).map(e => ({
+    properties: e.tags || {},
+    geometry: e.type === "node" ? { type:"Point", coordinates:[e.lon, e.lat] }
+            : e.center ? { type:"Point", coordinates:[e.center.lon, e.center.lat] } : null
+  }));
   if (!features.length) return melde("Die Datei enthält keine Einträge.");
 
   const vorhanden = new Set(DATEN.map(o => ortSchluessel(o.name, o.lat, o.lon)));
+  const bekannt = new Map();
+  for (const o of DATEN) rasterRein(bekannt, o);
+  const neuRaster = new Map();
 
   /* Erster Durchgang: Vereinsgelände einsammeln (sports_centre, club=sport).
      Sie werden nicht selbst als Orte importiert – sie dienen als Anker:
      Jeder ungeklärte Platz im Umkreis von 180 m gilt als vermutliche
      Vereinsanlage und bekommt den Vereinsnamen. */
-  const vereine = [];
+  const vereine = new Map();
   for (const f of features) {
     const t = f.properties || {};
     if (t.leisure === "sports_centre" || t.club === "sport") {
       const p = mittelpunkt(f.geometry);
-      if (p) vereine.push({ lat:p.lat, lon:p.lon, name:(t.name || "").trim() });
+      if (p) rasterRein(vereine, { lat:p.lat, lon:p.lon, name:(t.name || "").trim() });
     }
   }
   function vereinInDerNaehe(lat, lon){
-    for (const v of vereine)
+    for (const v of rasterNah(vereine, lat, lon))
       if (entfernungKm({lat, lon}, {lat:v.lat, lon:v.lon}) * 1000 <= 180) return v;
     return null;
   }
@@ -3490,7 +3502,8 @@ async function importGeoJson(text){
     /* Abgleich: Liegt hier schon eine Fläche aus einer amtlichen Liste?
        Dann ist es dieselbe Anlage – wir übernehmen sie nicht doppelt,
        ergänzen aber fehlende Sportarten und den Untergrund aus OSM. */
-    const treffer = bekannterOrtInDerNaehe(p.lat, p.lon);
+    const treffer = rasterNah(bekannt, p.lat, p.lon)
+      .find(o => entfernungKm({ lat:p.lat, lon:p.lon }, o) * 1000 <= MISCH_RADIUS_M);
     if (treffer) {
       schonDa++;
       if (treffer.bestaetigt_durch === "Auskunft Gemeinde" || treffer.zugang === "öffentlich")
@@ -3545,13 +3558,14 @@ async function importGeoJson(text){
 
     /* Gehört der Punkt zu einem schon gesammelten neuen Ort (Gerät derselben
        Anlage, zweites Feld desselben Geländes)? Dann verschmelzen statt anhängen. */
-    if (mitNeuenMischen(zeilen, neuerEintrag)) { continue; }
+    if (mitNeuenMischen(rasterNah(neuRaster, p.lat, p.lon), neuerEintrag)) { continue; }
 
     const schluessel = ortSchluessel(name, p.lat, p.lon);
     if (vorhanden.has(schluessel)) { schonDa++; continue; }
     vorhanden.add(schluessel);
 
     zeilen.push(neuerEintrag);
+    rasterRein(neuRaster, neuerEintrag);
   }
 
   /* Notizen erst jetzt schreiben – nach dem Verschmelzen wissen wir,
@@ -3797,15 +3811,16 @@ function ansichtRechtliches(){
         DNS-Anfragen. Beim Aufruf verarbeiten diese Anbieter technisch nötige
         Daten wie deine IP-Adresse, Uhrzeit, aufgerufene Adresse und
         Browserkennung, um die Seite auszuliefern und vor Angriffen zu
-        schützen. Wir selbst sehen diese Daten nicht. Rechtsgrundlage ist
-        unser berechtigtes Interesse an einem sicheren Betrieb (Art. 6 Abs. 1
-        lit. f DSGVO). Die Übermittlung in die USA stützt sich auf das EU-US
-        Data Privacy Framework und Standardvertragsklauseln.</p>
+        schützen. Wir selbst sehen diese Daten nicht. Wie lange die Anbieter
+        diese Protokolle aufbewahren, legen sie selbst fest; in der Regel
+        sind es wenige Wochen. Rechtsgrundlage ist unser berechtigtes
+        Interesse an einem sicheren Betrieb (Art. 6 Abs. 1 lit. f DSGVO).</p>
 
         <h4>3. Datenbank</h4>
         <p>Plätze und alles, was Nutzer beitragen, speichern wir bei Supabase
-        (Supabase Inc., USA) auf Servern in Irland (EU). Mit Supabase besteht
-        ein Vertrag zur Auftragsverarbeitung mit Standardvertragsklauseln.</p>
+        (Supabase Inc., USA) auf Servern in Irland (EU). Supabase arbeitet für
+        uns als Auftragsverarbeiter (Art. 28 DSGVO). Ein Konto mit E-Mail und
+        Passwort gibt es nur für uns als Betreiber, um Beiträge zu prüfen.</p>
 
         <h4>4. Die zufällige Geräte-Nummer</h4>
         <p>Für einige Funktionen legt die App beim ersten Mal eine zufällige
@@ -3856,19 +3871,21 @@ function ansichtRechtliches(){
         verabreden können, ohne dass dafür persönliche Daten nötig sind.</p>
 
         <h4>6. Standort</h4>
-        <p>Wenn du es erlaubst, nutzt die App deinen Standort, um die
-        Entfernung zu Plätzen zu berechnen. Der Standort bleibt auf deinem
-        Gerät. Nur für die Wettervorhersage geht eine ungefähre Position an
-        Open-Meteo (Schweiz, angemessenes Datenschutzniveau laut
-        EU-Kommission), und beim Einchecken einmal an unsere Datenbank zur
-        Abstandsprüfung (siehe oben). Ohne Freigabe rechnet die App ab
-        München-Mitte. Die Freigabe kannst du jederzeit in den Einstellungen
-        deines Geräts zurücknehmen.</p>
+        <p>Die App fragt über deinen Browser, ob sie deinen Standort nutzen
+        darf. Nur wenn du zustimmst, liest sie ihn aus (Einwilligung nach
+        § 25 Abs. 1 TDDDG). Damit berechnet sie die Entfernung zu Plätzen;
+        der Standort bleibt dafür auf deinem Gerät. Für die Wettervorhersage
+        geht eine auf etwa 1 km gerundete Position an Open-Meteo, und beim
+        Einchecken einmal an unsere Datenbank zur Abstandsprüfung (siehe
+        oben), ohne dass er gespeichert wird. Rechtsgrundlage für diese
+        Nutzung ist Art. 6 Abs. 1 lit. f DSGVO (Plätze in deiner Nähe zeigen).
+        Ohne Freigabe rechnet die App ab München-Mitte. Du kannst die
+        Freigabe jederzeit in den Einstellungen deines Browsers oder Geräts
+        widerrufen. Das berührt nicht, was vorher erlaubt war.</p>
 
         <h4>7. Karten, Bilder und Bibliotheken</h4>
-        <p>Kartenbilder laden wir von CARTO (USA) bzw. Esri (USA), Luftbilder
-        von Esri, die Programmbibliotheken von cdnjs (Cloudflare, USA) und
-        jsDelivr. Öffnest du einen Platz ohne Straßenangabe, fragen wir die
+        <p>Kartenbilder laden wir von CARTO bzw. Esri, Luftbilder von Esri,
+        die Programmbibliotheken von cdnjs (Cloudflare) und jsDelivr. Öffnest du einen Platz ohne Straßenangabe, fragen wir die
         Adresse dieses Platzes bei Nominatim (OpenStreetMap Foundation,
         Großbritannien) ab. Dabei erfahren diese Anbieter technisch bedingt
         deine IP-Adresse. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO
@@ -3876,7 +3893,28 @@ function ansichtRechtliches(){
         <p>Tippst du auf „Route“, öffnet sich Apple Karten oder Google Maps.
         Ab dann gelten die Datenschutzbestimmungen dieser Anbieter.</p>
 
-        <h4>8. Besucherstatistik</h4>
+        <h4>8. Empfänger und Übermittlung in Drittländer</h4>
+        <p>Wir verkaufen keine Daten und geben sie nicht zu Werbezwecken
+        weiter. Empfänger sind nur die Dienstleister, die für den Betrieb
+        nötig sind:</p>
+        <p>GitHub Inc. (USA), Hosting · Netlify Inc. (USA), Domain und DNS ·
+        Supabase Inc. (USA, Server in Irland), Datenbank und Fotos ·
+        CARTO (CartoDB Inc., USA) und Esri Inc. (USA), Kartenbilder ·
+        Cloudflare Inc. (USA), cdnjs · Prospect One (Polen), jsDelivr ·
+        OpenStreetMap Foundation (Großbritannien), Adresssuche ·
+        Open-Meteo (Schweiz), Wetter · GoatCounter (Niederlande),
+        Besucherzählung.</p>
+        <p>Für Großbritannien und die Schweiz gibt es einen
+        Angemessenheitsbeschluss der EU-Kommission. Für Anbieter in den USA
+        stützt sich die Übermittlung auf das EU-US Data Privacy Framework,
+        soweit der Anbieter dort zertifiziert ist, und sonst auf
+        Standardvertragsklauseln der EU-Kommission (Art. 46 Abs. 2 lit. c
+        DSGVO).</p>
+        <p>Was in der App öffentlich zu sehen ist (Plätze, Anzahlen, Spielzeiten,
+        Tipps, freigegebene Fotos), kann jeder abrufen. Darin stecken keine
+        Angaben zu deiner Person.</p>
+
+        <h4>9. Besucherstatistik</h4>
         <p>Um zu sehen, wie viele Menschen Platzfrei nutzen, zählen wir
         Seitenaufrufe mit GoatCounter (goatcounter.com, Niederlande). Dabei
         werden aufgerufene Seite, Herkunftsseite, Browser, Bildschirmgröße
@@ -3885,7 +3923,7 @@ function ansichtRechtliches(){
         Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (Verbesserung des
         Angebots).</p>
 
-        <h4>9. Auf deinem Gerät</h4>
+        <h4>10. Auf deinem Gerät</h4>
         <p>Merkliste, Geräte-Nummer, eigene Bestätigungen, Zusagen und Tipps,
         dein aktueller Check-in und deine Abzeichen speichert die App im
         Speicher deines Browsers (localStorage). Damit die App auch ohne Netz
@@ -3895,14 +3933,15 @@ function ansichtRechtliches(){
         Du kannst alles jederzeit über die Browsereinstellungen löschen.
         Cookies setzen wir nicht.</p>
 
-        <h4>10. Wie lange wir speichern</h4>
+        <h4>11. Wie lange wir speichern</h4>
         <p>Check-ins löschen wir nach einem Tag, vergangene Spiele ebenfalls.
         Bestätigungen, Tipps, Meldungen und Fotos bleiben gespeichert, solange
         der Platz in der App ist, oder bis du sie zurücknimmst bzw. uns um
-        Löschung bittest. Fehlermeldungen und Vereinsangaben löschen wir,
-        sobald wir sie nicht mehr brauchen.</p>
+        Löschung bittest. Fehlermeldungen löschen wir, wenn der Fehler
+        behoben ist, Vereinsangaben, wenn die Platzzeiten geprüft sind.
+        Was auf deinem Gerät liegt, bleibt dort, bis du es löschst.</p>
 
-        <h4>11. Kinder und Jugendliche</h4>
+        <h4>12. Kinder und Jugendliche</h4>
         <p>Platzfrei ist kostenlos und für alle Altersgruppen gedacht. Weil wir
         keine Namen, kein Alter und keine Kontaktdaten abfragen (außer
         freiwillig beim Fehler melden und bei Vereinsangaben), keine
@@ -3910,10 +3949,11 @@ function ansichtRechtliches(){
         ermöglichen, können Kinder die App nutzen, ohne persönliche Daten
         preiszugeben. Eltern können sich jederzeit an uns wenden.</p>
 
-        <h4>12. Deine Rechte</h4>
+        <h4>13. Deine Rechte</h4>
         <p>Du hast das Recht auf Auskunft, Berichtigung, Löschung,
         Einschränkung der Verarbeitung und Datenübertragbarkeit (Art. 15–20
-        DSGVO). Schreib uns dazu an ${rechtFeld(r.email)}. Weil wir dich nicht
+        DSGVO) und kannst eine erteilte Einwilligung jederzeit widerrufen.
+        Schreib uns dazu an ${rechtFeld(r.email)}. Weil wir dich nicht
         kennen, hilft es, wenn du uns sagst, um welchen Platz und welchen Tag
         es geht.</p>
         <p><b>Widerspruchsrecht (Art. 21 DSGVO):</b> Du kannst jederzeit aus
@@ -3924,7 +3964,7 @@ function ansichtRechtliches(){
         beschweren, zum Beispiel beim Bayerischen Landesamt für
         Datenschutzaufsicht (BayLDA), Promenade 18, 91522 Ansbach.</p>
 
-        <h4>13. Sonstiges</h4>
+        <h4>14. Sonstiges</h4>
         <p>Du musst keine Daten angeben, um Platzfrei zu nutzen. Es gibt keine
         automatisierten Entscheidungen über dich. Die Verbindung zur App und
         zur Datenbank ist verschlüsselt (HTTPS). Wenn sich die App ändert,
@@ -3942,15 +3982,110 @@ function ansichtRechtliches(){
     </div>`;
 }
 
+/* --------------------------------------------------------------------------
+   Ganze Regionen aus OpenStreetMap
+   --------------------------------------------------------------------------
+   Ganz Deutschland auf einmal schafft Overpass nicht. Deshalb pro
+   Bundesland, die großen Länder pro Regierungsbezirk (Regionalschlüssel).
+   -------------------------------------------------------------------------- */
+const OSM_REGIONEN = [
+  ["rs:091","Bayern – Oberbayern"], ["rs:092","Bayern – Niederbayern"], ["rs:093","Bayern – Oberpfalz"],
+  ["rs:094","Bayern – Oberfranken"], ["rs:095","Bayern – Mittelfranken"], ["rs:096","Bayern – Unterfranken"],
+  ["rs:097","Bayern – Schwaben"],
+  ["rs:081","Baden-Württemberg – Stuttgart"], ["rs:082","Baden-Württemberg – Karlsruhe"],
+  ["rs:083","Baden-Württemberg – Freiburg"], ["rs:084","Baden-Württemberg – Tübingen"],
+  ["rs:051","NRW – Düsseldorf"], ["rs:053","NRW – Köln"], ["rs:055","NRW – Münster"],
+  ["rs:057","NRW – Detmold"], ["rs:059","NRW – Arnsberg"],
+  ["rs:064","Hessen – Darmstadt"], ["rs:065","Hessen – Gießen"], ["rs:066","Hessen – Kassel"],
+  ["iso:DE-NI","Niedersachsen"], ["iso:DE-SH","Schleswig-Holstein"], ["iso:DE-HH","Hamburg"],
+  ["iso:DE-HB","Bremen"], ["iso:DE-BE","Berlin"], ["iso:DE-BB","Brandenburg"],
+  ["iso:DE-MV","Mecklenburg-Vorpommern"], ["iso:DE-SN","Sachsen"], ["iso:DE-ST","Sachsen-Anhalt"],
+  ["iso:DE-TH","Thüringen"], ["iso:DE-RP","Rheinland-Pfalz"], ["iso:DE-SL","Saarland"]
+];
+const OSM_GELADEN_SCHLUESSEL = "platzfrei.osmgeladen";
+function osmGeladen(){ return mengeLaden(OSM_GELADEN_SCHLUESSEL); }
+
+function osmRegionAbfrage(region){
+  const [art, wert] = region.split(":");
+  const gebiet = art === "iso"
+    ? `area["ISO3166-2"="${wert}"]["admin_level"="4"]->.a;`
+    : `area["de:regionalschluessel"="${wert}"]["boundary"="administrative"]->.a;`;
+  return `[out:json][timeout:600][maxsize:1073741824];
+${gebiet}
+(
+  nwr["leisure"="pitch"]["sport"~"soccer|football|basketball|streetball|table_tennis|beachvolleyball|volleyball|multi|skateboard"](area.a);
+  nwr["leisure"="track"]["sport"~"running|athletics"](area.a);
+  nwr["leisure"="fitness_station"](area.a);
+  nwr["leisure"="playground"]["sport"](area.a);
+  nwr["playground"~"basketball|football|table_tennis|soccer"](area.a);
+  nwr["leisure"="sports_centre"](area.a);
+  nwr["club"="sport"](area.a);
+);
+out center tags;`;
+}
+
+async function osmRegionLaden(){
+  if (!Z.admin) return;
+  const region = document.getElementById("osm-region").value;
+  const name = (OSM_REGIONEN.find(r => r[0] === region) || [, region])[1];
+  melde(`Lade ${name} aus OpenStreetMap … das dauert etwas.`);
+  let text;
+  try {
+    const antwort = await fetch("https://overpass-api.de/api/interpreter", {
+      method:"POST",
+      headers:{ "Content-Type":"application/x-www-form-urlencoded" },
+      body:"data=" + encodeURIComponent(osmRegionAbfrage(region))
+    });
+    if (antwort.status === 429 || antwort.status === 504)
+      return melde("Overpass ist gerade ausgelastet. Bitte in ein paar Minuten nochmal.");
+    if (!antwort.ok) return melde("Overpass antwortet mit Fehler " + antwort.status + ".");
+    text = await antwort.text();
+  } catch (e) {
+    console.error(e);
+    return melde("Overpass nicht erreichbar.");
+  }
+  let anzahl = 0;
+  try { anzahl = (JSON.parse(text).elements || []).length; } catch {}
+  if (!anzahl) return melde(`Für ${name} kam nichts zurück. Später nochmal versuchen.`);
+  melde(`${anzahl} Einträge geladen, werden abgeglichen …`);
+  await importGeoJson(text);
+  const g = osmGeladen(); g.add(region); mengeSpeichern(OSM_GELADEN_SCHLUESSEL, g);
+  Z.importText = name + ": " + (Z.importText || "fertig");
+  zeichne();
+}
+
+/* Raster für die Umkreissuche beim Import: statt jeden Ort mit jedem zu
+   vergleichen, nur die Nachbarzellen ansehen. 0,003° ≈ 200–330 m. */
+const RASTER = 0.003;
+function rasterSchluessel(lat, lon){ return Math.floor(lat / RASTER) + ":" + Math.floor(lon / RASTER); }
+function rasterRein(raster, o){
+  const k = rasterSchluessel(o.lat, o.lon);
+  (raster.get(k) || raster.set(k, []).get(k)).push(o);
+}
+function rasterNah(raster, lat, lon){
+  const a = Math.floor(lat / RASTER), b = Math.floor(lon / RASTER), aus = [];
+  for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) {
+    const z = raster.get((a + i) + ":" + (b + j));
+    if (z) aus.push(...z);
+  }
+  return aus;
+}
+
 function ansichtImportieren(){
+  /* Die Abfrage gilt für die Mitte des aktuellen Kartenausschnitts –
+     erst zur Stadt schieben, dann hier öffnen. */
+  const m = karte.getCenter();
+  const um = `around:10000,${m.lat.toFixed(4)},${m.lng.toFixed(4)}`;
   const abfrage =
 `[out:json][timeout:120];
 (
-  nwr["leisure"="pitch"](around:30000,48.0954,11.3982);
-  nwr["leisure"="track"]["sport"](around:30000,48.0954,11.3982);
-  nwr["leisure"="fitness_station"](around:30000,48.0954,11.3982);
-  nwr["leisure"="sports_centre"](around:30000,48.0954,11.3982);
-  nwr["club"="sport"](around:30000,48.0954,11.3982);
+  nwr["leisure"="pitch"](${um});
+  nwr["leisure"="track"]["sport"](${um});
+  nwr["leisure"="fitness_station"](${um});
+  nwr["leisure"="playground"]["sport"](${um});
+  nwr["playground"~"basketball|football|table_tennis|soccer"](${um});
+  nwr["leisure"="sports_centre"](${um});
+  nwr["club"="sport"](${um});
 );
 out center tags;`;
 
@@ -3979,10 +4114,24 @@ out center tags;`;
         <b>Zugang „unklar“</b> – OSM weiß nicht, ob man spielen darf.</p>
       </div>
       <div class="form" style="padding-top:0">
-        <label>Overpass-Abfrage – 30 km rund um Stockdorf</label>
+        <label>Overpass-Abfrage – 10 km rund um die Kartenmitte</label>
         <textarea readonly style="min-height:158px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px">${abfrage}</textarea>
-        <p class="hinweis">Radius ändern: die 30000 (Meter) an allen drei Stellen
-        anpassen. Kleinere Zahl = weniger, dafür näher.</p>
+        <p class="hinweis">Für eine andere Stadt: erst die Karte dorthin schieben,
+        dann Import neu öffnen. Radius ändern: die 10000 (Meter) überall
+        anpassen.</p>
+      </div>
+      <div class="abschnitt">
+        <h3>Weg C – Ganze Region direkt aus OpenStreetMap laden</h3>
+        <p>Region wählen und laden. Die App holt alle Bolzplätze, Körbe,
+        Tischtennisplatten, Beachvolleyballfelder, Skate- und Fitnessanlagen
+        direkt bei Overpass und importiert sie. Schon vorhandene Plätze werden
+        nicht doppelt angelegt. Eine Region dauert ein bis drei Minuten,
+        bitte die Seite so lange offen lassen. ✓ = schon geladen.</p>
+        <div class="form" style="padding:10px 0 0">
+          <select id="osm-region">${OSM_REGIONEN.map(([k, n]) =>
+            `<option value="${k}">${osmGeladen().has(k) ? "✓ " : ""}${esc(n)}</option>`).join("")}</select>
+        </div>
+        <p style="margin-top:10px"><button class="inline-knopf" data-osmladen="1">Region laden</button></p>
       </div>
       ${Z.importText ? `<div class="abschnitt"><h3>Ergebnis</h3>
         <p>${esc(Z.importText)}</p></div>` : ``}
@@ -4261,7 +4410,7 @@ document.addEventListener("click", e=>{
                              "[data-schildok],[data-schildweg],[data-loeschen],[data-fehlersenden],[data-fehlererledigt],"+
                              "[data-suchweg],[data-teilen],[data-abmelden],[data-hierpunkt],[data-vereinszeitensenden],"+
                              "[data-neuok],[data-neuweg],[data-vzok],[data-vzweg],[data-hier],[data-hierweg],"+
-                             "[data-zusage],[data-spielweg],[data-spielform],[data-spielansetzen],[data-tipp],[data-tippsoffen]");
+                             "[data-zusage],[data-spielweg],[data-spielform],[data-spielansetzen],[data-tipp],[data-tippsoffen],[data-osmladen]");
   if (!t) return;
 
   if (t.dataset.hierpunkt)  { return hierPunktSetzen(); }
@@ -4272,6 +4421,7 @@ document.addEventListener("click", e=>{
   if (t.dataset.spielform)  { Z.spielFormOffen = t.dataset.spielform === "1"; return zeichne(); }
   if (t.dataset.spielansetzen) { return spielAnsetzen(); }
   if (t.dataset.tipp)       { return tippUmschalten(t.dataset.tipp); }
+  if (t.dataset.osmladen)   { return osmRegionLaden(); }
   if (t.dataset.tippsoffen) { Z.tippsOffen = t.dataset.tippsoffen === "1"; return zeichne(); }
   if (t.dataset.vereinszeitensenden) { return vereinszeitenSenden(); }
   if (t.dataset.neuok)      { return neuenOrtPruefen(t.dataset.neuok, true); }
