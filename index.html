@@ -469,8 +469,9 @@ label.inline-knopf{display:inline-block;margin-top:10px}
   box-shadow:0 2px 8px rgba(15,26,21,.25);cursor:pointer;
   transition:transform 180ms var(--feder)}
 .buendel:hover span{transform:scale(1.08)}
-/* Im Bündel wird gerade gespielt: kleiner grüner Punkt oben rechts. */
-.buendel{position:relative}
+/* Im Bündel wird gerade gespielt: kleiner grüner Punkt oben rechts.
+   (.buendel bleibt position:absolute von Leaflet – relative würde die
+   Bündel untereinander stapeln und auf der Karte verschieben.) */
 .buendel i{position:absolute;top:-2px;right:-2px;width:10px;height:10px;border-radius:50%;
   background:#34C759;border:2px solid #fff;animation:puls 1.8s ease-out infinite}
 @media (prefers-reduced-motion:reduce){.buendel i{animation:none}}
@@ -1162,7 +1163,7 @@ function punktZeichnen(o){
   .addTo(markerEbene);
 }
 
-function buendelZeichnen(gruppe){
+function buendelZeichnen(gruppe, mitte){
   const n = gruppe.length;
   let lat = 0, lon = 0, rang = BUENDEL_RANG.length - 1;
   for (const o of gruppe) {
@@ -1170,9 +1171,9 @@ function buendelZeichnen(gruppe){
     const r = BUENDEL_RANG.indexOf(farbe(o));
     if (r >= 0 && r < rang) rang = r;
   }
-  const groesse = Math.round(Math.min(48, 26 + Math.log10(n) * 9));
+  const groesse = buendelGroesse(n);
   const text = n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(".", ",") + "k" : n;
-  L.marker([lat / n, lon / n], {
+  L.marker(mitte ? karte.unproject(mitte, karte.getZoom()) : [lat / n, lon / n], {
     icon: L.divIcon({
       className: "buendel",
       html: `<span style="--ring:${BUENDEL_RANG[rang]};width:${groesse}px;height:${groesse}px">${text}</span>${
@@ -1187,6 +1188,8 @@ function buendelZeichnen(gruppe){
   })
   .addTo(markerEbene);
 }
+
+function buendelGroesse(n){ return Math.round(Math.min(48, 26 + Math.log10(n) * 9)); }
 
 function bildMitte(orte, zoom){
   let x = 0, y = 0;
@@ -1217,19 +1220,41 @@ function markerZeichnen(){
     if (!zellen.has(schluessel)) zellen.set(schluessel, []);
     zellen.get(schluessel).push(o);
   }
-  /* Rasterzellen schneiden Nachbarn mitten durch – dann lägen zwei Kreise
-     übereinander. Zu nahe Gruppen deshalb noch zusammenlegen. */
-  const gruppen = [];
-  for (const gruppe of [...zellen.values()].sort((a,b) => b.length - a.length)) {
-    const mitte = bildMitte(gruppe, zoom);
-    const nah = gruppen.find(g => g.mitte.distanceTo(mitte) < BUENDEL_ZELLE * 0.75);
-    if (nah) { nah.orte.push(...gruppe); nah.mitte = bildMitte(nah.orte, zoom); }
-    else gruppen.push({ orte: gruppe, mitte });
+  /* Rasterzellen schneiden Nachbarn mitten durch, und ein Bündel liegt in
+     der Mitte seiner Orte, nicht seiner Zelle – so können sich Kreise
+     überlappen. Deshalb so lange zusammenlegen, bis keine zwei Kreise sich
+     mehr berühren. Die neue Mitte ist nach Anzahl gewichtet. */
+  let gruppen = [...zellen.values()].map(orte => ({ orte, mitte: bildMitte(orte, zoom) }));
+  const ABSTAND = 10;   // Mindestlücke zwischen zwei Kreisen in Punkten
+  for (let geaendert = true; geaendert; ) {
+    geaendert = false;
+    gruppen.sort((a, b) => b.orte.length - a.orte.length);
+    for (let i = 0; i < gruppen.length; i++) {
+      const a = gruppen[i];
+      if (!a) continue;
+      for (let j = i + 1; j < gruppen.length; j++) {
+        const b = gruppen[j];
+        if (!b) continue;
+        const ra = a.orte.length > 1 ? buendelGroesse(a.orte.length) / 2 : 7;
+        const rb = b.orte.length > 1 ? buendelGroesse(b.orte.length) / 2 : 7;
+        if (a.mitte.distanceTo(b.mitte) >= ra + rb + ABSTAND) continue;
+        const na = a.orte.length, nb = b.orte.length;
+        a.mitte = L.point((a.mitte.x * na + b.mitte.x * nb) / (na + nb),
+                          (a.mitte.y * na + b.mitte.y * nb) / (na + nb));
+        a.orte = a.orte.concat(b.orte);
+        gruppen[j] = null;
+        geaendert = true;
+      }
+    }
+    gruppen = gruppen.filter(Boolean);
   }
   const einzelne = [];
-  for (const { orte: gruppe } of gruppen) {
-    if (gruppe.length === 1 || gruppe.some(o => String(o.id) === String(Z.auswahlId))) einzelne.push(...gruppe);
-    else buendelZeichnen(gruppe);
+  for (const { orte: gruppe, mitte } of gruppen) {
+    const offen = gruppe.find(o => String(o.id) === String(Z.auswahlId));
+    const rest = offen ? gruppe.filter(o => o !== offen) : gruppe;
+    if (offen) einzelne.push(offen);
+    if (rest.length === 1) einzelne.push(rest[0]);
+    else if (rest.length > 1) buendelZeichnen(rest, offen ? null : mitte);
   }
   einzelne.sort(grauZuerst).forEach(punktZeichnen);
 }
