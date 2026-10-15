@@ -172,6 +172,8 @@ aside{width:420px;flex-shrink:0;background:var(--grund);
   border-radius:var(--r-karte);background:var(--unklar-bg);color:var(--unklar)}
 .status.frei{background:var(--frei-bg);color:var(--frei)}
 .status.absprache{background:var(--absprache-bg);color:var(--absprache)}
+.status.vermutet{background:var(--frei-bg);color:var(--frei);outline:1.5px dashed var(--frei);outline-offset:-1.5px}
+.status.vermutet .status-icon{background:#8FD9A3;color:#0F3D1E}
 .status-icon{width:40px;height:40px;flex-shrink:0;border-radius:50%;display:grid;
   place-items:center;font-size:20px;font-weight:800;background:var(--unklar);color:#fff}
 .status.frei .status-icon{background:var(--frei)}
@@ -243,6 +245,7 @@ aside{width:420px;flex-shrink:0;background:var(--grund);
   margin:8px 6px 0 0;line-height:1.35;background:var(--unklar-bg);color:var(--unklar)}
 .marke.frei{background:var(--frei-bg);color:var(--frei)}
 .marke.absprache{background:var(--absprache-bg);color:var(--absprache)}
+.marke.vermutet{background:transparent;color:var(--frei);box-shadow:inset 0 0 0 1.5px #8FD9A3}
 .marke.unklar{background:var(--unklar-bg);color:var(--unklar)}
 .marke.verein{background:var(--verein-bg);color:var(--verein);margin-left:0}
 .marke.boden{margin-left:0}
@@ -834,10 +837,10 @@ let FEHLERBERICHTE = [];   // nur für Admins, offene Fehlermeldungen
 const AUSWAHL = {
   sportarten:["Fußball","Basketball","Tischtennis","Beachvolleyball","Laufen",
               "Calisthenics","Skaten"],
-  zugang:["öffentlich","Vereinsgelände frei betretbar","Vereinsgelände nach Absprache",
+  zugang:["öffentlich","vermutlich öffentlich","vermutlich Schulhof","Vereinsgelände frei betretbar","Vereinsgelände nach Absprache",
           "Vereinsgelände abgeschlossen","Schulhof nach Unterricht","unklar"],
   bestaetigtDurch:["Schild vor Ort","Auskunft Gemeinde","Auskunft Verein",
-                   "Auskunft Schule","nur vermutet"],
+                   "Auskunft Schule","Lage (OSM)","nur vermutet"],
   untergrund:["Kunstrasen","Naturrasen","Asche","Beton/Asphalt","Tartan","Sand","gemischt"],
   groesse:["Großfeld","Kleinfeld","Mini/Käfig","Einzelfläche","Mehrfachanlage"],
   janein:["ja","nein"]
@@ -1100,6 +1103,8 @@ let ichMarker = null;
 
 const FARBE = {
   "öffentlich":"#34C759",
+  "vermutlich öffentlich":"#8FD9A3",
+  "vermutlich Schulhof":"#FFC978",
   "Vereinsgelände frei betretbar":"#34C759",
   "Vereinsgelände nach Absprache":"#FF9F0A",
   "Schulhof nach Unterricht":"#FF9F0A",
@@ -1131,7 +1136,7 @@ const BUENDEL_BIS_ZOOM = 13;   // bis hier bündeln, ab 14 einzelne Punkte
 const BUENDEL_ZELLE = 90;      // Bündelgröße in Bildschirmpunkten
 
 /* Welche Farbe ein Bündel bekommt: die "beste" Nachricht darin gewinnt. */
-const BUENDEL_RANG = ["#34C759", "#FF9F0A", "#7A5EA8", "#FF3B30", "#8E8E93"];
+const BUENDEL_RANG = ["#34C759", "#8FD9A3", "#FF9F0A", "#FFC978", "#7A5EA8", "#FF3B30", "#8E8E93"];
 
 function punktZeichnen(o){
   if ((Z.aktiv[o.id] || 0) >= 2 || hierHier(o.id))
@@ -1297,8 +1302,13 @@ function heute(){ return new Date().toISOString().slice(0,10); }
 function frei(o){
   return o.zugang==="öffentlich" || o.zugang==="Vereinsgelände frei betretbar";
 }
+/* Aus der Lage geschlossen (Park, Spielplatz, Schulgelände in OSM),
+   aber nicht belegt. Eigene, hellere Stufe. */
+function vermutlichFrei(o){ return o.zugang === "vermutlich öffentlich"; }
 function markeArt(o){
   if (frei(o)) return ["frei","frei zugänglich"];
+  if (vermutlichFrei(o)) return ["vermutet","vermutlich frei"];
+  if (o.zugang === "vermutlich Schulhof") return ["absprache","vermutlich Schulhof"];
   if (o.zugang.includes("Absprache")||o.zugang.includes("Schulhof"))
     return ["absprache","nach Absprache"];
   return ["unklar", o.zugang==="unklar" ? "Zugang unklar" : "nicht zugänglich"];
@@ -1352,7 +1362,7 @@ function sichtbareOrte(){
   const gefiltert = DATEN
     .filter(o => !sucht || passtZurSuche(o))
     .filter(o => Z.sportart==="alle" || o.sportarten.includes(Z.sportart))
-    .filter(o => !Z.nurFrei || frei(o))
+    .filter(o => !Z.nurFrei || frei(o) || vermutlichFrei(o))
     .filter(o => !Z.nurBelegt || belegt(o) || nutzerBestaetigt(o))
     .filter(o => !Z.nurGemerkt || GEMERKT.has(o.id))
     .filter(o => !Z.nurLicht || o.beleuchtung === "ja")
@@ -1901,7 +1911,7 @@ function ansichtDetail(){
   const o = ort(Z.auswahlId);
   if (!o) { Z.ansicht="liste"; return ansichtListe(); }
 
-  const vermutet = o.bestaetigtDurch==="nur vermutet";
+  const vermutet = o.bestaetigtDurch==="nur vermutet" || o.bestaetigtDurch==="Lage (OSM)";
   const gepruefttext = o.geprueft
     ? o.geprueft.split("-").reverse().join(".")
     : `<span class="vermutet">nie geprüft</span>`;
@@ -1920,7 +1930,7 @@ function ansichtDetail(){
 
   const [statusArt, statusText] = markeArt(o);
   adresseErgaenzen(o);
-  const statusIcon = statusArt === "frei" ? "✓" : statusArt === "absprache" ? "!" : "?";
+  const statusIcon = statusArt === "frei" || statusArt === "vermutet" ? "✓" : statusArt === "absprache" ? "!" : "?";
 
   seite.innerHTML = `
     <div class="dkopf">
@@ -1934,7 +1944,7 @@ function ansichtDetail(){
       <div class="status ${statusArt}">
         <span class="status-icon" aria-hidden="true">${statusIcon}</span>
         <span class="status-text"><b>${statusText.charAt(0).toUpperCase() + statusText.slice(1)}</b>
-          <span>${esc(o.zugang)}${o.zeiten && o.zeiten !== "unbekannt" ? ` · ${esc(o.zeiten)}` : ``}</span></span>
+          <span>${o.bestaetigtDurch === "Lage (OSM)" ? "nach Lage in OpenStreetMap" : esc(o.zugang)}${o.zeiten && o.zeiten !== "unbekannt" ? ` · ${esc(o.zeiten)}` : ``}</span></span>
       </div>
       ${liveBlock(o)}
       <div class="schnell">
@@ -1969,9 +1979,12 @@ function ansichtDetail(){
         hier im letzten Jahr ohne Ärger gespielt. Hängt ein Schild am Platz,
         mach ein Foto davon – dann tragen wir die Regeln fest ein.</p>
         ${schildKnopf}</div>` : vermutet ? `<div class="abschnitt">
-        <h3>Achtung</h3>
-        <p>Die Zugangsangabe ist nicht belegt – sie stammt aus OpenStreetMap oder
-        einer Vermutung. Wer dort war: bitte korrigieren.</p>
+        <h3>${o.bestaetigtDurch === "Lage (OSM)" ? "Aus der Lage geschlossen" : "Achtung"}</h3>
+        <p>${o.bestaetigtDurch === "Lage (OSM)"
+          ? (o.zugang === "vermutlich Schulhof"
+              ? "Der Platz liegt laut OpenStreetMap auf einem Schulgelände. Meist darf man dort nur außerhalb der Unterrichtszeit spielen, manchmal gar nicht."
+              : "Der Platz liegt laut OpenStreetMap in einem Park oder auf einem Spielplatz. Solche Plätze gehören fast immer der Gemeinde und sind frei nutzbar, amtlich bestätigt ist das aber nicht.")
+          : "Die Zugangsangabe ist nicht belegt – sie stammt aus OpenStreetMap oder einer Vermutung. Wer dort war: bitte korrigieren."}</p>
         <p>Am besten mit einem Foto vom Schild am Eingang. Das ist der Beleg,
         mit dem wir den Zugang fest eintragen.</p>
         ${schildKnopf}</div>` : ``}
@@ -3327,7 +3340,8 @@ async function stapelEinfuegen(zeilen, zaehler){
 
   if (!zeilen.length) {
     Z.importText = `Nichts Neues: ${zaehler.schonDa} schon vorhanden, `
-                 + `${zaehler.ohneSportart} ohne passende Sportart.`;
+                 + `${zaehler.ohneSportart} ohne passende Sportart`
+                 + (zaehler.eingestuft ? `, ${zaehler.eingestuft} vorhandene Plätze nach Lage eingestuft.` : `.`);
     return zeichne();
   }
 
@@ -3361,7 +3375,8 @@ async function stapelEinfuegen(zeilen, zaehler){
                + `${zaehler.schonDa + dubletten} lagen auf bekannten Flächen`
                + (zaehler.alsOeffentlichErkannt
                    ? ` (davon ${zaehler.alsOeffentlichErkannt} amtlich als öffentlich bestätigt)` : ``)
-               + ` · ${zaehler.ohneSportart} ohne passende Sportart übersprungen.`;
+               + ` · ${zaehler.ohneSportart} ohne passende Sportart übersprungen`
+               + (zaehler.eingestuft ? ` · ${zaehler.eingestuft} vorhandene Plätze nach Lage eingestuft.` : `.`);
   zeichne();
   melde(`Fertig: ${uebernommen} Orte übernommen.`);
 }
@@ -3455,9 +3470,13 @@ async function importGeoJson(text){
   /* Auch rohes Overpass-JSON annehmen (elements statt features). */
   const features = geo.features || (geo.elements || []).map(e => ({
     properties: e.tags || {},
+    bounds: e.bounds || null,      // nur bei Parks, Spielplätzen, Schulen
     geometry: e.type === "node" ? { type:"Point", coordinates:[e.lon, e.lat] }
-            : e.center ? { type:"Point", coordinates:[e.center.lon, e.center.lat] } : null
+            : e.center ? { type:"Point", coordinates:[e.center.lon, e.center.lat] }
+            : e.bounds ? { type:"Point", coordinates:[(e.bounds.minlon + e.bounds.maxlon) / 2,
+                                                      (e.bounds.minlat + e.bounds.maxlat) / 2] } : null
   }));
+  const umgebung = umgebungAufbauen(features);
   if (!features.length) return melde("Die Datei enthält keine Einträge.");
 
   const vorhanden = new Set(DATEN.map(o => ortSchluessel(o.name, o.lat, o.lon)));
@@ -3472,6 +3491,7 @@ async function importGeoJson(text){
   const vereine = new Map();
   for (const f of features) {
     const t = f.properties || {};
+    if (f.bounds) continue;
     if (t.leisure === "sports_centre" || t.club === "sport") {
       const p = mittelpunkt(f.geometry);
       if (p) rasterRein(vereine, { lat:p.lat, lon:p.lon, name:(t.name || "").trim() });
@@ -3488,6 +3508,7 @@ async function importGeoJson(text){
 
   for (const f of features) {
     const t = f.properties || {};
+    if (f.bounds) continue;   // Umgebung, kein Platz
 
     /* Vereinsgelände selbst überspringen – die Spielfelder darauf kommen
        als eigene OSM-Einträge und werden gleich richtig eingefärbt. */
@@ -3540,17 +3561,20 @@ async function importGeoJson(text){
     const name = t.name || sp[0] + "-Fläche";
     const vereinHier = vereinInDerNaehe(p.lat, p.lon);
 
+    const lage = vereinHier ? null : lageEinstufen(umgebung, p.lat, p.lon, t);
     const neuerEintrag = {
       name, ort: t["addr:city"] || null,
       lat: p.lat, lon: p.lon,
       sportarten: sp,
-      zugang: "unklar", zeiten: "unbekannt", bestaetigt_durch: "nur vermutet",
+      zugang: lage ? lage.zugang : "unklar", zeiten: "unbekannt",
+      bestaetigt_durch: lage ? "Lage (OSM)" : "nur vermutet",
       untergrund: OSM_BELAG[(t.surface || "").toLowerCase()] || null,
       beleuchtung: t.lit === "yes" ? "ja" : (t.lit === "no" ? "nein" : null),
       verein: vereinHier ? (vereinHier.name || "Verein in der Nähe") : null,
       notizen: "",
       freigegeben: true
     };
+    neuerEintrag._lage = lage ? lage.grund : null;
     neuerEintrag._verdacht = !!vereinHier
                           || t.access === "private" || t.access === "customers"
                           || !!t.club || t.leisure === "sports_centre"
@@ -3574,12 +3598,94 @@ async function importGeoJson(text){
     const basis = z._verdacht
       ? "Aus OpenStreetMap. Steht in keiner amtlichen Liste öffentlicher Flächen und trägt Hinweise auf eine Vereins- oder Schulanlage – Zugang beim Betreiber klären."
       : "Aus OpenStreetMap. Steht in keiner amtlichen Liste öffentlicher Flächen. Zugang ungeklärt, vor Ort oder bei der Gemeinde prüfen.";
-    z.notizen = basis + (z._teile > 1 ? ` ${z._teile} OSM-Einträge zu einer Anlage zusammengefasst.` : "");
-    delete z._teile;
+    z.notizen = (z._lage ? `Aus OpenStreetMap. ${z._lage}` : basis)
+      + (z._teile > 1 ? ` ${z._teile} OSM-Einträge zu einer Anlage zusammengefasst.` : "");
+    delete z._teile; delete z._lage;
     delete z._verdacht;
   }
 
-  await stapelEinfuegen(zeilen, { schonDa, ohneSportart, alsOeffentlichErkannt });
+  const eingestuft = await vorhandeneEinstufen(umgebung);
+  await stapelEinfuegen(zeilen, { schonDa, ohneSportart, alsOeffentlichErkannt, eingestuft });
+}
+
+/* --------------------------------------------------------------------------
+   Lage-Auswertung
+   --------------------------------------------------------------------------
+   OSM sagt nicht, ob man spielen darf, aber es sagt, WO der Platz liegt.
+   Im Park oder auf dem Spielplatz gehört er fast immer der Gemeinde und ist
+   frei nutzbar. Auf dem Schulgelände ist er ein Schulhof. Das ergibt eine
+   eigene Stufe ("vermutlich …", Beleg "Lage (OSM)"), nie "öffentlich".
+   Geprüft wird über das umschließende Rechteck der Fläche – bei krummen
+   Parks ist das etwas großzügig, deshalb nur Flächen bis etwa 5 km.
+   -------------------------------------------------------------------------- */
+const UMGEBUNG_ZELLE = 0.01;
+function umgebungAufbauen(features){
+  const raster = new Map();
+  let anzahl = 0;
+  for (const f of features) {
+    const b = f.bounds, t = f.properties || {};
+    if (!b) continue;
+    const art = t.amenity === "school" ? "schule"
+      : /^(park|playground|recreation_ground)$/.test(t.leisure || "") || t.landuse === "recreation_ground" ? "park" : null;
+    if (!art) continue;
+    if (b.maxlat - b.minlat > 0.05 || b.maxlon - b.minlon > 0.07) continue;
+    const eintrag = { art, b, name:(t.name || "").trim(), spielplatz:t.leisure === "playground" };
+    anzahl++;
+    for (let a = Math.floor(b.minlat / UMGEBUNG_ZELLE); a <= Math.floor(b.maxlat / UMGEBUNG_ZELLE); a++)
+      for (let c = Math.floor(b.minlon / UMGEBUNG_ZELLE); c <= Math.floor(b.maxlon / UMGEBUNG_ZELLE); c++) {
+        const k = a + ":" + c;
+        (raster.get(k) || raster.set(k, []).get(k)).push(eintrag);
+      }
+  }
+  return anzahl ? raster : null;
+}
+
+function lageEinstufen(umgebung, lat, lon, t = {}){
+  if (/^(private|no|customers)$/.test(t.access || "")) return null;
+  const amt = /\b(stadt|gemeinde|markt|bezirksamt|landeshauptstadt)\b/i.test(t.operator || "");
+  const offen = /^(yes|public|permissive)$/.test(t.access || "");
+  const hier = umgebung
+    ? (umgebung.get(Math.floor(lat / UMGEBUNG_ZELLE) + ":" + Math.floor(lon / UMGEBUNG_ZELLE)) || [])
+        .filter(u => lat >= u.b.minlat && lat <= u.b.maxlat && lon >= u.b.minlon && lon <= u.b.maxlon)
+    : [];
+  const schule = hier.find(u => u.art === "schule");
+  if (schule) return { zugang:"vermutlich Schulhof",
+    grund:`Liegt auf einem Schulgelände${schule.name ? ` (${schule.name})` : ""}, vermutlich nur außerhalb der Unterrichtszeit nutzbar. Nicht amtlich bestätigt.` };
+  const park = hier.find(u => u.spielplatz) || hier.find(u => u.art === "park");
+  if (park || offen || amt) {
+    const wo = park ? (park.spielplatz ? "auf einem Spielplatz" : "in einem Park") + (park.name ? ` (${park.name})` : "")
+      : amt ? `in der Verwaltung von ${t.operator}` : "laut OSM öffentlich zugänglich";
+    return { zugang:"vermutlich öffentlich",
+      grund:`Liegt ${wo}. Solche Plätze sind fast immer frei nutzbar. Nicht amtlich bestätigt.` };
+  }
+  return null;
+}
+
+/* Schon vorhandene, ungeklärte Plätze im geladenen Gebiet einstufen. */
+async function vorhandeneEinstufen(umgebung){
+  if (!umgebung) return 0;
+  const gruppen = {};
+  for (const o of DATEN) {
+    if (o.zugang !== "unklar" || o.bestaetigtDurch !== "nur vermutet" || vereinsMarke(o)) continue;
+    const lage = lageEinstufen(umgebung, o.lat, o.lon);
+    if (!lage) continue;
+    (gruppen[lage.zugang] ||= []).push(o);
+  }
+  let n = 0;
+  for (const [zugang, orte] of Object.entries(gruppen)) {
+    for (let i = 0; i < orte.length; i += 200) {
+      const teil = orte.slice(i, i + 200);
+      if (ECHT) {
+        const { error } = await db.from("orte")
+          .update({ zugang, bestaetigt_durch:"Lage (OSM)" })
+          .in("id", teil.map(o => o.id));
+        if (error) { console.error(error); continue; }
+      }
+      for (const o of teil) { o.zugang = zugang; o.bestaetigtDurch = "Lage (OSM)"; }
+      n += teil.length;
+    }
+  }
+  return n;
 }
 
 function ansichtMelden(){
@@ -3995,7 +4101,7 @@ const DE_KACHELN = [];
 for (let lat = 47.0; lat < 55.0; lat += KACHEL)
   for (let lon = 5.5; lon < 15.0; lon += KACHEL)
     DE_KACHELN.push(lat.toFixed(1) + "," + lon.toFixed(1));
-const OSM_KACHEL_SCHLUESSEL = "platzfrei.osmkacheln";
+const OSM_KACHEL_SCHLUESSEL = "platzfrei.osmkacheln2";   // 2: mit Lage-Auswertung
 function osmKachelnFertig(){ return mengeLaden(OSM_KACHEL_SCHLUESSEL); }
 
 function osmKachelAbfrage(kachel){
@@ -4010,8 +4116,17 @@ function osmKachelAbfrage(kachel){
   nwr["playground"~"basketball|football|table_tennis|soccer"];
   nwr["leisure"="sports_centre"];
   nwr["club"="sport"];
-);
-out center tags;`;
+)->.p;
+.p out center tags;
+/* Umgebung für die Lage-Auswertung: Parks, Spielplätze, Schulen */
+(
+  way["leisure"~"^(park|playground|recreation_ground)$"];
+  relation["leisure"~"^(park|recreation_ground)$"];
+  way["landuse"="recreation_ground"];
+  way["amenity"="school"];
+  relation["amenity"="school"];
+)->.k;
+.k out bb tags;`;
 }
 
 /* Mehrere öffentliche Overpass-Server: ist einer überlastet, nimmt die App
