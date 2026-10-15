@@ -2008,7 +2008,7 @@ function ansichtDetail(){
         <p>${o.bestaetigtDurch === "Lage (OSM)"
           ? (o.zugang === "vermutlich Schulhof"
               ? "Der Platz liegt laut OpenStreetMap auf einem Schulgelände. Meist darf man dort nur außerhalb der Unterrichtszeit spielen, manchmal gar nicht."
-              : "Der Platz liegt laut OpenStreetMap in einem Park oder auf einem Spielplatz. Solche Plätze gehören fast immer der Gemeinde und sind frei nutzbar, amtlich bestätigt ist das aber nicht.")
+              : "Laut OpenStreetMap liegt der Platz in einem Park oder auf einem Spielplatz, oder er ist als typischer öffentlicher Platz eingetragen (Bolzplatz, Skatepark, Fitnessgeräte im Freien). Solche Plätze gehören fast immer der Gemeinde und sind frei nutzbar, amtlich bestätigt ist das aber nicht.")
           : "Die Zugangsangabe ist nicht belegt – sie stammt aus OpenStreetMap oder einer Vermutung. Wer dort war: bitte korrigieren."}</p>
         <p>Am besten mit einem Foto vom Schild am Eingang. Das ist der Beleg,
         mit dem wir den Zugang fest eintragen.</p>
@@ -3573,6 +3573,7 @@ async function importGeoJson(text){
 
   const zeilen = [];
   let ohneSportart = 0, schonDa = 0, alsOeffentlichErkannt = 0, ausland = 0;
+  const nachMerkmal = new Map();   // vorhandener Ort -> neue Stufe
 
   for (const f of features) {
     const t = f.properties || {};
@@ -3610,6 +3611,13 @@ async function importGeoJson(text){
             if (!error) treffer.verein = name;
           } else treffer.verein = name;
         }
+      }
+
+      /* Ungeklärt und kein Verein: mit den OSM-Merkmalen einstufen. */
+      if (treffer.zugang === "unklar" && treffer.bestaetigtDurch === "nur vermutet"
+          && !treffer.verein && !vereinsMarke(treffer)) {
+        const lage = lageEinstufen(umgebung, p.lat, p.lon, t);
+        if (lage) nachMerkmal.set(treffer, lage.zugang);
       }
 
       const fehlende = sp.filter(s => !treffer.sportarten.includes(s));
@@ -3673,7 +3681,7 @@ async function importGeoJson(text){
     delete z._verdacht;
   }
 
-  const eingestuft = await vorhandeneEinstufen(umgebung);
+  const eingestuft = await vorhandeneEinstufen(umgebung, nachMerkmal);
   await stapelEinfuegen(zeilen, { schonDa, ohneSportart, alsOeffentlichErkannt, eingestuft });
 }
 
@@ -3709,8 +3717,13 @@ function umgebungAufbauen(features){
   return anzahl ? raster : null;
 }
 
+/* Namen, die praktisch nur öffentliche Plätze tragen. "Sportplatz" gehört
+   bewusst nicht dazu – das sind meist Vereinsplätze. */
+const OEFFENTLICH_NAME = /bolz|streetball|basketballplatz|basketballfeld|skate|pumptrack|dirt ?park|calisthenics|street ?workout|fitness ?park|trimm|freizeit(anlage|gelände|platz|fläche)|jugendplatz|aktivpark|mehrgenerationen|spielplatz|spielwiese|bürgerpark|stadtpark/i;
+
 function lageEinstufen(umgebung, lat, lon, t = {}){
-  if (/^(private|no|customers)$/.test(t.access || "")) return null;
+  if (/^(private|no|customers|members)$/.test(t.access || "")) return null;
+  if (t.fee === "yes" || t.indoor === "yes" || t.building) return null;
   const amt = /\b(stadt|gemeinde|markt|bezirksamt|landeshauptstadt)\b/i.test(t.operator || "");
   const offen = /^(yes|public|permissive)$/.test(t.access || "");
   const hier = umgebung
@@ -3727,14 +3740,26 @@ function lageEinstufen(umgebung, lat, lon, t = {}){
     return { zugang:"vermutlich öffentlich",
       grund:`Liegt ${wo}. Solche Plätze sind fast immer frei nutzbar. Nicht amtlich bestätigt.` };
   }
+  /* Merkmale am Platz selbst */
+  const name = (t.name || "").trim();
+  const sport = (t.sport || "").toLowerCase();
+  let warum = null;
+  if (name && OEFFENTLICH_NAME.test(name)) warum = `Heißt „${name}“`;
+  else if (t.leisure === "fitness_station") warum = "Ist als Fitnessgerät im Freien eingetragen";
+  else if (/skateboard|bmx/.test(sport)) warum = "Ist als Skate- oder BMX-Anlage eingetragen";
+  else if (t.playground) warum = "Ist als Spielgerät auf einem Spielplatz eingetragen";
+  else if (t.fee === "no") warum = "Ist in OSM als kostenlos eingetragen";
+  if (warum) return { zugang:"vermutlich öffentlich",
+    grund:`${warum}. Solche Plätze sind fast immer frei nutzbar. Nicht amtlich bestätigt.` };
   return null;
 }
 
 /* Schon vorhandene, ungeklärte Plätze im geladenen Gebiet einstufen. */
-async function vorhandeneEinstufen(umgebung){
-  if (!umgebung) return 0;
+async function vorhandeneEinstufen(umgebung, nachMerkmal = new Map()){
   const gruppen = {};
-  for (const o of DATEN) {
+  for (const [o, zugang] of nachMerkmal) (gruppen[zugang] ||= []).push(o);
+  if (umgebung) for (const o of DATEN) {
+    if (nachMerkmal.has(o)) continue;
     if (o.zugang !== "unklar" || o.bestaetigtDurch !== "nur vermutet" || vereinsMarke(o)) continue;
     const lage = lageEinstufen(umgebung, o.lat, o.lon);
     if (!lage) continue;
@@ -4176,7 +4201,7 @@ for (let lat = 47.0; lat < 55.0; lat += KACHEL)
         drin = grobInDeutschland(lat + KACHEL * a / 5, lon + KACHEL * b / 5);
     if (drin) DE_KACHELN.push(lat.toFixed(1) + "," + lon.toFixed(1));
   }
-const OSM_KACHEL_SCHLUESSEL = "platzfrei.osmkacheln2";   // 2: mit Lage-Auswertung
+const OSM_KACHEL_SCHLUESSEL = "platzfrei.osmkacheln3";   // 3: mit Lage und OSM-Merkmalen
 function osmKachelnFertig(){ return mengeLaden(OSM_KACHEL_SCHLUESSEL); }
 
 function osmKachelAbfrage(kachel){
