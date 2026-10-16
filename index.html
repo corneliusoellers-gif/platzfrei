@@ -134,6 +134,19 @@ aside{width:420px;flex-shrink:0;background:var(--grund);
   color:var(--tinte-3);margin:16px 0 9px}
 .filtertitel:first-child{margin-top:0}
 .chips{display:flex;gap:7px;flex-wrap:wrap}
+/* Auch am Laptop nur EINE Filterzeile – die drei beschrifteten Blöcke
+   haben dort fast die ganze Seitenleiste gefüllt. Mausrad scrollt seitlich. */
+@media (min-width:881px){
+  .filter{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:7px;padding:14px 20px 12px;
+    scrollbar-width:none;scroll-snap-type:x proximity;scroll-padding-inline:20px;
+    -webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);
+            mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent)}
+  .filter::-webkit-scrollbar{display:none}
+  .filtertitel,.filter .notiz-klein{display:none}
+  .filter .chips{display:contents}
+  .filter .chip{flex-shrink:0;scroll-snap-align:start}
+  .filter .chips:not(:first-of-type) > .chip:first-child{margin-left:11px}
+}
 .chip{font-family:var(--schrift);font-size:13.5px;font-weight:600;letter-spacing:-.005em;
   padding:8px 15px;border:0;background:var(--flaeche);color:var(--tinte-2);
   border-radius:var(--r-pille);cursor:pointer;line-height:1.2;
@@ -4918,6 +4931,13 @@ const sheet = (function(){
 /* ==========================================================================
    10. KLICKS
    ========================================================================== */
+
+/* Mausrad über der Filterzeile schiebt sie seitlich (Laptop ohne Trackpad). */
+document.addEventListener("wheel", e => {
+  const f = e.target.closest(".filter");
+  if (!f || Math.abs(e.deltaX) > Math.abs(e.deltaY) || f.scrollWidth <= f.clientWidth) return;
+  f.scrollLeft += e.deltaY; e.preventDefault();
+}, { passive:false });
 
 document.addEventListener("click", e=>{
   const t = e.target.closest("[data-sport],[data-nurfrei],[data-nurlos],[data-ort],[data-gehe],"+
