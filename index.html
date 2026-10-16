@@ -305,6 +305,28 @@ aside{width:420px;flex-shrink:0;background:var(--grund);
 .live-kasten .live-text{flex:1 1 180px;font-size:14px;line-height:1.35;color:var(--tinte);display:flex;align-items:center}
 .live-kasten .live-text small{display:block;color:var(--tinte-3);font-size:12px;margin-top:2px}
 .live-kasten .inline-knopf{margin:0}
+/* "Was ist los": Community-Leiste oben in der Liste */
+.los{margin:14px 0 0;flex-shrink:0}
+.los-titel{margin:0 20px 8px;font-size:13px;font-weight:700;color:var(--tinte-2);
+  display:flex;align-items:center;gap:6px}
+.los-leiste{display:flex;gap:10px;overflow-x:auto;padding:2px 20px 4px;scroll-snap-type:x mandatory;
+  scrollbar-width:none}
+.los-leiste::-webkit-scrollbar{display:none}
+.los-karte{flex:0 0 auto;width:212px;scroll-snap-align:start;text-align:left;border:0;cursor:pointer;
+  background:var(--flaeche);border-radius:var(--r-karte);box-shadow:var(--schatten);
+  padding:12px 14px;display:flex;flex-direction:column;gap:4px;color:var(--tinte);font:inherit}
+.los-karte .los-art{font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px}
+.los-karte .los-name{font-size:14.5px;font-weight:600;line-height:1.25;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.los-karte small{font-size:12.5px;color:var(--tinte-3)}
+.los-karte.live .los-art{color:var(--frei)}
+.los-karte.spiel .los-art{color:var(--gruen-tief)}
+.los-karte.hier{background:var(--frei-bg)}
+.los-karte .inline-knopf{margin:6px 0 0;align-self:flex-start}
+.los-karte.leer{width:250px;cursor:default}
+.spiel-ring{pointer-events:none}
+.spiel-ring span{display:block;width:26px;height:26px;border-radius:50%;
+  border:2px dashed var(--gruen-tief)}
 .live-ring{pointer-events:none}
 .live-ring span{display:block;width:30px;height:30px;border-radius:50%;
   border:2px solid #34C759;animation:ring 1.8s ease-out infinite}
@@ -1140,6 +1162,12 @@ const BUENDEL_ZELLE = 90;      // Bündelgröße in Bildschirmpunkten
 const BUENDEL_RANG = ["#34C759", "#8FD9A3", "#FF9F0A", "#FFC978", "#7A5EA8", "#FF3B30", "#8E8E93"];
 
 function punktZeichnen(o){
+  const spiel = naechstesSpiel(o.id);
+  if (spiel && new Date(spiel.beginn) - Date.now() < 24 * 3600e3 && (Z.aktiv[o.id] || 0) < 2)
+    L.marker([o.lat, o.lon], {
+      icon: L.divIcon({ className:"spiel-ring", html:"<span></span>", iconSize:[26,26] }),
+      interactive:false, keyboard:false
+    }).addTo(markerEbene);
   if ((Z.aktiv[o.id] || 0) >= 2 || hierHier(o.id))
     L.marker([o.lat, o.lon], {
       icon: L.divIcon({ className:"live-ring", html:"<span></span>", iconSize:[30,30] }),
@@ -1391,6 +1419,7 @@ function sichtbareOrte(){
     .filter(o => !Z.nurBelegt || belegt(o) || nutzerBestaetigt(o))
     .filter(o => !Z.nurGemerkt || GEMERKT.has(o.id))
     .filter(o => !Z.nurLicht || o.beleuchtung === "ja")
+    .filter(o => !Z.nurLos || (Z.aktiv[o.id] || 0) >= 2 || naechstesSpiel(o.id))
     .filter(o => sucht || !Z.maxKm || entfernungKm(Z.position,o) <= Z.maxKm)
     /* "In diesem Bereich suchen": zeigt, was man gerade auf der Karte sieht,
        statt was in der Nähe ist – für Auswärtsspiele und Urlaub. */
@@ -1522,6 +1551,74 @@ const seite = document.getElementById("seite");
 const SPORT_ICON = { "Fußball":"⚽", "Basketball":"🏀", "Tischtennis":"🏓",
   "Beachvolleyball":"🏐", "Laufen":"🏃", "Calisthenics":"💪", "Skaten":"🛹" };
 
+/* --------------------------------------------------------------------------
+   "Was ist los in deiner Nähe" – die Community ganz oben in der Liste
+   --------------------------------------------------------------------------
+   Zeigt, wo gerade gespielt wird, welche Spiele anstehen, und – wenn man
+   auf einem Platz steht – den Knopf zum Einchecken. Ist nichts los, lädt
+   eine Karte dazu ein, selbst ein Spiel anzusetzen. Nur Anzahlen, keine
+   Namen (Jugendschutz, wie überall).
+   -------------------------------------------------------------------------- */
+const LOS_RADIUS_KM = 30;
+function losLeiste(){
+  const karten = [];
+  const kmText = km => km < 1 ? Math.round(km * 1000) + " m" : (km < 10 ? km.toFixed(1).replace(".", ",") : Math.round(km)) + " km";
+
+  /* Eingecheckt, oder gerade auf einem Platz? */
+  const ich = meinCheckin();
+  const meinOrt = ich && ort(ich.ort);
+  if (meinOrt) {
+    const bis = new Date(ich.bis).toLocaleTimeString("de-DE", { hour:"2-digit", minute:"2-digit" });
+    karten.push(`<div class="los-karte hier" data-ort="${meinOrt.id}" role="button" tabindex="0">
+      <span class="los-art"><span class="puls" aria-hidden="true"></span>Du bist eingecheckt</span>
+      <span class="los-name">${esc(meinOrt.name)}</span><small>bis ${bis} Uhr</small>
+      <button class="inline-knopf" data-hierweg="1">Wieder weg</button></div>`);
+  } else if (Z.positionEcht) {
+    let naechster = null, best = 0.3;
+    for (const o of DATEN) {
+      if (Math.abs(o.lat - Z.position.lat) > 0.004 || Math.abs(o.lon - Z.position.lon) > 0.006) continue;
+      const km = entfernungKm(Z.position, o);
+      if (km <= best) { best = km; naechster = o; }
+    }
+    if (naechster) karten.push(`<div class="los-karte hier" data-ort="${naechster.id}" role="button" tabindex="0">
+      <span class="los-art">📍 Du bist ganz nah</span>
+      <span class="los-name">${esc(naechster.name)}</span><small>Zeig anderen, dass hier gespielt wird</small>
+      <button class="inline-knopf" data-hier="${naechster.id}">Ich bin gerade hier</button></div>`);
+  }
+
+  /* Wo gerade gespielt wird (ab 2 Personen) */
+  const live = Object.entries(Z.aktiv).filter(([, n]) => n >= 2)
+    .map(([id, n]) => ({ o: ort(id) || ort(+id), n })).filter(x => x.o)
+    .map(x => ({ ...x, km: entfernungKm(Z.position, x.o) })).filter(x => x.km <= LOS_RADIUS_KM)
+    .sort((a, b) => a.km - b.km).slice(0, 6);
+  for (const { o, n, km } of live) karten.push(`<button class="los-karte live" data-ort="${o.id}">
+      <span class="los-art"><span class="puls" aria-hidden="true"></span>${n} spielen gerade</span>
+      <span class="los-name">${esc(o.name)}</span><small>${esc(o.sportarten.join(" · "))} · ${kmText(km)}</small></button>`);
+
+  /* Kommende Spiele in der Nähe */
+  const jetzt = new Date();
+  const spiele = Z.spiele.filter(sp => new Date(sp.beginn) > new Date(jetzt - 2 * 3600e3))
+    .map(sp => ({ sp, o: ort(sp.ort_id) || ort(+sp.ort_id) })).filter(x => x.o)
+    .map(x => ({ ...x, km: entfernungKm(Z.position, x.o) })).filter(x => x.km <= LOS_RADIUS_KM)
+    .sort((a, b) => new Date(a.sp.beginn) - new Date(b.sp.beginn)).slice(0, 8);
+  for (const { sp, o, km } of spiele) karten.push(`<button class="los-karte spiel" data-ort="${o.id}">
+      <span class="los-art">📅 ${esc(spielZeit(sp.beginn))}</span>
+      <span class="los-name">${esc(sp.sportart)} · ${esc(o.name)}</span>
+      <small>${sp.dabei} von ${sp.brauchen} dabei · ${kmText(km)}</small></button>`);
+
+  if (!live.length && !spiele.length) karten.push(`<div class="los-karte leer">
+      <span class="los-art">👥 Noch nichts los</span>
+      <small>Öffne einen Platz und setz ein Spiel an. Dann sehen andere hier, wann sie dazukommen können.</small></div>`);
+
+  karten.push(`<button class="los-karte" data-gehe="abzeichen">
+      <span class="los-art">🏅 Abzeichen</span>
+      <span class="los-name">${abzeichenErreicht().length} von ${ABZEICHEN.length} geschafft</span>
+      <small>Spielen, prüfen, Tipps geben</small></button>`);
+
+  return `<div class="los"><div class="los-titel">Was ist los in deiner Nähe</div>
+    <div class="los-leiste">${karten.join("")}</div></div>`;
+}
+
 function ansichtListe(nurListe){
   const alleOrte = sichtbareOrte();
   const orte = alleOrte.slice(0, 150);   // Liste zeigt die 150 nächsten;
@@ -1626,6 +1723,7 @@ function ansichtListe(nurListe){
         aria-label="Platz, Ort oder Sportart suchen">
       ${Z.suche ? `<button class="suche-weg" data-suchweg="1" aria-label="Suche löschen">✕</button>` : ``}
     </div>
+    ${Z.suche.trim() ? `` : losLeiste()}
     <div class="filter">
       <div class="filtertitel">Sportart</div>
       <div class="chips">${sportChips}</div>
@@ -1634,6 +1732,7 @@ function ansichtListe(nurListe){
         <button class="chip" data-nurfrei="0" aria-pressed="${!Z.nurFrei}">Alles zeigen</button>
         <button class="chip" data-nurfrei="1" aria-pressed="${Z.nurFrei}">Nur frei zugänglich</button>
         <button class="chip" data-belegt="1" aria-pressed="${Z.nurBelegt}">Nur wo ich sicher darf</button>
+        <button class="chip" data-nurlos="${Z.nurLos ? "0" : "1"}" aria-pressed="${!!Z.nurLos}">👥 Hier ist was los</button>
         <button class="chip mehr" data-mehr="${Z.filterOffen ? "0" : "1"}"
           aria-pressed="${Z.filterOffen}">${Z.filterOffen ? "Weniger" : "Mehr Filter"}</button>
       </div>
@@ -1935,6 +2034,7 @@ function liveBlock(o){
 function ansichtDetail(){
   const o = ort(Z.auswahlId);
   if (!o) { Z.ansicht="liste"; return ansichtListe(); }
+  if (!o._voll) ortVollLaden(o);
 
   const vermutet = o.bestaetigtDurch==="nur vermutet" || o.bestaetigtDurch==="Lage (OSM)";
   const gepruefttext = o.geprueft
@@ -2077,6 +2177,13 @@ function ansichtDetail(){
 
 function ansichtBearbeiten(){
   const o = ort(Z.auswahlId);
+  /* Ohne die vollen Angaben würde Speichern leere Felder zurückschreiben. */
+  if (o && !o._voll && ECHT) {
+    seite.innerHTML = `<div class="dkopf"><button class="zurueck" data-gehe="detail">← Zurück</button>
+      <div class="dname">${esc(o.name)}</div></div><p class="hinweis" style="padding:16px">Lädt …</p>`;
+    ortVollLaden(o);
+    return;
+  }
   const sperr = !Z.admin;   // Nicht-Admins sehen die Zugangsfelder, dürfen sie
                             // aber nur vorschlagen, nicht direkt ändern.
 
@@ -2492,8 +2599,73 @@ function ausDb(r){
     beleuchtung:r.beleuchtung || "nein", zustand:r.zustand || 3,
     drumherum:r.drumherum || "—", notizen:r.notizen || "",
     verein:r.verein || null,
-    geprueft:r.geprueft_am, freigegeben:r.freigegeben
+    geprueft:r.geprueft_am, freigegeben:r.freigegeben,
+    _voll: r.notizen !== undefined     // false = nur Listenfelder geladen
   };
+}
+
+/* --------------------------------------------------------------------------
+   Schnell laden
+   --------------------------------------------------------------------------
+   1. Für Karte und Liste holen wir nur die Felder, die dort gebraucht
+      werden. Notizen, Größe, Ausstattung usw. kommen erst, wenn man einen
+      Platz öffnet (ortVollLaden).
+   2. Die Plätze werden auf dem Gerät gespeichert (IndexedDB). Beim nächsten
+      Start ist die Karte sofort da; frisch geladen wird im Hintergrund, wenn
+      der Speicher älter als 15 Minuten ist (für den Admin immer).
+   3. Beim ersten Laden zeigen wir die Plätze schon, sobald die ersten
+      Seiten da sind, statt auf alle zu warten.
+   -------------------------------------------------------------------------- */
+const LISTE_SPALTEN = "id,name,ort,lat,lon,sportarten,zugang,zeiten,bestaetigt_durch,"
+                    + "untergrund,beleuchtung,zustand,verein,geprueft_am,freigegeben";
+const SPEICHER_ALTER_MIN = 15;
+
+function speicherOeffnen(){
+  return new Promise((ja, nein) => {
+    try {
+      const anfrage = indexedDB.open("platzfrei", 1);
+      anfrage.onupgradeneeded = () => anfrage.result.createObjectStore("daten");
+      anfrage.onsuccess = () => ja(anfrage.result);
+      anfrage.onerror = () => nein(anfrage.error);
+    } catch (e) { nein(e); }
+  });
+}
+async function speicherLesen(){
+  try {
+    const d = await speicherOeffnen();
+    return await new Promise(ja => {
+      const a = d.transaction("daten").objectStore("daten").get("orte");
+      a.onsuccess = () => ja(a.result || null);
+      a.onerror = () => ja(null);
+    });
+  } catch { return null; }
+}
+/* Nach eigenen Änderungen: beim nächsten Start frisch laden. */
+async function speicherVeraltet(){
+  try {
+    const d = await speicherOeffnen();
+    const tx = d.transaction("daten", "readwrite").objectStore("daten");
+    const a = tx.get("orte");
+    a.onsuccess = () => { if (a.result) tx.put({ ...a.result, zeit: 0 }, "orte"); };
+  } catch {}
+}
+async function speicherSchreiben(zeilen){
+  try {
+    const d = await speicherOeffnen();
+    d.transaction("daten", "readwrite").objectStore("daten")
+      .put({ zeit: Date.now(), zeilen }, "orte");
+  } catch {}
+}
+
+/* Volle Angaben eines Platzes nachladen (für Detail und Bearbeiten). */
+async function ortVollLaden(o){
+  if (!ECHT || !o || o._voll || o._laedt) return;
+  o._laedt = true;
+  const { data, error } = await db.from("orte").select("*").eq("id", o.id).maybeSingle();
+  o._laedt = false;
+  if (error || !data) return;
+  Object.assign(o, ausDb(data));
+  if (String(Z.auswahlId) === String(o.id) && (Z.ansicht === "detail" || Z.ansicht === "bearbeiten")) zeichne();
 }
 
 /* Orte aus der Datenbank holen. Klappt das nicht, bleiben die Daten aus
@@ -2501,16 +2673,37 @@ function ausDb(r){
 async function datenLaden(){
   if (!ECHT) return;
 
-  /* Supabase liefert höchstens 1000 Zeilen pro Anfrage. Seit dem
-     deutschlandweiten Import sind es fast 30.000 – also erst zählen und dann
-     mehrere Seiten gleichzeitig holen statt eine nach der anderen. */
   const fehler = error => {
     melde("Datenbank nicht erreichbar. Schon das SQL-Skript ausgeführt?");
     console.error("Fehler beim Laden:", error);
   };
+  /* geprueft = schon sortiert und nur Deutschland (so liegt es im Speicher) –
+     die Grenzprüfung kostet bei 100.000 Plätzen rund eine Sekunde. */
+  const uebernehmen = (zeilen, geprueft) => {
+    if (!geprueft) {
+      zeilen = zeilen.filter(z => inDeutschland(z.lat, z.lon));
+      zeilen.sort((a,b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
+    }
+    /* Schon voll geladene Plätze (z. B. der gerade offene) behalten ihre Angaben. */
+    const voll = new Map(DATEN.filter(o => o._voll).map(o => [String(o.id), o]));
+    DATEN = zeilen.map(z => voll.get(String(z.id)) || ausDb(z));
+    return zeilen;
+  };
+
+  /* 1. Aus dem Gerätespeicher – dann ist die Karte sofort da. */
+  const gespeichert = await speicherLesen();
+  if (gespeichert?.zeilen?.length) {
+    uebernehmen(gespeichert.zeilen, true);
+    zeichne();
+    const frisch = Date.now() - gespeichert.zeit < SPEICHER_ALTER_MIN * 60000;
+    if (frisch && !Z.admin) return;
+  }
+
+  /* 2. Aus der Datenbank. Supabase liefert höchstens 1000 Zeilen pro
+     Anfrage – also erst zählen und dann mehrere Seiten gleichzeitig holen. */
   const { count, error: zaehlFehler } = await db.from("orte")
     .select("id", { count:"exact", head:true });
-  if (zaehlFehler) { fehler(zaehlFehler); return; }
+  if (zaehlFehler) { if (!gespeichert) fehler(zaehlFehler); return; }
 
   const SEITE = 1000, GLEICHZEITIG = 6;
   const anfaenge = [];
@@ -2518,20 +2711,21 @@ async function datenLaden(){
   const alle = [];
   for (let i = 0; i < anfaenge.length; i += GLEICHZEITIG) {
     const antworten = await Promise.all(anfaenge.slice(i, i + GLEICHZEITIG).map(von =>
-      db.from("orte").select("*").order("id").range(von, von + SEITE - 1)));
+      db.from("orte").select(LISTE_SPALTEN).order("id").range(von, von + SEITE - 1)));
     for (const { data, error } of antworten) {
-      if (error) { fehler(error); return; }
+      if (error) { if (!gespeichert) fehler(error); return; }
       alle.push(...data);
     }
+    /* Beim allerersten Laden schon zwischendurch zeigen. */
+    if (!gespeichert && i === 0 && alle.length) { uebernehmen([...alle]); zeichne(); }
   }
-  alle.sort((a,b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
 
   if (!alle.length) {
     melde("Die Datenbank ist noch leer – Abschnitt 7 im SQL-Skript fehlt.");
     return;
   }
 
-  DATEN = alle.map(ausDb).filter(o => inDeutschland(o.lat, o.lon));
+  speicherSchreiben(uebernehmen(alle));
   VORSCHLAEGE = [];
   if (Z.admin) await Promise.all([vorschlaegeLaden(), fehlerLaden(), pruefungLaden()]);
   zeichne();
@@ -2592,6 +2786,7 @@ async function speichern(){
       if (error) { console.error(error); return melde("Speichern abgelehnt: " + error.message); }
     }
     Object.assign(o, offen);
+    speicherVeraltet();
     o.geprueft = heute();
   }
 
@@ -2709,6 +2904,7 @@ async function neuSpeichern(){
       return melde("Anlegen abgelehnt: " + error.message);
     }
     DATEN.push(ausDb(data));
+    speicherVeraltet();
   } else {
     DATEN.push(ausDb({ ...zeile, id:"O"+String(DATEN.length+1).padStart(2,"0") }));
   }
@@ -2811,9 +3007,21 @@ async function alsGepruefT(id){
 }
 
 /* Export bleibt als Sicherheitsnetz: alles als JSON herunterladen. */
-function exportieren(){
+async function exportieren(){
   if (!Z.admin) return;
-  const inhalt = JSON.stringify({ orte:DATEN, vorschlaege:VORSCHLAEGE }, null, 2);
+  /* Karte und Liste haben nur die Listenfelder – für die Sicherung alles holen. */
+  let orte = DATEN;
+  if (ECHT) {
+    melde("Export wird vorbereitet …");
+    orte = [];
+    for (let von = 0; ; von += 1000) {
+      const { data, error } = await db.from("orte").select("*").order("id").range(von, von + 999);
+      if (error) return melde("Export fehlgeschlagen: " + error.message);
+      orte.push(...data);
+      if (data.length < 1000) break;
+    }
+  }
+  const inhalt = JSON.stringify({ orte, vorschlaege:VORSCHLAEGE }, null, 2);
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([inhalt], {type:"application/json"}));
   a.download = "sportflaechen-"+heute()+".json";
@@ -3150,6 +3358,7 @@ async function ortLoeschen(ortId){
     if (error) { console.error(error); return melde("Löschen abgelehnt: " + error.message); }
   }
   DATEN = DATEN.filter(x => x.id !== ortId);
+  speicherVeraltet();
   if (GEMERKT.delete(ortId)) {
     try { localStorage.setItem(MERK_SCHLUESSEL, JSON.stringify([...GEMERKT])); } catch {}
   }
@@ -4127,7 +4336,9 @@ function ansichtRechtliches(){
         <p>Merkliste, Geräte-Nummer, eigene Bestätigungen, Zusagen und Tipps,
         dein aktueller Check-in und deine Abzeichen speichert die App im
         Speicher deines Browsers (localStorage). Damit die App auch ohne Netz
-        startet, legt sie außerdem eine Kopie ihrer Dateien im Browser ab.
+        startet, legt sie außerdem eine Kopie ihrer Dateien und der Platzliste
+        im Browser ab (Cache und IndexedDB); die Platzliste enthält keine
+        Angaben über dich.
         Das ist für diese Funktionen unbedingt nötig (§ 25 Abs. 2 Nr. 2
         TDDDG) und wird nicht an uns übertragen, außer wie oben beschrieben.
         Du kannst alles jederzeit über die Browsereinstellungen löschen.
@@ -4656,7 +4867,7 @@ const sheet = (function(){
    ========================================================================== */
 
 document.addEventListener("click", e=>{
-  const t = e.target.closest("[data-sport],[data-nurfrei],[data-ort],[data-gehe],"+
+  const t = e.target.closest("[data-sport],[data-nurfrei],[data-nurlos],[data-ort],[data-gehe],"+
                              "[data-speichern],[data-neuspeichern],[data-geprueft],"+
                              "[data-export],[data-anmelden],[data-km],"+
                              "[data-merken],[data-gemerkt],[data-melden],[data-route],"+
@@ -4709,6 +4920,7 @@ document.addEventListener("click", e=>{
 
   if (t.dataset.sport)      { Z.sportart = t.dataset.sport; return zeichne(); }
   if (t.dataset.nurfrei)    { Z.nurFrei = t.dataset.nurfrei==="1"; return zeichne(); }
+  if (t.dataset.nurlos)     { Z.nurLos = t.dataset.nurlos==="1"; return zeichne(); }
   if (t.dataset.ort) {
     Z.auswahlId = t.dataset.ort; Z.ansicht = "detail"; zeichne();
     const o = ort(t.dataset.ort);
@@ -4807,10 +5019,17 @@ function standortHolen(){
       ichMarker = L.circleMarker([Z.position.lat, Z.position.lon], {
         radius:7, color:"#fff", weight:2.5, fillColor:"#2E6BE0", fillOpacity:1
       }).addTo(karte);
+      /* Karte beim Start direkt am eigenen Standort öffnen – außer man hat
+         sie inzwischen selbst bewegt oder ein geteilter Platz ist offen. */
+      if (karteUnberuehrt && !Z.auswahlId) {
+        mitteBeimZeichnen = L.latLng(Z.position.lat, Z.position.lon);   // kein "In diesem Bereich suchen"
+        karte.setView(mitteBeimZeichnen, 15);
+      }
       zeichne();
       wetterLaden();   // jetzt mit der echten Position
     },
-    () => {}   // kein Standort: München-Mitte bleibt der Bezugspunkt
+    () => {},   // kein Standort: München-Mitte bleibt der Bezugspunkt
+    { timeout:10000, maximumAge:300000 }
   );
 }
 
@@ -4860,6 +5079,8 @@ const StandortKnopf = L.Control.extend({
 new StandortKnopf().addTo(karte);
 
 zeichne();
+let karteUnberuehrt = true;
+karte.once("movestart", () => { karteUnberuehrt = false; });
 standortHolen();
 
 /* Reihenfolge beim Start: erst schauen, ob eine Sitzung aus einem früheren
