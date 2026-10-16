@@ -143,7 +143,7 @@ aside{width:420px;flex-shrink:0;background:var(--grund);
   aside{width:clamp(420px,44vw,760px);container-type:inline-size}
   /* Breite Liste: Plätze in zwei Spalten */
   @container (min-width:640px){
-    .rolle{display:grid;grid-template-columns:1fr 1fr;column-gap:12px;align-content:start}
+    .rolle{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:max-content;column-gap:12px;align-content:start}
     .rolle > :not(.zeile){grid-column:1/-1}
   }
   /* Ganze Seiten (Über Platzfrei, Für Vereine) ohne Karte */
@@ -397,7 +397,7 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
 .los-titel small{font-size:12.5px;font-weight:500;color:var(--tinte-3);margin-left:auto}
 .los-karte.live{background:var(--frei-bg)}
 .los-karte.spiel{background:var(--flaeche);box-shadow:inset 0 0 0 2px var(--gruen-tief),var(--schatten)}
-.los-karte.ansetzen{background:var(--gruen-tief);color:#fff}
+.los-karte.ansetzen{background:linear-gradient(140deg,#0B9463,#06603F);color:#fff}
 .los-karte.ansetzen .los-art,.los-karte.ansetzen small{color:rgba(255,255,255,.85)}
 .los-pille{position:absolute;left:50%;top:14px;transform:translateX(-50%);z-index:500;
   font-family:var(--schrift);font-size:13.5px;font-weight:600;padding:9px 16px;border:0;
@@ -1746,7 +1746,7 @@ function losLeiste(){
       <small>Spielen, prüfen, Tipps geben</small></button>`);
 
   const zahl = live.length + spiele.length;
-  return `<div class="los"><div class="los-titel">👥 Was ist los in deiner Nähe${
+  return `<div class="los"><div class="los-titel">Was ist los in deiner Nähe${
       zahl ? `<small>${zahl} aktiv</small>` : ``}</div>
     <div class="los-leiste">${karten.join("")}</div></div>`;
 }
@@ -1780,8 +1780,6 @@ function ansichtListe(nurListe){
     const anzMeld = Z.meldungen[o.id] || 0;
     const km = entfernungKm(Z.position,o);
     return `<button class="zeile" data-ort="${o.id}" style="--streifen:${farbe(o)}">
-      <img class="luftbild" src="${satellitBild(o)}" alt="" loading="lazy" decoding="async"
-           onerror="this.remove()">
       <span class="zt">
         <span class="zname">${esc(o.name)}</span>
         <span class="zsub">${esc(o.sportarten.join(" · "))} · ${esc(o.untergrund)}</span>
@@ -1833,10 +1831,11 @@ function ansichtListe(nurListe){
   const ueberschrift = Z.suche.trim()
     ? `${anzahl} Treffer`
     : Z.bereich ? `${anzahl} ${anzahl === 1 ? "Platz" : "Plätze"} im Kartenausschnitt`
+    : anzahl > 150 ? `${anzahl.toLocaleString("de-DE")} Plätze · die nächsten zuerst`
     : `${anzahl} ${anzahl === 1 ? "Platz" : "Plätze"} in deiner Nähe`;
 
   const rolleInhalt = `${Z.suche.trim() ? `` : losLeiste()}<div class="anzahl">${ueberschrift}</div>${zeilen}${alleOrte.length > orte.length
-      ? `<div class="leer">… und ${alleOrte.length - orte.length} weitere.<br>
+      ? `<div class="leer">… und ${(alleOrte.length - orte.length).toLocaleString("de-DE")} weitere.<br>
          Filter setzen, suchen oder auf der Karte zoomen.</div>` : ``}${listenende}`;
 
   /* Beim Tippen im Suchfeld nur die Liste tauschen – sonst würde das Feld
@@ -2715,7 +2714,7 @@ function zeichne(){
 
   const w = VORSCHLAEGE.length;
   document.getElementById("kopfnotiz").textContent =
-    `Version 0.1 · ${DATEN.length} Orte`
+    `Version 0.1 · ${DATEN.length.toLocaleString("de-DE")} Orte`
     + (w ? ` · ${w} Vorschläge offen` : "")
     + (ECHT ? "" : " · Testmodus");
 }
