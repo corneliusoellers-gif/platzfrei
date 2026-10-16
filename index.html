@@ -387,7 +387,11 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
 .los-leiste::-webkit-scrollbar{display:none}
 .los-karte{flex:0 0 auto;width:212px;scroll-snap-align:start;text-align:left;border:0;cursor:pointer;
   background:var(--flaeche);border-radius:var(--r-karte);box-shadow:var(--schatten);
-  padding:12px 14px;display:flex;flex-direction:column;gap:4px;color:var(--tinte);font:inherit}
+  padding:10px 12px;display:block;border:2px solid transparent;color:var(--tinte);font:inherit;vertical-align:top}
+/* Innerer Kasten: Safari zentriert Inhalte in Knöpfen senkrecht – so beginnen
+   alle Karten oben auf derselben Höhe. */
+.los-innen{display:flex;flex-direction:column;gap:4px;height:100%;justify-content:flex-start;text-align:left}
+.los-leiste{align-items:stretch}
 .los-karte .los-art{font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;justify-content:flex-start}
 .los-karte > *{text-align:left;width:100%}
 .los-karte .los-name{font-size:14.5px;font-weight:600;line-height:1.25;
@@ -403,7 +407,7 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
 .los-titel{font-size:16px;color:var(--tinte);margin-bottom:10px}
 .los-titel small{font-size:12.5px;font-weight:500;color:var(--tinte-3);margin-left:auto}
 .los-karte.live{background:var(--frei-bg)}
-.los-karte.spiel{background:var(--flaeche);box-shadow:inset 0 0 0 2px var(--gruen-tief),var(--schatten)}
+.los-karte.spiel{background:var(--flaeche);border-color:var(--gruen-tief)}
 .los-karte.ansetzen{background:linear-gradient(140deg,#0B9463,#06603F);color:#fff}
 .los-karte.ansetzen .los-art,.los-karte.ansetzen small{color:rgba(255,255,255,.85)}
 .los-pille{position:absolute;left:50%;top:14px;transform:translateX(-50%);z-index:500;
@@ -1795,6 +1799,9 @@ function losLeiste(){
       <small>Spielen, prüfen, Tipps geben</small></button>`);
 
   const zahl = live.length + spiele.length;
+  const innen = k => { const a = k.indexOf(">") + 1, z = k.lastIndexOf("</");
+    return k.slice(0, a) + `<span class="los-innen">` + k.slice(a, z) + `</span>` + k.slice(z); };
+  karten.splice(0, karten.length, ...karten.map(innen));
   return `<div class="los"><div class="los-titel">Was ist los in deiner Nähe${
       zahl ? `<small>${zahl} aktiv</small>` : ``}</div>
     <div class="los-leiste">${karten.join("")}</div></div>`;
