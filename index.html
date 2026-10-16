@@ -128,6 +128,59 @@ aside{width:420px;flex-shrink:0;background:var(--grund);
 .leaflet-control-attribution{font-size:9.5px!important;background:rgba(255,255,255,.8)!important;
   border-radius:8px 0 0 0!important;padding:2px 6px!important}
 
+/* ---------- Laptop: Suche und Filter oben über die ganze Breite ---------- */
+#leiste{display:none}
+.kopfnav{display:flex;gap:4px;margin-left:8px}
+.kopfnav button{font-family:var(--schrift);font-size:14px;font-weight:600;color:var(--tinte-2);
+  background:none;border:0;padding:8px 12px;border-radius:var(--r-pille);cursor:pointer}
+.kopfnav button:hover{background:var(--gruen-zart);color:var(--gruen-tief)}
+.kopfnav button[aria-current=page]{background:var(--gruen-zart);color:var(--gruen-tief)}
+@media (min-width:881px){
+  body.mit-leiste #leiste{display:flex;align-items:center;gap:18px;flex-shrink:0;
+    padding:12px 22px;background:var(--grund);border-bottom:1px solid var(--kante);position:relative;z-index:15}
+  #leiste .suche{margin:0;flex:0 0 min(400px,34vw)}
+  #leiste .filter{flex:1;min-width:0;padding:2px 0}
+  aside{width:clamp(420px,44vw,760px);container-type:inline-size}
+  /* Breite Liste: Plätze in zwei Spalten */
+  @container (min-width:640px){
+    .rolle{display:grid;grid-template-columns:1fr 1fr;column-gap:12px;align-content:start}
+    .rolle > :not(.zeile){grid-column:1/-1}
+  }
+  /* Ganze Seiten (Über Platzfrei, Für Vereine) ohne Karte */
+  body.vollseite #karte{display:none}
+  body.vollseite aside{width:100%;border-left:0}
+  body.vollseite #seite{max-width:980px;width:100%;margin:0 auto}
+}
+@media (max-width:880px){ .kopfnav{display:none} }
+
+/* ---------- Über Platzfrei / Für Vereine ---------- */
+.held{padding:34px 22px 10px}
+.held .ueber-marke{font-size:13px;font-weight:700;color:var(--gruen-tief);letter-spacing:.02em;text-transform:uppercase}
+.held h2{font-size:clamp(30px,4.4vw,46px);line-height:1.08;letter-spacing:-.03em;font-weight:800;margin:10px 0 14px}
+.held h2 em{font-style:normal;color:var(--gruen)}
+.held p{font-size:17px;line-height:1.55;color:var(--tinte-2);max-width:640px}
+.held .reihe{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+.held .knopf{flex:0 0 auto;padding-left:22px;padding-right:22px}
+a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.zahlen{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:22px 0 8px}
+.zahl{background:var(--flaeche);border-radius:var(--r-karte);box-shadow:var(--schatten);padding:18px 18px 16px}
+.zahl b{display:block;font-size:30px;font-weight:800;letter-spacing:-.03em;color:var(--tinte);
+  font-variant-numeric:tabular-nums;line-height:1.1}
+.zahl small{display:block;font-size:13px;color:var(--tinte-3);margin-top:4px;line-height:1.35}
+.zahl.gruen b{color:var(--frei)} .zahl.lila b{color:var(--verein)}
+.schritte{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:8px 0 4px}
+.schritt{background:var(--flaeche);border-radius:var(--r-karte);box-shadow:var(--schatten);padding:18px}
+.schritt .nr{display:inline-flex;width:28px;height:28px;border-radius:50%;align-items:center;justify-content:center;
+  background:var(--gruen-zart);color:var(--gruen-tief);font-weight:800;font-size:14px;margin-bottom:10px}
+.schritt b{display:block;font-size:16px;margin-bottom:4px}
+.schritt p{font-size:14px;line-height:1.55;color:var(--tinte-2)}
+.ueber-teil{padding:18px 22px 6px}
+.ueber-teil > h3{font-size:21px;letter-spacing:-.02em;margin-bottom:6px}
+.ueber-teil > p{font-size:15px;line-height:1.6;color:var(--tinte-2);max-width:680px}
+.ueber-teil .abschnitt{margin:12px 0 0}
+.ueber-fuss{padding:26px 22px 40px;font-size:13px;color:var(--tinte-3)}
+.ueber-fuss button{font:inherit;color:inherit;text-decoration:underline;background:none;border:0;cursor:pointer}
+
 /* ---------- Filter ---------- */
 .filter{padding:18px 20px 12px;flex-shrink:0}
 .filtertitel{font-size:12.5px;font-weight:600;letter-spacing:.002em;
@@ -328,7 +381,8 @@ aside{width:420px;flex-shrink:0;background:var(--grund);
 .los-karte{flex:0 0 auto;width:212px;scroll-snap-align:start;text-align:left;border:0;cursor:pointer;
   background:var(--flaeche);border-radius:var(--r-karte);box-shadow:var(--schatten);
   padding:12px 14px;display:flex;flex-direction:column;gap:4px;color:var(--tinte);font:inherit}
-.los-karte .los-art{font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px}
+.los-karte .los-art{font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;justify-content:flex-start}
+.los-karte > *{text-align:left;width:100%}
 .los-karte .los-name{font-size:14.5px;font-weight:600;line-height:1.25;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .los-karte small{font-size:12.5px;color:var(--tinte-3)}
@@ -759,10 +813,16 @@ label.inline-knopf{display:inline-block;margin-top:10px}
     <svg width="22" height="22" viewBox="0 0 512 512" aria-hidden="true"><path fill="#2CA93F" d="M256 484C232 440 196 402 160 368C116 326 84 280 84 218a172 172 0 1 1 344 0c0 62-32 108-76 150c-36 34-72 72-96 116Z"/><g stroke="#FFF" stroke-width="25" fill="none"><circle cx="256" cy="218" r="136"/><line x1="120" y1="218" x2="392" y2="218"/><circle cx="256" cy="218" r="50"/><rect x="198" y="70" width="116" height="56" rx="10"/><rect x="198" y="310" width="116" height="56" rx="10"/></g></svg>
     platzfrei <em>— wo darf ich spielen?</em>
   </h1>
+  <nav class="kopfnav" aria-label="Seiten">
+    <button data-gehe="liste" data-nav="liste">Karte</button>
+    <button data-gehe="ueber" data-nav="ueber">Über Platzfrei</button>
+    <button data-gehe="vereine" data-nav="vereine">Für Vereine</button>
+  </nav>
   <span class="kopfnotiz" id="kopfnotiz">Version 0.1</span>
   <button class="adminknopf" id="adminknopf" hidden>Abmelden</button>
 </header>
 
+<div id="leiste"></div>
 <main>
   <div id="karte"></div>
   <aside>
@@ -1086,6 +1146,10 @@ function zaehle(art, ortId){
 /* Platzfrei gibt es nur in Deutschland: Weiter raus als bis ganz
    Deutschland lässt sich nicht zoomen, und die Karte bleibt beim Verschieben
    in der Nähe (etwas Rand, damit Grenzorte nicht am Bildrand kleben). */
+const leiste = document.getElementById("leiste");
+const breit = window.matchMedia("(min-width: 881px)");
+breit.addEventListener("change", () => zeichne());
+
 const DEUTSCHLAND = L.latLngBounds([[47.2, 5.8], [55.1, 15.1]]);
 const KARTEN_RAHMEN = L.latLngBounds([[45.8, 3.0], [56.4, 18.0]]);
 const karte = L.map("karte", {
@@ -1756,7 +1820,9 @@ function ansichtListe(nurListe){
         <button class="knopf zweit" data-export="1">Export</button>
         <button class="knopf zweit" data-abmelden="1">Abmelden</button></div>` : ``}
       <button class="abzeichen-link" data-gehe="abzeichen">🏅 Meine Abzeichen · ${abzeichenErreicht().length} von ${ABZEICHEN.length}</button>
-      <div class="rechtliches-link">Alle Angaben ohne Gewähr – vor Ort gilt das Schild.<br>
+      <div class="rechtliches-link">
+        <button data-gehe="ueber">Über Platzfrei</button> · <button data-gehe="vereine">Für Vereine</button><br>
+        Alle Angaben ohne Gewähr – vor Ort gilt das Schild.<br>
         <button data-gehe="rechtliches">Impressum &amp; Datenschutz</button> ·
         <button data-gehe="fehler">Fehler melden</button></div>
     </div>`;
@@ -1840,6 +1906,11 @@ function ansichtListe(nurListe){
     <div class="rechtliches-link listenfuss">Alle Angaben ohne Gewähr – vor Ort gilt das Schild.<br>
       <button data-gehe="rechtliches">Impressum &amp; Datenschutz</button> ·
       <button data-gehe="fehler">Fehler melden</button></div>`;
+
+  /* Laptop: Suche und Filter oben über die ganze Breite, damit die Liste
+     darunter mehr Höhe bekommt. Die Klicks laufen über document, deshalb
+     funktionieren sie dort genauso. */
+  if (breit.matches) leiste.append(seite.querySelector(".suche"), seite.querySelector(".filter"));
 }
 
 /* Suchfeld: tippen filtert sofort, Enter zeigt die Treffer auf der Karte. */
@@ -2571,7 +2642,7 @@ function ansichtAnmelden(){
 const ANSICHTS_TIEFE = {
   liste:0, importieren:1, anmelden:1, neu:1,
   detail:1, bearbeiten:2, melden:2, rechtliches:1, fehler:1, fehlerliste:1,
-  vereinszeiten:2, pruefen:1, abzeichen:1
+  vereinszeiten:2, pruefen:1, abzeichen:1, ueber:1, vereine:1
 };
 let letzteTiefe = 0;
 let letzterSchluessel = "liste";
@@ -2592,20 +2663,30 @@ function zeichne(){
      vorher, wie weit sie und die Liste gescrollt waren. */
   const schluessel = Z.ansicht === "liste" ? "liste" : Z.ansicht + ":" + (Z.auswahlId || "");
   const gleich = schluessel === letzterSchluessel;
-  const vorher = { filter: seite.querySelector(".filter")?.scrollLeft || 0,
+  const vorher = { filter: document.querySelector(".filter")?.scrollLeft || 0,
                    rolle:  seite.querySelector(".rolle")?.scrollTop || 0 };
   SCROLL[letzterSchluessel] = vorher;
   letzterSchluessel = schluessel;
 
+  /* Laptop: Suche und Filter wandern in die Leiste oben (siehe ansichtListe). */
+  leiste.replaceChildren();
+  const klasseVorher = document.body.className;
+  document.body.classList.toggle("mit-leiste", Z.ansicht === "liste");
+  document.body.classList.toggle("vollseite", Z.ansicht === "ueber" || Z.ansicht === "vereine");
+  document.querySelectorAll("[data-nav]").forEach(b =>
+    b.toggleAttribute("aria-current", b.dataset.nav === (Z.ansicht === "vereine" || Z.ansicht === "ueber" ? Z.ansicht : "liste")));
+  if (document.body.className !== klasseVorher) setTimeout(() => karte.invalidateSize(), 0);
+
   ({ liste:ansichtListe, detail:ansichtDetail, bearbeiten:ansichtBearbeiten,
      neu:ansichtNeu, anmelden:ansichtAnmelden, importieren:ansichtImportieren,
-     melden:ansichtMelden, rechtliches:ansichtRechtliches, vereinszeiten:ansichtVereinszeiten, pruefen:ansichtPruefen, fehler:ansichtFehler, fehlerliste:ansichtFehlerliste, abzeichen:ansichtAbzeichen })[Z.ansicht]();
+     melden:ansichtMelden, rechtliches:ansichtRechtliches, vereinszeiten:ansichtVereinszeiten, pruefen:ansichtPruefen, fehler:ansichtFehler, fehlerliste:ansichtFehlerliste, abzeichen:ansichtAbzeichen,
+     ueber:ansichtUeber, vereine:ansichtVereine })[Z.ansicht]();
 
   /* §11 Nur transform und opacity bewegen – beides läuft im Compositor,
      ohne dass der Browser das Layout neu rechnen muss. */
   const merk = gleich ? vorher : (schluessel === "liste" ? SCROLL.liste : null);
   if (merk) {
-    const f = seite.querySelector(".filter"), r = seite.querySelector(".rolle");
+    const f = document.querySelector(".filter"), r = seite.querySelector(".rolle");
     if (f) f.scrollLeft = merk.filter;
     if (r) r.scrollTop = merk.rolle;
   }
@@ -4215,6 +4296,137 @@ async function fehlerErledigt(id){
   melde("Als erledigt markiert.");
 }
 
+/* --------------------------------------------------------------------------
+   "Über Platzfrei" und "Für Vereine"
+   --------------------------------------------------------------------------
+   Am Laptop ganze Seiten ohne Karte, am Handy normale Ansichten im Blatt.
+   Alle Zahlen kommen live aus den geladenen Plätzen – nichts ist geschätzt.
+   -------------------------------------------------------------------------- */
+function kennzahlen(){
+  const z = { plaetze:DATEN.length, frei:0, verein:0, vereinZeiten:0, belegt:0, sportarten:new Set() };
+  const gemeinden = new Set(), orte = new Set();
+  for (const o of DATEN) {
+    if (frei(o)) z.frei++;
+    const v = vereinsMarke(o);
+    if (v && !v[1]) z.verein++;
+    if (o.bestaetigtDurch === "Auskunft Verein") z.vereinZeiten++;
+    if (belegt(o)) z.belegt++;
+    if (o.bestaetigtDurch === "Auskunft Gemeinde" && o.ort) gemeinden.add(o.ort);
+    if (o.ort) orte.add(o.ort);
+    (o.sportarten || []).forEach(s => z.sportarten.add(s));
+  }
+  z.gemeinden = gemeinden.size; z.orte = orte.size; z.sportarten = z.sportarten.size;
+  return z;
+}
+const zahlText = n => n.toLocaleString("de-DE");
+
+function ueberFuss(){
+  return `<div class="ueber-fuss">Platzfrei · ${esc(RECHT.email)} ·
+    <button data-gehe="rechtliches">Impressum &amp; Datenschutz</button></div>`;
+}
+
+function ansichtUeber(){
+  const z = kennzahlen();
+  seite.innerHTML = `
+    <div class="rolle">
+      <div class="held">
+        <div class="ueber-marke">Über Platzfrei</div>
+        <h2>Wo darf ich <em>spielen?</em></h2>
+        <p>Platzfrei zeigt Kindern und Jugendlichen, auf welchen Bolz-, Basketball- und
+        Sportplätzen sie frei spielen dürfen – und wann. Ohne Ärger mit dem Platzwart,
+        ohne Rätselraten am Zaun.</p>
+        <div class="reihe">
+          <button class="knopf" data-gehe="liste">Plätze in deiner Nähe</button>
+          <button class="knopf zweit" data-gehe="vereine">Für Vereine</button>
+        </div>
+      </div>
+      <div class="ueber-teil">
+        <div class="zahlen">
+          <div class="zahl"><b>${zahlText(z.plaetze)}</b><small>Plätze in ganz Deutschland</small></div>
+          <div class="zahl gruen"><b>${zahlText(z.frei)}</b><small>davon frei zugänglich</small></div>
+          <div class="zahl lila"><b>${zahlText(z.verein)}</b><small>Vereinsanlagen</small></div>
+          <div class="zahl"><b>${zahlText(z.gemeinden)}</b><small>Gemeinden haben ihre Plätze bestätigt</small></div>
+        </div>
+      </div>
+      <div class="ueber-teil">
+        <h3>So funktioniert es</h3>
+        <div class="schritte">
+          <div class="schritt"><span class="nr">1</span><b>Platz finden</b>
+            <p>Karte öffnen, Sportart wählen. Die App zeigt die nächsten Plätze mit Untergrund, Flutlicht und Wetter.</p></div>
+          <div class="schritt"><span class="nr">2</span><b>Regeln sehen</b>
+            <p>Grün heißt frei, Orange nach Absprache, Lila Vereinsanlage. Belegt durch Gemeinden, Vereine oder ein Foto vom Schild.</p></div>
+          <div class="schritt"><span class="nr">3</span><b>Zusammen spielen</b>
+            <p>Einchecken, wenn man da ist, oder ein Spiel ansetzen. Andere sehen, wo gerade etwas los ist.</p></div>
+        </div>
+      </div>
+      <div class="ueber-teil">
+        <h3>Woher die Daten kommen</h3>
+        <p>Wir fragen Gemeinden direkt an und übernehmen ihre Antworten, nutzen offene
+        Daten der Städte und OpenStreetMap. Nutzer bestätigen vor Ort und fotografieren
+        die Schilder. Was nicht belegt ist, zeigen wir ehrlich als „vermutet“ an.</p>
+        <div class="zahlen">
+          <div class="zahl"><b>${zahlText(z.belegt)}</b><small>Plätze mit belegtem Zugang</small></div>
+          <div class="zahl"><b>${zahlText(z.orte)}</b><small>Orte mit Plätzen</small></div>
+          <div class="zahl"><b>${zahlText(z.sportarten)}</b><small>Sportarten</small></div>
+        </div>
+      </div>
+      <div class="ueber-teil">
+        <h3>Sicher für Kinder</h3>
+        <p>Kein Chat, keine Profile, keine Direktnachrichten. Wer gerade spielt, sieht
+        man nur als Anzahl, und erst ab zwei Personen. Keine Werbung und keine Werbe-Cookies.</p>
+      </div>
+      ${ueberFuss()}
+    </div>`;
+}
+
+function ansichtVereine(){
+  const z = kennzahlen();
+  seite.innerHTML = `
+    <div class="rolle">
+      <div class="held">
+        <div class="ueber-marke">Für Vereine</div>
+        <h2>Euer Platz. <em>Eure Zeiten.</em></h2>
+        <p>Kinder wollen kicken – oft genau auf eurem Platz. Mit Platzfrei seht ihr,
+        dass klar ist, wann trainiert wird und wann der Platz frei ist. Das spart Ärger
+        und bringt euch den Nachwuchs von nebenan.</p>
+        <div class="reihe">
+          <button class="knopf" data-gehe="liste" data-vereinsuche="1">Euren Platz finden</button>
+          <a class="knopf zweit" href="mailto:${esc(RECHT.email)}?subject=Platzfrei%20f%C3%BCr%20Vereine">Kontakt aufnehmen</a>
+        </div>
+      </div>
+      <div class="ueber-teil">
+        <div class="zahlen">
+          <div class="zahl lila"><b>${zahlText(z.verein)}</b><small>Vereinsanlagen auf der Karte</small></div>
+          <div class="zahl gruen"><b>${zahlText(z.vereinZeiten)}</b><small>Plätze mit Angaben direkt vom Verein</small></div>
+        </div>
+      </div>
+      <div class="ueber-teil">
+        <h3>Was ihr davon habt</h3>
+        <div class="schritte">
+          <div class="schritt"><span class="nr">1</span><b>Klare Zeiten</b>
+            <p>Tragt ein, wann Training ist. Die App zeigt dann genau, wann der Platz für alle offen ist und wann nicht.</p></div>
+          <div class="schritt"><span class="nr">2</span><b>Weniger Ärger</b>
+            <p>Wer nachschaut, weiß Bescheid. Platzwart und Trainer müssen niemanden mehr wegschicken.</p></div>
+          <div class="schritt"><span class="nr">3</span><b>Nachwuchs gewinnen</b>
+            <p>Die Kinder, die auf eurem Platz bolzen, sind eure Spieler von morgen. Platzfrei zeigt ihnen, wer der Verein ist.</p></div>
+        </div>
+      </div>
+      <div class="ueber-teil">
+        <h3>So tragt ihr eure Zeiten ein</h3>
+        <div class="abschnitt"><p>1. Euren Platz suchen und öffnen.<br>
+          2. „Bist du vom Verein? Platzzeiten eintragen“ antippen.<br>
+          3. Trainingszeiten im Wochenraster markieren und absenden.</p>
+          <p>Wir prüfen jede Angabe, bevor sie erscheint. Kostenlos, ohne Konto.</p></div>
+      </div>
+      <div class="ueber-teil">
+        <h3>Für Verbände und Gemeinden</h3>
+        <p>Wir arbeiten gern mit Verbänden und Gemeinden zusammen, um Plätze und Zeiten
+        verlässlich einzutragen. Schreibt uns an ${esc(RECHT.email)}.</p>
+      </div>
+      ${ueberFuss()}
+    </div>`;
+}
+
 function ansichtRechtliches(){
   const r = RECHT;
   seite.innerHTML = `
@@ -5002,7 +5214,15 @@ document.addEventListener("click", e=>{
     sheet.aufmachen();
     return;
   }
-  if (t.dataset.gehe)       { Z.ansicht=t.dataset.gehe; return zeichne(); }
+  if (t.dataset.gehe)       {
+    Z.ansicht=t.dataset.gehe; zeichne();
+    if (t.dataset.vereinsuche) document.getElementById("suchfeld")?.focus();
+    if (Z.ansicht === "ueber" || Z.ansicht === "vereine") {
+      seite.querySelector(".rolle")?.scrollTo(0, 0);
+      sheet.aufmachen();
+    }
+    return;
+  }
   if (t.dataset.speichern)  { return speichern(); }
   if (t.dataset.neuspeichern){ return neuSpeichern(); }
   if (t.dataset.export)     { return exportieren(); }
