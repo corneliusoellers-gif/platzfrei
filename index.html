@@ -281,6 +281,13 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
 .luftbild{width:56px;height:56px;flex-shrink:0;border-radius:12px;object-fit:cover;
   background:#DDE3DA;box-shadow:inset 0 0 0 1px rgba(15,26,21,.08)}
 
+/* Gezeichnete Spielfläche je Sportart, mit dem Sport-Zeichen als Plakette */
+.platzbild{position:relative;overflow:hidden;display:block}
+.platzbild svg{display:block;width:100%;height:100%}
+.platzbild i{position:absolute;right:3px;bottom:3px;width:21px;height:21px;border-radius:50%;
+  background:rgba(255,255,255,.94);font-style:normal;font-size:12px;line-height:1;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+
 /* Knopf über der Karte */
 .bereich-knopf{position:absolute;left:50%;top:14px;transform:translateX(-50%);
   z-index:500;font-family:var(--schrift);font-size:13.5px;font-weight:600;
@@ -1672,6 +1679,48 @@ function auswahlFeld(name, liste, wert, gesperrt){
 
 const seite = document.getElementById("seite");
 
+/* Kleines Bild für die Liste: eine gezeichnete Spielfläche passend zur
+   ersten Sportart (bei Fußball auch zum Untergrund), keine Fotos. */
+function platzBild(o){
+  const sport = o.sportarten[0] || "Fußball";
+  const L = 'fill="none" stroke="#fff" stroke-width="1.6" stroke-opacity=".9"';
+  let bild;
+  if (sport === "Basketball") bild = `<rect width="56" height="56" fill="#D9824A"/>
+    <rect x="0" y="0" width="56" height="28" fill="#E08D55"/>
+    <g ${L}><rect x="5" y="6" width="46" height="44" rx="1"/><line x1="5" y1="28" x2="51" y2="28"/>
+    <circle cx="28" cy="28" r="6"/><rect x="20" y="6" width="16" height="11"/><rect x="20" y="39" width="16" height="11"/></g>`;
+  else if (sport === "Tischtennis") bild = `<rect width="56" height="56" fill="#5E7F6B"/>
+    <rect x="10" y="8" width="36" height="40" rx="2" fill="#1F5FA8"/>
+    <g ${L}><rect x="10" y="8" width="36" height="40" rx="2"/><line x1="28" y1="8" x2="28" y2="48"/></g>
+    <line x1="7" y1="28" x2="49" y2="28" stroke="#0F1A15" stroke-width="2.4"/>`;
+  else if (sport === "Beachvolleyball") bild = `<rect width="56" height="56" fill="#E6CB8E"/>
+    <circle cx="14" cy="16" r="1" fill="#C9AC6C"/><circle cx="40" cy="40" r="1" fill="#C9AC6C"/><circle cx="38" cy="12" r="1" fill="#C9AC6C"/>
+    <g fill="none" stroke="#2F6FB8" stroke-width="1.6"><rect x="7" y="8" width="42" height="40"/></g>
+    <line x1="4" y1="28" x2="52" y2="28" stroke="#0F1A15" stroke-width="2.2" stroke-dasharray="2 1.2"/>`;
+  else if (sport === "Laufen") bild = `<rect width="56" height="56" fill="#C4553D"/>
+    <g fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="1.2">
+    <rect x="4" y="5" width="48" height="46" rx="20"/><rect x="9" y="10" width="38" height="36" rx="15"/></g>
+    <rect x="14" y="15" width="28" height="26" rx="11" fill="#3E9A54"/>`;
+  else if (sport === "Skaten") bild = `<rect width="56" height="56" fill="#A3ABA7"/>
+    <path d="M0 36 Q18 36 24 56 L0 56Z" fill="#8A938F"/><path d="M56 22 Q36 24 32 0 L56 0Z" fill="#8A938F"/>
+    <path d="M0 36 Q18 36 24 56" fill="none" stroke="#6E7773" stroke-width="1.6"/>
+    <path d="M56 22 Q36 24 32 0" fill="none" stroke="#6E7773" stroke-width="1.6"/>`;
+  else if (sport === "Calisthenics") bild = `<rect width="56" height="56" fill="#45574F"/>
+    <g stroke="#C8D2CD" stroke-width="2.4" stroke-linecap="round">
+    <line x1="12" y1="14" x2="44" y2="14"/><line x1="12" y1="14" x2="12" y2="46"/><line x1="44" y1="14" x2="44" y2="46"/>
+    <line x1="22" y1="30" x2="34" y2="30"/></g>`;
+  else {
+    const asche = /asche|tenne/i.test(o.untergrund || "");
+    const [a, b] = asche ? ["#B8673F", "#C2724A"] : ["#3E9A54", "#48A85E"];
+    bild = `<rect width="56" height="56" fill="${a}"/>
+      <rect x="0" y="0" width="56" height="11" fill="${b}"/><rect x="0" y="22" width="56" height="11" fill="${b}"/><rect x="0" y="44" width="56" height="12" fill="${b}"/>
+      <g ${L}><rect x="5" y="6" width="46" height="44" rx="1"/><line x1="5" y1="28" x2="51" y2="28"/>
+      <circle cx="28" cy="28" r="7"/><rect x="17" y="6" width="22" height="9"/><rect x="17" y="41" width="22" height="9"/></g>`;
+  }
+  return `<span class="luftbild platzbild" aria-hidden="true"><svg viewBox="0 0 56 56" preserveAspectRatio="xMidYMid slice">${bild}</svg>${
+    SPORT_ICON[sport] ? `<i>${SPORT_ICON[sport]}</i>` : ``}</span>`;
+}
+
 const SPORT_ICON = { "Fußball":"⚽", "Basketball":"🏀", "Tischtennis":"🏓",
   "Beachvolleyball":"🏐", "Laufen":"🏃", "Calisthenics":"💪", "Skaten":"🛹" };
 
@@ -1780,6 +1829,7 @@ function ansichtListe(nurListe){
     const anzMeld = Z.meldungen[o.id] || 0;
     const km = entfernungKm(Z.position,o);
     return `<button class="zeile" data-ort="${o.id}" style="--streifen:${farbe(o)}">
+      ${platzBild(o)}
       <span class="zt">
         <span class="zname">${esc(o.name)}</span>
         <span class="zsub">${esc(o.sportarten.join(" · "))} · ${esc(o.untergrund)}</span>
