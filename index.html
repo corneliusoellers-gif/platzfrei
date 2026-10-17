@@ -931,8 +931,15 @@ label.inline-knopf{display:inline-block;margin-top:10px}
 .buendel2{background:none;border:0}
 .bpille{position:absolute;left:0;top:0;transform:translate(-50%,-50%);display:flex;flex-direction:column;
   gap:4px;padding:7px 10px;border-radius:14px;background:var(--flaeche);color:var(--tinte);
-  box-shadow:0 0 0 1.5px var(--tinte),0 2px 8px rgba(32,44,64,.15);white-space:nowrap;cursor:pointer;
-  font:700 13px/1.1 var(--schrift)}
+  white-space:nowrap;cursor:pointer;font:700 13px/1.1 var(--schrift);
+  /* Rand in der Farbe des besten Zugangs im Bündel, unten kräftiger */
+  --ring:var(--tinte-3);
+  box-shadow:0 0 0 2.5px var(--ring),inset 0 -4px 0 var(--ring),0 2px 8px rgba(32,44,64,.18);padding-bottom:10px}
+.bpille.r-frei{--ring:var(--frei)}
+.bpille.r-vermutet{--ring:color-mix(in srgb,var(--frei) 55%,var(--flaeche))}
+.bpille.r-absprache{--ring:var(--absprache)}
+.bpille.r-verein{--ring:var(--verein)}
+.bpille.r-zu{--ring:var(--zu)}
 .bpille .bz{display:flex;gap:7px;font-size:11.5px;font-weight:500}
 .bpille .bz span{display:inline-flex;align-items:center;gap:2px}
 .bpille .pin-z{width:13px;height:13px}
@@ -1075,7 +1082,7 @@ label.inline-knopf{display:inline-block;margin-top:10px}
 
 @media(prefers-color-scheme:dark){
   .pin{box-shadow:0 0 0 1px var(--kante),0 2px 8px rgba(0,0,0,.35)}
-  .bpille{box-shadow:0 0 0 1.5px var(--tinte),0 2px 8px rgba(0,0,0,.35)}
+  .bpille{box-shadow:0 0 0 2.5px var(--ring),inset 0 -4px 0 var(--ring),0 2px 8px rgba(0,0,0,.35)}
   #vertrauen{background:#0C1424}
 }
 
@@ -1170,6 +1177,42 @@ label.inline-knopf{display:inline-block;margin-top:10px}
   .vf-tabelle th:nth-child(4),.vf-tabelle td:nth-child(4){display:none}
   .vf-verwaltung-fuss{flex-direction:column;align-items:flex-start}
 }
+
+/* Filter als Ausklappmenü (natives select: auf dem Handy öffnet sich die Systemauswahl) */
+.wahl{position:relative;display:inline-flex;align-items:center;flex-shrink:0}
+.wahl select.chip{-webkit-appearance:none;appearance:none;padding-right:30px;field-sizing:content;
+  max-width:260px;text-overflow:ellipsis}
+.wahl select.chip.an{background:var(--gruen);color:var(--auf-akzent);box-shadow:none}
+.wahl-pfeil{position:absolute;right:11px;pointer-events:none;width:10px;height:10px;color:var(--tinte-2);
+  border-right:1.8px solid currentColor;border-bottom:1.8px solid currentColor;transform:translateY(-2px) rotate(45deg)}
+.wahl select.chip.an + .wahl-pfeil{color:var(--auf-akzent)}
+.wahl.leise select{background:none;box-shadow:none;border:0;font-family:var(--schrift);font-size:12px;font-weight:500;
+  color:var(--tinte-2);padding:8px 20px 8px 2px;cursor:pointer;text-align:right;text-align-last:right}
+.wahl.leise .wahl-pfeil{right:4px;width:7px;height:7px;border-width:1.5px}
+@media (min-width:881px){ #leiste .wahl.erster{margin-left:auto} }
+
+/* Hell/Dunkel-Schalter */
+.thema-knopf{display:inline-flex;align-items:center;gap:7px;font-family:var(--schrift);font-size:14px;font-weight:500;
+  color:var(--tinte);background:none;border:0;border-radius:14px;padding:10px 12px;cursor:pointer;flex-shrink:0}
+.thema-knopf:hover{background:var(--gruen-zart);color:var(--gruen)}
+.thema-steuerung a{display:flex!important;align-items:center;justify-content:center;width:40px!important;height:40px!important;
+  border:0!important;border-radius:14px!important;background:var(--flaeche)!important;color:var(--tinte)!important;
+  box-shadow:0 0 0 1px var(--kante),var(--schatten-karte)!important}
+.thema-steuerung{border:0!important;box-shadow:none!important}
+@media (min-width:881px){ .thema-steuerung{display:none} }
+
+/* Plus auf der Karte: Sprechblase, sobald die Maus in die Nähe kommt */
+.standort-knopf a.neu-knopf{position:relative;overflow:visible}
+.neu-blase{position:absolute;right:calc(100% + 14px);top:50%;transform:translate(10px,-50%) scale(.9);
+  transform-origin:right center;opacity:0;pointer-events:none;white-space:nowrap;
+  background:var(--gruen);color:var(--auf-akzent);font:600 14px/1 var(--schrift);padding:11px 15px;border-radius:14px;
+  box-shadow:0 6px 18px rgba(22,74,242,.28);transition:opacity 160ms ease,transform 260ms var(--feder)}
+.neu-blase::after{content:"";position:absolute;right:-5px;top:50%;width:12px;height:12px;background:inherit;
+  border-radius:2px;transform:translateY(-50%) rotate(45deg)}
+.neu-knopf.nah .neu-blase,.neu-knopf:hover .neu-blase,.neu-knopf:focus-visible .neu-blase{
+  opacity:1;transform:translate(0,-50%) scale(1);pointer-events:auto}
+@media (prefers-reduced-motion:reduce){ .neu-blase{transition:opacity 120ms ease} }
+.thema-steuerung .thema-text{display:none}
 </style>
 <!-- Besucherzähler GoatCounter: ohne Cookies, ohne personenbezogene Daten -->
 <script data-goatcounter="https://platzfrei.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
@@ -1188,6 +1231,7 @@ label.inline-knopf{display:inline-block;margin-top:10px}
   </nav>
   <span class="kopfnotiz" id="kopfnotiz">Version 0.1</span>
   <button class="adminknopf" id="adminknopf" hidden>Abmelden</button>
+  <button class="thema-knopf" data-thema="1"></button>
   <button class="kopf-cta" data-gehe="neu">Platz vorschlagen</button>
 </header>
 
@@ -1559,6 +1603,43 @@ karte.zoomControl.setPosition("topright");
    grauen Esri-Kacheln. */
 const CARTO_SCHLUESSEL = "cb1_4f5p_1_9d0286c3078c08148622ccfa";
 const dunkel = window.matchMedia("(prefers-color-scheme: dark)");
+
+/* Hell oder dunkel: folgt dem System, bis man selbst umschaltet. Die
+   Dunkel-Regeln im CSS stehen in @media (prefers-color-scheme: dark) –
+   beim Umschalten wird deren Bedingung auf "immer" oder "nie" gesetzt. */
+const THEMA_SCHLUESSEL = "platzfrei-thema";
+let THEMA = "auto";
+try { THEMA = localStorage.getItem(THEMA_SCHLUESSEL) || "auto"; } catch {}
+const MEDIEN_ORIGINAL = new Map();
+function dunkelAktiv(){ return THEMA === "dunkel" || (THEMA === "auto" && dunkel.matches); }
+function themaAnwenden(){
+  for (const blatt of document.styleSheets) {
+    let regeln; try { regeln = blatt.cssRules; } catch { continue; }
+    for (const r of regeln) {
+      if (!(r instanceof CSSMediaRule)) continue;
+      if (!MEDIEN_ORIGINAL.has(r)) MEDIEN_ORIGINAL.set(r, r.media.mediaText);
+      const original = MEDIEN_ORIGINAL.get(r);
+      if (!/prefers-color-scheme:\s*dark/.test(original)) continue;
+      r.media.mediaText = THEMA === "auto" ? original
+        : original.replace(/\(prefers-color-scheme:\s*dark\)/, THEMA === "dunkel" ? "(min-width: 0px)" : "(max-width: 0px)");
+    }
+  }
+  const d = dunkelAktiv();
+  document.documentElement.style.colorScheme = d ? "dark" : "light";
+  document.querySelectorAll('meta[name="theme-color"]').forEach(m => {
+    m.removeAttribute("media"); m.content = d ? "#131E30" : "#F1EFE8"; });
+  document.querySelectorAll("[data-thema], .thema-anzeige").forEach(b => {
+    b.innerHTML = d ? `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span class="thema-text">Hell</span>` : `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg><span class="thema-text">Dunkel</span>`;
+    b.title = b.ariaLabel = d ? "Zum hellen Design wechseln" : "Zum dunklen Design wechseln";
+  });
+}
+function themaUmschalten(){
+  THEMA = dunkelAktiv() ? "hell" : "dunkel";
+  try { localStorage.setItem(THEMA_SCHLUESSEL, THEMA); } catch {}
+  themaAnwenden();
+  karteThemaNeu();
+}
+themaAnwenden();
 const esriAttribution = 'Kartendaten &copy; Esri, HERE, Garmin, &copy; OpenStreetMap';
 
 function grauEbene(dunkelModus){
@@ -1581,17 +1662,18 @@ function cartoEbene(dunkelModus){
 }
 const strassenKarte = d => CARTO_SCHLUESSEL ? cartoEbene(d) : grauEbene(d);
 
-let strassenEbene = strassenKarte(dunkel.matches).addTo(karte);
+let strassenEbene = strassenKarte(dunkelAktiv()).addTo(karte);
 
-/* Wechselt der Systemmodus, wechselt auch die Karte. */
-dunkel.addEventListener("change", e => {
+/* Wechselt der Modus (System oder Schalter), wechselt auch die Karte. */
+dunkel.addEventListener("change", () => { themaAnwenden(); karteThemaNeu(); });
+function karteThemaNeu(){
   const warAktiv = karte.hasLayer(strassenEbene);
   karte.removeLayer(strassenEbene);
   ebenenSchalter.removeLayer(strassenEbene);
-  strassenEbene = strassenKarte(e.matches);
+  strassenEbene = strassenKarte(dunkelAktiv());
   ebenenSchalter.addBaseLayer(strassenEbene, "Karte");
   if (warAktiv) strassenEbene.addTo(karte);
-});
+}
 
 /* Satellitenbilder von Esri. Praktisch fürs Prüfen aus der Ferne:
    Belag, Tore und Zäune erkennt man oft schon von oben. */
@@ -1663,6 +1745,12 @@ function zsKlasse(art){ return art === "vermutet" ? "zs-frei vermutet" : "zs-" +
 const PILLEN_MAX = 300;
 let pillenModus = false;
 
+/* Hervorgehoben wird ein Platz nur, solange er geöffnet ist. Zurück in
+   der Liste verschwindet die Markierung wieder. */
+function istOffen(o){
+  return ["detail", "bearbeiten", "melden"].includes(Z.ansicht) && String(o.id) === String(Z.auswahlId);
+}
+
 function ortAusKarteOeffnen(o){
   Z.auswahlId=o.id; Z.ansicht="detail"; zeichne();
   sheet.mitte();
@@ -1682,7 +1770,7 @@ function punktZeichnen(o){
       interactive:false, keyboard:false
     }).addTo(markerEbene);
   const grau = farbe(o) === GRAU;
-  const gewaehlt = String(o.id) === String(Z.auswahlId);
+  const gewaehlt = istOffen(o);
   const art = pillenModus ? pinArt(o) : null;
   if (art) {
     L.marker([o.lat, o.lon], {
@@ -1719,12 +1807,13 @@ function buendelZeichnen(gruppe, mitte){
     const art = pinArt(o);
     if (art) zaehler[art]++;
   }
+  const bester = ["frei","vermutet","absprache","verein","zu"].find(art => zaehler[art]);
   const teile = Object.entries(zaehler).filter(([, z]) => z)
     .map(([art, z]) => `<span><span class="pin-z ${zsKlasse(art)}"></span>${kurzZahl(z)}</span>`).join("");
   L.marker(mitte ? karte.unproject(mitte, karte.getZoom()) : [lat / n, lon / n], {
     icon: L.divIcon({
       className: "buendel2", iconSize: null,
-      html: `<span class="bpille"><span>${kurzZahl(n)} Orte</span>${teile ? `<span class="bz">${teile}</span>` : ``}${
+      html: `<span class="bpille${bester ? " r-" + bester : ""}"><span>${kurzZahl(n)} Orte</span>${teile ? `<span class="bz">${teile}</span>` : ``}${
         gruppe.some(o => (Z.aktiv[o.id] || 0) >= 2) ? `<i title="Hier wird gerade gespielt"></i>` : ``}</span>`
     }),
     keyboard: false
@@ -1785,8 +1874,8 @@ function markerZeichnen(){
       for (let j = i + 1; j < gruppen.length; j++) {
         const b = gruppen[j];
         if (!b) continue;
-        const ra = a.orte.length > 1 ? 46 : 18;
-        const rb = b.orte.length > 1 ? 46 : 18;
+        const ra = a.orte.length > 1 ? 40 + 14 * Math.log10(a.orte.length) : 18;
+        const rb = b.orte.length > 1 ? 40 + 14 * Math.log10(b.orte.length) : 18;
         if (a.mitte.distanceTo(b.mitte) >= ra + rb + ABSTAND) continue;
         const na = a.orte.length, nb = b.orte.length;
         a.mitte = L.point((a.mitte.x * na + b.mitte.x * nb) / (na + nb),
@@ -1800,7 +1889,7 @@ function markerZeichnen(){
   }
   const einzelne = [];
   for (const { orte: gruppe, mitte } of gruppen) {
-    const offen = gruppe.find(o => String(o.id) === String(Z.auswahlId));
+    const offen = gruppe.find(istOffen);
     const rest = offen ? gruppe.filter(o => o !== offen) : gruppe;
     if (offen) einzelne.push(offen);
     if (rest.length === 1) einzelne.push(rest[0]);
@@ -2235,6 +2324,14 @@ function losLeiste(){
     <div class="los-leiste">${karten.join("")}</div></div>`;
 }
 
+/* Ausklappmenü für einen Filter. Der erste Eintrag ist die Grundeinstellung. */
+function auswahl(name, titel, wert, optionen, extra = ""){
+  return `<span class="wahl ${extra}"><select class="${extra === "leise" ? "" : "chip"}${
+      wert !== optionen[0][0] && extra !== "leise" ? " an" : ""}" data-filterwahl="${name}" aria-label="${esc(titel)}" title="${esc(titel)}">${
+    optionen.map(([w, text]) => `<option value="${w}"${w === wert ? " selected" : ""}>${text}</option>`).join("")
+  }</select><span class="wahl-pfeil" aria-hidden="true"></span></span>`;
+}
+
 function ansichtListe(nurListe){
   const alleOrte = sichtbareOrte();
   const orte = alleOrte.slice(0, 150);   // Liste zeigt die 150 nächsten;
@@ -2263,7 +2360,7 @@ function ansichtListe(nurListe){
     const bs = bespielbarkeit(o);
     const anzMeld = Z.meldungen[o.id] || 0;
     const km = entfernungKm(Z.position,o);
-    const gew = String(o.id) === String(Z.auswahlId) ? " gewaehlt" : "";
+    const gew = istOffen(o) ? " gewaehlt" : "";
     return `<button class="zeile${gew}" data-ort="${o.id}">
       ${platzBild(o)}
       <span class="zt">
@@ -2323,7 +2420,7 @@ function ansichtListe(nurListe){
 
   const rolleInhalt = `${Z.suche.trim() ? `` : losLeiste()}<div class="liste-kopf"><div>
       <h2 class="liste-titel">${titel}</h2><div class="anzahl">${esc(ueberschrift)}</div></div>
-      <button class="sort-knopf" data-sortzyklus="1" title="Sortierung wechseln">${SORT_TEXT[Z.sortierung] || "Distanz ↑"}</button></div>
+      ${auswahl("sort", "Sortieren", Z.sortierung, Object.entries(SORT_TEXT), "leise")}</div>
     <div class="legende in-liste">${legendeHtml()}</div>${zeilen}${alleOrte.length > orte.length
       ? `<div class="leer">… und ${(alleOrte.length - orte.length).toLocaleString("de-DE")} weitere.<br>
          Filter setzen, suchen oder auf der Karte zoomen.</div>` : ``}${listenende}`;
@@ -2356,10 +2453,10 @@ function ansichtListe(nurListe){
       <div class="filtertitel" style="margin-top:12px">Zugang</div>
       <div class="chips">
         <button class="chip" data-nurlos="${Z.nurLos ? "0" : "1"}" aria-pressed="${!!Z.nurLos}">👥 Hier ist was los</button>
-        <button class="chip zyklus erster" data-zugangzyklus="1" aria-pressed="${zugangText !== "alle"}"
-          title="Tippen wechselt: alle · frei zugänglich · sicher (Zugang belegt)">Zugang · ${zugangText}</button>
-        <button class="chip zyklus" data-umkreiszyklus="1" aria-pressed="${!!Z.maxKm}"
-          title="Tippen wechselt den Umkreis${Z.positionEcht ? "" : " (gemessen ab München-Mitte)"}">Umkreis · ${Z.maxKm ? Z.maxKm + " km" : "alle"}</button>
+        ${auswahl("zugang", "Zugang", zugangText,
+          [["alle","Zugang · alle"],["frei","Zugang · frei zugänglich"],["sicher","Zugang · sicher (belegt)"]], "erster")}
+        ${auswahl("umkreis", Z.positionEcht ? "Umkreis" : "Umkreis, gemessen ab München-Mitte", String(Z.maxKm || 0),
+          [["0","Umkreis · alle"],["2","Umkreis · 2 km"],["5","Umkreis · 5 km"],["10","Umkreis · 10 km"],["25","Umkreis · 25 km"]])}
         <button class="chip mehr" data-mehr="${Z.filterOffen ? "0" : "1"}"
           aria-pressed="${Z.filterOffen}">${Z.filterOffen ? "Weniger" : "Mehr Filter"}</button>
       </div>
@@ -5785,7 +5882,7 @@ document.addEventListener("wheel", e => {
 }, { passive:false });
 
 document.addEventListener("click", e=>{
-  const t = e.target.closest("[data-zugangzyklus],[data-umkreiszyklus],[data-sortzyklus],[data-standort],[data-unten],[data-scrollzu],"+
+  const t = e.target.closest("[data-thema],[data-standort],[data-unten],[data-scrollzu],"+
                              "[data-sport],[data-nurfrei],[data-nurlos],[data-ort],[data-gehe],"+
                              "[data-speichern],[data-neuspeichern],[data-geprueft],"+
                              "[data-export],[data-anmelden],[data-km],"+
@@ -5797,24 +5894,8 @@ document.addEventListener("click", e=>{
                              "[data-zusage],[data-spielweg],[data-spielform],[data-spielansetzen],[data-tipp],[data-tippsoffen],[data-osmladen],[data-osmstop]");
   if (!t) return;
 
-  if (t.dataset.zugangzyklus) {
-    /* alle → nur frei zugänglich → nur wo der Zugang belegt ist → alle */
-    if (Z.nurBelegt) { Z.nurBelegt = false; Z.nurFrei = false; }
-    else if (Z.nurFrei) { Z.nurFrei = false; Z.nurBelegt = true; }
-    else Z.nurFrei = true;
-    return zeichne();
-  }
-  if (t.dataset.umkreiszyklus) {
-    const stufen = [0, 2, 5, 10, 25];
-    Z.maxKm = stufen[(stufen.indexOf(Z.maxKm || 0) + 1) % stufen.length] || null;
-    return zeichne();
-  }
-  if (t.dataset.sortzyklus) {
-    const s = ["entfernung", "zustand", "geprueft"];
-    Z.sortierung = s[(s.indexOf(Z.sortierung) + 1) % s.length];
-    return zeichne();
-  }
   if (t.dataset.standort)   { return zuMeinemStandort(); }
+  if (t.dataset.thema)      { return themaUmschalten(); }
   if (t.dataset.scrollzu)   { return document.getElementById(t.dataset.scrollzu)?.scrollIntoView({ behavior:"smooth" }); }
   if (t.dataset.unten) {
     const ziel = t.dataset.unten;
@@ -5929,6 +6010,16 @@ window.addEventListener("popstate", () => {
 
 /* Dateiauswahl beim Import – "change" steigt nicht wie "click" im Baum auf,
    deshalb ein eigener Lauscher. */
+/* Ausklappmenüs der Filter */
+document.addEventListener("change", e => {
+  const w = e.target.closest?.("[data-filterwahl]");
+  if (!w) return;
+  if (w.dataset.filterwahl === "zugang") { Z.nurFrei = w.value === "frei"; Z.nurBelegt = w.value === "sicher"; }
+  if (w.dataset.filterwahl === "umkreis") Z.maxKm = +w.value || null;
+  if (w.dataset.filterwahl === "sort") Z.sortierung = w.value;
+  zeichne();
+});
+
 document.addEventListener("change", e=>{
   if (e.target.id === "importdatei" && e.target.files?.[0])
     importVerarbeiten(e.target.files[0]);
@@ -6021,7 +6112,8 @@ const StandortKnopf = L.Control.extend({
         <circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></a>
       <a href="#" role="button" class="neu-knopf" title="Platz hinzufügen" aria-label="Platz hinzufügen">
       <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none"
-        stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></a>`;
+        stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      <span class="neu-blase">Platz vorschlagen</span></a>`;
     L.DomEvent.disableClickPropagation(box);
     L.DomEvent.on(box.firstElementChild, "click", e => { L.DomEvent.preventDefault(e); zuMeinemStandort(); });
     L.DomEvent.on(box.lastElementChild, "click", e => {
@@ -6034,6 +6126,37 @@ const StandortKnopf = L.Control.extend({
   }
 });
 new StandortKnopf().addTo(karte);
+
+const ThemaKnopf = L.Control.extend({
+  options:{ position:"topright" },
+  onAdd(){
+    const box = L.DomUtil.create("div", "leaflet-bar thema-steuerung");
+    box.innerHTML = `<a href="#" role="button" class="thema-anzeige"></a>`;
+    L.DomEvent.disableClickPropagation(box);
+    L.DomEvent.on(box.firstElementChild, "click", e => { L.DomEvent.preventDefault(e); themaUmschalten(); });
+    return box;
+  }
+});
+new ThemaKnopf().addTo(karte);
+themaAnwenden();
+
+/* Plus: Sprechblase "Platz vorschlagen", sobald die Maus in die Nähe kommt. */
+if (window.matchMedia("(hover:hover)").matches) {
+  let geplant = false, maus = null;
+  document.addEventListener("mousemove", e => {
+    maus = e;
+    if (geplant) return;
+    geplant = true;
+    requestAnimationFrame(() => {
+      geplant = false;
+      const k = document.querySelector(".standort-knopf .neu-knopf");
+      if (!k) return;
+      const r = k.getBoundingClientRect();
+      const abstand = Math.hypot(maus.clientX - (r.left + r.width / 2), maus.clientY - (r.top + r.height / 2));
+      k.classList.toggle("nah", abstand < 110);
+    });
+  }, { passive:true });
+}
 
 zeichne();
 let karteUnberuehrt = true;
