@@ -1229,6 +1229,57 @@ label.inline-knopf{display:inline-block;margin-top:10px}
 }
 .legende.in-liste{margin:0 0 10px}
 @media (max-width:880px){ .karten-legende.legende{display:none} }
+
+/* Laptop: Filter in einer Zeile. Die Sportarten scrollen seitlich,
+   Zugang, Umkreis und Mehr Filter stehen fest rechts daneben. */
+@media (min-width:881px){
+  #leiste .filter{flex-wrap:wrap;column-gap:14px;row-gap:8px}
+  #leiste .filter .chips{display:flex;flex-wrap:nowrap;gap:6px;align-items:center}
+  #leiste .filter .filtertitel:first-child + .chips{flex:1 1 0;min-width:0;overflow-x:auto;scrollbar-width:none;
+    -webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 32px),transparent);
+            mask-image:linear-gradient(90deg,#000 calc(100% - 32px),transparent);padding:2px 28px 2px 2px}
+  #leiste .filter .filtertitel:first-child + .chips::-webkit-scrollbar{display:none}
+  #leiste .filter .chips{flex:none}
+  #leiste .filter .filtertitel:first-child + .chips{flex:1 1 0}
+  #leiste .filter .chip{flex-shrink:0}
+  #leiste .wahl.erster{margin-left:0}
+
+  /* Kompakter: weniger Platz für Kopf, Überschrift und Rahmen, mehr für Liste und Karte */
+  header{height:60px;padding:0 28px}
+  header h1{font-size:25px;gap:8px}
+  header h1 .pf-marke{width:23px;height:23px}
+  .kopfnav button,.thema-knopf{font-size:14.5px;padding:8px 11px}
+  .kopf-cta{font-size:14px;padding:9px 16px;border-radius:12px}
+  body.mit-leiste #leiste{padding:12px 28px 12px;gap:10px 24px}
+  .leiste-titel{display:flex!important;align-items:baseline;gap:12px}
+  .leiste-titel h2{font-size:26px}
+  .leiste-titel p{margin:0;font-size:13px}
+  #leiste .suche input{height:42px;font-size:15px}
+  #leiste .chip,#leiste .wahl select.chip{padding:7px 12px;font-size:13px}
+  #leiste .wahl select.chip{padding-right:28px}
+  body:not(.vollseite) main{padding:0 16px 14px;gap:14px}
+  body:not(.vollseite) aside{width:clamp(340px,30vw,440px);border-radius:20px}
+  body:not(.vollseite) #karte{border-radius:20px}
+  .rolle{padding:0 16px 16px}
+  .liste-kopf{padding:12px 0 8px}
+  .liste-titel{font-size:20px}
+  .zeile{padding:8px 12px 8px 8px;gap:12px;margin-bottom:8px}
+  .zeile .luftbild{width:60px;height:68px;border-radius:12px}
+  .zname{font-size:15.5px}
+  .zhinweis{margin-top:5px}
+  .marke{margin-top:6px}
+  #vertrauen{height:34px;padding:0 28px;font-size:12.5px;gap:10px}
+  #vertrauen .ui-ic{width:16px;height:16px}
+  .dbild{height:170px}
+  .rolle > .dname{font-size:26px}
+  .deigen{padding:12px 0;margin-bottom:16px}
+}
+@media (max-width:880px){
+  .liste-titel{font-size:19px}
+  .zeile .luftbild{width:60px;height:68px}
+  .dbild{height:160px}
+  .rolle > .dname{font-size:24px}
+}
 </style>
 <!-- Besucherzähler GoatCounter: ohne Cookies, ohne personenbezogene Daten -->
 <script data-goatcounter="https://platzfrei.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
@@ -5892,7 +5943,9 @@ const sheet = (function(){
 
 /* Mausrad über der Filterzeile schiebt sie seitlich (Laptop ohne Trackpad). */
 document.addEventListener("wheel", e => {
-  const f = e.target.closest(".filter");
+  /* Am Laptop scrollt nur die Sportarten-Gruppe, auf dem Handy die ganze Leiste. */
+  const gruppe = e.target.closest(".filter .chips");
+  const f = gruppe && gruppe.scrollWidth > gruppe.clientWidth ? gruppe : e.target.closest(".filter");
   if (!f || Math.abs(e.deltaX) > Math.abs(e.deltaY) || f.scrollWidth <= f.clientWidth) return;
   f.scrollLeft += e.deltaY; e.preventDefault();
 }, { passive:false });
