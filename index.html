@@ -159,12 +159,6 @@ aside{width:420px;flex-shrink:0;background:var(--grund);
     padding:12px 22px;background:var(--grund);border-bottom:1px solid var(--kante);position:relative;z-index:15}
   #leiste .suche{margin:0;flex:0 0 min(400px,34vw)}
   #leiste .filter{flex:1;min-width:0;padding:2px 0}
-  aside{width:clamp(420px,44vw,760px);container-type:inline-size}
-  /* Breite Liste: Plätze in zwei Spalten */
-  @container (min-width:640px){
-    .rolle{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:max-content;column-gap:12px;align-content:start}
-    .rolle > :not(.zeile){grid-column:1/-1}
-  }
   /* Ganze Seiten (Über Platzfrei, Für Vereine) ohne Karte */
   body.vollseite #karte{display:none}
   body.vollseite aside{width:100%;border-left:0}
@@ -357,10 +351,10 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
 .marke.frei::before,.marke.vermutet::before,.marke.absprache::before,.marke.verein::before,.marke.zu::before,
 .status-icon.mit-symbol::before{content:"";width:16px;height:16px;flex-shrink:0;background:currentColor;
   -webkit-mask:var(--zs) center/contain no-repeat;mask:var(--zs) center/contain no-repeat}
-.marke.frei,.marke.vermutet,.status.frei,.status.vermutet{--zs:url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg%3E%3Cpath d='M13.3328 4L6.0002 11.3328L2.6672 7.99971' stroke-width='1.8' stroke-linecap='round' stroke='%23147563'/%3E%3C/g%3E%3C/svg%3E")}
-.marke.absprache,.status.absprache{--zs:url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg%3E%3Cpath d='M14.6672 11.3334C14.6672 11.687 14.5267 12.0261 14.2766 12.2762C14.0266 12.5262 13.6874 12.6667 13.3338 12.6667H4.55172C4.1981 12.6668 3.85899 12.8073 3.60898 13.0574L2.14086 14.5254C2.07466 14.5916 1.99032 14.6367 1.8985 14.6549C1.80669 14.6732 1.71152 14.6638 1.62503 14.628C1.53854 14.5922 1.46461 14.5315 1.4126 14.4537C1.36058 14.3758 1.33281 14.2843 1.3328 14.1907V3.33334C1.3328 2.97972 1.47329 2.64058 1.72336 2.39053C1.97342 2.14048 2.31259 2 2.66624 2H13.3338C13.6874 2 14.0266 2.14048 14.2766 2.39053C14.5267 2.64058 14.6672 2.97972 14.6672 3.33334V11.3334Z' stroke-width='1.8' stroke-linecap='round' stroke='%23906017'/%3E%3C/g%3E%3C/svg%3E")}
-.marke.verein,.status.verein{--zs:url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg%3E%3Cpath d='M13.3328 8.66667C13.3328 12.0001 10.9997 13.6668 8.22664 14.6335C8.08143 14.6827 7.9237 14.6804 7.78002 14.6269C5.0003 13.6668 2.6672 12.0001 2.6672 8.66667V3.99985C2.6672 3.82304 2.73743 3.65346 2.86244 3.52843C2.98745 3.4034 3.15701 3.33316 3.3338 3.33316C4.667 3.33316 6.3335 2.53314 7.49338 1.51977C7.63461 1.3991 7.81425 1.3328 8 1.3328C8.18575 1.3328 8.36539 1.3991 8.50662 1.51977C9.67317 2.53981 11.333 3.33316 12.6662 3.33316C12.843 3.33316 13.0125 3.4034 13.1376 3.52843C13.2626 3.65346 13.3328 3.82304 13.3328 3.99985V8.66667Z' stroke-width='1.8' stroke-linecap='round' stroke='%23526884'/%3E%3C/g%3E%3C/svg%3E")}
-.marke.zu,.status.zu{--zs:url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg%3E%3Cpath d='M4.66667 6.66656V4.6664C4.66667 3.78227 5.01786 2.93436 5.64298 2.30919C6.2681 1.68402 7.11595 1.3328 8 1.3328C8.88406 1.3328 9.7319 1.68402 10.357 2.30919C10.9821 2.93436 11.3333 3.78227 11.3333 4.6664V6.66656M4.66667 6.66656H3.33333C2.59695 6.66656 2 7.26356 2 8V13.3338C2 14.0702 2.59695 14.6672 3.33333 14.6672H12.6667C13.403 14.6672 14 14.0702 14 13.3338V8C14 7.26356 13.403 6.66656 12.6667 6.66656H11.3333M4.66667 6.66656H11.3333M8.66667 10.6669C8.66667 11.0351 8.36819 11.3336 8 11.3336C7.63181 11.3336 7.33333 11.0351 7.33333 10.6669C7.33333 10.2987 7.63181 10.0002 8 10.0002C8.36819 10.0002 8.66667 10.2987 8.66667 10.6669Z' stroke-width='1.8' stroke-linecap='round' stroke='%23626775'/%3E%3C/g%3E%3C/svg%3E")}
+.zs-frei,.marke.frei,.marke.vermutet,.status.frei,.status.vermutet{--zs:url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg%3E%3Cpath d='M13.3328 4L6.0002 11.3328L2.6672 7.99971' stroke-width='1.8' stroke-linecap='round' stroke='%23147563'/%3E%3C/g%3E%3C/svg%3E")}
+.zs-absprache,.marke.absprache,.status.absprache{--zs:url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg%3E%3Cpath d='M14.6672 11.3334C14.6672 11.687 14.5267 12.0261 14.2766 12.2762C14.0266 12.5262 13.6874 12.6667 13.3338 12.6667H4.55172C4.1981 12.6668 3.85899 12.8073 3.60898 13.0574L2.14086 14.5254C2.07466 14.5916 1.99032 14.6367 1.8985 14.6549C1.80669 14.6732 1.71152 14.6638 1.62503 14.628C1.53854 14.5922 1.46461 14.5315 1.4126 14.4537C1.36058 14.3758 1.33281 14.2843 1.3328 14.1907V3.33334C1.3328 2.97972 1.47329 2.64058 1.72336 2.39053C1.97342 2.14048 2.31259 2 2.66624 2H13.3338C13.6874 2 14.0266 2.14048 14.2766 2.39053C14.5267 2.64058 14.6672 2.97972 14.6672 3.33334V11.3334Z' stroke-width='1.8' stroke-linecap='round' stroke='%23906017'/%3E%3C/g%3E%3C/svg%3E")}
+.zs-verein,.marke.verein,.status.verein{--zs:url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg%3E%3Cpath d='M13.3328 8.66667C13.3328 12.0001 10.9997 13.6668 8.22664 14.6335C8.08143 14.6827 7.9237 14.6804 7.78002 14.6269C5.0003 13.6668 2.6672 12.0001 2.6672 8.66667V3.99985C2.6672 3.82304 2.73743 3.65346 2.86244 3.52843C2.98745 3.4034 3.15701 3.33316 3.3338 3.33316C4.667 3.33316 6.3335 2.53314 7.49338 1.51977C7.63461 1.3991 7.81425 1.3328 8 1.3328C8.18575 1.3328 8.36539 1.3991 8.50662 1.51977C9.67317 2.53981 11.333 3.33316 12.6662 3.33316C12.843 3.33316 13.0125 3.4034 13.1376 3.52843C13.2626 3.65346 13.3328 3.82304 13.3328 3.99985V8.66667Z' stroke-width='1.8' stroke-linecap='round' stroke='%23526884'/%3E%3C/g%3E%3C/svg%3E")}
+.zs-zu,.marke.zu,.status.zu{--zs:url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg%3E%3Cpath d='M4.66667 6.66656V4.6664C4.66667 3.78227 5.01786 2.93436 5.64298 2.30919C6.2681 1.68402 7.11595 1.3328 8 1.3328C8.88406 1.3328 9.7319 1.68402 10.357 2.30919C10.9821 2.93436 11.3333 3.78227 11.3333 4.6664V6.66656M4.66667 6.66656H3.33333C2.59695 6.66656 2 7.26356 2 8V13.3338C2 14.0702 2.59695 14.6672 3.33333 14.6672H12.6667C13.403 14.6672 14 14.0702 14 13.3338V8C14 7.26356 13.403 6.66656 12.6667 6.66656H11.3333M4.66667 6.66656H11.3333M8.66667 10.6669C8.66667 11.0351 8.36819 11.3336 8 11.3336C7.63181 11.3336 7.33333 11.0351 7.33333 10.6669C7.33333 10.2987 7.63181 10.0002 8 10.0002C8.36819 10.0002 8.66667 10.2987 8.66667 10.6669Z' stroke-width='1.8' stroke-linecap='round' stroke='%23626775'/%3E%3C/g%3E%3C/svg%3E")}
 .marke.frei{background:var(--frei-bg);color:var(--frei)}
 .marke.absprache{background:var(--absprache-bg);color:var(--absprache)}
 .marke.vermutet{background:transparent;color:var(--frei);box-shadow:inset 0 0 0 1px var(--frei);opacity:.9}
@@ -856,6 +850,326 @@ label.inline-knopf{display:inline-block;margin-top:10px}
   .marke{outline:1px solid currentColor;outline-offset:-1px}
   .rolle{-webkit-mask-image:none;mask-image:none}
 }
+
+/* ======================================================================
+   Linienspiel v2 · Bildschirme (Entdecken, Platzdetail, Für Vereine)
+   ====================================================================== */
+.ui-ic{display:inline-block;width:20px;height:20px;flex-shrink:0;background:currentColor;
+  -webkit-mask:var(--ic) center/contain no-repeat;mask:var(--ic) center/contain no-repeat}
+.i-search{--ic:url("data:image/svg+xml,%3Csvg width=%2220%22 height=%2220%22 viewBox=%220 0 20 20%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E %3Cg id=%22search%22%3E %3Cpath id=%22Vector%22 d=%22M17.5001 17.5001L13.8835 13.8835M15.8333 9.16667C15.8333 12.8486 12.8486 15.8333 9.16667 15.8333C5.48477 15.8333 2.5 12.8486 2.5 9.16667C2.5 5.48477 5.48477 2.5 9.16667 2.5C12.8486 2.5 15.8333 5.48477 15.8333 9.16667Z%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke=%22%23164AF2%22/%3E %3C/g%3E %3C/svg%3E")}
+.i-locate{--ic:url("data:image/svg+xml,%3Csvg width=%2220%22 height=%2220%22 viewBox=%220 0 20 20%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E %3Cg id=%22locate-fixed%22 clip-path=%22url(%23clip0_0_9)%22%3E %3Cpath id=%22Vector%22 d=%22M1.666 10H4.1662M4.1662 10C4.1662 13.2219 6.77808 15.8338 10 15.8338M4.1662 10C4.1662 6.77808 6.77808 4.1662 10 4.1662M10 15.8338C13.2219 15.8338 15.8338 13.2219 15.8338 10M10 15.8338V18.334M10 4.1662C13.2219 4.1662 15.8338 6.77808 15.8338 10M10 4.1662V1.666M15.8338 10H18.334M12.5002 10C12.5002 11.3808 11.3808 12.5002 10 12.5002C8.61918 12.5002 7.4998 11.3808 7.4998 10C7.4998 8.61918 8.61918 7.4998 10 7.4998C11.3808 7.4998 12.5002 8.61918 12.5002 10Z%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke=%22%23164AF2%22/%3E %3C/g%3E %3Cdefs%3E %3CclipPath id=%22clip0_0_9%22%3E %3Crect width=%2220%22 height=%2220%22 fill=%22white%22/%3E %3C/clipPath%3E %3C/defs%3E %3C/svg%3E")}
+.i-map{--ic:url("data:image/svg+xml,%3Csvg width=%2222%22 height=%2222%22 viewBox=%220 0 22 22%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E %3Cg id=%22map%22%3E %3Cpath id=%22Vector%22 d=%22M13.75 5.28281C13.4655 5.28281 13.185 5.21661 12.9305 5.08945L9.0695 3.15895C8.81504 3.0318 8.53447 2.9656 8.25 2.9656M13.75 5.28281C14.0345 5.28281 14.315 5.21661 14.5695 5.08945L17.9236 3.41195C18.0634 3.34207 18.2189 3.30911 18.375 3.31623C18.5312 3.32334 18.683 3.37028 18.8159 3.45259C18.9488 3.5349 19.0585 3.64984 19.1345 3.78649C19.2105 3.92313 19.2502 4.07694 19.25 4.23329V15.9336C19.2499 16.1038 19.2024 16.2706 19.1129 16.4154C19.0234 16.5601 18.8953 16.677 18.7431 16.7531L14.5695 18.8404C14.315 18.9675 14.0345 19.0337 13.75 19.0337C13.4655 19.0337 13.185 18.9675 12.9305 18.8404L9.0695 16.9099C8.81504 16.7827 8.53447 16.7165 8.25 16.7165C7.96553 16.7165 7.68497 16.7827 7.4305 16.9099L4.07642 18.5874C3.93649 18.6573 3.781 18.6902 3.62474 18.6831C3.46848 18.6759 3.31665 18.6289 3.18369 18.5465C3.05074 18.4641 2.94109 18.349 2.86518 18.2122C2.78927 18.0755 2.74962 17.9215 2.75 17.7651V6.0657C2.75009 5.89551 2.79756 5.72871 2.88709 5.58397C2.97662 5.43923 3.10468 5.32228 3.25692 5.2462L7.4305 3.15895C7.68497 3.0318 7.96553 2.9656 8.25 2.9656M13.75 5.28281L13.75 19.0323M8.25 2.9656L8.25 16.7156%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke=%22%23164AF2%22/%3E %3C/g%3E %3C/svg%3E")}
+.i-bookmark{--ic:url("data:image/svg+xml,%3Csvg width=%2222%22 height=%2222%22 viewBox=%220 0 22 22%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E %3Cg id=%22bookmark%22%3E %3Cpath id=%22Vector%22 d=%22M15.5839 2.75C16.0701 2.75 16.5365 2.94316 16.8804 3.28698C17.2242 3.6308 17.4174 4.09713 17.4174 4.58337V18.3336C17.4173 18.4941 17.3751 18.6518 17.295 18.7909C17.2148 18.93 17.0996 19.0456 16.9607 19.1262C16.8219 19.2068 16.6643 19.2495 16.5037 19.25C16.3432 19.2505 16.1853 19.2089 16.0459 19.1293L11.9094 16.7661C11.6325 16.6079 11.319 16.5247 11 16.5247C10.681 16.5247 10.3675 16.6079 10.0906 16.7661L5.95409 19.1293C5.81469 19.2089 5.65682 19.2505 5.49627 19.25C5.33573 19.2495 5.17815 19.2068 5.03928 19.1262C4.90042 19.0456 4.78515 18.93 4.70501 18.7909C4.62486 18.6518 4.58265 18.4941 4.5826 18.3336V4.58337C4.5826 4.09713 4.77578 3.6308 5.11963 3.28698C5.46349 2.94316 5.92986 2.75 6.41614 2.75H15.5839Z%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke=%22%23636B74%22/%3E %3C/g%3E %3C/svg%3E")}
+.i-shieldcheck{--ic:url("data:image/svg+xml,%3Csvg width=%2222%22 height=%2222%22 viewBox=%220 0 22 22%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E %3Cg id=%22shield-check%22%3E %3Cpath id=%22Vector%22 d=%22M8.25027 10.9996L10.0834 12.833L13.7497 9.16617M18.3326 11.9167C18.3326 16.5002 15.1246 18.7919 11.3116 20.1211C11.112 20.1888 10.8951 20.1855 10.6975 20.1119C6.87541 18.7919 3.6674 16.5002 3.6674 11.9167V5.4998C3.6674 5.25667 3.76397 5.02351 3.93586 4.8516C4.10775 4.67968 4.34088 4.5831 4.58398 4.5831C6.41712 4.5831 8.70856 3.48307 10.3034 2.08969C10.4976 1.92376 10.7446 1.8326 11 1.8326C11.2554 1.8326 11.5024 1.92376 11.6966 2.08969C13.3006 3.49223 15.5829 4.5831 17.416 4.5831C17.6591 4.5831 17.8923 4.67968 18.0641 4.8516C18.236 5.02351 18.3326 5.25667 18.3326 5.4998V11.9167Z%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke=%22%23636B74%22/%3E %3C/g%3E %3C/svg%3E")}
+.i-arrowleft{--ic:url("data:image/svg+xml,%3Csvg width=%2220%22 height=%2220%22 viewBox=%220 0 20 20%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E %3Cg id=%22arrow-left%22%3E %3Cpath id=%22Vector%22 d=%22M10 4.166L4.166 10L10 15.834M4.166 10H15.834%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke=%22%23F7F4EB%22/%3E %3C/g%3E %3C/svg%3E")}
+.i-layers{--ic:url("data:image/svg+xml,%3Csvg width=%2222%22 height=%2222%22 viewBox=%220 0 22 22%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E %3Cg id=%22layers%22 clip-path=%22url(%23clip0_0_12)%22%3E %3Cpath id=%22Vector%22 d=%22M1.8326 10.9998C1.83217 11.1751 1.88203 11.3469 1.97627 11.4948C2.07051 11.6426 2.20518 11.7603 2.36431 11.834L10.2482 15.4184C10.4858 15.526 10.7437 15.5816 11.0045 15.5816C11.2653 15.5816 11.5232 15.526 11.7608 15.4184L19.6263 11.8432C19.7886 11.7702 19.9262 11.6516 20.0222 11.5019C20.1182 11.3521 20.1686 11.1777 20.1672 10.9998M1.8326 15.5834C1.83217 15.7587 1.88203 15.9305 1.97627 16.0783C2.07051 16.2262 2.20518 16.3439 2.36431 16.4176L10.2482 20.0019C10.4858 20.1095 10.7437 20.1652 11.0045 20.1652C11.2653 20.1652 11.5232 20.1095 11.7608 20.0019L19.6263 16.4267C19.7886 16.3538 19.9262 16.2352 20.0222 16.0855C20.1182 15.9357 20.1686 15.7613 20.1672 15.5834M11.7612 1.99794C11.5223 1.88898 11.2629 1.8326 11.0003 1.8326C10.7378 1.8326 10.4783 1.88898 10.2394 1.99794L2.38305 5.57314C2.22038 5.64486 2.08207 5.76235 1.98497 5.91127C1.88788 6.0602 1.83618 6.23415 1.83618 6.41193C1.83618 6.58972 1.88788 6.76366 1.98497 6.91259C2.08207 7.06152 2.22038 7.179 2.38305 7.25073L10.2486 10.8351C10.4875 10.944 10.7469 11.0004 11.0095 11.0004C11.272 11.0004 11.5315 10.944 11.7704 10.8351L19.6359 7.2599C19.7986 7.18817 19.9369 7.07069 20.034 6.92176C20.1311 6.77283 20.1828 6.59888 20.1828 6.4211C20.1828 6.24332 20.1311 6.06937 20.034 5.92044C19.9369 5.77151 19.7986 5.65403 19.6359 5.5823L11.7612 1.99794Z%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke=%22%23A9BEFF%22/%3E %3C/g%3E %3Cdefs%3E %3CclipPath id=%22clip0_0_12%22%3E %3Crect width=%2222%22 height=%2222%22 fill=%22white%22/%3E %3C/clipPath%3E %3C/defs%3E %3C/svg%3E")}
+.i-route{--ic:url("data:image/svg+xml,%3Csvg width=%2222%22 height=%2222%22 viewBox=%220 0 22 22%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E %3Cg id=%22route%22%3E %3Cpath id=%22Vector%22 d=%22M8.25 17.4172C8.25 18.9361 7.01878 20.1674 5.5 20.1674C3.98122 20.1674 2.75 18.9361 2.75 17.4172C2.75 15.8983 3.98122 14.667 5.5 14.667C7.01878 14.667 8.25 15.8983 8.25 17.4172ZM8.25 17.4172H16.0417C16.8926 17.4172 17.7086 17.0791 18.3103 16.4774C18.912 15.8757 19.25 15.0596 19.25 14.2086C19.25 13.3576 18.912 12.5415 18.3103 11.9398C17.7086 11.338 16.8926 11 16.0417 11H5.95833C5.10743 11 4.29138 10.662 3.6897 10.0602C3.08802 9.4585 2.75 8.64238 2.75 7.79141C2.75 6.94044 3.08802 6.12432 3.6897 5.52259C4.29138 4.92087 5.10743 4.58282 5.95833 4.58282H13.75M13.75 4.58282C13.75 6.10172 14.9812 7.33304 16.5 7.33304C18.0188 7.33304 19.25 6.10172 19.25 4.58282C19.25 3.06392 18.0188 1.8326 16.5 1.8326C14.9812 1.8326 13.75 3.06392 13.75 4.58282Z%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke=%22%23A9BEFF%22/%3E %3C/g%3E %3C/svg%3E")}
+.i-info{--ic:url("data:image/svg+xml,%3Csvg width=%2218%22 height=%2218%22 viewBox=%220 0 18 18%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E %3Cg id=%22info%22 clip-path=%22url(%23clip0_0_10)%22%3E %3Cpath id=%22Vector%22 d=%22M9 12.0002V9M9 5.99976H9.0075M16.5006 9C16.5006 13.1425 13.1425 16.5006 9 16.5006C4.85753 16.5006 1.4994 13.1425 1.4994 9C1.4994 4.85753 4.85753 1.4994 9 1.4994C13.1425 1.4994 16.5006 4.85753 16.5006 9Z%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke=%22%23A9BEFF%22/%3E %3C/g%3E %3Cdefs%3E %3CclipPath id=%22clip0_0_10%22%3E %3Crect width=%2218%22 height=%2218%22 fill=%22white%22/%3E %3C/clipPath%3E %3C/defs%3E %3C/svg%3E")}
+.i-kalender{--ic:url("data:image/svg+xml,%3Csvg width=%2228%22 height=%2228%22 viewBox=%220 0 28 28%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E %3Cg id=%22calendar-days%22%3E %3Cpath id=%22Vector%22 d=%22M9.33333 2.3324V4.66592M9.33333 4.66592V6.99944M9.33333 4.66592H5.83333C4.54467 4.66592 3.5 5.71067 3.5 6.99944V11.6665M9.33333 4.66592H18.6667M18.6667 2.3324V4.66592M18.6667 4.66592V6.99944M18.6667 4.66592H22.1667C23.4553 4.66592 24.5 5.71067 24.5 6.99944V11.6665M3.5 11.6665H24.5M3.5 11.6665V23.3341C3.5 24.6229 4.54467 25.6676 5.83333 25.6676H22.1667C23.4553 25.6676 24.5 24.6229 24.5 23.3341V11.6665M9.33333 16.3335H9.345M14 16.3335H14.0117M18.6667 16.3335H18.6783M9.33333 21.0006H9.345M14 21.0006H14.0117M18.6667 21.0006H18.6783%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke=%22%23164AF2%22/%3E %3C/g%3E %3C/svg%3E")}
+.i-listchecks{--ic:url("data:image/svg+xml,%3Csvg width=%2228%22 height=%2228%22 viewBox=%220 0 28 28%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E %3Cg id=%22list-checks%22%3E %3Cpath id=%22Vector%22 d=%22M15.1667 5.8324H24.5M15.1667 14H24.5M15.1667 22.1676H24.5M3.5 19.834L5.83333 22.1676L10.5 17.5004M3.5 8.166L5.83333 10.4996L10.5 5.8324%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke=%22%23164AF2%22/%3E %3C/g%3E %3C/svg%3E")}
+.i-fileclock{--ic:url("data:image/svg+xml,%3Csvg width=%2220%22 height=%2220%22 viewBox=%220 0 20 20%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E %3Cg id=%22file-clock%22%3E %3Cpath id=%22Vector%22 d=%22M13.3327 18.334H14.9993C15.4414 18.334 15.8653 18.1584 16.1778 17.8458C16.4904 17.5332 16.666 17.1093 16.666 16.6672V6.6664M16.666 6.6664C16.6666 6.40231 16.615 6.1407 16.514 5.89667C16.413 5.65264 16.2647 5.43103 16.0777 5.24462L13.0877 2.25439C12.9013 2.0673 12.6797 1.91899 12.4357 1.818C12.1917 1.71702 11.9301 1.66536 11.666 1.66601M16.666 6.6664L12.4993 6.6664C12.2783 6.6664 12.0664 6.57859 11.9101 6.4223C11.7538 6.26601 11.666 6.05403 11.666 5.833V1.66601M11.666 1.66601H4.99933C4.5573 1.66601 4.13338 1.84161 3.82082 2.1542C3.50826 2.46679 3.33267 2.89074 3.33267 3.33281V5.70799M6.666 11.6668V13.5003L7.99933 14.3337M11.666 13.3336C11.666 16.0952 9.42742 18.334 6.666 18.334C3.90458 18.334 1.666 16.0952 1.666 13.3336C1.666 10.572 3.90458 8.3332 6.666 8.3332C9.42742 8.3332 11.666 10.572 11.666 13.3336Z%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke=%22%23164AF2%22/%3E %3C/g%3E %3C/svg%3E")}
+.i-filepen{--ic:url("data:image/svg+xml,%3Csvg width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E %3Cg id=%22file-pen-line%22%3E %3Cpath id=%22Vector%22 d=%22M14.4877 7.85767C14.3393 7.76896 14.2164 7.64327 14.1311 7.49288C14.0457 7.34249 14.0008 7.17253 14.0007 6.9996V1.9992M14.0007 1.9992L6.00079 1.99921C5.47036 1.99921 4.96165 2.20994 4.58658 2.58504C4.21151 2.96014 4.0008 3.46889 4.0008 3.99937V20.0006C4.0008 20.5311 4.21151 21.0399 4.58658 21.415C4.96165 21.7901 5.47036 22.0008 6.00079 22.0008H18.0007C18.5311 22.0008 19.0398 21.7901 19.4149 21.415C19.79 21.0399 20.0007 20.5311 20.0007 20.0006V19.6456M14.0007 1.9992C14.3173 1.99869 14.6308 2.06081 14.9233 2.18199C15.2157 2.30317 15.4813 2.481 15.7047 2.70526L18.2207 5.22146M8.00077 18.0005H9.00077M14.3647 13.6343C14.127 13.8719 13.9529 14.1657 13.8587 14.4883L13.0217 17.3586C12.9966 17.4446 12.9951 17.5359 13.0174 17.6227C13.0396 17.7095 13.0848 17.7888 13.1482 17.8522C13.2115 17.9156 13.2908 17.9607 13.3776 17.983C13.4644 18.0052 13.5557 18.0037 13.6417 17.9786L16.5117 17.1416C16.8344 17.0473 17.1281 16.8733 17.3657 16.6355L21.3787 12.6262C21.777 12.2278 22.0008 11.6875 22.0008 11.1241C22.0008 10.5607 21.777 10.0203 21.3787 9.62196C20.9803 9.22357 20.44 8.99976 19.8767 8.99976C19.3133 8.99976 18.773 9.22357 18.3747 9.62196L14.3647 13.6343Z%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke=%22%23164AF2%22/%3E %3C/g%3E %3C/svg%3E")}
+.i-clipboard{--ic:url("data:image/svg+xml,%3Csvg width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E %3Cg id=%22clipboard-check%22%3E %3Cpath id=%22Vector%22 d=%22M15.9996 3.99936H17.9994C18.5298 3.99936 19.0384 4.21009 19.4135 4.58519C19.7885 4.9603 19.9992 5.46904 19.9992 5.99952V20.0006C19.9992 20.5311 19.7885 21.0399 19.4135 21.415C19.0384 21.7901 18.5298 22.0008 17.9994 22.0008H6.0006C5.47022 22.0008 4.96156 21.7901 4.58653 21.415C4.21149 21.0399 4.0008 20.5311 4.0008 20.0006V5.99952C4.0008 5.46904 4.21149 4.9603 4.58653 4.58519C4.96156 4.21009 5.47022 3.99936 6.0006 3.99936H8.0004M15.9996 3.99936V2.99928C15.9996 2.44695 15.5519 1.9992 14.9997 1.9992H9.0003C8.44807 1.9992 8.0004 2.44695 8.0004 2.99928V3.99936M15.9996 3.99936V4.99944C15.9996 5.55177 15.5519 5.99952 14.9997 5.99952H9.0003C8.44807 5.99952 8.0004 5.55177 8.0004 4.99944V3.99936M9.0003 14.0002L11.0001 16.0003L14.9997 12%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke=%22%23164AF2%22/%3E %3C/g%3E %3C/svg%3E")}
+.i-history{--ic:url("data:image/svg+xml,%3Csvg width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E %3Cg id=%22history%22%3E %3Cpath id=%22Vector%22 d=%22M3 12C3 13.78 3.52784 15.5201 4.51677 17.0001C5.50571 18.4802 6.91131 19.6337 8.55585 20.3149C10.2004 20.9961 12.01 21.1743 13.7558 20.8271C15.5016 20.4798 17.1053 19.6226 18.364 18.364C19.6226 17.1053 20.4798 15.5016 20.8271 13.7558C21.1743 12.01 20.9961 10.2004 20.3149 8.55585C19.6337 6.91131 18.4802 5.50571 17.0001 4.51677C15.5201 3.52784 13.78 3 12 3C9.48395 3.00947 7.06897 3.99122 5.26 5.74L3 8M8 8H3V3M12 7V12L16 14%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke=%22%23164AF2%22/%3E %3C/g%3E %3C/svg%3E")}
+.i-regelcheck{--ic:url("data:image/svg+xml,%3Csvg width=%2217%22 height=%2217%22 viewBox=%220 0 17 17%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E %3Cg id=%22check%22%3E %3Cpath id=%22Vector%22 d=%22M14.1661 4.25L6.37521 12.0411L2.8339 8.49969%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke=%22%23A9BEFF%22/%3E %3C/g%3E %3C/svg%3E")}
+.i-lock{--ic:url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg%3E%3Cpath d='M4.66667 6.66656V4.6664C4.66667 3.78227 5.01786 2.93436 5.64298 2.30919C6.2681 1.68402 7.11595 1.3328 8 1.3328C8.88406 1.3328 9.7319 1.68402 10.357 2.30919C10.9821 2.93436 11.3333 3.78227 11.3333 4.6664V6.66656M4.66667 6.66656H3.33333C2.59695 6.66656 2 7.26356 2 8V13.3338C2 14.0702 2.59695 14.6672 3.33333 14.6672H12.6667C13.403 14.6672 14 14.0702 14 13.3338V8C14 7.26356 13.403 6.66656 12.6667 6.66656H11.3333M4.66667 6.66656H11.3333M8.66667 10.6669C8.66667 11.0351 8.36819 11.3336 8 11.3336C7.63181 11.3336 7.33333 11.0351 7.33333 10.6669C7.33333 10.2987 7.63181 10.0002 8 10.0002C8.36819 10.0002 8.66667 10.2987 8.66667 10.6669Z' stroke-width='1.8' stroke-linecap='round' stroke='%23626775'/%3E%3C/g%3E%3C/svg%3E")}
+.zs-frei{color:var(--frei)} .zs-absprache{color:var(--absprache)}
+.zs-verein{color:var(--verein)} .zs-zu{color:var(--zu)}
+.pin-z{display:inline-block;width:16px;height:16px;flex-shrink:0;background:currentColor;
+  -webkit-mask:var(--zs) center/contain no-repeat;mask:var(--zs) center/contain no-repeat}
+.pin-z.vermutet{opacity:.55}
+
+/* Kopf */
+.kopf-cta{font-family:var(--schrift);font-size:15px;font-weight:600;padding:13px 20px;border:0;
+  border-radius:14px;background:var(--gruen);color:var(--auf-akzent);cursor:pointer;flex-shrink:0}
+.kopf-cta:hover{background:var(--gruen-tief)}
+
+/* Suchfeld: Lupe links, Standort rechts */
+.suche-lupe{position:absolute;left:16px;color:var(--gruen);display:none}
+.suche-ort{position:absolute;right:8px;width:38px;height:38px;border:0;border-radius:12px;
+  background:none;color:var(--gruen);display:grid;place-items:center;cursor:pointer}
+.suche-ort:hover{background:var(--gruen-zart)}
+.suche input{padding-right:52px}
+.leiste-titel{display:none}
+
+/* Listenkopf */
+.liste-kopf{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px 0 12px}
+.liste-titel{font-family:var(--schrift-titel);font-size:26px;font-weight:600;letter-spacing:-.01em;
+  line-height:1.15;margin:0;color:var(--tinte)}
+.rolle .liste-kopf .anzahl{padding:5px 0 0;font-size:13px;font-weight:400;color:var(--tinte-2)}
+.sort-knopf{border:0;background:none;font-family:var(--schrift);font-size:12px;font-weight:500;
+  color:var(--tinte-2);padding:8px 2px;cursor:pointer;white-space:nowrap}
+.sort-knopf:hover{color:var(--gruen)}
+.chip.zyklus{font-weight:600}
+
+/* Platzkarten */
+.zeile{align-items:center;padding:10px 14px 10px 10px}
+.zeile .luftbild{width:82px;height:94px}
+.zmarken{display:flex;flex-wrap:wrap}
+.zhinweis{display:block;font-size:11px;color:var(--tinte-2);margin-top:7px;line-height:1.3}
+.zeile > .stern{align-self:flex-start}
+
+/* Legende */
+.legende-titel{font-size:13px;color:var(--tinte);margin-bottom:8px}
+.legende-marken{display:flex;flex-wrap:wrap;gap:6px}
+.legende .marke{margin:0}
+.legende-notiz{font-size:11px;color:var(--tinte-2);margin-top:6px;line-height:1.4}
+.legende.in-liste{margin:0 0 14px}
+.karten-legende{display:none}
+
+/* Marker: Pille mit Sport- und Zugangssymbol */
+.pin-wrap{background:none;border:0}
+.pin{position:absolute;left:0;top:0;transform:translate(-50%,-50%);display:flex;align-items:center;
+  gap:6px;padding:7px 10px;border-radius:14px;background:var(--flaeche);color:var(--tinte);
+  box-shadow:0 0 0 1px var(--kante),0 2px 8px rgba(32,44,64,.14);white-space:nowrap;cursor:pointer}
+.pin .sport-ic{width:19px;height:19px;color:var(--tinte)}
+.pin.an{background:#164AF2;box-shadow:0 0 0 3px #E2EF83,0 2px 10px rgba(22,74,242,.35)}
+.pin.an .sport-ic,.pin.an .pin-z{color:#F7F4EB}
+.pin-name{position:absolute;bottom:calc(100% + 12px);left:50%;transform:translateX(-50%);
+  background:#164AF2;color:#F7F4EB;font:600 14px/1 var(--schrift);padding:9px 11px;border-radius:9px;
+  white-space:nowrap;pointer-events:none}
+.buendel2{background:none;border:0}
+.bpille{position:absolute;left:0;top:0;transform:translate(-50%,-50%);display:flex;flex-direction:column;
+  gap:4px;padding:7px 10px;border-radius:14px;background:var(--flaeche);color:var(--tinte);
+  box-shadow:0 0 0 1.5px var(--tinte),0 2px 8px rgba(32,44,64,.15);white-space:nowrap;cursor:pointer;
+  font:700 13px/1.1 var(--schrift)}
+.bpille .bz{display:flex;gap:7px;font-size:11.5px;font-weight:500}
+.bpille .bz span{display:inline-flex;align-items:center;gap:2px}
+.bpille .pin-z{width:13px;height:13px}
+.bpille i{position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;
+  background:#34C759;border:2px solid #fff;animation:puls 1.8s ease-out infinite}
+
+/* Platzdetail */
+.dkopf2{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 10px}
+.dkopf2 .zurueck{display:flex;align-items:center;gap:8px;padding:8px 0;color:var(--tinte);font-size:15px;font-weight:500}
+.merk-knopf{width:44px;height:44px;border:0;border-radius:14px;background:var(--flaeche);
+  box-shadow:0 0 0 1px var(--kante);color:var(--tinte);display:grid;place-items:center;cursor:pointer}
+.merk-knopf.an{background:var(--gruen);color:var(--auf-akzent);box-shadow:none}
+.dbild{position:relative;height:216px;border-radius:20px;background:#164AF2;overflow:hidden;
+  display:grid;place-items:center;margin:0 0 20px}
+.dbild > img{width:82%;height:auto;max-height:80%}
+.dbild > .luftbild{height:100%;width:auto;aspect-ratio:64/72;border-radius:0}
+.dbild-ball{position:absolute;left:73%;top:62%;width:14px;height:14px;border-radius:50%;background:#E2EF83}
+.dbild-tag{position:absolute;left:8px;bottom:8px;background:rgba(19,30,48,.85);color:#F7F4EB;
+  font-size:11px;padding:5px 8px;border-radius:7px}
+.rolle > .dname{font-size:32px;font-weight:600;letter-spacing:-.015em;line-height:1.1;margin:0 0 8px}
+.rolle > .dort{margin:0 0 10px}
+.dmarken{display:flex;flex-wrap:wrap}
+.dmarken .marke{margin-top:0}
+.dhinweis{font-size:15px;line-height:1.5;color:var(--tinte-2);margin:14px 0 18px}
+.deigen{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:16px 0;margin:0 0 22px;
+  border-top:1px solid var(--kante);border-bottom:1px solid var(--kante)}
+.deigen > div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.deigen .ui-ic,.deigen .sport-ic{width:22px;height:22px;color:var(--gruen);margin-bottom:6px}
+.deigen b{font-size:15px;font-weight:600;color:var(--tinte);overflow:hidden;text-overflow:ellipsis}
+.deigen small{font-size:11.5px;color:var(--tinte-2)}
+.gut-zu-wissen h3,.dteil-titel{font-family:var(--schrift-titel);font-size:24px;font-weight:600;
+  letter-spacing:-.01em;margin:0 0 6px;color:var(--tinte)}
+.rubrik{font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--gruen)}
+.regeln{list-style:none;padding:0;margin:12px 0 20px}
+.regeln li{display:flex;gap:12px;font-size:15px;line-height:1.45;color:var(--tinte);margin-bottom:12px}
+.regeln .ui-ic{width:17px;height:17px;color:var(--gruen);margin-top:2px}
+.herkunft,.kinderschutz{background:var(--flaeche);border-radius:20px;box-shadow:0 0 0 1px var(--kante);
+  padding:16px 18px;margin:0 0 18px}
+.herkunft h4{display:flex;align-items:center;gap:8px;margin:0 0 8px;font-size:15px;font-weight:600;color:var(--tinte)}
+.herkunft h4 .ui-ic{color:var(--gruen)}
+.herkunft p{font-size:13px;line-height:1.55;color:var(--tinte-2);margin:0}
+.live2{margin:0 0 12px}
+.live2 .live-text{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--tinte);margin-bottom:10px}
+.knopf.voll{width:100%;display:flex;justify-content:center}
+.live-notiz{display:flex;gap:8px;font-size:12.5px;line-height:1.45;color:var(--tinte-2);margin:10px 0 0}
+.live-notiz .ui-ic{width:15px;height:15px;margin-top:1px}
+.melden-knopf{margin:0 0 18px}
+.kinderschutz{display:flex;gap:12px}
+.kinderschutz .ui-ic{color:var(--gruen);width:22px;height:22px}
+.kinderschutz b{display:block;font-size:15px;color:var(--tinte);margin-bottom:4px}
+.kinderschutz p{font-size:13px;line-height:1.5;color:var(--tinte-2);margin:0}
+.dteil-titel{margin-top:8px;margin-bottom:12px}
+.rolle .schnell.zwei{grid-template-columns:1fr 1fr;margin-left:0;margin-right:0}
+.rolle .daten{width:100%;margin-left:0;margin-right:0}
+
+/* Untere Navigation (nur Handy) und Vertrauensleiste (nur Laptop) */
+#unternav,#vertrauen{display:none}
+
+/* ---------- Laptop ---------- */
+@media (min-width:881px){
+  header{height:80px;padding:0 40px;background:var(--flaeche);box-shadow:0 1px 0 var(--kante);
+    backdrop-filter:none;-webkit-backdrop-filter:none}
+  header h1{font-size:32px;gap:10px}
+  header h1 .pf-marke{width:30px;height:30px}
+  .kopfnav{margin-left:auto;gap:6px}
+  .kopfnav button{font-size:16px;font-weight:400;color:var(--tinte);padding:10px 14px;border-radius:14px}
+  .kopfnav button:hover{background:var(--gruen-zart);color:var(--gruen)}
+  .kopfnav button[aria-current=page]{background:none;color:var(--gruen);font-weight:600}
+  .kopfnotiz{display:none}
+  header .kopf-cta{margin-left:18px}
+
+  body.mit-leiste #leiste{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,510px);
+    gap:18px 32px;align-items:center;padding:24px 40px 22px;background:var(--grund);border-bottom:0}
+  #leiste .leiste-titel{display:block;grid-column:1}
+  .leiste-titel h2{font-family:var(--schrift-titel);font-size:42px;font-weight:600;letter-spacing:-.015em;
+    line-height:1;margin:0;color:var(--tinte)}
+  .leiste-titel p{font-size:14px;color:var(--tinte-2);margin:10px 0 0}
+  #leiste .suche{grid-column:2;margin:0;flex:none}
+  #leiste .suche input{padding-left:48px;background:var(--flaeche);box-shadow:inset 0 0 0 1px var(--kante);
+    height:50px;font-size:16px}
+  #leiste .suche input:focus{box-shadow:inset 0 0 0 2px var(--gruen)}
+  #leiste .suche-logo{display:none}
+  #leiste .suche-lupe{display:block}
+  #leiste .filter{grid-column:1/-1;padding:0;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  #leiste .filtertitel,#leiste .notiz-klein{display:none}
+  #leiste .chips{display:contents}
+  #leiste .filter{overflow:visible;-webkit-mask-image:none;mask-image:none;scroll-snap-type:none}
+  #leiste .filter .chips:not(:first-of-type) > .chip:first-child{margin-left:0}
+  #leiste .chip.zyklus.erster{margin-left:auto}
+  /* "Platz vorschlagen" steht oben im Kopf – unten bleiben nur Admin-Knöpfe */
+  .listenfuss .knopf[data-gehe="neu"]{display:none}
+  .fuss.listenfuss:not(:has(.zweit)){display:none}
+
+  body:not(.vollseite) main{padding:0 24px 20px;gap:20px;background:var(--grund)}
+  body:not(.vollseite) aside{order:-1;width:clamp(380px,34vw,488px);border-left:0;background:var(--flaeche);
+    border-radius:28px;overflow:hidden;container-type:normal}
+  body:not(.vollseite) #karte{border-radius:28px;overflow:hidden}
+  .rolle{padding:0 22px 22px}
+  body:not(.vollseite) .dkopf2{padding:18px 22px 10px}
+
+  .karten-legende{display:block;position:absolute;left:20px;bottom:20px;z-index:500;
+    max-width:calc(100% - 110px);background:var(--flaeche);border-radius:20px;padding:14px 18px;
+    box-shadow:0 0 0 1px var(--kante),0 4px 18px rgba(32,44,64,.12)}
+  body.vollseite .karten-legende{display:none}
+  .legende.in-liste{display:none}
+  .bereich-knopf{left:20px;top:20px;transform:none;font-size:12px;font-weight:500;padding:8px 12px;
+    border-radius:9px;color:var(--tinte)!important}
+  .leaflet-top.leaflet-right{margin-top:10px;margin-right:10px}
+  .leaflet-bottom.leaflet-right .standort-knopf{margin-right:20px;margin-bottom:20px}
+
+  #vertrauen{display:flex;align-items:center;gap:14px;padding:0 40px;height:56px;flex-shrink:0;
+    background:#131E30;color:#F7F4EB;font-size:14px}
+  #vertrauen .ui-ic{color:#A9BEFF}
+  #vertrauen small{margin-left:auto;font-size:11.5px;color:#C1CDC9}
+  body.vollseite #vertrauen{display:none}
+  body.seite-vereine #seite{max-width:none}
+}
+
+/* ---------- Handy ---------- */
+@media (max-width:880px){
+  aside{bottom:var(--unten-h,0px);height:calc((100dvh - var(--unten-h,0px)) * .94)}
+  .leaflet-bottom.leaflet-left,.leaflet-bottom.leaflet-right{bottom:calc(var(--blatt-sichtbar, 42vh) + 4px)}
+  #unternav{display:block;position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--flaeche);
+    box-shadow:0 -1px 0 var(--kante);padding:8px 8px calc(6px + env(safe-area-inset-bottom,0))}
+  #unternav .reihe{display:grid;grid-template-columns:repeat(3,1fr)}
+  #unternav button{display:flex;flex-direction:column;align-items:center;gap:4px;border:0;background:none;
+    font-family:var(--schrift);font-size:11.5px;font-weight:500;color:var(--tinte-2);padding:6px 0;cursor:pointer}
+  #unternav button[aria-current]{color:var(--gruen);font-weight:600}
+  #unternav .ui-ic{width:22px;height:22px}
+  #unternav p{text-align:center;font-size:10.5px;color:var(--tinte-2);margin:2px 0 0}
+  .listenende{padding-bottom:12px}
+  .fuss{padding-bottom:12px}
+  .zeile .luftbild{width:70px;height:80px}
+  .liste-titel{font-size:22px}
+  .rolle .liste-kopf{padding-top:12px}
+  .dkopf2{padding:4px 16px 8px}
+  .rolle > .dname{font-size:28px}
+  .dbild{height:190px}
+}
+
+@media(prefers-color-scheme:dark){
+  .pin{box-shadow:0 0 0 1px var(--kante),0 2px 8px rgba(0,0,0,.35)}
+  .bpille{box-shadow:0 0 0 1.5px var(--tinte),0 2px 8px rgba(0,0,0,.35)}
+  #vertrauen{background:#0C1424}
+}
+
+/* ---------- Für Vereine ---------- */
+.rolle.vf{padding:0;background:var(--grund);color:var(--tinte)}
+.vf-teil{padding:72px clamp(20px,5vw,64px)}
+.vf-teil.hell{background:var(--flaeche)}
+.vf-teil.dunkel{background:#131E30;color:#F7F4EB}
+.vf-teil.kobalt{background:#164AF2;color:#F7F4EB}
+.vf-innen{max-width:1180px;margin:0 auto}
+.vf .rubrik{display:block;margin-bottom:14px}
+.vf-teil.dunkel .rubrik{color:#A9BEFF}
+.vf h2{font-family:var(--schrift-titel);font-size:clamp(30px,3.6vw,46px);font-weight:600;line-height:1.12;
+  letter-spacing:-.015em;margin:0 0 18px}
+.vf p{font-size:16px;line-height:1.6;color:var(--tinte-2);margin:0 0 14px}
+.vf-teil.dunkel p,.vf-teil.kobalt p{color:#C1CDC9}
+.vf-teil.kobalt p{color:#E6EBFF}
+.vf small,.vf .klein{font-size:12.5px;color:var(--tinte-2);line-height:1.5}
+.vf-zwei{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.vf-held h1{font-family:var(--schrift-titel);font-size:clamp(40px,5.6vw,72px);font-weight:600;line-height:1.02;
+  letter-spacing:-.02em;margin:0 0 22px;color:var(--tinte)}
+.vf-held .rubrik{color:var(--gruen)}
+.vf-knoepfe{display:flex;gap:12px;flex-wrap:wrap;margin:24px 0 18px}
+.vf-knoepfe .knopf{flex:0 0 auto;padding-left:22px;padding-right:22px;text-decoration:none}
+.vf-karte{background:var(--flaeche);border-radius:28px;padding:22px;box-shadow:0 0 0 1px var(--kante)}
+.vf-karte-kopf{display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-bottom:12px}
+.vf-karte-kopf small{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase}
+.vf-karte img{display:block;width:100%;height:auto;border-radius:20px}
+.vf-karte-zeile{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin:18px 0 12px}
+.vf-karte-zeile b{font-family:var(--schrift-titel);font-size:20px;font-weight:600;display:block}
+.vf-karte-zeile .marke{margin:0}
+.vf-notiz{display:flex;gap:10px;background:var(--grund);border-radius:14px;padding:12px 14px;font-size:12.5px;
+  line-height:1.5;color:var(--tinte-2)}
+.vf-notiz .ui-ic{color:var(--gruen);width:18px;height:18px}
+.vf-drei{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:30px}
+.vf-kachel{background:var(--grund);border-radius:20px;padding:24px}
+.vf-kachel .ui-ic{color:var(--gruen);width:24px;height:24px;margin-bottom:18px}
+.vf-kachel h3{font-family:var(--schrift-titel);font-size:22px;font-weight:600;margin:0 0 10px}
+.vf-kachel p{font-size:14.5px;margin:0}
+.vf-verwaltung{background:var(--flaeche);border-radius:28px;padding:24px;box-shadow:0 0 0 1px var(--kante)}
+.vf-verwaltung-kopf{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.vf-verwaltung-kopf b{font-family:var(--schrift-titel);font-size:24px;font-weight:600;display:block}
+.vf-tabs{display:flex;gap:20px;font-size:13px;margin:16px 0 8px;color:var(--tinte-2)}
+.vf-tabs span:first-child{color:var(--gruen);font-weight:600}
+.vf-tabelle{width:100%;border-collapse:collapse;font-size:13px}
+.vf-tabelle th{text-align:left;font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--tinte-2);padding:12px 8px 8px 0;border-bottom:1px solid var(--kante)}
+.vf-tabelle td{padding:12px 8px 12px 0;border-bottom:1px solid var(--kante);color:var(--tinte)}
+.vf-tabelle td:last-child{color:var(--tinte-2)}
+.vf-tabelle .marke{margin:0}
+.vf-verwaltung-fuss{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-top:16px}
+.vf-rollen{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:34px}
+.vf-rollen > div{border-top:1px solid #44516A;padding-top:22px}
+.vf-rollen h3{font-family:var(--schrift-titel);font-size:32px;font-weight:600;color:#E2EF83;margin:0 0 14px}
+.vf-rollen p{font-size:14.5px}
+.vf-schritte-box{background:var(--grund);border-radius:28px;padding:22px 24px}
+.vf-schritt{display:flex;gap:14px;padding:12px 0}
+.vf-schritt .ui-ic{color:var(--gruen);width:22px;height:22px}
+.vf-schritt b{display:block;font-size:15px;margin-bottom:4px}
+.vf-schritt p{font-size:13.5px;margin:0}
+.vf-schutz{display:flex;flex-direction:column;gap:14px}
+.vf-schutz .kinderschutz{margin:0}
+.vf-beispiel{background:#131E30;color:#F7F4EB;border-radius:20px;padding:20px}
+.vf-beispiel .knopf{background:#A9BEFF;color:#131E30;width:100%;justify-content:center;display:flex}
+.vf-beispiel p{color:#C1CDC9;font-size:13px;margin:12px 0 0}
+.vf-beispiel small{display:block;color:#9AA6AE;font-size:11.5px;margin-top:10px;padding-top:10px;border-top:1px solid #44516A}
+.vf-vier{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:34px}
+.vf-vier > div{border-top:2px solid var(--kante);padding-top:16px}
+.vf-vier .nr{font-family:var(--schrift-titel);font-size:32px;color:var(--gruen);display:block;margin-bottom:22px}
+.vf-vier h3{font-family:var(--schrift-titel);font-size:22px;font-weight:600;margin:0 0 10px}
+.vf-vier p{font-size:14px}
+.vf-faq{display:grid;grid-template-columns:1fr 2fr;gap:48px}
+.vf-faq details{border-bottom:1px solid var(--kante);padding:16px 0}
+.vf-faq summary{font-size:17px;font-weight:600;cursor:pointer;color:var(--tinte)}
+.vf-faq details p{margin:10px 0 0;font-size:14.5px}
+.vf-cta{display:flex;justify-content:space-between;align-items:center;gap:32px}
+.vf-cta h2{color:#F7F4EB}
+.vf-cta .knopf{background:#A9BEFF;color:#131E30;min-width:260px;justify-content:center;display:flex;text-decoration:none}
+.vf-cta small{display:block;color:#E6EBFF;text-align:center;margin-top:10px}
+.vf-fuss{display:grid;grid-template-columns:1.4fr 1fr 1fr 1.4fr;gap:24px;font-size:13.5px}
+.vf-fuss .marke-wort{display:flex;align-items:center;gap:8px;font-family:var(--schrift-titel);font-size:26px;
+  font-weight:700;color:#F7F4EB}
+.vf-fuss button,.vf-fuss a{display:block;background:none;border:0;padding:4px 0;color:#F7F4EB;
+  font:inherit;cursor:pointer;text-decoration:none;text-align:left}
+.vf-fuss p{font-size:13px;color:#C1CDC9}
+.vf-fussende{display:flex;justify-content:space-between;font-size:11.5px;color:#9AA6AE;
+  border-top:1px solid #44516A;margin-top:36px;padding-top:16px}
+@media (max-width:880px){
+  .vf-teil{padding:44px 20px}
+  .vf-zwei,.vf-drei,.vf-rollen,.vf-vier,.vf-faq,.vf-fuss{grid-template-columns:1fr;gap:22px}
+  .vf-cta{flex-direction:column;align-items:flex-start}
+  .vf-tabelle th:nth-child(4),.vf-tabelle td:nth-child(4){display:none}
+  .vf-verwaltung-fuss{flex-direction:column;align-items:flex-start}
+}
 </style>
 <!-- Besucherzähler GoatCounter: ohne Cookies, ohne personenbezogene Daten -->
 <script data-goatcounter="https://platzfrei.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
@@ -865,15 +1179,16 @@ label.inline-knopf{display:inline-block;margin-top:10px}
 <header>
   <h1>
     <svg class="pf-marke" width="24" height="24" viewBox="0 0 38 38" aria-hidden="true"><path fill-rule="evenodd" d="M0 0H23.75C32.6562 0 38 5.34375 38 14.25V16.625C38 24.9375 32.6562 29.6875 23.75 29.6875H11.875V38H0V0ZM11.875 7.125H28.5V13.0625H17.8125V16.625H26.125V22.5625H17.8125V26.125H11.875V7.125Z"/></svg>
-    platzfrei <em>wo darf ich spielen?</em>
+    platzfrei
   </h1>
   <nav class="kopfnav" aria-label="Seiten">
-    <button data-gehe="liste" data-nav="liste">Karte</button>
-    <button data-gehe="ueber" data-nav="ueber">Über Platzfrei</button>
+    <button data-gehe="liste" data-nav="liste">Entdecken</button>
     <button data-gehe="vereine" data-nav="vereine">Für Vereine</button>
+    <button data-gehe="ueber" data-nav="ueber">Über platzfrei</button>
   </nav>
   <span class="kopfnotiz" id="kopfnotiz">Version 0.1</span>
   <button class="adminknopf" id="adminknopf" hidden>Abmelden</button>
+  <button class="kopf-cta" data-gehe="neu">Platz vorschlagen</button>
 </header>
 
 <div id="leiste"></div>
@@ -885,6 +1200,21 @@ label.inline-knopf{display:inline-block;margin-top:10px}
     <div id="seite"></div>
   </aside>
 </main>
+
+<!-- Laptop: Vertrauensleiste unten -->
+<div id="vertrauen"><span class="ui-ic i-shieldcheck" aria-hidden="true"></span>
+  Keine Profilbilder. Kein Chat. Wer gerade spielt, erscheint nur anonym als Zahl.
+  <small>Alle Angaben ohne Gewähr · vor Ort gilt das Schild</small></div>
+
+<!-- Handy: untere Navigation -->
+<nav id="unternav" aria-label="Bereiche">
+  <div class="reihe">
+    <button data-unten="entdecken"><span class="ui-ic i-map" aria-hidden="true"></span>Entdecken</button>
+    <button data-unten="merkliste"><span class="ui-ic i-bookmark" aria-hidden="true"></span>Merkliste</button>
+    <button data-unten="privat"><span class="ui-ic i-shieldcheck" aria-hidden="true"></span>Privatsphäre</button>
+  </div>
+  <p>Keine Profilbilder. Kein Chat.</p>
+</nav>
 
 <div id="meldung" role="status" aria-live="polite"></div>
 
@@ -1220,6 +1550,7 @@ function deutschlandZoom(){
 }
 deutschlandZoom();
 window.addEventListener("resize", deutschlandZoom);
+karte.zoomControl.setPosition("topright");
 
 /* Straßenkarte von CARTO (Voyager, im Dunkelmodus Dark Matter), Satellit von
    Esri. CARTO braucht seit 2026 einen kostenlosen Schlüssel
@@ -1319,6 +1650,25 @@ const BUENDEL_ZELLE = 90;      // Bündelgröße in Bildschirmpunkten
 /* Welche Farbe ein Bündel bekommt: die "beste" Nachricht darin gewinnt. */
 const BUENDEL_RANG = ["#147563", "#6FAE9F", "#906017", "#C49A5A", "#526884", "#626775", GRAU];
 
+/* Zugangsart eines Ortes für Marker und Bündel. Ungeklärte Orte (grau)
+   haben keine – sie bleiben kleine Punkte. */
+function pinArt(o){
+  if (farbe(o) === GRAU) return null;
+  const art = markeArt(o)[0];
+  return art === "unklar" ? "verein" : art;
+}
+function zsKlasse(art){ return art === "vermutet" ? "zs-frei vermutet" : "zs-" + art; }
+/* Pillen sind HTML-Elemente. Bei sehr vielen Orten im Bild wäre das zäh,
+   dann bleibt es bei den gezeichneten Punkten. */
+const PILLEN_MAX = 300;
+let pillenModus = false;
+
+function ortAusKarteOeffnen(o){
+  Z.auswahlId=o.id; Z.ansicht="detail"; zeichne();
+  sheet.mitte();
+  karte.flyTo([o.lat, o.lon], Math.max(karte.getZoom(), 16), { duration:.6 });
+}
+
 function punktZeichnen(o){
   const spiel = naechstesSpiel(o.id);
   if (spiel && new Date(spiel.beginn) - Date.now() < 24 * 3600e3 && (Z.aktiv[o.id] || 0) < 2)
@@ -1333,6 +1683,19 @@ function punktZeichnen(o){
     }).addTo(markerEbene);
   const grau = farbe(o) === GRAU;
   const gewaehlt = String(o.id) === String(Z.auswahlId);
+  const art = pillenModus ? pinArt(o) : null;
+  if (art) {
+    L.marker([o.lat, o.lon], {
+      icon: L.divIcon({ className:"pin-wrap", iconSize:null,
+        html:`<span class="pin ${art}${gewaehlt ? " an" : ""}" title="${esc(o.name)}">${
+          gewaehlt ? `<b class="pin-name">${esc(o.name)}</b>` : ``}${
+          sportIcon((o.sportarten || [])[0])}<span class="pin-z ${zsKlasse(art)}"></span></span>` }),
+      keyboard:false, zIndexOffset: gewaehlt ? 1000 : 0
+    })
+    .on("click", () => ortAusKarteOeffnen(o))
+    .addTo(markerEbene);
+    return;
+  }
   const klein = karte.getZoom() < 15;
   L.circleMarker([o.lat, o.lon], {
     renderer: stift,
@@ -1341,30 +1704,28 @@ function punktZeichnen(o){
     weight: gewaehlt ? 3 : grau ? 1.5 : 2,
     fillColor: gewaehlt ? "#164AF2" : farbe(o), fillOpacity: grau && !gewaehlt ? .7 : 1
   })
-  .on("click", () => {
-    Z.auswahlId=o.id; Z.ansicht="detail"; zeichne();
-    sheet.mitte();
-    karte.flyTo([o.lat, o.lon], Math.max(karte.getZoom(), 16), { duration:.6 });
-  })
+  .on("click", () => ortAusKarteOeffnen(o))
   .addTo(markerEbene);
 }
 
+/* Bündel: Anzahl der Orte und darunter die Zugänge getrennt gezählt. */
+function kurzZahl(n){ return n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(".", ",") + "k" : n; }
 function buendelZeichnen(gruppe, mitte){
   const n = gruppe.length;
-  let lat = 0, lon = 0, rang = BUENDEL_RANG.length - 1;
+  let lat = 0, lon = 0;
+  const zaehler = { frei:0, vermutet:0, absprache:0, verein:0, zu:0 };
   for (const o of gruppe) {
     lat += o.lat; lon += o.lon;
-    const r = BUENDEL_RANG.indexOf(farbe(o));
-    if (r >= 0 && r < rang) rang = r;
+    const art = pinArt(o);
+    if (art) zaehler[art]++;
   }
-  const groesse = buendelGroesse(n);
-  const text = n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(".", ",") + "k" : n;
+  const teile = Object.entries(zaehler).filter(([, z]) => z)
+    .map(([art, z]) => `<span><span class="pin-z ${zsKlasse(art)}"></span>${kurzZahl(z)}</span>`).join("");
   L.marker(mitte ? karte.unproject(mitte, karte.getZoom()) : [lat / n, lon / n], {
     icon: L.divIcon({
-      className: "buendel",
-      html: `<span style="--ring:${BUENDEL_RANG[rang]};width:${groesse}px;height:${groesse}px">${text}</span>${
-        gruppe.some(o => (Z.aktiv[o.id] || 0) >= 2) ? `<i title="Hier wird gerade gespielt"></i>` : ``}`,
-      iconSize: [groesse, groesse]
+      className: "buendel2", iconSize: null,
+      html: `<span class="bpille"><span>${kurzZahl(n)} Orte</span>${teile ? `<span class="bz">${teile}</span>` : ``}${
+        gruppe.some(o => (Z.aktiv[o.id] || 0) >= 2) ? `<i title="Hier wird gerade gespielt"></i>` : ``}</span>`
     }),
     keyboard: false
   })
@@ -1393,9 +1754,11 @@ function markerZeichnen(){
   const grauZuerst = (a,b) => (farbe(b) === GRAU) - (farbe(a) === GRAU);
 
   if (karte.getZoom() > BUENDEL_BIS_ZOOM) {
+    pillenModus = imBild.filter(o => farbe(o) !== GRAU).length <= PILLEN_MAX;
     imBild.sort(grauZuerst).forEach(punktZeichnen);
     return;
   }
+  pillenModus = true;
 
   /* Bündeln über ein Raster in Bildschirmpunkten – schnell genug für
      zehntausende Orte und ohne zusätzliche Bibliothek. */
@@ -1422,8 +1785,8 @@ function markerZeichnen(){
       for (let j = i + 1; j < gruppen.length; j++) {
         const b = gruppen[j];
         if (!b) continue;
-        const ra = a.orte.length > 1 ? buendelGroesse(a.orte.length) / 2 : 7;
-        const rb = b.orte.length > 1 ? buendelGroesse(b.orte.length) / 2 : 7;
+        const ra = a.orte.length > 1 ? 46 : 18;
+        const rb = b.orte.length > 1 ? 46 : 18;
         if (a.mitte.distanceTo(b.mitte) >= ra + rb + ABSTAND) continue;
         const na = a.orte.length, nb = b.orte.length;
         a.mitte = L.point((a.mitte.x * na + b.mitte.x * nb) / (na + nb),
@@ -1460,6 +1823,14 @@ document.getElementById("karte").appendChild(bereichKnopf);
 
 /* Grüne Pille oben auf der Karte, sobald in der Nähe etwas los ist –
    damit man die Community auch sieht, wenn die Liste zugeklappt ist. */
+/* Legende über der Karte (Laptop). Auf dem Handy steht sie in der Liste. */
+const kartenLegende = document.createElement("div");
+kartenLegende.className = "karten-legende";
+kartenLegende.innerHTML = legendeHtml();
+document.getElementById("karte").appendChild(kartenLegende);
+L.DomEvent.disableClickPropagation(kartenLegende);
+L.DomEvent.disableScrollPropagation(kartenLegende);
+
 var losPille = document.createElement("button");   // var: markerZeichnen läuft evtl. schon vorher
 losPille.className = "los-pille";
 losPille.hidden = true;
@@ -1757,8 +2128,23 @@ function platzBild(o){
     <rect x="25" y="7" width="14" height="4"/><rect x="25" y="61" width="14" height="4"/>`;
   return `<span class="luftbild platzbild" aria-hidden="true"><svg viewBox="0 0 64 72" preserveAspectRatio="xMidYMid slice">
     <rect width="64" height="72" fill="#164AF2"/><g ${L}>${linien}</g>
-    <circle cx="${ball[0]}" cy="${ball[1]}" r="3.2" fill="#E2EF83"/></svg>${
-    SPORT_KLASSE[sport] ? `<i>${sportIcon(sport)}</i>` : ``}</span>`;
+    <circle cx="${ball[0]}" cy="${ball[1]}" r="3.2" fill="#E2EF83"/></svg></span>`;
+}
+
+/* Großes Spielfeld für die Platzansicht */
+const FELD_GROSS = "data:image/svg+xml,%3Csvg width=%22296%22 height=%22164.16%22 viewBox=%220 0 296 164.16%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E %3Cmask id=%22stroke0_0_18%22 fill=%22white%22%3E %3Cpath d=%22M0 0H148H296V40.5205V61.3003V102.86V123.64V164.16H148H0V123.64V102.86V61.3003V40.5205V0Z%22/%3E %3C/mask%3E %3Cpath id=%22Spielfeldlinien%22 d=%22M127.632 60.7744L128.21 61.3273V61.3273L127.632 60.7744ZM127.632 103.386L128.21 102.833V102.833L127.632 103.386ZM46.6846 40.5205H47.4846V39.7205H46.6846V40.5205ZM46.6846 123.64V124.44H47.4846V123.64H46.6846ZM249.315 40.5205V39.7205H248.515V40.5205H249.315ZM249.315 123.64H248.515V124.44H249.315V123.64ZM16.8859 61.3003H17.6859V60.5003H16.8859V61.3003ZM16.8859 102.86V103.66H17.6859V102.86H16.8859ZM279.114 61.3003V60.5003H278.314V61.3003H279.114ZM279.114 102.86H278.314V103.66H279.114V102.86ZM148 0H147.2V51.9494H148H148.8V0H148ZM148 51.9494H147.2V112.211H148H148.8V51.9494H148ZM148 112.211H147.2V164.16H148H148.8V112.211H148ZM119.195 82.08H119.995C119.995 74.2897 122.954 66.8253 128.21 61.3273L127.632 60.7744L127.053 60.2216C121.505 66.0247 118.395 73.888 118.395 82.08H119.195ZM127.632 60.7744L128.21 61.3273C133.465 55.8304 140.584 52.7494 148 52.7494V51.9494V51.1494C140.136 51.1494 132.602 54.4173 127.053 60.2216L127.632 60.7744ZM148 51.9494V52.7494C155.416 52.7494 162.535 55.8304 167.79 61.3273L168.368 60.7744L168.947 60.2216C163.398 54.4173 155.864 51.1494 148 51.1494V51.9494ZM168.368 60.7744L167.79 61.3273C173.046 66.8253 176.005 74.2897 176.005 82.08H176.805H177.605C177.605 73.888 174.495 66.0247 168.947 60.2216L168.368 60.7744ZM176.805 82.08H176.005C176.005 89.8703 173.046 97.3347 167.79 102.833L168.368 103.386L168.947 103.938C174.495 98.1353 177.605 90.272 177.605 82.08H176.805ZM168.368 103.386L167.79 102.833C162.535 108.33 155.416 111.411 148 111.411V112.211V113.011C155.864 113.011 163.398 109.743 168.947 103.938L168.368 103.386ZM148 112.211V111.411C140.584 111.411 133.465 108.33 128.21 102.833L127.632 103.386L127.053 103.938C132.602 109.743 140.136 113.011 148 113.011V112.211ZM127.632 103.386L128.21 102.833C122.954 97.3347 119.995 89.8703 119.995 82.08H119.195H118.395C118.395 90.272 121.505 98.1353 127.053 103.938L127.632 103.386ZM0 40.5205V41.3205H46.6846V40.5205V39.7205H0V40.5205ZM46.6846 40.5205H45.8846V123.64H46.6846H47.4846V40.5205H46.6846ZM46.6846 123.64V122.84H0V123.64V124.44H46.6846V123.64ZM296 40.5205V39.7205H249.315V40.5205V41.3205H296V40.5205ZM249.315 40.5205H248.515V123.64H249.315H250.115V40.5205H249.315ZM249.315 123.64V124.44H296V123.64V122.84H249.315V123.64ZM0 61.3003V62.1003H16.8859V61.3003V60.5003H0V61.3003ZM16.8859 61.3003H16.0859V102.86H16.8859H17.6859V61.3003H16.8859ZM16.8859 102.86V102.06H0V102.86V103.66H16.8859V102.86ZM296 61.3003V60.5003H279.114V61.3003V62.1003H296V61.3003ZM279.114 61.3003H278.314V102.86H279.114H279.914V61.3003H279.114ZM279.114 102.86V103.66H296V102.86V102.06H279.114V102.86ZM0 0V-1.6H-1.6V0H0ZM296 0H297.6V-1.6H296V0ZM296 164.16V165.76H297.6V164.16H296ZM0 164.16H-1.6V165.76H0V164.16ZM0 0V1.6H148V0V-1.6H0V0ZM148 0V1.6H296V0V-1.6H148V0ZM296 0H294.4V40.5205H296H297.6V0H296ZM296 40.5205H294.4V61.3003H296H297.6V40.5205H296ZM296 61.3003H294.4V102.86H296H297.6V61.3003H296ZM296 102.86H294.4V123.64H296H297.6V102.86H296ZM296 123.64H294.4V164.16H296H297.6V123.64H296ZM296 164.16V162.56H148V164.16V165.76H296V164.16ZM148 164.16V162.56H0V164.16V165.76H148V164.16ZM0 164.16H1.6V123.64H0H-1.6V164.16H0ZM0 123.64H1.6V102.86H0H-1.6V123.64H0ZM0 102.86H1.6V61.3003H0H-1.6V102.86H0ZM0 61.3003H1.6V40.5205H0H-1.6V61.3003H0ZM0 40.5205H1.6V0H0H-1.6V40.5205H0Z%22 fill=%22%23F7F4EB%22 fill-opacity=%220.811765%22 mask=%22url(%23stroke0_0_18)%22/%3E %3C/svg%3E";
+function platzBildGross(o){
+  const sport = o.sportarten[0] || "Fußball";
+  return `<div class="dbild" aria-hidden="true">${sport === "Fußball"
+    ? `<img src="${FELD_GROSS}" alt="" width="296" height="164"><span class="dbild-ball"></span>`
+    : platzBild(o)}<span class="dbild-tag">Spielfeldillustration · kein Foto</span></div>`;
+}
+
+/* "Darf ich hier spielen?" – Karte (Laptop) und Liste (Handy) */
+function legendeHtml(){
+  return `<div class="legende-titel">Darf ich hier spielen?</div>
+    <div class="legende-marken"><span class="marke frei">frei zugänglich</span><span class="marke absprache">nach Absprache</span><span class="marke verein">Vereinsanlage</span><span class="marke zu">nicht zugänglich</span></div>
+    <div class="legende-notiz">Graue Punkte: Zugang noch ungeklärt. Bündel zeigen Anzahl und Zugänge getrennt.</div>`;
 }
 
 /* Linien-Sporticons aus dem Markensystem (CSS-Klassen .ic-…) */
@@ -1877,12 +2263,13 @@ function ansichtListe(nurListe){
     const bs = bespielbarkeit(o);
     const anzMeld = Z.meldungen[o.id] || 0;
     const km = entfernungKm(Z.position,o);
-    return `<button class="zeile" data-ort="${o.id}" style="--streifen:${farbe(o)}">
+    const gew = String(o.id) === String(Z.auswahlId) ? " gewaehlt" : "";
+    return `<button class="zeile${gew}" data-ort="${o.id}">
       ${platzBild(o)}
       <span class="zt">
         <span class="zname">${esc(o.name)}</span>
-        <span class="zsub">${esc(o.sportarten.join(" · "))} · ${esc(o.untergrund)}</span>
-        <span class="marke ${cls}">${text}</span>${v ? `
+        <span class="zsub">${esc(o.sportarten.join(" · "))} · ${esc(o.untergrund)} · ${entfText(km)}</span>
+        <span class="zmarken"><span class="marke ${cls}">${text}</span>${v ? `
         <span class="marke verein">${v[0]}</span>` : ``}${bs ? `
         <span class="marke boden ${bs[0]}">${bs[1]}</span>` : ``}${anzMeld >= 3 ? `
         <span class="marke warnung">${anzMeld}× weggeschickt</span>` : ``}${
@@ -1891,14 +2278,12 @@ function ansichtListe(nurListe){
           (Z.aktiv[o.id] || 0) >= 2 ? `
         <span class="marke live"><span class="puls" aria-hidden="true"></span>${Z.aktiv[o.id]} spielen gerade</span>` : ``}${
           !belegt(o) && nutzerBestaetigt(o) ? `
-        <span class="marke bestaetigt">✓ von Nutzern bestätigt</span>` : ``}
+        <span class="marke bestaetigt">✓ von Nutzern bestätigt</span>` : ``}</span>
+        <span class="zhinweis">${belegt(o) ? `Belegt: ${esc(o.bestaetigtDurch)}` : `Zugang vor Ort prüfen`}</span>
       </span>
-      <span class="zrechts">
-        <span class="zdist">${km < 0.1 ? "0" : (km < 10 ? km.toFixed(1).replace(".",",") : Math.round(km))}<small>${km < 0.1 ? "hier" : "km"}</small></span>
-        <span class="stern${GEMERKT.has(o.id) ? " an" : ""}" data-merken="${o.id}"
-              role="button" tabindex="0"
-              aria-label="${GEMERKT.has(o.id) ? "Aus Merkliste entfernen" : "Merken"}">★</span>
-      </span>
+      <span class="stern${GEMERKT.has(o.id) ? " an" : ""}" data-merken="${o.id}"
+            role="button" tabindex="0"
+            aria-label="${GEMERKT.has(o.id) ? "Aus Merkliste entfernen" : "Merken"}">★</span>
     </button>`;
   }).join("") : Z.suche.trim() ? `<div class="leer"><b>Nichts gefunden für „${esc(Z.suche.trim())}“.</b><br>
       Anders schreiben, Filter lockern – oder den Platz selbst eintragen.</div>`
@@ -1927,13 +2312,19 @@ function ansichtListe(nurListe){
   orte.slice(0, 6).forEach(adresseErgaenzen);
 
   const anzahl = alleOrte.length;
-  const ueberschrift = Z.suche.trim()
-    ? `${anzahl} Treffer`
-    : Z.bereich ? `${anzahl} ${anzahl === 1 ? "Platz" : "Plätze"} im Kartenausschnitt`
-    : anzahl > 150 ? `${anzahl.toLocaleString("de-DE")} Plätze · die nächsten zuerst`
-    : `${anzahl} ${anzahl === 1 ? "Platz" : "Plätze"} in deiner Nähe`;
+  const titel = Z.suche.trim()
+    ? `${anzahl.toLocaleString("de-DE")} Treffer`
+    : `${anzahl.toLocaleString("de-DE")} ${anzahl === 1 ? "Ort" : "Orte"} für dein Spiel`;
+  const ueberschrift = Z.suche.trim() ? `für „${Z.suche.trim()}“`
+    : Z.bereich ? `im Kartenausschnitt`
+    : anzahl > 150 ? `die nächsten zuerst`
+    : Z.positionEcht ? `in deiner Nähe` : `rund um München-Mitte`;
+  const SORT_TEXT = { entfernung:"Distanz ↑", zustand:"Zustand ↓", geprueft:"Zuletzt geprüft" };
 
-  const rolleInhalt = `${Z.suche.trim() ? `` : losLeiste()}<div class="anzahl">${ueberschrift}</div>${zeilen}${alleOrte.length > orte.length
+  const rolleInhalt = `${Z.suche.trim() ? `` : losLeiste()}<div class="liste-kopf"><div>
+      <h2 class="liste-titel">${titel}</h2><div class="anzahl">${esc(ueberschrift)}</div></div>
+      <button class="sort-knopf" data-sortzyklus="1" title="Sortierung wechseln">${SORT_TEXT[Z.sortierung] || "Distanz ↑"}</button></div>
+    <div class="legende in-liste">${legendeHtml()}</div>${zeilen}${alleOrte.length > orte.length
       ? `<div class="leer">… und ${(alleOrte.length - orte.length).toLocaleString("de-DE")} weitere.<br>
          Filter setzen, suchen oder auf der Karte zoomen.</div>` : ``}${listenende}`;
 
@@ -1947,35 +2338,32 @@ function ansichtListe(nurListe){
     return;
   }
 
+  const zugangText = Z.nurBelegt ? "sicher" : Z.nurFrei ? "frei" : "alle";
   seite.innerHTML = `
+    <div class="leiste-titel"><h2>Draußen spielen.</h2><p>wo darf ich spielen?</p></div>
     <div class="suche">
+      <span class="ui-ic i-search suche-lupe" aria-hidden="true"></span>
       <svg class="suche-logo pf-marke" width="18" height="18" viewBox="0 0 38 38" aria-hidden="true" style="color:var(--gruen)"><path fill-rule="evenodd" d="M0 0H23.75C32.6562 0 38 5.34375 38 14.25V16.625C38 24.9375 32.6562 29.6875 23.75 29.6875H11.875V38H0V0ZM11.875 7.125H28.5V13.0625H17.8125V16.625H26.125V22.5625H17.8125V26.125H11.875V7.125Z"/></svg>
       <input id="suchfeld" type="search" enterkeyhint="search" autocomplete="off"
         placeholder="Platz, Ort oder Sportart suchen" value="${esc(Z.suche)}"
         aria-label="Platz, Ort oder Sportart suchen">
-      ${Z.suche ? `<button class="suche-weg" data-suchweg="1" aria-label="Suche löschen">✕</button>` : ``}
+      ${Z.suche ? `<button class="suche-weg" data-suchweg="1" aria-label="Suche löschen">✕</button>`
+        : `<button class="suche-ort" data-standort="1" aria-label="Zu meinem Standort" title="Zu meinem Standort"><span class="ui-ic i-locate" aria-hidden="true"></span></button>`}
     </div>
     <div class="filter">
       <div class="filtertitel">Sportart</div>
       <div class="chips">${sportChips}</div>
       <div class="filtertitel" style="margin-top:12px">Zugang</div>
       <div class="chips">
-        <button class="chip" data-nurfrei="0" aria-pressed="${!Z.nurFrei}">Alles zeigen</button>
-        <button class="chip" data-nurfrei="1" aria-pressed="${Z.nurFrei}">Nur frei zugänglich</button>
-        <button class="chip" data-belegt="1" aria-pressed="${Z.nurBelegt}">Nur wo ich sicher darf</button>
         <button class="chip" data-nurlos="${Z.nurLos ? "0" : "1"}" aria-pressed="${!!Z.nurLos}">👥 Hier ist was los</button>
+        <button class="chip zyklus erster" data-zugangzyklus="1" aria-pressed="${zugangText !== "alle"}"
+          title="Tippen wechselt: alle · frei zugänglich · sicher (Zugang belegt)">Zugang · ${zugangText}</button>
+        <button class="chip zyklus" data-umkreiszyklus="1" aria-pressed="${!!Z.maxKm}"
+          title="Tippen wechselt den Umkreis${Z.positionEcht ? "" : " (gemessen ab München-Mitte)"}">Umkreis · ${Z.maxKm ? Z.maxKm + " km" : "alle"}</button>
         <button class="chip mehr" data-mehr="${Z.filterOffen ? "0" : "1"}"
           aria-pressed="${Z.filterOffen}">${Z.filterOffen ? "Weniger" : "Mehr Filter"}</button>
       </div>
       ${Z.filterOffen ? `
-      <div class="filtertitel" style="margin-top:12px">Entfernung</div>
-      ${Z.positionEcht ? `` : `<div class="notiz-klein">Gemessen ab München-Mitte – Standort nicht freigegeben.</div>`}
-      <div class="chips">
-        ${[[0,"Alle"],[2,"bis 2 km"],[5,"bis 5 km"],[10,"bis 10 km"],[25,"bis 25 km"]]
-          .map(([km,text]) =>
-            `<button class="chip" data-km="${km}"
-               aria-pressed="${(Z.maxKm || 0) === km}">${text}</button>`).join("")}
-      </div>
       <div class="filtertitel" style="margin-top:12px">Sortieren</div>
       <div class="chips">
         ${[["entfernung","Entfernung"],["zustand","Zustand"],["geprueft","Zuletzt geprüft"]]
@@ -2008,7 +2396,7 @@ function ansichtListe(nurListe){
   /* Laptop: Suche und Filter oben über die ganze Breite, damit die Liste
      darunter mehr Höhe bekommt. Die Klicks laufen über document, deshalb
      funktionieren sie dort genauso. */
-  if (breit.matches) leiste.append(seite.querySelector(".suche"), seite.querySelector(".filter"));
+  if (breit.matches) leiste.append(seite.querySelector(".leiste-titel"), seite.querySelector(".suche"), seite.querySelector(".filter"));
 }
 
 /* Suchfeld: tippen filtert sofort, Enter zeigt die Treffer auf der Karte. */
@@ -2255,14 +2643,16 @@ function liveBlock(o){
   const ich = hierHier(o.id);
   const bis = ich ? new Date(meinCheckin().bis)
     .toLocaleTimeString("de-DE", { hour:"2-digit", minute:"2-digit" }) : "";
-  const text = ich && n >= 2 ? `<b>Du und ${n - 1} ${n - 1 === 1 ? "weiterer" : "weitere"} seid gerade hier</b>`
-    : ich ? `<span><b>Du bist hier eingecheckt</b><small>bis ${bis} Uhr · andere sehen es, sobald ihr zu zweit seid</small></span>`
-    : n >= 2 ? `<b>${n} spielen gerade hier</b>`
-    : `<span><b>Bist du gerade hier?</b><small>Zeig anderen, dass hier gespielt wird. Anonym, ohne Namen, gilt 2 Stunden.</small></span>`;
-  return `<div class="live-kasten">
-      <span class="live-text">${n >= 2 || ich ? `<span class="puls" aria-hidden="true"></span>` : ``}${text}</span>
-      ${ich ? `<button class="inline-knopf" data-hierweg="1">Wieder weg</button>`
-            : `<button class="inline-knopf" data-hier="${o.id}">${n >= 2 ? "Ich bin auch hier" : "Ich bin gerade hier"}</button>`}
+  const text = ich && n >= 2 ? `Du und ${n - 1} ${n - 1 === 1 ? "weiterer" : "weitere"} seid gerade hier`
+    : ich ? `Du bist hier eingecheckt bis ${bis} Uhr`
+    : n >= 2 ? `${n} spielen gerade hier` : ``;
+  return `<div class="live2">
+      ${text ? `<div class="live-text"><span class="puls" aria-hidden="true"></span><b>${text}</b></div>` : ``}
+      ${ich ? `<button class="knopf zweit voll" data-hierweg="1">Wieder weg</button>`
+            : `<button class="knopf voll" data-hier="${o.id}">${n >= 2 ? "Ich bin auch hier" : "Ich bin gerade hier"}</button>`}
+      <p class="live-notiz"><span class="ui-ic i-lock" aria-hidden="true"></span>
+        <span>Anonym, ohne Namen, gilt 2 Stunden. Andere sehen nur eine Zahl, und erst ab zwei Personen.
+        Dein Standort prüft nur, ob du am Platz bist, und wird niemandem gezeigt.</span></p>
     </div>`;
 }
 
@@ -2292,29 +2682,53 @@ function ansichtDetail(){
   adresseErgaenzen(o);
   const statusIcon = statusArt === "unklar" ? "?" : "";
 
+  const gemerkt = GEMERKT.has(o.id);
+  const quelle = o.bestaetigtDurch === "Lage (OSM)" ? "Lage in OpenStreetMap, nicht amtlich bestätigt"
+    : o.bestaetigtDurch === "nur vermutet" ? "Vermutung, nicht belegt" : o.bestaetigtDurch;
   seite.innerHTML = `
-    <div class="dkopf">
-      <button class="zurueck" data-gehe="liste">← Liste</button>
-      <div class="dname">${esc(o.name)}</div>
-      <div class="dort">${esc(o.ort)} · ${entfText(entfernungKm(Z.position,o))} entfernt</div>
-      ${verein ? `<span class="marke verein">${verein[0]}</span>` : ``}
+    <div class="dkopf dkopf2">
+      <button class="zurueck" data-gehe="liste"><span class="ui-ic i-arrowleft" aria-hidden="true"></span>Entdecken</button>
+      <button class="merk-knopf${gemerkt ? " an" : ""}" data-merken="${o.id}"
+        aria-label="${gemerkt ? "Aus Merkliste entfernen" : "Merken"}" title="${gemerkt ? "Gemerkt" : "Merken"}"><span class="ui-ic i-bookmark" aria-hidden="true"></span></button>
     </div>
     <div class="rolle">
-      <!-- Das Wichtigste zuerst: Darf ich hier spielen, und wann? -->
-      <div class="status ${statusArt}">
-        <span class="status-icon${statusIcon ? "" : " mit-symbol"}" aria-hidden="true">${statusIcon}</span>
-        <span class="status-text"><b>${statusText.charAt(0).toUpperCase() + statusText.slice(1)}</b>
-          <span>${o.bestaetigtDurch === "Lage (OSM)" ? "nach Lage in OpenStreetMap" : esc(o.zugang)}${o.zeiten && o.zeiten !== "unbekannt" ? ` · ${esc(o.zeiten)}` : ``}</span></span>
+      ${platzBildGross(o)}
+      <div class="dname">${esc(o.name)}</div>
+      <div class="dort">${esc(o.ort)}</div>
+      <!-- Das Wichtigste zuerst: Darf ich hier spielen? -->
+      <div class="dmarken"><span class="marke ${statusArt}">${statusText}</span>${
+        verein ? `<span class="marke verein">${verein[0]}</span>` : ``}</div>
+      <p class="dhinweis">Zugang vor Ort prüfen. Dieser Eintrag ersetzt keine Nutzungserlaubnis.</p>
+      <div class="deigen">
+        <div>${sportIcon(o.sportarten[0]) || `<span class="ui-ic i-map" aria-hidden="true"></span>`}<b>${esc(o.sportarten.join(", "))}</b><small>Sportart</small></div>
+        <div><span class="ui-ic i-layers" aria-hidden="true"></span><b>${esc(o.untergrund)}</b><small>Belag</small></div>
+        <div><span class="ui-ic i-route" aria-hidden="true"></span><b>${entfText(entfernungKm(Z.position,o))}</b><small>Entfernung</small></div>
+      </div>
+      <div class="gut-zu-wissen">
+        <h3>Gut zu wissen</h3>
+        <div class="rubrik">Allgemeine Hinweise</div>
+        <ul class="regeln">
+          <li><span class="ui-ic i-regelcheck" aria-hidden="true"></span>Bitte nimm Rücksicht auf die Nachbarschaft.</li>
+          <li><span class="ui-ic i-regelcheck" aria-hidden="true"></span>Halte Zugänge frei und nimm deinen Müll wieder mit.</li>
+          <li><span class="ui-ic i-regelcheck" aria-hidden="true"></span>Beachte Beschilderung und mögliche Sperrungen vor Ort.</li>
+        </ul>
+      </div>
+      <div class="herkunft">
+        <h4><span class="ui-ic i-info" aria-hidden="true"></span>Woher stammen die Angaben?</h4>
+        <p>Quelle: ${esc(quelle)}.<br>
+        Zugang: ${esc(o.zugang)}${o.zeiten && o.zeiten !== "unbekannt" ? ` · ${esc(o.zeiten)}` : ` · keine bestätigten Zeiten`}.<br>
+        Aktualität: ${o.geprueft ? `zuletzt geprüft am ${o.geprueft.split("-").reverse().join(".")}` : `nicht vor Ort geprüft`}.
+        Bitte gleiche die Angaben mit der Beschilderung ab.</p>
       </div>
       ${liveBlock(o)}
-      <div class="schnell">
+      <button class="knopf zweit voll melden-knopf" data-gehe="melden">Angaben melden</button>
+      <div class="schnell zwei">
         <button data-route="${o.id}"><span aria-hidden="true">➜</span>Route</button>
-        <button data-merken="${o.id}" class="${GEMERKT.has(o.id) ? "an" : ""}"><span aria-hidden="true">${GEMERKT.has(o.id) ? "★" : "☆"}</span>${GEMERKT.has(o.id) ? "Gemerkt" : "Merken"}</button>
         <button data-teilen="${o.id}"><span aria-hidden="true">↗</span>Teilen</button>
-        <button data-gehe="melden"><span aria-hidden="true">⚑</span>Melden</button>
       </div>
       ${spieleBlock(o)}
       ${tippsBlock(o)}
+      <h3 class="dteil-titel">Alle Angaben</h3>
       <table class="daten">
         <tr class="geschuetzt"><th>Zugang</th><td><b>${esc(o.zugang)}</b></td></tr>
         <tr class="geschuetzt"><th>Erlaubte Zeiten</th><td>${esc(o.zeiten)}</td></tr>
@@ -2394,6 +2808,9 @@ function ansichtDetail(){
       </div>` : ``}
       ${offen ? `<div class="abschnitt"><h3>Offene Vorschläge</h3>
         <p>${offen} Änderung${offen>1?"en":""} wartet auf Freigabe.</p></div>` : ``}
+      <div class="kinderschutz"><span class="ui-ic i-shieldcheck" aria-hidden="true"></span>
+        <div><b>Keine Profilbilder. Kein Chat.</b>
+        <p>Du entdeckst Orte, keine Personen. Wer gerade spielt, erscheint nur als Zahl, ohne Namen.</p></div></div>
     </div>
     <div class="fuss">
       <button class="knopf" data-gehe="bearbeiten">Angaben ergänzen</button>
@@ -2773,6 +3190,11 @@ function zeichne(){
   document.body.classList.toggle("vollseite", Z.ansicht === "ueber" || Z.ansicht === "vereine");
   document.querySelectorAll("[data-nav]").forEach(b =>
     b.toggleAttribute("aria-current", b.dataset.nav === (Z.ansicht === "vereine" || Z.ansicht === "ueber" ? Z.ansicht : "liste")));
+  document.body.classList.toggle("seite-vereine", Z.ansicht === "vereine");
+  const unten = Z.ansicht === "rechtliches" ? "privat"
+    : Z.ansicht === "liste" && Z.nurGemerkt ? "merkliste"
+    : Z.ansicht === "liste" || Z.ansicht === "detail" ? "entdecken" : "";
+  document.querySelectorAll("[data-unten]").forEach(b => b.toggleAttribute("aria-current", b.dataset.unten === unten));
   if (document.body.className !== klasseVorher) setTimeout(() => karte.invalidateSize(), 0);
 
   ({ liste:ansichtListe, detail:ansichtDetail, bearbeiten:ansichtBearbeiten,
@@ -4479,49 +4901,159 @@ function ansichtUeber(){
 
 function ansichtVereine(){
   const z = kennzahlen();
+  const mail = `mailto:${esc(RECHT.email)}?subject=platzfrei%20f%C3%BCr%20Vereine`;
+  const marke = `<svg class="pf-marke" width="26" height="26" viewBox="0 0 38 38" aria-hidden="true"><path fill-rule="evenodd" d="M0 0H23.75C32.6562 0 38 5.34375 38 14.25V16.625C38 24.9375 32.6562 29.6875 23.75 29.6875H11.875V38H0V0ZM11.875 7.125H28.5V13.0625H17.8125V16.625H26.125V22.5625H17.8125V26.125H11.875V7.125Z"/></svg>`;
+  const zeile = (tag, zeit, art, text, regel) =>
+    `<tr><td>${tag}</td><td>${zeit}</td><td><span class="marke ${art}">${text}</span></td><td>${regel}</td></tr>`;
   seite.innerHTML = `
-    <div class="rolle">
-      <div class="held">
-        <div class="ueber-marke">Für Vereine</div>
-        <h2>Euer Platz. <em>Eure Zeiten.</em></h2>
-        <p>Kinder wollen kicken – oft genau auf eurem Platz. Mit Platzfrei seht ihr,
-        dass klar ist, wann trainiert wird und wann der Platz frei ist. Das spart Ärger
-        und bringt euch den Nachwuchs von nebenan.</p>
-        <div class="reihe">
-          <button class="knopf" data-gehe="liste" data-vereinsuche="1">Euren Platz finden</button>
-          <a class="knopf zweit" href="mailto:${esc(RECHT.email)}?subject=Platzfrei%20f%C3%BCr%20Vereine">Kontakt aufnehmen</a>
+    <div class="rolle vf">
+      <section class="vf-teil vf-held"><div class="vf-innen vf-zwei">
+        <div>
+          <span class="rubrik">Für Vereine, Verbände und Gemeinden</span>
+          <h1>Mehr Spiel.<br>Klare Zuständigkeit.</h1>
+          <p>Macht sichtbar, wann und unter welchen Regeln eure Plätze genutzt werden dürfen.
+          Ihr tragt eigene Platzzeiten ein und behaltet die Entscheidung. platzfrei macht eure
+          Angaben verständlich.</p>
+          <div class="vf-knoepfe">
+            <a class="knopf" href="${mail}">Gespräch vereinbaren</a>
+            <button class="knopf zweit" data-scrollzu="vf-ablauf">So funktioniert’s</button>
+          </div>
+          <small>Die App erteilt selbst keine Nutzungserlaubnis. Zuständig bleibt, wer über den Platz verfügen darf.<br>
+          Heute auf der Karte: ${zahlText(z.plaetze)} Plätze, davon ${zahlText(z.verein)} ${z.verein === 1 ? "Vereinsanlage" : "Vereinsanlagen"}.</small>
         </div>
-      </div>
-      <div class="ueber-teil">
-        <div class="zahlen">
-          <div class="zahl lila"><b>${zahlText(z.verein)}</b><small>Vereinsanlagen auf der Karte</small></div>
-          <div class="zahl gruen"><b>${zahlText(z.vereinZeiten)}</b><small>Plätze mit Angaben direkt vom Verein</small></div>
+        <div class="vf-karte">
+          <div class="vf-karte-kopf"><span>Euer Platz. Eure Regeln.</span><small>Beispiel · Entwurf</small></div>
+          <img src="data:image/svg+xml,%3Csvg width=%22536%22 height=%22240%22 viewBox=%220 0 536 240%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E %3Cg id=%22Illustrierte Spielfl%26%23195;%26%23164;che%22%3E %3Crect width=%22536%22 height=%22240%22 rx=%2220%22 fill=%22%23164AF2%22/%3E %3Cmask id=%22stroke0_0_8%22 fill=%22white%22%3E %3Cpath d=%22M53.6 28.8H268H482.4V73.8228V96.9114V143.089V166.177V211.2H268H53.6V166.177V143.089V96.9114V73.8228V28.8Z%22/%3E %3C/mask%3E %3Cpath id=%22Spielfeldlinien%22 d=%22M238.493 96.3271L237.993 95.7031V95.7031L238.493 96.3271ZM297.507 96.3271L297.006 96.9511V96.9511L297.507 96.3271ZM297.507 143.673L297.006 143.049V143.049L297.507 143.673ZM238.493 143.673L237.993 144.297V144.297L238.493 143.673ZM121.23 73.8228H122.03V73.0228H121.23V73.8228ZM121.23 166.177V166.977H122.03V166.177H121.23ZM414.77 73.8228V73.0228H413.97V73.8228H414.77ZM414.77 166.177H413.97V166.977H414.77V166.177ZM78.0617 96.9114H78.8617V96.1114H78.0617V96.9114ZM78.0617 143.089V143.889H78.8617V143.089H78.0617ZM457.938 96.9114V96.1114H457.138V96.9114H457.938ZM457.938 143.089H457.138V143.889H457.938V143.089ZM268 28.8H267.2V86.5215H268H268.8V28.8H268ZM268 86.5215H267.2V153.478H268H268.8V86.5215H268ZM268 153.478H267.2V211.2H268H268.8V153.478H268ZM226.271 120H227.071C227.071 111.397 231.33 103.1 238.994 96.9511L238.493 96.3271L237.993 95.7031C230.005 102.111 225.471 110.845 225.471 120H226.271ZM238.493 96.3271L238.994 96.9511C246.663 90.7985 257.095 87.3215 268 87.3215V86.5215V85.7215C256.771 85.7215 245.975 89.2989 237.993 95.7031L238.493 96.3271ZM268 86.5215V87.3215C278.905 87.3215 289.337 90.7985 297.006 96.9511L297.507 96.3271L298.007 95.7031C290.025 89.2989 279.229 85.7215 268 85.7215V86.5215ZM297.507 96.3271L297.006 96.9511C304.67 103.1 308.929 111.397 308.929 120H309.729H310.529C310.529 110.845 305.994 102.111 298.007 95.7031L297.507 96.3271ZM309.729 120H308.929C308.929 128.603 304.67 136.9 297.006 143.049L297.507 143.673L298.007 144.297C305.994 137.889 310.529 129.155 310.529 120H309.729ZM297.507 143.673L297.006 143.049C289.337 149.201 278.905 152.678 268 152.678V153.478V154.278C279.229 154.278 290.025 150.701 298.007 144.297L297.507 143.673ZM268 153.478V152.678C257.095 152.678 246.663 149.201 238.994 143.049L238.493 143.673L237.993 144.297C245.975 150.701 256.771 154.278 268 154.278V153.478ZM238.493 143.673L238.994 143.049C231.33 136.9 227.071 128.603 227.071 120H226.271H225.471C225.471 129.155 230.005 137.889 237.993 144.297L238.493 143.673ZM53.6 73.8228V74.6228H121.23V73.8228V73.0228H53.6V73.8228ZM121.23 73.8228H120.43V166.177H121.23H122.03V73.8228H121.23ZM121.23 166.177V165.377H53.6V166.177V166.977H121.23V166.177ZM482.4 73.8228V73.0228H414.77V73.8228V74.6228H482.4V73.8228ZM414.77 73.8228H413.97V166.177H414.77H415.57V73.8228H414.77ZM414.77 166.177V166.977H482.4V166.177V165.377H414.77V166.177ZM53.6 96.9114V97.7114H78.0617V96.9114V96.1114H53.6V96.9114ZM78.0617 96.9114H77.2617V143.089H78.0617H78.8617V96.9114H78.0617ZM78.0617 143.089V142.289H53.6V143.089V143.889H78.0617V143.089ZM482.4 96.9114V96.1114H457.938V96.9114V97.7114H482.4V96.9114ZM457.938 96.9114H457.138V143.089H457.938H458.738V96.9114H457.938ZM457.938 143.089V143.889H482.4V143.089V142.289H457.938V143.089ZM53.6 28.8V27.2H52V28.8H53.6ZM482.4 28.8H484V27.2H482.4V28.8ZM482.4 211.2V212.8H484V211.2H482.4ZM53.6 211.2H52V212.8H53.6V211.2ZM53.6 28.8V30.4H268V28.8V27.2H53.6V28.8ZM268 28.8V30.4H482.4V28.8V27.2H268V28.8ZM482.4 28.8H480.8V73.8228H482.4H484V28.8H482.4ZM482.4 73.8228H480.8V96.9114H482.4H484V73.8228H482.4ZM482.4 96.9114H480.8V143.089H482.4H484V96.9114H482.4ZM482.4 143.089H480.8V166.177H482.4H484V143.089H482.4ZM482.4 166.177H480.8V211.2H482.4H484V166.177H482.4ZM482.4 211.2V209.6H268V211.2V212.8H482.4V211.2ZM268 211.2V209.6H53.6V211.2V212.8H268V211.2ZM53.6 211.2H55.2V166.177H53.6H52V211.2H53.6ZM53.6 166.177H55.2V143.089H53.6H52V166.177H53.6ZM53.6 143.089H55.2V96.9114H53.6H52V143.089H53.6ZM53.6 96.9114H55.2V73.8228H53.6H52V96.9114H53.6ZM53.6 73.8228H55.2V28.8H53.6H52V73.8228H53.6Z%22 fill=%22%23F7F4EB%22 fill-opacity=%220.811765%22 mask=%22url(%23stroke0_0_8)%22/%3E %3Ccircle id=%22Spielimpuls%22 cx=%22383.6%22 cy=%22154.8%22 r=%228.4%22 fill=%22%23E2EF83%22/%3E %3C/g%3E %3C/svg%3E" alt="Illustriertes Spielfeld" width="536" height="240">
+          <div class="vf-karte-zeile"><div><b>Bolzplatz Würmtal</b><small>Fußball · Kunstrasen · 0,8 km</small></div>
+            <span class="marke frei">frei zugänglich</span></div>
+          <div class="vf-notiz"><span class="ui-ic i-fileclock" aria-hidden="true"></span>
+            <span>Platzzeiten vorbereitet. Noch nicht freigegeben. Die zuständige Stelle prüft Regeln
+            und Zugang vor einer Veröffentlichung.</span></div>
+          <small style="display:block;margin-top:12px">Beispielansicht · Angaben vor Ort prüfen</small>
         </div>
-      </div>
-      <div class="ueber-teil">
-        <h3>Was ihr davon habt</h3>
-        <div class="schritte">
-          <div class="schritt"><span class="nr">1</span><b>Klare Zeiten</b>
-            <p>Tragt ein, wann Training ist. Die App zeigt dann genau, wann der Platz für alle offen ist und wann nicht.</p></div>
-          <div class="schritt"><span class="nr">2</span><b>Weniger Ärger</b>
-            <p>Wer nachschaut, weiß Bescheid. Platzwart und Trainer müssen niemanden mehr wegschicken.</p></div>
-          <div class="schritt"><span class="nr">3</span><b>Nachwuchs gewinnen</b>
-            <p>Die Kinder, die auf eurem Platz bolzen, sind eure Spieler von morgen. Platzfrei zeigt ihnen, wer der Verein ist.</p></div>
+      </div></section>
+
+      <section class="vf-teil hell"><div class="vf-innen">
+        <span class="rubrik">Weniger Unklarheit. Mehr Orientierung.</span>
+        <h2>Öffnen, was möglich ist. Schützen, was bleiben muss.</h2>
+        <div class="vf-drei">
+          <div class="vf-kachel"><span class="ui-ic i-kalender" aria-hidden="true"></span><h3>Eigene Platzzeiten eintragen</h3>
+            <p>Tragt freie Zeitfenster ein und grenzt Training, Spielbetrieb und externe Nutzung klar voneinander ab. Änderungen bleiben in eurer Hand.</p></div>
+          <div class="vf-kachel"><span class="ui-ic i-listchecks" aria-hidden="true"></span><h3>Regeln transparent machen</h3>
+            <p>Zeigt Belag, Sportarten und Nutzungsregeln direkt am Platz. So können Kinder, Jugendliche und Eltern besser einschätzen, was sie erwartet.</p></div>
+          <div class="vf-kachel"><span class="ui-ic i-shieldcheck" aria-hidden="true"></span><h3>Zuständigkeit behalten</h3>
+            <p>Benennt die verantwortliche Stelle. Ein veröffentlichter Eintrag macht eure Angaben sichtbar, überträgt aber keine Entscheidungsbefugnis an die App.</p></div>
         </div>
-      </div>
-      <div class="ueber-teil">
-        <h3>So tragt ihr eure Zeiten ein</h3>
-        <div class="abschnitt"><p>1. Euren Platz suchen und öffnen.<br>
-          2. „Bist du vom Verein? Platzzeiten eintragen“ antippen.<br>
-          3. Trainingszeiten im Wochenraster markieren und absenden.</p>
-          <p>Wir prüfen jede Angabe, bevor sie erscheint. Kostenlos, ohne Konto.</p></div>
-      </div>
-      <div class="ueber-teil">
-        <h3>Für Verbände und Gemeinden</h3>
-        <p>Wir arbeiten gern mit Verbänden und Gemeinden zusammen, um Plätze und Zeiten
-        verlässlich einzutragen. Schreibt uns an ${esc(RECHT.email)}.</p>
-      </div>
-      ${ueberFuss()}
+      </div></section>
+
+      <section class="vf-teil"><div class="vf-innen vf-zwei" style="grid-template-columns:1fr 1.6fr">
+        <div>
+          <span class="rubrik">Ein Blick in die Verwaltung</span>
+          <h2>Eure Zeiten. Verständlich für alle.</h2>
+          <p>Ein freies Zeitfenster ist nur dann hilfreich, wenn auch der Zugang klar ist. Verbindet jede Zeit mit einem Status und einer kurzen Regel.</p>
+          <p>Sperrungen und Änderungen werden von der zuständigen Stelle gepflegt. Unklare Angaben sollten vor einer Freigabe geklärt werden – nicht erst am Spielfeldrand.</p>
+          <small>Alle dargestellten Zeiten sind Beispiele, keine verbindlichen Öffnungszeiten.</small>
+        </div>
+        <div class="vf-verwaltung">
+          <div class="vf-verwaltung-kopf"><div><b>Bolzplatz Würmtal</b><small>Beispielverwaltung · Entwurf · nicht veröffentlicht</small></div></div>
+          <div class="vf-tabs"><span>Platzzeiten</span><span>Regeln</span><span>Freigabe</span></div>
+          <table class="vf-tabelle">
+            <tr><th>Tag</th><th>Zeitfenster</th><th>Zugang</th><th>Regel</th></tr>
+            ${zeile("Mittwoch","16:00–18:00","frei","frei zugänglich","Freies Spielen")}
+            ${zeile("Freitag","16:00–18:00","absprache","nach Absprache","Vorher Kontakt aufnehmen")}
+            ${zeile("Samstag","10:00–12:00","verein","Vereinsanlage","Vereinstraining")}
+            ${zeile("Sonntag","ganztägig","zu","nicht zugänglich","Platzpflege")}
+          </table>
+          <div class="vf-verwaltung-fuss"><small>Echte Zeiten tragt ihr direkt am Platz ein. Wir prüfen jede Angabe, bevor sie erscheint.</small>
+            <button class="knopf" data-gehe="liste" data-vereinsuche="1">Euren Platz finden</button></div>
+        </div>
+      </div></section>
+
+      <section class="vf-teil dunkel"><div class="vf-innen">
+        <span class="rubrik">Gemeinsam klarer</span>
+        <h2>Drei Perspektiven. Eine verlässliche Angabe.</h2>
+        <p>Für einzelne Vereine ebenso gedacht wie für Gemeinden und Verbände. Zuständigkeiten werden sichtbar, nicht vermischt. Eine Partnerschaft mit einem Verband wird damit nicht behauptet.</p>
+        <div class="vf-rollen">
+          <div><h3>Verein</h3><p>Pflegt die eigenen Platzzeiten, beschreibt Nutzungsregeln und benennt eine verantwortliche Kontaktstelle. Entscheidet im Rahmen seiner Berechtigung.</p></div>
+          <div><h3>Verband</h3><p>Kann Vereine bei einheitlichen Angaben und verständlichen Regeln unterstützen. Die Entscheidung über einzelne Plätze bleibt bei den Berechtigten.</p></div>
+          <div><h3>Gemeinde</h3><p>Kann Angaben zu kommunalen Flächen prüfen und bestätigen sowie die zuständige Stelle benennen. Eigentum und Nutzungsrechte werden dabei berücksichtigt.</p></div>
+        </div>
+      </div></section>
+
+      <section class="vf-teil hell"><div class="vf-innen vf-zwei">
+        <div>
+          <span class="rubrik">Vertrauen braucht Herkunft</span>
+          <h2>Nicht einfach ein Häkchen. Eine nachvollziehbare Quelle.</h2>
+          <p>Zu jeder Zugangsangabe gehören Herkunft und Stand. Ein Vereinseintrag ist nicht automatisch eine kommunale Bestätigung. Wenn eine Prüfung fehlt, wird das verständlich gekennzeichnet.</p>
+        </div>
+        <div class="vf-schritte-box">
+          <div class="vf-schritt"><span class="ui-ic i-filepen" aria-hidden="true"></span><div><b>Eintragen</b><p>Platz, Regeln und eigene Platzzeiten im Entwurf ergänzen.</p></div></div>
+          <div class="vf-schritt"><span class="ui-ic i-clipboard" aria-hidden="true"></span><div><b>Prüfen und freigeben</b><p>Die berechtigte Stelle prüft den Zugang und übernimmt die Verantwortung für ihre Angaben. Gemeinden können kommunale Angaben bestätigen.</p></div></div>
+          <div class="vf-schritt"><span class="ui-ic i-history" aria-hidden="true"></span><div><b>Herkunft sichtbar halten</b><p>Quelle, Stand und offene Fragen stehen direkt am Platz. Veraltete Angaben können gemeldet werden.</p></div></div>
+        </div>
+      </div></section>
+
+      <section class="vf-teil"><div class="vf-innen vf-zwei">
+        <div>
+          <span class="rubrik">Orte verbinden. Kinder schützen.</span>
+          <h2>Sportorte entdecken. Keine Menschen verfolgen.</h2>
+          <p>platzfrei richtet sich auch an Kinder und Jugendliche von 10 bis 17 Jahren. Deshalb gehört Privatsphäre zur Produktlogik – nicht ins Kleingedruckte.</p>
+          <p>Es gibt keine Profile, keine Personenlisten und keinen Chat. Wer „Ich bin gerade hier“ nutzt, erscheint nur als Zahl am Platz – erst ab zwei Personen und höchstens zwei Stunden lang.</p>
+        </div>
+        <div class="vf-schutz">
+          <div class="kinderschutz"><span class="ui-ic i-shieldcheck" aria-hidden="true"></span>
+            <div><b>Keine Profilbilder. Kein Chat.</b><p>Du entdeckst Orte, keine Personen.</p></div></div>
+          <div class="vf-beispiel">
+            <span class="knopf" aria-hidden="true">Ich bin gerade hier</span>
+            <p>Anonym, ohne Namen. Andere sehen nur eine Zahl, und erst ab zwei Personen. Der Standort prüft nur, ob man am Platz ist.</p>
+            <small>Kein öffentlicher Live-Standort. Keine sichtbaren Anwesenheitslisten.</small>
+          </div>
+        </div>
+      </div></section>
+
+      <section class="vf-teil hell" id="vf-ablauf"><div class="vf-innen">
+        <span class="rubrik">So funktioniert’s</span>
+        <h2>Vom ersten Gespräch zum verständlichen Eintrag.</h2>
+        <div class="vf-vier">
+          <div><span class="nr">01</span><h3>Zuständigkeit klären</h3><p>Wir besprechen, wer den Platz verwaltet und wer Angaben freigeben darf.</p></div>
+          <div><span class="nr">02</span><h3>Platz beschreiben</h3><p>Ihr ergänzt Sportarten, Belag, Regeln und eure eigenen Platzzeiten.</p></div>
+          <div><span class="nr">03</span><h3>Angaben prüfen</h3><p>Die berechtigte Stelle gleicht Zugang und Regeln ab. Unklarheiten bleiben nicht unsichtbar.</p></div>
+          <div><span class="nr">04</span><h3>Aktuell halten</h3><p>Ihr pflegt Änderungen. Herkunft und Stand bleiben für alle nachvollziehbar.</p></div>
+        </div>
+      </div></section>
+
+      <section class="vf-teil"><div class="vf-innen vf-faq">
+        <div><span class="rubrik">Gut zu wissen</span><h2>Klare Antworten vor dem ersten Eintrag.</h2></div>
+        <div>
+          <details open><summary>Erteilt platzfrei eine Nutzungserlaubnis?</summary>
+            <p>Nein. Eine Erlaubnis kann nur die zuständige und dazu berechtigte Stelle erteilen. platzfrei stellt die von ihr bereitgestellten Angaben verständlich dar. Regeln und Beschilderung vor Ort bleiben maßgeblich.</p></details>
+          <details open><summary>Müssen wir unseren Platz für alle öffnen?</summary>
+            <p>Nein. Ihr könnt auch abzusprechende Nutzungen, Vereinsanlagen oder gesperrte Flächen transparent kennzeichnen. Ein Eintrag verpflichtet nicht dazu, zusätzliche Zeiten freizugeben.</p></details>
+          <details open><summary>Was passiert bei falschen oder veralteten Angaben?</summary>
+            <p>Am Platz gibt es die Aktion „Angaben melden“. Quelle und Aktualität sollen sichtbar bleiben. Eine Meldung ist ein Hinweis zur Prüfung, keine automatische Änderung und keine neue Nutzungserlaubnis.</p></details>
+          <details open><summary>Wie passt das in den Trainingsbetrieb?</summary>
+            <p>Ihr grenzt eigene Trainings- und Spielzeiten von möglichen freien Zeitfenstern ab. Bei Platzpflege oder Änderungen pflegt die verantwortliche Stelle die Angaben nach. Beispielzeiten sind keine verbindlichen Öffnungszeiten.</p></details>
+          <details open><summary>Wie starten wir als Verband oder Gemeinde?</summary>
+            <p>In einem Gespräch klären wir eure Rolle, Zuständigkeiten und den gewünschten Umfang. Gemeinsam legen wir fest, welche Flächen zuerst erfasst werden und wie die Freigabe organisiert werden soll.</p></details>
+        </div>
+      </div></section>
+
+      <section class="vf-teil kobalt"><div class="vf-innen vf-cta">
+        <div><h2>Macht euren Spielraum sichtbar.</h2>
+          <p>Lasst uns besprechen, wie eure Plätze, Regeln und Zuständigkeiten in platzfrei verständlich werden.</p></div>
+        <div><a class="knopf" href="${mail}">Gespräch vereinbaren</a>
+          <small>Für Vereine, Verbände und Gemeinden.<br>Unverbindlich über euren Bedarf sprechen.</small></div>
+      </div></section>
+
+      <section class="vf-teil dunkel"><div class="vf-innen">
+        <div class="vf-fuss">
+          <div><span class="marke-wort">${marke}platzfrei</span><p>wo darf ich spielen?</p></div>
+          <div><button data-gehe="liste">Entdecken</button><button data-gehe="vereine">Für Vereine</button><button data-gehe="ueber">Über platzfrei</button></div>
+          <div><button data-gehe="ueber">Kinderschutz</button><button data-gehe="rechtliches">Datenschutz</button><button data-gehe="rechtliches">Impressum</button><a href="mailto:${esc(RECHT.email)}">Kontakt</a></div>
+          <div><p>Keine Profilbilder. Kein Chat.<br>Anwesenheit nur anonym als Zahl.<br>Die App erteilt keine Nutzungserlaubnis.</p></div>
+        </div>
+        <div class="vf-fussende"><span>platzfrei · Für das Spiel draußen.</span><span>Angaben ohne Gewähr · vor Ort gilt das Schild</span></div>
+      </div></section>
     </div>`;
 }
 
@@ -5002,6 +5534,8 @@ const sheet = (function(){
   const griff  = document.getElementById("griff");
   const mobil  = window.matchMedia("(max-width: 880px)");
   const sanft  = window.matchMedia("(prefers-reduced-motion: reduce)");
+  /* Höhe der unteren Navigation – das Blatt liegt darüber. */
+  const unten = () => mobil.matches ? (document.getElementById("unternav")?.offsetHeight || 0) : 0;
 
   /* Rastpunkte als Anteil der Bildschirmhöhe, den das Sheet einnimmt. */
   /* Unterste Stufe: nur Griff und Suchfeld schauen heraus, die Karte hat
@@ -5016,7 +5550,7 @@ const sheet = (function(){
     return h;
   })();
   const untersteRaste = () => {
-    RASTEN[0] = Math.min(0.2, (92 + sicherUnten) / window.innerHeight);
+    RASTEN[0] = Math.min(0.2, (92 + (unten() ? 0 : sicherUnten)) / (window.innerHeight - unten()));
   };
   untersteRaste();
   const HOEHE  = 0.94;              // muss zur CSS-Höhe passen
@@ -5029,13 +5563,14 @@ const sheet = (function(){
   let griffOffset = 0;
   let verlauf = [];                 // die letzten Punkte für die Geschwindigkeit
 
-  const vh = () => window.innerHeight;
+  const vh = () => window.innerHeight - unten();
   const yFuer = anteil => (HOEHE - anteil) * vh();
   const minY = () => yFuer(RASTEN[RASTEN.length - 1]);   // ganz offen
   const maxY = () => yFuer(RASTEN[0]);                   // ganz zu
 
   function setzen(neu){
     y = neu;
+    document.documentElement.style.setProperty("--unten-h", unten() + "px");
     aside.style.transform = `translateY(${y}px)`;
     /* Die Innenhöhe folgt dem sichtbaren Teil – sonst rutscht die
        Fußleiste unter den Bildschirmrand, sobald das Sheet halb zu ist. */
@@ -5250,7 +5785,8 @@ document.addEventListener("wheel", e => {
 }, { passive:false });
 
 document.addEventListener("click", e=>{
-  const t = e.target.closest("[data-sport],[data-nurfrei],[data-nurlos],[data-ort],[data-gehe],"+
+  const t = e.target.closest("[data-zugangzyklus],[data-umkreiszyklus],[data-sortzyklus],[data-standort],[data-unten],[data-scrollzu],"+
+                             "[data-sport],[data-nurfrei],[data-nurlos],[data-ort],[data-gehe],"+
                              "[data-speichern],[data-neuspeichern],[data-geprueft],"+
                              "[data-export],[data-anmelden],[data-km],"+
                              "[data-merken],[data-gemerkt],[data-melden],[data-route],"+
@@ -5261,6 +5797,35 @@ document.addEventListener("click", e=>{
                              "[data-zusage],[data-spielweg],[data-spielform],[data-spielansetzen],[data-tipp],[data-tippsoffen],[data-osmladen],[data-osmstop]");
   if (!t) return;
 
+  if (t.dataset.zugangzyklus) {
+    /* alle → nur frei zugänglich → nur wo der Zugang belegt ist → alle */
+    if (Z.nurBelegt) { Z.nurBelegt = false; Z.nurFrei = false; }
+    else if (Z.nurFrei) { Z.nurFrei = false; Z.nurBelegt = true; }
+    else Z.nurFrei = true;
+    return zeichne();
+  }
+  if (t.dataset.umkreiszyklus) {
+    const stufen = [0, 2, 5, 10, 25];
+    Z.maxKm = stufen[(stufen.indexOf(Z.maxKm || 0) + 1) % stufen.length] || null;
+    return zeichne();
+  }
+  if (t.dataset.sortzyklus) {
+    const s = ["entfernung", "zustand", "geprueft"];
+    Z.sortierung = s[(s.indexOf(Z.sortierung) + 1) % s.length];
+    return zeichne();
+  }
+  if (t.dataset.standort)   { return zuMeinemStandort(); }
+  if (t.dataset.scrollzu)   { return document.getElementById(t.dataset.scrollzu)?.scrollIntoView({ behavior:"smooth" }); }
+  if (t.dataset.unten) {
+    const ziel = t.dataset.unten;
+    if (ziel === "merkliste" && !GEMERKT.size)
+      return melde("Noch nichts gemerkt. Öffne einen Platz und tippe auf das Lesezeichen.");
+    Z.ansicht = ziel === "privat" ? "rechtliches" : "liste";
+    Z.nurGemerkt = ziel === "merkliste";
+    zeichne();
+    if (ziel !== "entdecken") sheet.aufmachen();
+    return;
+  }
   if (t.dataset.hierpunkt)  { return hierPunktSetzen(); }
   if (t.dataset.hier)       { return hierEinchecken(t.dataset.hier); }
   if (t.dataset.hierweg)    { return hierAuschecken(); }
@@ -5447,7 +6012,7 @@ function zuMeinemStandort(){
 }
 
 const StandortKnopf = L.Control.extend({
-  options:{ position:"bottomleft" },
+  options:{ position:"bottomright" },
   onAdd(){
     const box = L.DomUtil.create("div", "leaflet-bar standort-knopf");
     box.innerHTML = `<a href="#" role="button" title="Zu meinem Standort" aria-label="Zu meinem Standort">
