@@ -1213,6 +1213,22 @@ label.inline-knopf{display:inline-block;margin-top:10px}
   opacity:1;transform:translate(0,-50%) scale(1);pointer-events:auto}
 @media (prefers-reduced-motion:reduce){ .neu-blase{transition:opacity 120ms ease} }
 .thema-steuerung .thema-text{display:none}
+/* Legende kompakt: eine schmale Zeile, Erklärung nur als Tooltip */
+.legende{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px}
+.legende-titel{margin:0;font-size:12px;font-weight:600}
+.legende-marken{gap:4px}
+.legende .marke{font-size:11px;padding:3px 7px;gap:4px}
+.legende .marke::before{width:12px!important;height:12px!important}
+.legende-notiz{display:none}
+@media (min-width:881px){
+  .karten-legende{left:16px;bottom:16px;padding:7px 12px;border-radius:14px;max-width:calc(100% - 100px)}
+  .karten-legende.legende,.karten-legende .legende-marken{flex-wrap:nowrap}
+  .karten-legende.legende{display:flex}
+  body.vollseite .karten-legende.legende{display:none}
+  .karten-legende .legende-titel{white-space:nowrap}
+}
+.legende.in-liste{margin:0 0 10px}
+@media (max-width:880px){ .karten-legende.legende{display:none} }
 </style>
 <!-- Besucherzähler GoatCounter: ohne Cookies, ohne personenbezogene Daten -->
 <script data-goatcounter="https://platzfrei.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
@@ -1914,7 +1930,7 @@ document.getElementById("karte").appendChild(bereichKnopf);
    damit man die Community auch sieht, wenn die Liste zugeklappt ist. */
 /* Legende über der Karte (Laptop). Auf dem Handy steht sie in der Liste. */
 const kartenLegende = document.createElement("div");
-kartenLegende.className = "karten-legende";
+kartenLegende.className = "karten-legende legende";
 kartenLegende.innerHTML = legendeHtml();
 document.getElementById("karte").appendChild(kartenLegende);
 L.DomEvent.disableClickPropagation(kartenLegende);
