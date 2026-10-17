@@ -7,7 +7,14 @@
 
 <!-- PWA: macht die Seite installierbar (Icon, Name, Vollbild). -->
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#FFFFFF">
+<meta name="theme-color" content="#F1EFE8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#131E30" media="(prefers-color-scheme: dark)">
+
+<!-- Schriften aus dem Markensystem "Linienspiel v2": Source Sans 3 für Titel
+     und Wortmarke, Inter für alle Texte und Labels. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Sans+3:wght@600;700&display=swap">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="mobile-web-app-capable" content="yes">
 
@@ -29,32 +36,43 @@
    =========================================================================== */
 
 :root{
-  --gruen:#0B9463;
-  --gruen-tief:#087B51;
-  --gruen-zart:#E7F5EE;
-  --grund:#F6F8F6;
-  --flaeche:#FFFFFF;
-  --tinte:#0F1A15;
-  --tinte-2:#3D4B44;
-  --tinte-3:#7C8B83;
-  --kante:rgba(15,26,21,.07);
+  /* Markensystem "Linienspiel v2" (Figma): Kobalt als Markenakzent,
+     warme Kalkstein- und Kreideflächen, Zitrone als Spielimpuls.
+     Die alten Namen (--gruen …) bleiben, damit der übrige Code passt. */
+  --gruen:#164AF2;          /* Markenakzent Kobalt */
+  --gruen-tief:#1240D6;
+  --gruen-zart:rgba(22,74,242,.08);
+  --auf-akzent:#F7F4EB;     /* Schrift auf Kobalt */
+  --impuls:#E2EF83;         /* Spielimpuls Zitrone */
+  --grund:#F1EFE8;          /* Hintergrund */
+  --flaeche:#FAF8F2;        /* Oberfläche */
+  --tinte:#202C40;          /* Primärtext */
+  --tinte-2:#636B74;        /* Sekundärtext */
+  --tinte-3:#7A818A;
+  --kante:#D8D7CF;          /* Kontur */
 
-  --frei:#0E7C43;         --frei-bg:#E4F6EA;
-  --absprache:#A8620B;    --absprache-bg:#FDF0DC;
-  --zu:#B3342A;           --zu-bg:#FCE9E7;
-  --verein:#6248B8;       --verein-bg:#EFEBFB;
-  --unklar:#6B7A72;       --unklar-bg:#EFF2F0;
+  /* Zugang: Farbe + eigenes Symbol + Klartext */
+  --frei:#147563;         --frei-bg:rgba(20,117,99,.08);
+  --absprache:#906017;    --absprache-bg:rgba(144,96,23,.08);
+  --zu:#626775;           --zu-bg:rgba(98,103,117,.08);
+  --verein:#526884;       --verein-bg:rgba(82,104,132,.08);
+  --unklar:#636B74;       --unklar-bg:rgba(98,103,117,.07);
+  --warnung:#B3342A;      --warnung-bg:rgba(179,52,42,.08);
 
-  --r-karte:18px;
-  --r-feld:12px;
-  --r-pille:999px;
-  --schatten:0 1px 2px rgba(15,26,21,.04), 0 6px 18px -6px rgba(15,26,21,.10);
-  --schatten-hoch:0 2px 4px rgba(15,26,21,.05), 0 14px 32px -10px rgba(15,26,21,.16);
+  /* Radien: Labels 9 · Kontrollen 14 · Karten 20 · Panels 28 */
+  --r-karte:20px;
+  --r-feld:14px;
+  --r-pille:14px;
+  --r-label:9px;
+  /* Keine dekorativen Schatten – Flächen trennen sich über die Kontur. */
+  --schatten:0 0 0 1px var(--kante);
+  --schatten-hoch:0 0 0 1px var(--tinte-3);
+  --schatten-karte:0 2px 10px rgba(32,44,64,.16);
 
   /* §15 Typografie: Systemschrift zuerst. Sie bringt optische Größen,
      Tracking-Tabellen und Lesbarkeitsfeinschliff bereits mit. */
-  --schrift:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI Variable',
-            'Segoe UI',system-ui,Roboto,'Helvetica Neue',sans-serif;
+  --schrift:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif;
+  --schrift-titel:'Source Sans 3','Inter',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
 
   /* §4 Bewegung: Kurven, die einen kritisch gedämpften Feder-Verlauf
      annähern – kein Überschwingen, weicher Auslauf. */
@@ -72,7 +90,9 @@ body{font-family:var(--schrift);font-size:15px;line-height:1.5;letter-spacing:0;
   color:var(--tinte);background:var(--grund);
   display:flex;flex-direction:column;overflow:hidden;
   -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
-::selection{background:var(--gruen);color:#fff}
+::selection{background:var(--gruen);color:var(--auf-akzent)}
+/* Titel und Wortmarke in Source Sans 3 */
+header h1,.dname,.held h2,.ueber-teil > h3,.zahl b,.los-titel{font-family:var(--schrift-titel)}
 
 /* §1 Reaktion: Alles Drückbare antwortet beim Drücken, nicht beim Loslassen. */
 button,.zeile,.chip,.stern,[role="button"]{touch-action:manipulation;
@@ -83,49 +103,48 @@ button:active,.zeile:active,.chip:active,.knopf:active,.adminknopf:active{
 /* ---------- Kopf: schwebende Materialschicht (§12) ---------- */
 header{position:relative;z-index:20;flex-shrink:0;height:62px;padding:0 22px;
   display:flex;align-items:center;gap:14px;
-  background:rgba(255,255,255,.72);
-  backdrop-filter:saturate(180%) blur(22px);
-  -webkit-backdrop-filter:saturate(180%) blur(22px);
-  /* §12 Helle Oberkante: das Licht, das sich im Material fängt.
-     Statt harter Trennlinie unten ein weicher Kantenverlauf. */
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.65),
-             0 1px 0 rgba(15,26,21,.05)}
-header h1{font-size:19px;font-weight:700;letter-spacing:-.021em;line-height:1.2;
-  display:flex;align-items:center;gap:9px}
-header h1 em{font-style:normal;font-weight:400;font-size:13.5px;letter-spacing:-.004em;
-  color:var(--tinte-3)}
+  background:rgba(241,239,232,.88);
+  backdrop-filter:saturate(160%) blur(18px);
+  -webkit-backdrop-filter:saturate(160%) blur(18px);
+  box-shadow:0 1px 0 var(--kante)}
+/* Wortmarke: Source Sans 3 Bold, Kobalt, mit der p/f-Marke davor */
+header h1{font-size:26px;font-weight:700;letter-spacing:-.01em;line-height:1;
+  display:flex;align-items:center;gap:8px;color:var(--gruen)}
+header h1 em{font-family:var(--schrift);font-style:normal;font-weight:400;font-size:13.5px;
+  letter-spacing:0;color:var(--tinte-2);margin-left:4px}
+.pf-marke{display:block;flex-shrink:0;fill:currentColor}
 .kopfnotiz{font-size:12.5px;letter-spacing:.004em;color:var(--tinte-3);
   margin-right:auto;font-variant-numeric:tabular-nums}
 .adminknopf{font-family:var(--schrift);font-size:13.5px;font-weight:600;
   letter-spacing:-.005em;padding:9px 18px;border:0;border-radius:var(--r-pille);
-  background:var(--gruen);color:#fff;cursor:pointer;
+  background:var(--gruen);color:var(--auf-akzent);cursor:pointer;
   transition:background 160ms var(--feder-schnell),transform var(--druck)}
 .adminknopf:hover{background:var(--gruen-tief)}
 .adminknopf[hidden]{display:none}
-.adminknopf.an{background:var(--tinte)}
+.adminknopf.an{background:var(--tinte);color:var(--grund)}
 .adminknopf:focus-visible{outline:2px solid var(--gruen);outline-offset:2px}
 
 /* ---------- Layout ---------- */
 main{flex:1;display:flex;min-height:0}
-#karte{flex:1;z-index:1;background:#E6EAE7}
+#karte{flex:1;z-index:1;background:#E9E7DF}
 aside{width:420px;flex-shrink:0;background:var(--grund);
   border-left:1px solid var(--kante);display:flex;flex-direction:column;min-height:0}
 #seite{display:flex;flex-direction:column;min-height:0;height:100%}
 
 .leaflet-control-zoom a,.leaflet-control-layers{border:0!important;
-  border-radius:14px!important;box-shadow:var(--schatten)!important;color:var(--tinte)!important}
+  border-radius:14px!important;box-shadow:0 0 0 1px var(--kante),var(--schatten-karte)!important;color:var(--tinte)!important;background:var(--flaeche)!important}
 .leaflet-control-zoom{border:0!important;box-shadow:none!important}
 .leaflet-control-zoom a:first-child{border-radius:14px 14px 4px 4px!important}
 .leaflet-control-zoom a:last-child{border-radius:4px 4px 14px 14px!important;margin-top:3px}
 .standort-knopf{border:0!important;box-shadow:none!important}
 .standort-knopf .neu-knopf{margin-top:8px}
-.standort-knopf a.neu-knopf{background:var(--gruen)!important;color:#fff!important}
+.standort-knopf a.neu-knopf{background:var(--gruen)!important;color:var(--auf-akzent)!important}
 .standort-knopf a{display:flex!important;align-items:center;justify-content:center;
   width:34px!important;height:34px!important;border:0!important;border-radius:14px!important;
-  box-shadow:var(--schatten)!important;color:var(--tinte)!important;background:var(--grund)}
+  box-shadow:0 0 0 1px var(--kante),var(--schatten-karte)!important;color:var(--tinte)!important;background:var(--flaeche)}
 .leaflet-control-layers-expanded{font-family:var(--schrift)!important;font-size:13.5px!important;
   padding:12px 14px!important;border-radius:14px!important}
-.leaflet-control-attribution{font-size:9.5px!important;background:rgba(255,255,255,.8)!important;
+.leaflet-control-attribution{font-size:9.5px!important;background:rgba(250,248,242,.85)!important;
   border-radius:8px 0 0 0!important;padding:2px 6px!important}
 
 /* ---------- Laptop: Suche und Filter oben über die ganze Breite ---------- */
@@ -201,13 +220,14 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
   .filter .chips:not(:first-of-type) > .chip:first-child{margin-left:11px}
 }
 .chip{font-family:var(--schrift);font-size:13.5px;font-weight:600;letter-spacing:-.005em;
-  padding:8px 15px;border:0;background:var(--flaeche);color:var(--tinte-2);
+  padding:9px 13px;border:0;background:var(--flaeche);color:var(--tinte);
   border-radius:var(--r-pille);cursor:pointer;line-height:1.2;
-  box-shadow:0 1px 2px rgba(15,26,21,.05);
+  display:inline-flex;align-items:center;
+  box-shadow:inset 0 0 0 1px var(--kante);
   transition:background 160ms var(--feder-schnell),color 160ms var(--feder-schnell),
              box-shadow 160ms var(--feder-schnell),transform var(--druck)}
-.chip:hover{color:var(--tinte);box-shadow:0 1px 3px rgba(15,26,21,.12)}
-.chip[aria-pressed="true"]{background:var(--tinte);color:#fff;box-shadow:none}
+.chip:hover{box-shadow:inset 0 0 0 1px var(--tinte-3)}
+.chip[aria-pressed="true"]{background:var(--gruen);color:var(--auf-akzent);box-shadow:none}
 .chip.mehr{background:transparent;box-shadow:inset 0 0 0 1.5px var(--kante);color:var(--tinte-3)}
 .chip.mehr:hover{box-shadow:inset 0 0 0 1.5px var(--tinte-3)}
 .chip.mehr[aria-pressed="true"]{background:transparent;color:var(--tinte);
@@ -223,10 +243,24 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
   color:var(--tinte);box-shadow:inset 0 0 0 1.5px var(--kante);appearance:none;-webkit-appearance:none}
 .suche input::placeholder{color:var(--tinte-3);font-weight:450}
 .suche input:focus{outline:none;box-shadow:inset 0 0 0 2px var(--gruen)}
+.suche input{border-radius:var(--r-feld)}
 .suche input::-webkit-search-cancel-button{display:none}
 .suche-weg{position:absolute;right:8px;width:28px;height:28px;border:0;border-radius:50%;
   background:var(--unklar-bg);color:var(--tinte-2);font-size:12px;cursor:pointer}
 .chip-icon{margin-right:6px}
+/* Sporticons aus dem Markensystem: Linien, 1,6 px Kontur. Als Maske,
+   damit sie die Schriftfarbe annehmen (Kobalt, auf aktivem Filter Kreide). */
+.sport-ic{display:inline-block;width:18px;height:18px;flex-shrink:0;background:currentColor;
+  -webkit-mask:var(--ic) center/contain no-repeat;mask:var(--ic) center/contain no-repeat}
+.chip .sport-ic{margin-right:6px;color:var(--gruen)}
+.chip[aria-pressed="true"] .sport-ic{color:inherit}
+.ic-fussball{--ic:url("data:image/svg+xml,%3Csvg width='28' height='28' viewBox='0 0 28 28' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cmask fill='white'%3E%3Cpath d='M28 14C28 15.3948 27.7919 16.7682 27.3928 18.0786C26.7295 20.2564 25.5387 22.2603 23.8995 23.8995C21.274 26.525 17.713 28 14 28C10.287 28 6.72601 26.525 4.1005 23.8995C2.46128 22.2603 1.27054 20.2564 0.60724 18.0786C0.208147 16.7682 0 15.3948 0 14C0 10.287 1.475 6.72601 4.1005 4.1005C6.72601 1.475 10.287 0 14 0C17.713 0 21.274 1.475 23.8995 4.1005C26.525 6.72601 28 10.287 28 14Z'/%3E%3C/mask%3E%3Cpath d='M27.3928 18.0786L27.5497 17.2941V17.2941L27.3928 18.0786ZM0.60724 18.0786L0.450347 17.2941H0.450346L0.60724 18.0786ZM9.8 9.8V10.6H18.2V9.8V9H9.8V9.8ZM18.2 9.8L17.4572 10.0971L20.2572 17.0971L21 16.8L21.7428 16.5029L18.9428 9.50289L18.2 9.8ZM21 16.8L20.5002 16.1753L13.5002 21.7753L14 22.4L14.4998 23.0247L21.4998 17.4247L21 16.8ZM14 22.4L14.4998 21.7753L7.49976 16.1753L7 16.8L6.50024 17.4247L13.5002 23.0247L14 22.4ZM7 16.8L7.74278 17.0971L10.5428 10.0971L9.8 9.8L9.05722 9.50289L6.25722 16.5029L7 16.8ZM9.8 9.8L10.5428 9.50289L7.74278 2.50289L7 2.8L6.25722 3.09711L9.05722 10.0971L9.8 9.8ZM18.2 9.8L18.886 10.2116L23.086 3.2116L22.4 2.8L21.714 2.3884L17.514 9.3884L18.2 9.8ZM21 16.8L20.8431 17.5845L27.2359 18.863L27.3928 18.0786L27.5497 17.2941L21.1569 16.0155L21 16.8ZM27.3928 18.0786L27.2359 18.863L27.8431 18.9845L28 18.2L28.1569 17.4155L27.5497 17.2941L27.3928 18.0786ZM14 22.4H13.2V28H14H14.8V22.4H14ZM7 16.8L6.84311 16.0155L0.450347 17.2941L0.60724 18.0786L0.764132 18.863L7.15689 17.5845L7 16.8ZM0.60724 18.0786L0.450346 17.2941L-0.156894 17.4155L0 18.2L0.156894 18.9845L0.764133 18.863L0.60724 18.0786ZM27.3928 18.0786L25.8622 17.6124V17.6124L27.3928 18.0786ZM4.1005 23.8995L2.96913 25.0309H2.96913L4.1005 23.8995ZM0.60724 18.0786L2.13783 17.6124V17.6124L0.60724 18.0786ZM4.1005 4.1005L2.96913 2.96913V2.96913L4.1005 4.1005ZM23.8995 4.1005L25.0309 2.96913L23.8995 4.1005ZM28 14H26.4C26.4 15.2355 26.2156 16.4518 25.8622 17.6124L27.3928 18.0786L28.9233 18.5447C29.3681 17.0846 29.6 15.5542 29.6 14H28ZM27.3928 18.0786L25.8622 17.6124C25.2746 19.5415 24.22 21.3163 22.7681 22.7681L23.8995 23.8995L25.0309 25.0309C26.8575 23.2043 28.1843 20.9713 28.9233 18.5447L27.3928 18.0786ZM23.8995 23.8995L22.7681 22.7681C20.4427 25.0936 17.2887 26.4 14 26.4V28V29.6C18.1374 29.6 22.1053 27.9564 25.0309 25.0309L23.8995 23.8995ZM14 28V26.4C10.7113 26.4 7.55733 25.0936 5.23188 22.7681L4.1005 23.8995L2.96913 25.0309C5.8947 27.9564 9.86262 29.6 14 29.6V28ZM4.1005 23.8995L5.23188 22.7681C3.78002 21.3163 2.72536 19.5415 2.13783 17.6124L0.60724 18.0786L-0.923346 18.5447C-0.184284 20.9713 1.14254 23.2043 2.96913 25.0309L4.1005 23.8995ZM0.60724 18.0786L2.13783 17.6124C1.78435 16.4518 1.6 15.2355 1.6 14H0H-1.6C-1.6 15.5542 -1.36806 17.0846 -0.923346 18.5447L0.60724 18.0786ZM0 14H1.6C1.6 10.7113 2.90642 7.55733 5.23188 5.23188L4.1005 4.1005L2.96913 2.96913C0.0435666 5.8947 -1.6 9.86262 -1.6 14H0ZM4.1005 4.1005L5.23188 5.23188C7.55733 2.90642 10.7113 1.6 14 1.6V0V-1.6C9.86262 -1.6 5.8947 0.0435666 2.96913 2.96913L4.1005 4.1005ZM14 0V1.6C17.2887 1.6 20.4427 2.90642 22.7681 5.23188L23.8995 4.1005L25.0309 2.96913C22.1053 0.0435667 18.1374 -1.6 14 -1.6V0ZM23.8995 4.1005L22.7681 5.23188C25.0936 7.55733 26.4 10.7113 26.4 14H28H29.6C29.6 9.86262 27.9564 5.8947 25.0309 2.96913L23.8995 4.1005Z' fill='%23164AF2' mask='url(%23stroke0_0_37)'/%3E%3C/svg%3E")}
+.ic-basketball{--ic:url("data:image/svg+xml,%3Csvg width='28' height='28' viewBox='0 0 28 28' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cmask fill='white'%3E%3Cpath d='M28 14C28 17.713 26.525 21.274 23.8995 23.8995C21.274 26.525 17.713 28 14 28C10.287 28 6.72601 26.525 4.1005 23.8995C1.475 21.274 0 17.713 0 14C0 10.287 1.475 6.72601 4.1005 4.1005C6.72601 1.475 10.287 0 14 0C17.713 0 21.274 1.475 23.8995 4.1005C26.525 6.72601 28 10.287 28 14Z'/%3E%3C/mask%3E%3Cpath d='M0 14V14.8H11.2V14V13.2H0V14ZM11.2 14V14.8H14V14V13.2H11.2V14ZM14 14V14.8H16.8V14V13.2H14V14ZM16.8 14V14.8H28V14V13.2H16.8V14ZM14 0H13.2V14H14H14.8V0H14ZM14 14H13.2V28H14H14.8V14H14ZM4.2 4.2L3.74123 4.85539C8.35029 8.08173 10.4 11.1398 10.4 14H11.2H12C12 10.3269 9.38304 6.8516 4.65877 3.54461L4.2 4.2ZM11.2 14H10.4C10.4 16.8602 8.35029 19.9183 3.74123 23.1446L4.2 23.8L4.65877 24.4554C9.38304 21.1484 12 17.6731 12 14H11.2ZM23.8 4.2L23.3412 3.54461C18.617 6.8516 16 10.3269 16 14H16.8H17.6C17.6 11.1398 19.6497 8.08173 24.2588 4.85539L23.8 4.2ZM16.8 14H16C16 17.6731 18.617 21.1484 23.3412 24.4554L23.8 23.8L24.2588 23.1446C19.6497 19.9183 17.6 16.8602 17.6 14H16.8ZM4.1005 23.8995L2.96913 25.0309L4.1005 23.8995ZM4.1005 4.1005L2.96913 2.96913V2.96913L4.1005 4.1005ZM23.8995 4.1005L25.0309 2.96913L23.8995 4.1005ZM28 14H26.4C26.4 17.2887 25.0936 20.4427 22.7681 22.7681L23.8995 23.8995L25.0309 25.0309C27.9564 22.1053 29.6 18.1374 29.6 14H28ZM23.8995 23.8995L22.7681 22.7681C20.4427 25.0936 17.2887 26.4 14 26.4V28V29.6C18.1374 29.6 22.1053 27.9564 25.0309 25.0309L23.8995 23.8995ZM14 28V26.4C10.7113 26.4 7.55733 25.0936 5.23188 22.7681L4.1005 23.8995L2.96913 25.0309C5.8947 27.9564 9.86262 29.6 14 29.6V28ZM4.1005 23.8995L5.23188 22.7681C2.90642 20.4427 1.6 17.2887 1.6 14H0H-1.6C-1.6 18.1374 0.0435667 22.1053 2.96913 25.0309L4.1005 23.8995ZM0 14H1.6C1.6 10.7113 2.90642 7.55733 5.23188 5.23188L4.1005 4.1005L2.96913 2.96913C0.0435666 5.8947 -1.6 9.86262 -1.6 14H0ZM4.1005 4.1005L5.23188 5.23188C7.55733 2.90642 10.7113 1.6 14 1.6V0V-1.6C9.86262 -1.6 5.8947 0.0435666 2.96913 2.96913L4.1005 4.1005ZM14 0V1.6C17.2887 1.6 20.4427 2.90642 22.7681 5.23188L23.8995 4.1005L25.0309 2.96913C22.1053 0.0435667 18.1374 -1.6 14 -1.6V0ZM23.8995 4.1005L22.7681 5.23188C25.0936 7.55733 26.4 10.7113 26.4 14H28H29.6C29.6 9.86262 27.9564 5.8947 25.0309 2.96913L23.8995 4.1005Z' fill='%23164AF2' mask='url(%23stroke0_0_36)'/%3E%3C/svg%3E")}
+.ic-tischtennis{--ic:url("data:image/svg+xml,%3Csvg width='28' height='28' viewBox='0 0 28 28' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cmask fill='white'%3E%3Cpath d='M23.0588 1.23944C31.2941 6.87324 24.7059 18.1408 14.8235 19.5493L4.94118 26.5915L0 22.3662L8.23529 15.3239C3.29412 4.05634 13.1765 -2.98592 23.0588 1.23944Z'/%3E%3Cpath d='M22.3766 23.1912C21.7588 23.7195 21.4118 24.436 21.4118 25.1831C21.4118 25.9302 21.7588 26.6467 22.3766 27.1749C22.9944 27.7032 23.8322 28 24.7059 28C25.5795 28 26.4174 27.7032 27.0352 27.1749C27.6529 26.6467 28 25.9302 28 25.1831C28 24.436 27.6529 23.7195 27.0352 23.1912C26.4174 22.663 25.5795 22.3662 24.7059 22.3662C23.8322 22.3662 22.9944 22.663 22.3766 23.1912Z'/%3E%3C/mask%3E%3Cpath d='M8.23529 15.3239L7.80341 15.9973L14.3916 20.2227L14.8235 19.5493L15.2554 18.8759L8.66718 14.6505L8.23529 15.3239ZM23.0588 1.23944L23.9622 -0.0811202L23.8324 -0.169909L23.6878 -0.231731L23.0588 1.23944ZM14.8235 19.5493L14.5978 17.9653L14.2122 18.0203L13.895 18.2463L14.8235 19.5493ZM4.94118 26.5915L3.90132 27.8076L4.85153 28.6201L5.86971 27.8946L4.94118 26.5915ZM0 22.3662L-1.03986 21.1502L-2.46188 22.3662L-1.03986 23.5822L0 22.3662ZM8.23529 15.3239L9.27515 16.54L10.1773 15.7685L9.70059 14.6814L8.23529 15.3239ZM22.3766 23.1912L21.3367 21.9752L21.3367 21.9752L22.3766 23.1912ZM27.0352 23.1912L28.075 21.9752L28.075 21.9752L27.0352 23.1912ZM27.0352 27.1749L25.9953 25.9589L25.9953 25.9589L27.0352 27.1749ZM22.3766 27.1749L23.4164 25.9589L23.4164 25.9589L22.3766 27.1749ZM23.0588 1.23944L22.1554 2.55999C23.9083 3.75916 24.7752 5.17844 25.069 6.60242C25.3684 8.05289 25.1043 9.66694 24.3049 11.262C22.6907 14.4827 19.0278 17.3339 14.5978 17.9653L14.8235 19.5493L15.0493 21.1333C20.5016 20.3562 25.074 16.8694 27.1657 12.6958C28.2192 10.5936 28.6757 8.24641 28.203 5.95568C27.7248 3.63846 26.327 1.53662 23.9622 -0.0811202L23.0588 1.23944ZM14.8235 19.5493L13.895 18.2463L4.01264 25.2885L4.94118 26.5915L5.86971 27.8946L15.7521 20.8523L14.8235 19.5493ZM4.94118 26.5915L5.98103 25.3755L1.03986 21.1502L0 22.3662L-1.03986 23.5822L3.90132 27.8076L4.94118 26.5915ZM0 22.3662L1.03986 23.5822L9.27515 16.54L8.23529 15.3239L7.19544 14.1079L-1.03986 21.1502L0 22.3662ZM8.23529 15.3239L9.70059 14.6814C7.45839 9.56836 8.6725 5.7877 11.1281 3.68785C13.6728 1.51177 17.943 0.792196 22.4298 2.7106L23.0588 1.23944L23.6878 -0.231731C18.2923 -2.53867 12.6801 -1.8498 9.04838 1.25581C5.3275 4.43765 4.07103 9.81192 6.77 15.9665L8.23529 15.3239ZM21.4118 25.1831H23.0118C23.0118 24.9484 23.1188 24.6618 23.4164 24.4073L22.3766 23.1912L21.3367 21.9752C20.3989 22.7772 19.8118 23.9236 19.8118 25.1831H21.4118ZM22.3766 23.1912L23.4164 24.4073C23.7218 24.1461 24.1827 23.9662 24.7059 23.9662V22.3662V20.7662C23.4818 20.7662 22.2669 21.1798 21.3367 21.9752L22.3766 23.1912ZM24.7059 22.3662V23.9662C25.2291 23.9662 25.6899 24.1461 25.9953 24.4073L27.0352 23.1912L28.075 21.9752C27.1449 21.1798 25.93 20.7662 24.7059 20.7662V22.3662ZM27.0352 23.1912L25.9953 24.4073C26.293 24.6618 26.4 24.9484 26.4 25.1831H28H29.6C29.6 23.9236 29.0129 22.7772 28.075 21.9752L27.0352 23.1912ZM28 25.1831H26.4C26.4 25.4178 26.293 25.7044 25.9953 25.9589L27.0352 27.1749L28.075 28.391C29.0129 27.589 29.6 26.4425 29.6 25.1831H28ZM27.0352 27.1749L25.9953 25.9589C25.6899 26.2201 25.2291 26.4 24.7059 26.4V28V29.6C25.93 29.6 27.1449 29.1864 28.075 28.391L27.0352 27.1749ZM24.7059 28V26.4C24.1827 26.4 23.7218 26.2201 23.4164 25.9589L22.3766 27.1749L21.3367 28.391C22.2669 29.1864 23.4818 29.6 24.7059 29.6V28ZM22.3766 27.1749L23.4164 25.9589C23.1188 25.7044 23.0118 25.4178 23.0118 25.1831H21.4118H19.8118C19.8118 26.4426 20.3989 27.589 21.3367 28.391L22.3766 27.1749Z' fill='%23164AF2' mask='url(%23stroke0_0_51)'/%3E%3C/svg%3E")}
+.ic-skaten{--ic:url("data:image/svg+xml,%3Csvg width='28' height='28' viewBox='0 0 28 28' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cmask fill='white'%3E%3Cpath d='M6.63158 14C0.736842 14 -1.22807 9.33333 0.736842 0H2.21053C1.22807 6.22222 2.70175 9.33333 6.63158 9.33333H21.3684C25.2982 9.33333 26.7719 6.22222 25.7895 0H27.2632C29.2281 9.33333 27.2632 14 21.3684 14H6.63158Z'/%3E%3Cpath d='M8.19466 22.0251C7.7801 21.3687 7.21785 21 6.63158 21C6.04531 21 5.48306 21.3687 5.0685 22.0251C4.65395 22.6815 4.42105 23.5717 4.42105 24.5C4.42105 25.4283 4.65395 26.3185 5.0685 26.9749C5.48306 27.6313 6.04531 28 6.63158 28C7.21785 28 7.7801 27.6313 8.19466 26.9749C8.60921 26.3185 8.8421 25.4283 8.8421 24.5C8.8421 23.5717 8.60921 22.6815 8.19466 22.0251Z'/%3E%3Cpath d='M22.9315 22.0251C22.5169 21.3687 21.9547 21 21.3684 21C20.7822 21 20.2199 21.3687 19.8053 22.0251C19.3908 22.6815 19.1579 23.5717 19.1579 24.5C19.1579 25.4283 19.3908 26.3185 19.8053 26.9749C20.2199 27.6313 20.7822 28 21.3684 28C21.9547 28 22.5169 27.6313 22.9315 26.9749C23.3461 26.3185 23.5789 25.4283 23.5789 24.5C23.5789 23.5717 23.3461 22.6815 22.9315 22.0251Z'/%3E%3C/mask%3E%3Cpath d='M0.736842 0C-1.22807 9.33333 0.736842 14 6.63158 14H21.3684C27.2632 14 29.2281 9.33333 27.2632 0H25.7895C26.7719 6.22222 25.2982 9.33333 21.3684 9.33333H6.63158C2.70175 9.33333 1.22807 6.22222 2.21053 0H0.736842ZM6.63158 21C7.21785 21 7.7801 21.3687 8.19466 22.0251C8.60921 22.6815 8.8421 23.5717 8.8421 24.5C8.8421 25.4283 8.60921 26.3185 8.19466 26.9749C7.7801 27.6313 7.21785 28 6.63158 28C6.04531 28 5.48306 27.6313 5.0685 26.9749C4.65395 26.3185 4.42105 25.4283 4.42105 24.5C4.42105 23.5717 4.65395 22.6815 5.0685 22.0251C5.48306 21.3687 6.04531 21 6.63158 21ZM21.3684 21C21.9547 21 22.5169 21.3687 22.9315 22.0251C23.3461 22.6815 23.5789 23.5717 23.5789 24.5C23.5789 25.4283 23.3461 26.3185 22.9315 26.9749C22.5169 27.6313 21.9547 28 21.3684 28C20.7822 28 20.2199 27.6313 19.8053 26.9749C19.3908 26.3185 19.1579 25.4283 19.1579 24.5C19.1579 23.5717 19.3908 22.6815 19.8053 22.0251C20.2199 21.3687 20.7822 21 21.3684 21Z' stroke-width='3.2' stroke='%23164AF2' mask='url(%23stroke0_0_34)'/%3E%3C/svg%3E")}
+.ic-calisthenics{--ic:url("data:image/svg+xml,%3Csvg width='28' height='28' viewBox='0 0 28 28' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cmask fill='white'%3E%3Cpath d='M0 28V0H28V28H25.2V2.8H21V12.6L15.4 16.8V22.4L21 28H16.8L14 23.8L11.2 28H7L12.6 22.4V16.8L7 12.6V2.8H2.8V28H0Z'/%3E%3C/mask%3E%3Cpath d='M9.8 11.2H9V11.6281L9.35624 11.8656L9.8 11.2ZM14 14L13.5562 14.6656L14 14.9615L14.4438 14.6656L14 14ZM18.2 11.2L18.6438 11.8656L19 11.6281V11.2H18.2ZM12.0201 6.4201L11.4544 5.85442V5.85442L12.0201 6.4201ZM15.9799 6.4201L16.5456 5.85442V5.85442L15.9799 6.4201ZM15.9799 10.3799L16.5456 10.9456V10.9456L15.9799 10.3799ZM21 2.8V2H18.2V2.8V3.6H21V2.8ZM18.2 2.8V2H9.8V2.8V3.6H18.2V2.8ZM9.8 2.8V2H7V2.8V3.6H9.8V2.8ZM9.8 2.8H9V11.2H9.8H10.6V2.8H9.8ZM9.8 11.2L9.35624 11.8656L13.5562 14.6656L14 14L14.4438 13.3344L10.2438 10.5344L9.8 11.2ZM14 14L14.4438 14.6656L18.6438 11.8656L18.2 11.2L17.7562 10.5344L13.5562 13.3344L14 14ZM18.2 11.2H19V2.8H18.2H17.4V11.2H18.2ZM11.2 8.4H12C12 7.86957 12.2107 7.36086 12.5858 6.98579L12.0201 6.4201L11.4544 5.85442C10.7793 6.52955 10.4 7.44522 10.4 8.4H11.2ZM12.0201 6.4201L12.5858 6.98579C12.9609 6.61071 13.4696 6.4 14 6.4V5.6V4.8C13.0452 4.8 12.1295 5.17928 11.4544 5.85442L12.0201 6.4201ZM14 5.6V6.4C14.5304 6.4 15.0391 6.61071 15.4142 6.98579L15.9799 6.4201L16.5456 5.85442C15.8705 5.17928 14.9548 4.8 14 4.8V5.6ZM15.9799 6.4201L15.4142 6.98579C15.7893 7.36086 16 7.86957 16 8.4H16.8H17.6C17.6 7.44522 17.2207 6.52955 16.5456 5.85442L15.9799 6.4201ZM16.8 8.4H16C16 8.93043 15.7893 9.43914 15.4142 9.81421L15.9799 10.3799L16.5456 10.9456C17.2207 10.2705 17.6 9.35478 17.6 8.4H16.8ZM15.9799 10.3799L15.4142 9.81421C15.0391 10.1893 14.5304 10.4 14 10.4V11.2V12C14.9548 12 15.8705 11.6207 16.5456 10.9456L15.9799 10.3799ZM14 11.2V10.4C13.4696 10.4 12.9609 10.1893 12.5858 9.81421L12.0201 10.3799L11.4544 10.9456C12.1295 11.6207 13.0452 12 14 12V11.2ZM12.0201 10.3799L12.5858 9.81421C12.2107 9.43914 12 8.93043 12 8.4H11.2H10.4C10.4 9.35478 10.7793 10.2705 11.4544 10.9456L12.0201 10.3799ZM0 28H-1.6V29.6H0V28ZM0 0V-1.6H-1.6V0H0ZM28 0H29.6V-1.6H28V0ZM28 28V29.6H29.6V28H28ZM25.2 28H23.6V29.6H25.2V28ZM25.2 2.8H26.8V1.2H25.2V2.8ZM21 2.8V1.2H19.4V2.8H21ZM7 2.8H8.6V1.2H7V2.8ZM2.8 2.8V1.2H1.2V2.8H2.8ZM2.8 28V29.6H4.4V28H2.8ZM21 12.6L21.96 13.88L22.6 13.4V12.6H21ZM15.4 16.8L14.44 15.52L13.8 16V16.8H15.4ZM15.4 22.4H13.8V23.0627L14.2686 23.5314L15.4 22.4ZM21 28V29.6H24.8627L22.1314 26.8686L21 28ZM16.8 28L15.4687 28.8875L15.9437 29.6H16.8V28ZM14 23.8L15.3313 22.9125L14 20.9156L12.6687 22.9125L14 23.8ZM11.2 28V29.6H12.0563L12.5313 28.8875L11.2 28ZM7 28L5.86863 26.8686L3.13726 29.6H7V28ZM12.6 22.4L13.7314 23.5314L14.2 23.0627V22.4H12.6ZM12.6 16.8H14.2V16L13.56 15.52L12.6 16.8ZM7 12.6H5.4V13.4L6.04 13.88L7 12.6ZM0 28H1.6V0H0H-1.6V28H0ZM0 0V1.6H28V0V-1.6H0V0ZM28 0H26.4V28H28H29.6V0H28ZM28 28V26.4H25.2V28V29.6H28V28ZM25.2 28H26.8V2.8H25.2H23.6V28H25.2ZM25.2 2.8V1.2H21V2.8V4.4H25.2V2.8ZM7 2.8V1.2H2.8V2.8V4.4H7V2.8ZM2.8 2.8H1.2V28H2.8H4.4V2.8H2.8ZM2.8 28V26.4H0V28V29.6H2.8V28ZM21 2.8H19.4V12.6H21H22.6V2.8H21ZM21 12.6L20.04 11.32L14.44 15.52L15.4 16.8L16.36 18.08L21.96 13.88L21 12.6ZM15.4 16.8H13.8V22.4H15.4H17V16.8H15.4ZM15.4 22.4L14.2686 23.5314L19.8686 29.1314L21 28L22.1314 26.8686L16.5314 21.2686L15.4 22.4ZM21 28V26.4H16.8V28V29.6H21V28ZM16.8 28L18.1313 27.1125L15.3313 22.9125L14 23.8L12.6687 24.6875L15.4687 28.8875L16.8 28ZM14 23.8L12.6687 22.9125L9.86872 27.1125L11.2 28L12.5313 28.8875L15.3313 24.6875L14 23.8ZM11.2 28V26.4H7V28V29.6H11.2V28ZM7 28L8.13137 29.1314L13.7314 23.5314L12.6 22.4L11.4686 21.2686L5.86863 26.8686L7 28ZM12.6 22.4H14.2V16.8H12.6H11V22.4H12.6ZM12.6 16.8L13.56 15.52L7.96 11.32L7 12.6L6.04 13.88L11.64 18.08L12.6 16.8ZM7 12.6H8.6V2.8H7H5.4V12.6H7Z' fill='%23164AF2' mask='url(%23stroke0_0_55)'/%3E%3C/svg%3E")}
+.ic-beachvolleyball{--ic:url("data:image/svg+xml,%3Csvg width='28' height='28' viewBox='0 0 28 28' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg stroke='%23000' stroke-width='1.6' stroke-linecap='round'%3E%3Ccircle cx='14' cy='14' r='13'/%3E%3Cpath d='M14 1c-1 6 1 11 6 14M27 14c-6-1-11 1-14 6M5 23c3-5 4-10 2-16'/%3E%3C/g%3E%3C/svg%3E")}
+.ic-laufen{--ic:url("data:image/svg+xml,%3Csvg width='28' height='28' viewBox='0 0 28 28' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='17' cy='4.5' r='2.5'/%3E%3Cpath d='M10 10l5-2 4 4 4 1M15 8l-3 8 5 4-2 7M12 16l-3 5H4'/%3E%3C/g%3E%3C/svg%3E")}
 .anzahl{padding:2px 20px 8px;font-size:13px;font-weight:600;color:var(--tinte-3);
   letter-spacing:.002em;flex-shrink:0}
 
@@ -239,10 +273,14 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
 .status.frei{background:var(--frei-bg);color:var(--frei)}
 .status.absprache{background:var(--absprache-bg);color:var(--absprache)}
 .status.vermutet{background:var(--frei-bg);color:var(--frei);outline:1.5px dashed var(--frei);outline-offset:-1.5px}
-.status.vermutet .status-icon{background:#8FD9A3;color:#0F3D1E}
+.status.vermutet .status-icon{background:transparent;color:var(--frei);box-shadow:inset 0 0 0 2px var(--frei)}
+.status.zu{background:var(--zu-bg);color:var(--zu)}
+.status.zu .status-icon{background:var(--zu)}
+.status-icon.mit-symbol::before{width:22px;height:22px}
 .status-icon{width:40px;height:40px;flex-shrink:0;border-radius:50%;display:grid;
-  place-items:center;font-size:20px;font-weight:800;background:var(--unklar);color:#fff}
+  place-items:center;font-size:20px;font-weight:800;background:var(--unklar);color:var(--grund)}
 .status.frei .status-icon{background:var(--frei)}
+.status{border-radius:var(--r-karte)}
 .status.absprache .status-icon{background:var(--absprache)}
 .status-text{display:flex;flex-direction:column;min-width:0}
 .status-text b{font-size:18px;letter-spacing:-.015em}
@@ -268,43 +306,42 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
 
 .zeile{width:100%;text-align:left;border:0;cursor:pointer;font-family:var(--schrift);
   display:flex;gap:14px;align-items:flex-start;position:relative;overflow:hidden;
-  background:var(--flaeche);border-radius:var(--r-karte);box-shadow:var(--schatten);
-  padding:15px 17px 15px 20px;margin-bottom:11px;
+  background:var(--flaeche);border-radius:var(--r-karte);box-shadow:inset 0 0 0 1px var(--kante);
+  padding:12px 14px 12px 12px;margin-bottom:10px;
   transition:box-shadow 220ms var(--feder),transform 220ms var(--feder)}
-.zeile::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
-  background:var(--streifen,var(--unklar))}
-.zeile:hover{box-shadow:var(--schatten-hoch);transform:translateY(-1px)}
+/* Ausgewählt: 2 px Akzentkontur (Figma "Platzkarte ausgewählt") */
+.zeile:hover,.zeile.gewaehlt{box-shadow:inset 0 0 0 2px var(--gruen)}
 .zeile:focus-visible{outline:2px solid var(--gruen);outline-offset:2px}
 .punkt{display:none}
 
 /* Satellitenausschnitt: zeigt beim Scrollen, ob Käfig oder Wiese. */
-.luftbild{width:56px;height:56px;flex-shrink:0;border-radius:12px;object-fit:cover;
-  background:#DDE3DA;box-shadow:inset 0 0 0 1px rgba(15,26,21,.08)}
+.luftbild{width:64px;height:72px;flex-shrink:0;border-radius:14px;object-fit:cover;
+  background:#164AF2}
 
 /* Gezeichnete Spielfläche je Sportart, mit dem Sport-Zeichen als Plakette */
 .platzbild{position:relative;overflow:hidden;display:block}
 .platzbild svg{display:block;width:100%;height:100%}
-.platzbild i{position:absolute;right:3px;bottom:3px;width:21px;height:21px;border-radius:50%;
-  background:rgba(255,255,255,.94);font-style:normal;font-size:12px;line-height:1;
-  display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.platzbild i{position:absolute;right:4px;bottom:4px;width:22px;height:22px;border-radius:8px;
+  background:#F7F4EB;color:#164AF2;display:flex;align-items:center;justify-content:center}
+.platzbild i .sport-ic{width:16px;height:16px}
 
 /* Knopf über der Karte */
-.bereich-knopf{position:absolute;left:50%;top:14px;transform:translateX(-50%);
+.bereich-knopf{position:absolute;left:50%;top:14px;transform:translateX(-50%);color:var(--gruen)!important;
   z-index:500;font-family:var(--schrift);font-size:13.5px;font-weight:600;
   letter-spacing:-.005em;padding:10px 18px;border:0;border-radius:var(--r-pille);
-  background:rgba(255,255,255,.9);backdrop-filter:saturate(180%) blur(18px);
+  background:rgba(250,248,242,.96);backdrop-filter:saturate(180%) blur(18px);
   -webkit-backdrop-filter:saturate(180%) blur(18px);color:var(--tinte);cursor:pointer;
-  box-shadow:0 2px 10px rgba(15,26,21,.18);
+  box-shadow:0 0 0 1px var(--kante),var(--schatten-karte);
   transition:background 160ms var(--feder-schnell),transform var(--druck)}
-.bereich-knopf:hover{background:#fff}
+.bereich-knopf:hover{background:var(--flaeche)}
 .bereich-knopf[hidden]{display:none}
 .abschnitt[hidden]{display:none}
 .daemmerung.bereich{background:var(--gruen-zart)}
 .abschnitt.luecke{border-left:3px solid var(--absprache)}
 .zt{flex:1;min-width:0}
-.zname{font-size:16.5px;font-weight:600;letter-spacing:-.014em;line-height:1.28;
+.zname{font-size:17px;font-weight:600;letter-spacing:-.01em;line-height:1.25;
   color:var(--tinte);display:block}
-.zsub{font-size:13px;letter-spacing:.002em;color:var(--tinte-3);margin-top:3px;
+.zsub{font-size:12.5px;letter-spacing:0;color:var(--tinte-2);margin-top:3px;
   display:block;font-weight:450;line-height:1.4}
 
 .zrechts{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0}
@@ -312,20 +349,29 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
   font-variant-numeric:tabular-nums;line-height:1;display:flex;align-items:baseline;gap:3px}
 .zdist small{font-size:11.5px;font-weight:600;color:var(--tinte-3);letter-spacing:.006em}
 
-.marke{display:inline-flex;align-items:center;white-space:nowrap;max-width:100%;
+.marke{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;max-width:100%;
   overflow:hidden;text-overflow:ellipsis;font-size:12px;font-weight:600;
-  letter-spacing:.004em;padding:4px 10px;border-radius:var(--r-pille);
+  letter-spacing:0;padding:5px 9px;border-radius:var(--r-label);
   margin:8px 6px 0 0;line-height:1.35;background:var(--unklar-bg);color:var(--unklar)}
+/* Zugang nie nur über Farbe: jede Art hat ihr eigenes Symbol. */
+.marke.frei::before,.marke.vermutet::before,.marke.absprache::before,.marke.verein::before,.marke.zu::before,
+.status-icon.mit-symbol::before{content:"";width:16px;height:16px;flex-shrink:0;background:currentColor;
+  -webkit-mask:var(--zs) center/contain no-repeat;mask:var(--zs) center/contain no-repeat}
+.marke.frei,.marke.vermutet,.status.frei,.status.vermutet{--zs:url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg%3E%3Cpath d='M13.3328 4L6.0002 11.3328L2.6672 7.99971' stroke-width='1.8' stroke-linecap='round' stroke='%23147563'/%3E%3C/g%3E%3C/svg%3E")}
+.marke.absprache,.status.absprache{--zs:url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg%3E%3Cpath d='M14.6672 11.3334C14.6672 11.687 14.5267 12.0261 14.2766 12.2762C14.0266 12.5262 13.6874 12.6667 13.3338 12.6667H4.55172C4.1981 12.6668 3.85899 12.8073 3.60898 13.0574L2.14086 14.5254C2.07466 14.5916 1.99032 14.6367 1.8985 14.6549C1.80669 14.6732 1.71152 14.6638 1.62503 14.628C1.53854 14.5922 1.46461 14.5315 1.4126 14.4537C1.36058 14.3758 1.33281 14.2843 1.3328 14.1907V3.33334C1.3328 2.97972 1.47329 2.64058 1.72336 2.39053C1.97342 2.14048 2.31259 2 2.66624 2H13.3338C13.6874 2 14.0266 2.14048 14.2766 2.39053C14.5267 2.64058 14.6672 2.97972 14.6672 3.33334V11.3334Z' stroke-width='1.8' stroke-linecap='round' stroke='%23906017'/%3E%3C/g%3E%3C/svg%3E")}
+.marke.verein,.status.verein{--zs:url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg%3E%3Cpath d='M13.3328 8.66667C13.3328 12.0001 10.9997 13.6668 8.22664 14.6335C8.08143 14.6827 7.9237 14.6804 7.78002 14.6269C5.0003 13.6668 2.6672 12.0001 2.6672 8.66667V3.99985C2.6672 3.82304 2.73743 3.65346 2.86244 3.52843C2.98745 3.4034 3.15701 3.33316 3.3338 3.33316C4.667 3.33316 6.3335 2.53314 7.49338 1.51977C7.63461 1.3991 7.81425 1.3328 8 1.3328C8.18575 1.3328 8.36539 1.3991 8.50662 1.51977C9.67317 2.53981 11.333 3.33316 12.6662 3.33316C12.843 3.33316 13.0125 3.4034 13.1376 3.52843C13.2626 3.65346 13.3328 3.82304 13.3328 3.99985V8.66667Z' stroke-width='1.8' stroke-linecap='round' stroke='%23526884'/%3E%3C/g%3E%3C/svg%3E")}
+.marke.zu,.status.zu{--zs:url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg%3E%3Cpath d='M4.66667 6.66656V4.6664C4.66667 3.78227 5.01786 2.93436 5.64298 2.30919C6.2681 1.68402 7.11595 1.3328 8 1.3328C8.88406 1.3328 9.7319 1.68402 10.357 2.30919C10.9821 2.93436 11.3333 3.78227 11.3333 4.6664V6.66656M4.66667 6.66656H3.33333C2.59695 6.66656 2 7.26356 2 8V13.3338C2 14.0702 2.59695 14.6672 3.33333 14.6672H12.6667C13.403 14.6672 14 14.0702 14 13.3338V8C14 7.26356 13.403 6.66656 12.6667 6.66656H11.3333M4.66667 6.66656H11.3333M8.66667 10.6669C8.66667 11.0351 8.36819 11.3336 8 11.3336C7.63181 11.3336 7.33333 11.0351 7.33333 10.6669C7.33333 10.2987 7.63181 10.0002 8 10.0002C8.36819 10.0002 8.66667 10.2987 8.66667 10.6669Z' stroke-width='1.8' stroke-linecap='round' stroke='%23626775'/%3E%3C/g%3E%3C/svg%3E")}
 .marke.frei{background:var(--frei-bg);color:var(--frei)}
 .marke.absprache{background:var(--absprache-bg);color:var(--absprache)}
-.marke.vermutet{background:transparent;color:var(--frei);box-shadow:inset 0 0 0 1.5px #8FD9A3}
+.marke.vermutet{background:transparent;color:var(--frei);box-shadow:inset 0 0 0 1px var(--frei);opacity:.9}
 .marke.unklar{background:var(--unklar-bg);color:var(--unklar)}
+.marke.zu{background:var(--zu-bg);color:var(--zu)}
 .marke.verein{background:var(--verein-bg);color:var(--verein);margin-left:0}
 .marke.boden{margin-left:0}
 .marke.boden.gut{background:var(--frei-bg);color:var(--frei)}
 .marke.boden.mittel{background:var(--absprache-bg);color:var(--absprache)}
-.marke.boden.schlecht{background:var(--zu-bg);color:var(--zu)}
-.marke.warnung{background:var(--zu-bg);color:var(--zu);margin-left:0}
+.marke.boden.schlecht{background:var(--warnung-bg);color:var(--warnung)}
+.marke.warnung{background:var(--warnung-bg);color:var(--warnung);margin-left:0}
 .marke.bestaetigt{background:var(--frei-bg);color:var(--frei);margin-left:0}
 .marke.live{background:var(--frei-bg);color:var(--frei);margin-left:0}
 
@@ -408,12 +454,13 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
 .los-titel small{font-size:12.5px;font-weight:500;color:var(--tinte-3);margin-left:auto}
 .los-karte.live{background:var(--frei-bg)}
 .los-karte.spiel{background:var(--flaeche);border-color:var(--gruen-tief)}
-.los-karte.ansetzen{background:linear-gradient(140deg,#0B9463,#06603F);color:#fff}
-.los-karte.ansetzen .los-art,.los-karte.ansetzen small{color:rgba(255,255,255,.85)}
+.los-karte.ansetzen{background:#164AF2;color:#F7F4EB}
+.los-karte.ansetzen .los-art{color:#E2EF83}
+.los-karte.ansetzen small{color:rgba(247,244,235,.85)}
 .los-pille{position:absolute;left:50%;top:14px;transform:translateX(-50%);z-index:500;
   font-family:var(--schrift);font-size:13.5px;font-weight:600;padding:9px 16px;border:0;
-  border-radius:var(--r-pille);background:var(--gruen-tief);color:#fff;cursor:pointer;
-  box-shadow:0 2px 10px rgba(15,26,21,.25);display:flex;align-items:center;gap:6px;white-space:nowrap}
+  border-radius:var(--r-pille);background:var(--gruen);color:var(--auf-akzent);cursor:pointer;
+  box-shadow:var(--schatten-karte);display:flex;align-items:center;gap:6px;white-space:nowrap}
 .los-pille[hidden]{display:none}
 .bereich-knopf:not([hidden]) ~ .los-pille{top:62px}
 /* Leiste und Überschrift scrollen mit der Liste mit – sonst bleibt auf
@@ -463,7 +510,7 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
   font-size:13px;font-weight:600;letter-spacing:-.004em;color:var(--gruen-tief);
   cursor:pointer;padding:6px 13px;border-radius:var(--r-pille);
   transition:background 160ms var(--feder-schnell),transform var(--druck)}
-.inline-knopf:hover{background:#D8EDE3}
+.inline-knopf:hover{background:rgba(22,74,242,.14)}
 
 /* ---------- Detail ---------- */
 .dkopf{padding:22px 20px 16px;flex-shrink:0}
@@ -513,7 +560,7 @@ label.inline-knopf{display:inline-block;margin-top:10px}
 .form label{display:block;font-size:13px;font-weight:600;color:var(--tinte-2);
   margin:18px 0 7px;letter-spacing:-.002em;text-transform:none}
 .form input,.form select,.form textarea{width:100%;font-family:var(--schrift);
-  font-size:15px;padding:13px 15px;border:1.5px solid transparent;
+  font-size:15px;padding:13px 15px;border:1px solid var(--kante);
   background:var(--flaeche);color:var(--tinte);border-radius:var(--r-feld);
   box-shadow:0 1px 2px rgba(15,26,21,.05);appearance:none;-webkit-appearance:none;
   font-weight:450;letter-spacing:-.002em;
@@ -521,7 +568,7 @@ label.inline-knopf{display:inline-block;margin-top:10px}
 .form select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1.5 1.5L6 6l4.5-4.5' stroke='%237C8B83' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:right 15px center;padding-right:38px}
 .form input:focus,.form select:focus,.form textarea:focus{outline:0;
-  border-color:var(--gruen);box-shadow:0 0 0 4px rgba(11,148,99,.13)}
+  border-color:var(--gruen);box-shadow:0 0 0 4px rgba(22,74,242,.13)}
 .form textarea{resize:vertical;min-height:74px;line-height:1.55}
 .gesperrt{opacity:.5}
 .hinweis{font-size:13px;color:var(--tinte-3);margin-top:14px;line-height:1.6}
@@ -540,25 +587,26 @@ label.inline-knopf{display:inline-block;margin-top:10px}
 /* ---------- Fußleiste: zweite Materialschicht (§12) ---------- */
 .fuss{padding:14px 20px calc(14px + env(safe-area-inset-bottom,0));flex-shrink:0;
   display:flex;gap:9px;
-  background:rgba(246,248,246,.78);
-  backdrop-filter:saturate(180%) blur(22px);
-  -webkit-backdrop-filter:saturate(180%) blur(22px);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.7)}
+  background:rgba(241,239,232,.9);
+  backdrop-filter:saturate(160%) blur(18px);
+  -webkit-backdrop-filter:saturate(160%) blur(18px);
+  box-shadow:inset 0 1px 0 var(--kante)}
 .knopf{flex:1;font-family:var(--schrift);font-size:14.5px;font-weight:600;
-  letter-spacing:-.008em;padding:14px 16px;border:0;border-radius:var(--r-pille);
-  background:var(--gruen);color:#fff;cursor:pointer;line-height:1.25;
+  letter-spacing:-.008em;padding:13px 20px;min-height:48px;border:0;border-radius:var(--r-pille);
+  background:var(--gruen);color:var(--auf-akzent);cursor:pointer;line-height:1.25;
   transition:background 160ms var(--feder-schnell),box-shadow 200ms var(--feder),
              transform var(--druck)}
 .knopf:hover{background:var(--gruen-tief)}
 /* §12 Nie helles Milchglas auf hellem Milchglas – der Zweitknopf ist deckend. */
-.knopf.zweit{background:var(--flaeche);color:var(--tinte);box-shadow:var(--schatten)}
-.knopf.zweit:hover{box-shadow:var(--schatten-hoch)}
+.knopf.zweit{background:var(--flaeche);color:var(--gruen);box-shadow:inset 0 0 0 1px var(--kante)}
+.knopf:disabled{background:var(--kante);color:var(--tinte-2);cursor:default}
+.knopf.zweit:hover{box-shadow:inset 0 0 0 1px var(--tinte-3)}
 .knopf:focus-visible{outline:2px solid var(--gruen);outline-offset:2px}
 
 /* ---------- Meldung ---------- */
 /* §7 Räumliche Konsistenz: taucht von unten auf und verschwindet nach unten. */
 #meldung{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(90px);
-  background:var(--tinte);color:#fff;padding:14px 24px;font-size:14px;font-weight:600;
+  background:var(--tinte);color:var(--grund);padding:14px 24px;font-size:14px;font-weight:600;
   letter-spacing:-.006em;border-radius:var(--r-pille);z-index:1000;
   max-width:88vw;text-align:center;box-shadow:0 10px 34px rgba(15,26,21,.28);
   transition:transform 420ms var(--feder)}
@@ -581,16 +629,16 @@ label.inline-knopf{display:inline-block;margin-top:10px}
 
 /* ---------- Marker ---------- */
 .eigenermarker{background:none;border:0}
-.mk{width:15px;height:15px;border:3px solid #fff;border-radius:50%;
+.mk{width:15px;height:15px;border:3px solid #F7F4EB;border-radius:50%;
   box-shadow:0 2px 6px rgba(15,26,21,.3);transition:transform 180ms var(--feder)}
 .eigenermarker:hover .mk{transform:scale(1.25)}
 /* Bündel: mehrere Orte nah beieinander, Zahl in der Mitte. Der farbige
    Ring zeigt die beste Zugangsangabe darin (grün = mindestens ein freier). */
 .buendel{background:none;border:0}
 .buendel span{display:flex;align-items:center;justify-content:center;box-sizing:border-box;
-  border-radius:50%;background:rgba(255,255,255,.95);border:3px solid var(--ring);
-  color:#0F1A15;font:700 12.5px/1 var(--schrift);letter-spacing:-.01em;
-  box-shadow:0 2px 8px rgba(15,26,21,.25);cursor:pointer;
+  border-radius:14px;background:var(--flaeche);border:1.5px solid var(--tinte);
+  color:var(--tinte);font:700 13px/1 var(--schrift);letter-spacing:-.01em;
+  box-shadow:inset 0 -3px 0 var(--ring),var(--schatten-karte);cursor:pointer;
   transition:transform 180ms var(--feder)}
 .buendel:hover span{transform:scale(1.08)}
 /* Im Bündel wird gerade gespielt: kleiner grüner Punkt oben rechts.
@@ -616,11 +664,11 @@ label.inline-knopf{display:inline-block;margin-top:10px}
   aside{position:fixed;left:0;right:0;bottom:0;z-index:10;
     height:94dvh;width:100%;border-left:0;
     border-radius:22px 22px 0 0;
-    background:rgba(246,248,246,.94);
-    backdrop-filter:saturate(180%) blur(24px);
-    -webkit-backdrop-filter:saturate(180%) blur(24px);
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.8),
-               0 -8px 34px -10px rgba(15,26,21,.22);
+    border-radius:28px 28px 0 0;
+    background:rgba(241,239,232,.97);
+    backdrop-filter:saturate(160%) blur(20px);
+    -webkit-backdrop-filter:saturate(160%) blur(20px);
+    box-shadow:0 -1px 0 var(--kante),0 -8px 30px -12px rgba(32,44,64,.25);
     /* Startposition wird beim Laden per JS gesetzt. */
     transform:translateY(52vh);
     will-change:transform;
@@ -631,9 +679,9 @@ label.inline-knopf{display:inline-block;margin-top:10px}
     touch-action:none;-webkit-tap-highlight-color:transparent}
   .griff::before{content:"";position:absolute;top:11px;left:50%;
     transform:translateX(-50%);width:40px;height:5px;border-radius:3px;
-    background:#C9D2CC;transition:background 160ms var(--feder-schnell)}
+    background:#C9C7BE;transition:background 160ms var(--feder-schnell)}
   .griff:active{cursor:grabbing}
-  .griff:active::before{background:#A9B5AD}
+  .griff:active::before{background:#A9A79E}
   .griff:focus-visible{outline:2px solid var(--gruen);outline-offset:-4px;border-radius:12px}
 
   #seite{height:calc(var(--sichtbar, 68dvh) - 34px);min-height:0}
@@ -665,7 +713,7 @@ label.inline-knopf{display:inline-block;margin-top:10px}
     background:transparent;color:var(--tinte-2);font-family:var(--schrift);font-size:14px;
     line-height:1.4;cursor:pointer}
   .eintragen-karte > span:first-child{width:40px;height:40px;flex-shrink:0;border-radius:50%;
-    display:grid;place-items:center;background:var(--gruen);color:#fff;font-size:22px;font-weight:700}
+    display:grid;place-items:center;background:var(--gruen);color:var(--auf-akzent);font-size:22px;font-weight:700}
   .eintragen-karte b{color:var(--tinte);font-size:15.5px}
   .admin-reihe{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
   .admin-reihe .knopf{font-size:13.5px;padding:11px 8px}
@@ -673,7 +721,7 @@ label.inline-knopf{display:inline-block;margin-top:10px}
 
   /* Kompaktere Karten: mehr Plätze auf einen Blick. */
   .zeile{padding:12px 14px 12px 17px;margin-bottom:10px;gap:12px;align-items:center}
-  .luftbild{width:64px;height:64px;border-radius:14px}
+  .luftbild{width:64px;height:72px;border-radius:14px}
   .zname{font-size:16.5px}
   .zsub{font-size:13px;margin-top:1px}
 
@@ -714,7 +762,7 @@ label.inline-knopf{display:inline-block;margin-top:10px}
   .daemmerung{margin:0 20px 10px;padding:11px 14px;font-size:13px}
   .dkopf,.form{padding-left:16px;padding-right:16px}
   .fuss{padding:12px 20px calc(12px + env(safe-area-inset-bottom,0));
-    background:rgba(246,248,246,.86)}
+    background:rgba(241,239,232,.92)}
   .dname{font-size:24px;letter-spacing:-.024em}
 
   /* Beschriftungsspalte schmaler, sonst brechen kurze Wörter um. */
@@ -736,49 +784,44 @@ label.inline-knopf{display:inline-block;margin-top:10px}
    =========================================================================== */
 @media(prefers-color-scheme:dark){
   :root{
-    --gruen:#2BC98A;
-    --gruen-tief:#22B27A;
-    --gruen-zart:#12332A;
-    --grund:#0E1512;
-    --flaeche:#18211D;
-    --tinte:#EDF2EF;
-    --tinte-2:#B6C2BC;
-    --tinte-3:#86978E;
-    --kante:rgba(255,255,255,.10);
+    /* Abendlicht */
+    --gruen:#A9BEFF;
+    --gruen-tief:#BFCEFF;
+    --gruen-zart:rgba(169,190,255,.12);
+    --auf-akzent:#131E30;
+    --grund:#131E30;
+    --flaeche:#223047;
+    --tinte:#F7F4EB;
+    --tinte-2:#C1CDC9;
+    --tinte-3:#9AA6AE;
+    --kante:#44516A;
 
-    --frei:#4FD182;         --frei-bg:#14331F;
-    --absprache:#F0AE4E;    --absprache-bg:#35270F;
-    --zu:#F2705F;           --zu-bg:#3A1B18;
-    --verein:#A996F5;       --verein-bg:#241E3D;
-    --unklar:#93A39B;       --unklar-bg:#1E2724;
-
-    --schatten:0 1px 2px rgba(0,0,0,.4), 0 6px 18px -6px rgba(0,0,0,.5);
-    --schatten-hoch:0 2px 4px rgba(0,0,0,.45), 0 14px 32px -10px rgba(0,0,0,.6);
+    --frei:#8CDBBF;         --frei-bg:rgba(140,219,191,.10);
+    --absprache:#F1C477;    --absprache-bg:rgba(241,196,119,.10);
+    --zu:#C6CAD1;           --zu-bg:rgba(198,202,209,.10);
+    --verein:#B6CBE9;       --verein-bg:rgba(182,203,233,.10);
+    --unklar:#C1CDC9;       --unklar-bg:rgba(198,202,209,.08);
+    --warnung:#F2A196;      --warnung-bg:rgba(242,161,150,.10);
+    --schatten-karte:0 2px 10px rgba(0,0,0,.45);
   }
-  header{background:rgba(24,33,29,.72);
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 1px 0 rgba(0,0,0,.35)}
-  .fuss{background:rgba(14,21,18,.78);box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
-  .adminknopf{color:#08211A}
+  header{background:rgba(19,30,48,.86);box-shadow:0 1px 0 var(--kante)}
+  .fuss{background:rgba(19,30,48,.86);box-shadow:inset 0 1px 0 var(--kante)}
   /* Aktiver Filter: heller Grund braucht dunkle Schrift, sonst Weiß auf Weiß. */
-  .chip[aria-pressed="true"]{color:var(--grund)}
-  .knopf{color:#08211A}
-  .knopf.zweit{color:var(--tinte)}
+
   .inline-knopf{color:var(--gruen)}
-  #karte{background:#141B18}
-  .luftbild{background:#141B18;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
-  .bereich-knopf{background:rgba(24,33,29,.9);color:var(--tinte)}
-  .bereich-knopf:hover{background:#18211D}
-  .buendel span{background:rgba(24,33,29,.95);color:var(--tinte)}
-  #meldung{background:#E9F0EC;color:#0E1512}
-  .stern{color:#3A4844}
+  #karte{background:#131E30}
+  .bereich-knopf{background:rgba(34,48,71,.94);color:var(--tinte)}
+  .bereich-knopf:hover{background:#223047}
+  #meldung{background:#F7F4EB;color:#131E30}
+  .stern{color:#44516A}
   .form input,.form select,.form textarea{border-color:var(--kante)}
   .form select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1.5 1.5L6 6l4.5-4.5' stroke='%2386978E' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
   .daten tr:not(:last-child) th,.daten tr:not(:last-child) td{
     border-bottom:1px solid rgba(255,255,255,.07)}
-  aside{background:rgba(14,21,18,.94)}
-  .griff::before{background:#3A4844}
-  .griff:active::before{background:#4E605A}
-  .leaflet-control-zoom a,.leaflet-control-layers,.standort-knopf a{background:#18211D!important;
+  aside{background:rgba(19,30,48,.96)}
+  .griff::before{background:#44516A}
+  .griff:active::before{background:#5A6884}
+  .leaflet-control-zoom a,.leaflet-control-layers,.standort-knopf a{background:#223047!important;
     color:var(--tinte)!important}
 }
 
@@ -806,7 +849,7 @@ label.inline-knopf{display:inline-block;margin-top:10px}
 }
 
 @media(prefers-contrast:more){
-  :root{--kante:rgba(15,26,21,.35);--tinte-3:#4A574F}
+  :root{--kante:#9A9A92;--tinte-3:#4A515A}
   header,.fuss{background:#fff;backdrop-filter:none;-webkit-backdrop-filter:none}
   .zeile,.abschnitt,.daten,.leer,.daemmerung{border:1.5px solid var(--kante)}
   .chip{border:1.5px solid var(--kante)}
@@ -820,9 +863,9 @@ label.inline-knopf{display:inline-block;margin-top:10px}
 <body>
 
 <header>
-  <h1 style="display:flex;align-items:center;gap:8px">
-    <svg width="22" height="22" viewBox="0 0 512 512" aria-hidden="true"><path fill="#2CA93F" d="M256 484C232 440 196 402 160 368C116 326 84 280 84 218a172 172 0 1 1 344 0c0 62-32 108-76 150c-36 34-72 72-96 116Z"/><g stroke="#FFF" stroke-width="25" fill="none"><circle cx="256" cy="218" r="136"/><line x1="120" y1="218" x2="392" y2="218"/><circle cx="256" cy="218" r="50"/><rect x="198" y="70" width="116" height="56" rx="10"/><rect x="198" y="310" width="116" height="56" rx="10"/></g></svg>
-    platzfrei <em>— wo darf ich spielen?</em>
+  <h1>
+    <svg class="pf-marke" width="24" height="24" viewBox="0 0 38 38" aria-hidden="true"><path fill-rule="evenodd" d="M0 0H23.75C32.6562 0 38 5.34375 38 14.25V16.625C38 24.9375 32.6562 29.6875 23.75 29.6875H11.875V38H0V0ZM11.875 7.125H28.5V13.0625H17.8125V16.625H26.125V22.5625H17.8125V26.125H11.875V7.125Z"/></svg>
+    platzfrei <em>wo darf ich spielen?</em>
   </h1>
   <nav class="kopfnav" aria-label="Seiten">
     <button data-gehe="liste" data-nav="liste">Karte</button>
@@ -1236,21 +1279,24 @@ const ebenenSchalter = L.control.layers(
 let markerEbene = L.layerGroup().addTo(karte);
 let ichMarker = null;
 
+/* Zugangsfarben aus dem Markensystem (frei Grünblau, Absprache Ocker,
+   Verein Stahlblau, nicht zugänglich Schiefer). Ungeklärt bleibt hellgrau. */
+const GRAU = "#A9AAA3";
 const FARBE = {
-  "öffentlich":"#34C759",
-  "vermutlich öffentlich":"#8FD9A3",
-  "vermutlich Schulhof":"#FFC978",
-  "Vereinsgelände frei betretbar":"#34C759",
-  "Vereinsgelände nach Absprache":"#FF9F0A",
-  "Schulhof nach Unterricht":"#FF9F0A",
-  "Vereinsgelände abgeschlossen":"#FF3B30",
-  "unklar":"#8E8E93"
+  "öffentlich":"#147563",
+  "vermutlich öffentlich":"#6FAE9F",
+  "vermutlich Schulhof":"#C49A5A",
+  "Vereinsgelände frei betretbar":"#147563",
+  "Vereinsgelände nach Absprache":"#906017",
+  "Schulhof nach Unterricht":"#906017",
+  "Vereinsgelände abgeschlossen":"#626775",
+  "unklar":GRAU
 };
 function farbe(o){
   // Ungeklärt, aber Vereinshinweis: eigene Farbe, damit man auf der Karte
   // sofort sieht, wo man besser erst fragt.
-  if (o.zugang === "unklar" && vereinsMarke(o)) return "#7A5EA8";
-  return FARBE[o.zugang] || "#8E8E93";
+  if (o.zugang === "unklar" && vereinsMarke(o)) return "#526884";
+  return FARBE[o.zugang] || GRAU;
 }
 
 /* Bei wenigen Orten wären einzelne HTML-Marker fein – bei tausenden wird der
@@ -1271,7 +1317,7 @@ const BUENDEL_BIS_ZOOM = 13;   // bis hier bündeln, ab 14 einzelne Punkte
 const BUENDEL_ZELLE = 90;      // Bündelgröße in Bildschirmpunkten
 
 /* Welche Farbe ein Bündel bekommt: die "beste" Nachricht darin gewinnt. */
-const BUENDEL_RANG = ["#34C759", "#8FD9A3", "#FF9F0A", "#FFC978", "#7A5EA8", "#FF3B30", "#8E8E93"];
+const BUENDEL_RANG = ["#147563", "#6FAE9F", "#906017", "#C49A5A", "#526884", "#626775", GRAU];
 
 function punktZeichnen(o){
   const spiel = naechstesSpiel(o.id);
@@ -1285,15 +1331,15 @@ function punktZeichnen(o){
       icon: L.divIcon({ className:"live-ring", html:"<span></span>", iconSize:[30,30] }),
       interactive:false, keyboard:false
     }).addTo(markerEbene);
-  const grau = farbe(o) === "#8E8E93";
+  const grau = farbe(o) === GRAU;
   const gewaehlt = String(o.id) === String(Z.auswahlId);
   const klein = karte.getZoom() < 15;
   L.circleMarker([o.lat, o.lon], {
     renderer: stift,
-    radius: gewaehlt ? 9 : grau ? (klein ? 4 : 5) : (klein ? 6 : 7),
-    color: gewaehlt ? "#0F1A15" : "#fff",
+    radius: gewaehlt ? 10 : grau ? (klein ? 4 : 5) : (klein ? 6 : 7),
+    color: gewaehlt ? "#E2EF83" : "#F7F4EB",
     weight: gewaehlt ? 3 : grau ? 1.5 : 2,
-    fillColor: farbe(o), fillOpacity: grau && !gewaehlt ? .6 : 1
+    fillColor: gewaehlt ? "#164AF2" : farbe(o), fillOpacity: grau && !gewaehlt ? .7 : 1
   })
   .on("click", () => {
     Z.auswahlId=o.id; Z.ansicht="detail"; zeichne();
@@ -1344,7 +1390,7 @@ function markerZeichnen(){
   const imBild = sichtbareOrte().filter(o => rahmen.contains([o.lat, o.lon]));
 
   /* Graue zuerst, damit die farbigen obenauf liegen. */
-  const grauZuerst = (a,b) => (farbe(b) === "#8E8E93") - (farbe(a) === "#8E8E93");
+  const grauZuerst = (a,b) => (farbe(b) === GRAU) - (farbe(a) === GRAU);
 
   if (karte.getZoom() > BUENDEL_BIS_ZOOM) {
     imBild.sort(grauZuerst).forEach(punktZeichnen);
@@ -1499,7 +1545,7 @@ function markeArt(o){
   if (o.zugang === "vermutlich Schulhof") return ["absprache","vermutlich Schulhof"];
   if (o.zugang.includes("Absprache")||o.zugang.includes("Schulhof"))
     return ["absprache","nach Absprache"];
-  return ["unklar", o.zugang==="unklar" ? "Zugang unklar" : "nicht zugänglich"];
+  return o.zugang==="unklar" ? ["unklar","Zugang unklar"] : ["zu","nicht zugänglich"];
 }
 
 /* Vereinsanlage: sicher, wenn der Zugang es sagt – sonst Verdacht aus dem
@@ -1686,45 +1732,41 @@ const seite = document.getElementById("seite");
 /* Kleines Bild für die Liste: eine gezeichnete Spielfläche passend zur
    ersten Sportart (bei Fußball auch zum Untergrund), keine Fotos. */
 function platzBild(o){
+  /* Markensystem: präzise Feldlinien auf mattem Kobalt, ein kleiner
+     zitroniger Spielimpuls. Hochformat, wie die Platzkarte in Figma. */
   const sport = o.sportarten[0] || "Fußball";
-  const L = 'fill="none" stroke="#fff" stroke-width="1.6" stroke-opacity=".9"';
-  let bild;
-  if (sport === "Basketball") bild = `<rect width="56" height="56" fill="#D9824A"/>
-    <rect x="0" y="0" width="56" height="28" fill="#E08D55"/>
-    <g ${L}><rect x="5" y="6" width="46" height="44" rx="1"/><line x1="5" y1="28" x2="51" y2="28"/>
-    <circle cx="28" cy="28" r="6"/><rect x="20" y="6" width="16" height="11"/><rect x="20" y="39" width="16" height="11"/></g>`;
-  else if (sport === "Tischtennis") bild = `<rect width="56" height="56" fill="#5E7F6B"/>
-    <rect x="10" y="8" width="36" height="40" rx="2" fill="#1F5FA8"/>
-    <g ${L}><rect x="10" y="8" width="36" height="40" rx="2"/><line x1="28" y1="8" x2="28" y2="48"/></g>
-    <line x1="7" y1="28" x2="49" y2="28" stroke="#0F1A15" stroke-width="2.4"/>`;
-  else if (sport === "Beachvolleyball") bild = `<rect width="56" height="56" fill="#E6CB8E"/>
-    <circle cx="14" cy="16" r="1" fill="#C9AC6C"/><circle cx="40" cy="40" r="1" fill="#C9AC6C"/><circle cx="38" cy="12" r="1" fill="#C9AC6C"/>
-    <g fill="none" stroke="#2F6FB8" stroke-width="1.6"><rect x="7" y="8" width="42" height="40"/></g>
-    <line x1="4" y1="28" x2="52" y2="28" stroke="#0F1A15" stroke-width="2.2" stroke-dasharray="2 1.2"/>`;
-  else if (sport === "Laufen") bild = `<rect width="56" height="56" fill="#C4553D"/>
-    <g fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="1.2">
-    <rect x="4" y="5" width="48" height="46" rx="20"/><rect x="9" y="10" width="38" height="36" rx="15"/></g>
-    <rect x="14" y="15" width="28" height="26" rx="11" fill="#3E9A54"/>`;
-  else if (sport === "Skaten") bild = `<rect width="56" height="56" fill="#A3ABA7"/>
-    <path d="M0 36 Q18 36 24 56 L0 56Z" fill="#8A938F"/><path d="M56 22 Q36 24 32 0 L56 0Z" fill="#8A938F"/>
-    <path d="M0 36 Q18 36 24 56" fill="none" stroke="#6E7773" stroke-width="1.6"/>
-    <path d="M56 22 Q36 24 32 0" fill="none" stroke="#6E7773" stroke-width="1.6"/>`;
-  else if (sport === "Calisthenics") bild = `<rect width="56" height="56" fill="#45574F"/>
-    <g stroke="#C8D2CD" stroke-width="2.4" stroke-linecap="round">
-    <line x1="12" y1="14" x2="44" y2="14"/><line x1="12" y1="14" x2="12" y2="46"/><line x1="44" y1="14" x2="44" y2="46"/>
-    <line x1="22" y1="30" x2="34" y2="30"/></g>`;
-  else {
-    const asche = /asche|tenne/i.test(o.untergrund || "");
-    const [a, b] = asche ? ["#B8673F", "#C2724A"] : ["#3E9A54", "#48A85E"];
-    bild = `<rect width="56" height="56" fill="${a}"/>
-      <rect x="0" y="0" width="56" height="11" fill="${b}"/><rect x="0" y="22" width="56" height="11" fill="${b}"/><rect x="0" y="44" width="56" height="12" fill="${b}"/>
-      <g ${L}><rect x="5" y="6" width="46" height="44" rx="1"/><line x1="5" y1="28" x2="51" y2="28"/>
-      <circle cx="28" cy="28" r="7"/><rect x="17" y="6" width="22" height="9"/><rect x="17" y="41" width="22" height="9"/></g>`;
-  }
-  return `<span class="luftbild platzbild" aria-hidden="true"><svg viewBox="0 0 56 56" preserveAspectRatio="xMidYMid slice">${bild}</svg>${
-    SPORT_ICON[sport] ? `<i>${SPORT_ICON[sport]}</i>` : ``}</span>`;
+  const L = 'fill="none" stroke="#F7F4EB" stroke-opacity=".82" stroke-width="1.6"';
+  let linien, ball = [44, 52];
+  if (sport === "Basketball") linien = `<rect x="6" y="7" width="52" height="58" rx="1"/>
+    <line x1="6" y1="36" x2="58" y2="36"/><circle cx="32" cy="36" r="6"/>
+    <rect x="23" y="7" width="18" height="13"/><rect x="23" y="52" width="18" height="13"/>
+    <path d="M14 7v6a18 18 0 0 0 36 0V7M14 65v-6a18 18 0 0 1 36 0v6"/>`;
+  else if (sport === "Tischtennis") { linien = `<rect x="14" y="12" width="36" height="48" rx="1"/>
+    <line x1="32" y1="12" x2="32" y2="60"/><line x1="9" y1="36" x2="55" y2="36" stroke-width="2.4" stroke-opacity="1"/>`; ball = [40, 24]; }
+  else if (sport === "Beachvolleyball") linien = `<rect x="9" y="9" width="46" height="54" rx="1"/>
+    <line x1="4" y1="36" x2="60" y2="36" stroke-dasharray="2.5 1.5" stroke-width="2.2"/>`;
+  else if (sport === "Laufen") { linien = `<rect x="6" y="6" width="52" height="60" rx="24"/>
+    <rect x="12" y="12" width="40" height="48" rx="18"/><line x1="6" y1="36" x2="12" y2="36"/>`; ball = [32, 36]; }
+  else if (sport === "Skaten") linien = `<path d="M4 46 Q24 46 30 70"/><path d="M60 24 Q38 26 34 2"/>
+    <path d="M4 52 Q20 52 25 70" stroke-opacity=".4"/>`;
+  else if (sport === "Calisthenics") { linien = `<g stroke-width="2.4" stroke-linecap="round">
+    <line x1="14" y1="18" x2="50" y2="18"/><line x1="14" y1="18" x2="14" y2="58"/><line x1="50" y1="18" x2="50" y2="58"/>
+    <line x1="24" y1="38" x2="40" y2="38"/></g>`; ball = [32, 50]; }
+  else linien = `<rect x="6" y="7" width="52" height="58" rx="1"/><line x1="6" y1="36" x2="58" y2="36"/>
+    <circle cx="32" cy="36" r="7"/><rect x="18" y="7" width="28" height="11"/><rect x="18" y="54" width="28" height="11"/>
+    <rect x="25" y="7" width="14" height="4"/><rect x="25" y="61" width="14" height="4"/>`;
+  return `<span class="luftbild platzbild" aria-hidden="true"><svg viewBox="0 0 64 72" preserveAspectRatio="xMidYMid slice">
+    <rect width="64" height="72" fill="#164AF2"/><g ${L}>${linien}</g>
+    <circle cx="${ball[0]}" cy="${ball[1]}" r="3.2" fill="#E2EF83"/></svg>${
+    SPORT_KLASSE[sport] ? `<i>${sportIcon(sport)}</i>` : ``}</span>`;
 }
 
+/* Linien-Sporticons aus dem Markensystem (CSS-Klassen .ic-…) */
+const SPORT_KLASSE = { "Fußball":"fussball", "Basketball":"basketball", "Tischtennis":"tischtennis",
+  "Beachvolleyball":"beachvolleyball", "Laufen":"laufen", "Calisthenics":"calisthenics", "Skaten":"skaten" };
+function sportIcon(s){
+  return SPORT_KLASSE[s] ? `<span class="sport-ic ic-${SPORT_KLASSE[s]}" aria-hidden="true"></span>` : ``;
+}
 const SPORT_ICON = { "Fußball":"⚽", "Basketball":"🏀", "Tischtennis":"🏓",
   "Beachvolleyball":"🏐", "Laufen":"🏃", "Calisthenics":"💪", "Skaten":"🛹" };
 
@@ -1826,7 +1868,7 @@ function ansichtListe(nurListe){
 
   const sportChips = ["alle", ...AUSWAHL.sportarten].map(s=>
     `<button class="chip" data-sport="${esc(s)}" aria-pressed="${Z.sportart===s}">${
-       SPORT_ICON[s] ? `<span class="chip-icon" aria-hidden="true">${SPORT_ICON[s]}</span>` : ``}${
+       sportIcon(s)}${
        s==="alle"?"Alle Sportarten":esc(s)}</button>`).join("");
 
   const zeilen = orte.length ? orte.map(o=>{
@@ -1907,7 +1949,7 @@ function ansichtListe(nurListe){
 
   seite.innerHTML = `
     <div class="suche">
-      <svg class="suche-logo" width="20" height="20" viewBox="0 0 512 512" aria-hidden="true"><path fill="#2CA93F" d="M256 484C232 440 196 402 160 368C116 326 84 280 84 218a172 172 0 1 1 344 0c0 62-32 108-76 150c-36 34-72 72-96 116Z"/><g stroke="#FFF" stroke-width="25" fill="none"><circle cx="256" cy="218" r="136"/><line x1="120" y1="218" x2="392" y2="218"/><circle cx="256" cy="218" r="50"/></g></svg>
+      <svg class="suche-logo pf-marke" width="18" height="18" viewBox="0 0 38 38" aria-hidden="true" style="color:var(--gruen)"><path fill-rule="evenodd" d="M0 0H23.75C32.6562 0 38 5.34375 38 14.25V16.625C38 24.9375 32.6562 29.6875 23.75 29.6875H11.875V38H0V0ZM11.875 7.125H28.5V13.0625H17.8125V16.625H26.125V22.5625H17.8125V26.125H11.875V7.125Z"/></svg>
       <input id="suchfeld" type="search" enterkeyhint="search" autocomplete="off"
         placeholder="Platz, Ort oder Sportart suchen" value="${esc(Z.suche)}"
         aria-label="Platz, Ort oder Sportart suchen">
@@ -2248,7 +2290,7 @@ function ansichtDetail(){
 
   const [statusArt, statusText] = markeArt(o);
   adresseErgaenzen(o);
-  const statusIcon = statusArt === "frei" || statusArt === "vermutet" ? "✓" : statusArt === "absprache" ? "!" : "?";
+  const statusIcon = statusArt === "unklar" ? "?" : "";
 
   seite.innerHTML = `
     <div class="dkopf">
@@ -2260,7 +2302,7 @@ function ansichtDetail(){
     <div class="rolle">
       <!-- Das Wichtigste zuerst: Darf ich hier spielen, und wann? -->
       <div class="status ${statusArt}">
-        <span class="status-icon" aria-hidden="true">${statusIcon}</span>
+        <span class="status-icon${statusIcon ? "" : " mit-symbol"}" aria-hidden="true">${statusIcon}</span>
         <span class="status-text"><b>${statusText.charAt(0).toUpperCase() + statusText.slice(1)}</b>
           <span>${o.bestaetigtDurch === "Lage (OSM)" ? "nach Lage in OpenStreetMap" : esc(o.zugang)}${o.zeiten && o.zeiten !== "unbekannt" ? ` · ${esc(o.zeiten)}` : ``}</span></span>
       </div>
