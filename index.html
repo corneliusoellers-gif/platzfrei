@@ -417,6 +417,39 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
   box-shadow:0 2px 10px rgba(15,26,21,.25);display:flex;align-items:center;gap:6px;white-space:nowrap}
 .los-pille[hidden]{display:none}
 .bereich-knopf:not([hidden]) ~ .los-pille{top:62px}
+
+/* ---------- Jetzt spielen, Auslastung, Einführung (Version 1.0) ---------- */
+.los-karte.jetzt{background:var(--flaeche);border-color:var(--gruen)}
+.los-karte.jetzt .los-art{color:var(--gruen-tief)}
+.auslastung{margin:12px 0 4px;padding:12px 14px;border-radius:var(--r-feld);background:var(--flaeche);box-shadow:var(--schatten)}
+.auslastung h4{margin:0 0 10px;font-size:14px;font-weight:700;color:var(--tinte)}
+.ausl-tage{display:flex;gap:4px;margin-bottom:12px}
+.ausl-tage button{flex:1;border:0;border-radius:var(--r-pille);padding:5px 0;font:inherit;font-size:12px;
+  font-weight:600;background:var(--grund);color:var(--tinte-2);cursor:pointer}
+.ausl-tage button[aria-pressed="true"]{background:var(--gruen);color:#fff}
+.ausl-balken{display:flex;align-items:flex-end;gap:3px;height:64px}
+.ausl-balken span{flex:1;background:var(--gruen);opacity:.32;border-radius:3px 3px 0 0;min-height:3px}
+.ausl-balken span.jetzt{opacity:1}
+.ausl-achse{display:flex;justify-content:space-between;font-size:11px;color:var(--tinte-3);margin-top:4px}
+.auslastung p{margin:10px 0 0;font-size:13px;line-height:1.4;color:var(--tinte-2)}
+.auslastung.ausl-leer{padding:10px 14px;box-shadow:none;background:var(--grund)}
+.auslastung.ausl-leer p{margin:0;font-size:12.5px;color:var(--tinte-3)}
+.einf{position:fixed;inset:0;z-index:3000;background:rgba(10,20,15,.55);display:flex;align-items:center;
+  justify-content:center;padding:16px;font-family:var(--schrift)}
+.einf-karte{background:var(--flaeche);color:var(--tinte);border-radius:24px;max-width:380px;width:100%;
+  padding:30px 24px 20px;box-shadow:var(--schatten-hoch);text-align:center;position:relative}
+.einf-weg{position:absolute;top:12px;right:14px;border:0;background:none;color:var(--tinte-3);font:inherit;
+  font-size:14px;cursor:pointer;padding:6px}
+.einf-bild{font-size:54px;line-height:1;height:84px;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.einf h2{margin:0 0 8px;font-size:22px;line-height:1.2}
+.einf p{margin:0;font-size:15px;line-height:1.45;color:var(--tinte-2)}
+.einf-legende{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;margin:18px 0 0;text-align:left;font-size:13.5px}
+.einf-legende span{display:flex;align-items:center;gap:8px}
+.einf-legende i{width:12px;height:12px;border-radius:50%;flex:none;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.18)}
+.einf-punkte{display:flex;justify-content:center;gap:6px;margin:22px 0 14px}
+.einf-punkte i{width:7px;height:7px;border-radius:50%;background:var(--tinte-3);opacity:.35}
+.einf-punkte i.an{background:var(--gruen);opacity:1}
+.einf .knopf{width:100%;margin:0}
 /* Leiste und Überschrift scrollen mit der Liste mit – sonst bleibt auf
    kleinen Bildschirmen kaum Platz für die Plätze. */
 .rolle .los{margin:4px -20px 16px}
@@ -1849,6 +1882,10 @@ function losLeiste(){
       <button class="inline-knopf" data-hier="${naechster.id}">Ich bin gerade hier</button></div>`);
   }
 
+  /* Jetzt spielen: der beste Platz für sofort */
+  const jetztK = jetztKarte();
+  if (jetztK) karten.push(jetztK);
+
   /* Wo gerade gespielt wird (ab 2 Personen) */
   const live = Object.entries(Z.aktiv).filter(([, n]) => n >= 2)
     .map(([id, n]) => ({ o: ort(id) || ort(+id), n })).filter(x => x.o)
@@ -1891,6 +1928,188 @@ function losLeiste(){
   return `<div class="los"><div class="los-titel">Was ist los in deiner Nähe${
       zahl ? `<small>${zahl} aktiv</small>` : ``}</div>
     <div class="los-leiste">${karten.join("")}</div></div>`;
+}
+
+/* --------------------------------------------------------------------------
+   "Jetzt spielen": ein Tipp, und die App nimmt den besten Platz in der Nähe
+   --------------------------------------------------------------------------
+   Frei zugänglich (oder von Nutzern bestätigt), zur gewählten Sportart
+   passend, nicht matschig und noch hell – sonst nur mit Flutlicht. Belegte
+   Plätze und Plätze, auf denen gerade gespielt wird, rücken etwas nach vorn.
+   -------------------------------------------------------------------------- */
+const JETZT_KM = 15;
+function jetztVorschlag(){
+  const bisDunkel = minutenBisDunkel();
+  const dunkel = !!Z.wetter?.sonnenuntergang && bisDunkel === null;
+  const lichtNoetig = dunkel || (bisDunkel !== null && bisDunkel < 45);
+  let best = null, bestWert = Infinity;
+  for (const o of DATEN) {
+    if (Math.abs(o.lat - Z.position.lat) > 0.14 || Math.abs(o.lon - Z.position.lon) > 0.21) continue;
+    if (Z.sportart !== "alle" && !o.sportarten.includes(Z.sportart)) continue;
+    const bestaetigt = nutzerBestaetigt(o);
+    if (!frei(o) && !vermutlichFrei(o) && !bestaetigt) continue;
+    if ((Z.meldungen[o.id] || 0) >= 3 && !bestaetigt) continue;
+    if (lichtNoetig && o.beleuchtung !== "ja") continue;
+    const bs = bespielbarkeit(o);
+    if (bs && bs[0] === "schlecht") continue;
+    const km = entfernungKm(Z.position, o);
+    if (km > JETZT_KM) continue;
+    let wert = km;
+    if (vermutlichFrei(o) && !bestaetigt) wert += 0.6;
+    if (belegt(o) || bestaetigt) wert -= 0.4;
+    if ((Z.aktiv[o.id] || 0) >= 2) wert -= 0.5;
+    if (wert < bestWert) { bestWert = wert; best = o; }
+  }
+  return best && { o:best, km:entfernungKm(Z.position, best), lichtNoetig, bisDunkel };
+}
+
+function jetztGrund(v){
+  const o = v.o, teile = [entfText(v.km)];
+  teile.push(frei(o) ? "frei" : nutzerBestaetigt(o) ? "von Nutzern bestätigt" : "vermutlich frei");
+  const bs = bespielbarkeit(o);
+  if (Z.wetter) teile.push(Z.wetter.regnetGleich ? "gleich Regen" : bs ? bs[1] : "trocken");
+  if (v.lichtNoetig) teile.push("mit Flutlicht");
+  else if (v.bisDunkel !== null && v.bisDunkel <= 180) teile.push(v.bisDunkel >= 120
+    ? `noch ${Math.floor(v.bisDunkel / 60)} h hell` : `noch ${v.bisDunkel} min hell`);
+  if ((Z.aktiv[o.id] || 0) >= 2) teile.push(`${Z.aktiv[o.id]} spielen gerade`);
+  return teile.join(" · ");
+}
+
+function jetztKarte(){
+  const v = jetztVorschlag();
+  if (!v) return null;
+  return `<button class="los-karte jetzt" data-jetzt="1">
+      <span class="los-art">⚡ Jetzt spielen</span>
+      <span class="los-name">${esc(v.o.name)}</span>
+      <small>${esc(jetztGrund(v))}</small></button>`;
+}
+
+function jetztSpielen(){
+  const v = jetztVorschlag();
+  if (!v) return melde(`Gerade kein passender Platz im Umkreis von ${JETZT_KM} km. Zu dunkel oder zu nass?`);
+  Z.auswahlId = v.o.id; Z.ansicht = "detail"; zeichne();
+  karte.flyTo([v.o.lat, v.o.lon], Math.max(karte.getZoom(), 16), { duration:.6 });
+  sheet.aufmachen();
+  melde("Jetzt spielen: " + jetztGrund(v));
+}
+
+/* --------------------------------------------------------------------------
+   "Wann ist hier meist was los?" – aus den Check-ins der letzten 8 Wochen
+   --------------------------------------------------------------------------
+   Die Datenbank liefert nur relative Werte (0–100) je Wochentag und Stunde,
+   und erst, wenn an mindestens 5 Tagen von 3 Geräten eingecheckt wurde.
+   Einzelne Personen lassen sich daraus nicht ablesen.
+   -------------------------------------------------------------------------- */
+const AUSL_TAGE = ["Mo","Di","Mi","Do","Fr","Sa","So"];
+const AUSL_VON = 8, AUSL_BIS = 22;
+Z.auslastung = {};
+function heuteIso(){ return new Date().getDay() || 7; }
+
+async function auslastungLaden(id){
+  Z.auslastung[id] = "laedt";
+  const { data, error } = await db.rpc("auslastung", { p_ort:String(id) });
+  if (error) { console.warn("Auslastung:", error.message); Z.auslastung[id] = null; }
+  else {
+    const raster = {};
+    for (const z of data || []) (raster[z.wochentag] ||= {})[z.stunde] = z.wert;
+    Z.auslastung[id] = (data || []).length ? raster : null;
+  }
+  const kasten = document.getElementById("auslastung");
+  if (kasten && String(Z.auswahlId) === String(id)) kasten.outerHTML = auslastungBlock(ort(id) || ort(+id));
+}
+
+function auslastungBlock(o){
+  if (!ECHT || !o) return ``;
+  const r = Z.auslastung[o.id];
+  if (r === undefined) { auslastungLaden(o.id); return `<div id="auslastung"></div>`; }
+  if (r === "laedt") return `<div id="auslastung"></div>`;
+  if (!r) return `<div class="auslastung ausl-leer" id="auslastung">
+      <p>📊 Wann hier meist was los ist, siehst du, sobald öfter jemand eincheckt.</p></div>`;
+
+  const tag = Z.auslastungTag || heuteIso();
+  const jetzt = new Date(), istHeute = tag === heuteIso();
+  const werte = [];
+  for (let h = AUSL_VON; h < AUSL_BIS; h++) werte.push(r[tag]?.[h] || 0);
+  const balken = werte.map((w, i) => `<span class="${istHeute && AUSL_VON + i === jetzt.getHours() ? "jetzt" : ""}"
+      style="height:${Math.max(4, w)}%" title="${AUSL_VON + i} Uhr"></span>`).join("");
+  const spitze = Math.max(...werte);
+  const ab = werte.findIndex(w => w >= Math.max(40, spitze * .6));
+  const satz = !spitze ? `An diesem Tag ist hier bisher kaum jemand.`
+    : `Am meisten los ist meist ${ab >= 0 ? `ab ${AUSL_VON + ab} Uhr` : `um ${AUSL_VON + werte.indexOf(spitze)} Uhr`}.`;
+  return `<div class="auslastung" id="auslastung">
+      <h4>Wann ist hier meist was los?</h4>
+      <div class="ausl-tage">${AUSL_TAGE.map((t, i) =>
+        `<button data-ausltag="${i + 1}" aria-pressed="${tag === i + 1}">${t}</button>`).join("")}</div>
+      <div class="ausl-balken" role="img" aria-label="${esc(satz)}">${balken}</div>
+      <div class="ausl-achse"><span>${AUSL_VON} Uhr</span><span>15 Uhr</span><span>${AUSL_BIS} Uhr</span></div>
+      <p>${satz} Aus den Check-ins der letzten 8 Wochen.</p></div>`;
+}
+
+/* --------------------------------------------------------------------------
+   Einführung beim ersten Start: drei Karten, danach nie wieder
+   (außer man öffnet sie unter "Über Platzfrei").
+   -------------------------------------------------------------------------- */
+const EINF_SCHLUESSEL = "platzfrei.einfuehrung";
+const EINF_SEITEN = [
+  { bild:`<svg width="54" height="71" viewBox="0 0 320 420" aria-hidden="true"><path d="M160 0C71.634 0 0 70 0 158C0 244 84 348 149 414C155 420 165 420 171 414C236 348 320 244 320 158C320 70 248.366 0 160 0Z" fill="#05B630"/><path d="M124 62V100H196V62M124 282V244H196V282M70 172H250M86 62H234C244.667 62 250 67.3333 250 78V266C250 276.667 244.667 282 234 282H86C75.3333 282 70 276.667 70 266V78C70 67.3333 75.3333 62 86 62ZM187 172C187 186.912 174.912 199 160 199C145.088 199 133 186.912 133 172C133 157.088 145.088 145 160 145C174.912 145 187 157.088 187 172Z" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    titel:"Wo darf ich spielen?",
+    text:"Platzfrei zeigt Bolz-, Basketball- und Sportplätze in deiner Nähe und ob du dort frei spielen darfst.",
+    legende:true },
+  { bild:"👥", titel:"Sieh, wo was los ist",
+    text:"Check ein, wenn du auf dem Platz bist, oder setz ein Spiel an. Andere sehen nur, wie viele kommen, nie deinen Namen." },
+  { bild:"⚡", titel:"Jetzt spielen",
+    text:"Ein Tipp, und die App sucht den nächsten freien Platz, der trocken und noch hell ist. Dafür braucht sie deinen Standort." }
+];
+
+function einfuehrungZeigen(immer){
+  if (!immer) { try { if (localStorage.getItem(EINF_SCHLUESSEL)) return; } catch { return; } }
+  document.querySelector(".einf")?.remove();
+  const el = document.createElement("div");
+  el.className = "einf";
+  el.setAttribute("role", "dialog");
+  el.setAttribute("aria-modal", "true");
+  el.setAttribute("aria-label", "Einführung");
+  let i = 0;
+  const fertig = () => {
+    try { localStorage.setItem(EINF_SCHLUESSEL, "1"); } catch {}
+    el.remove();
+    document.removeEventListener("keydown", taste);
+    if (!Z.positionEcht) standortHolen();
+  };
+  const taste = e => { if (e.key === "Escape") fertig(); };
+  const bauen = () => {
+    const s = EINF_SEITEN[i], letzte = i === EINF_SEITEN.length - 1;
+    el.innerHTML = `<div class="einf-karte">
+        <button class="einf-weg" data-einfweg="1">Überspringen</button>
+        <div class="einf-bild">${s.bild}</div>
+        <h2>${s.titel}</h2><p>${s.text}</p>
+        ${s.legende ? `<div class="einf-legende">
+          <span><i style="background:#34C759"></i>frei zugänglich</span>
+          <span><i style="background:#FF9F0A"></i>nach Absprache</span>
+          <span><i style="background:#7A5EA8"></i>Vereinsanlage</span>
+          <span><i style="background:#8E8E93"></i>noch unklar</span></div>` : ``}
+        <div class="einf-punkte" aria-hidden="true">${EINF_SEITEN.map((_, k) => `<i class="${k === i ? "an" : ""}"></i>`).join("")}</div>
+        <button class="knopf" data-einfweiter="1">${letzte ? "Los geht’s" : "Weiter"}</button></div>`;
+    el.querySelector("[data-einfweiter]").focus();
+  };
+  el.addEventListener("click", e => {
+    if (e.target.closest("[data-einfweg]")) return fertig();
+    if (e.target.closest("[data-einfweiter]")) {
+      if (i === EINF_SEITEN.length - 1) return fertig();
+      i++; bauen();
+    }
+  });
+  let x0 = null;
+  el.addEventListener("touchstart", e => { x0 = e.touches[0].clientX; }, { passive:true });
+  el.addEventListener("touchend", e => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0; x0 = null;
+    if (dx < -50 && i < EINF_SEITEN.length - 1) { i++; bauen(); }
+    else if (dx > 50 && i > 0) { i--; bauen(); }
+  });
+  document.addEventListener("keydown", taste);
+  document.body.appendChild(el);
+  bauen();
 }
 
 function ansichtListe(nurListe){
@@ -2346,6 +2565,7 @@ function ansichtDetail(){
           <span>${o.bestaetigtDurch === "Lage (OSM)" ? "nach Lage in OpenStreetMap" : esc(o.zugang)}${o.zeiten && o.zeiten !== "unbekannt" ? ` · ${esc(o.zeiten)}` : ``}</span></span>
       </div>
       ${liveBlock(o)}
+      ${auslastungBlock(o)}
       <div class="schnell">
         <button data-route="${o.id}"><span aria-hidden="true">➜</span>Route</button>
         <button data-merken="${o.id}" class="${GEMERKT.has(o.id) ? "an" : ""}"><span aria-hidden="true">${GEMERKT.has(o.id) ? "★" : "☆"}</span>${GEMERKT.has(o.id) ? "Gemerkt" : "Merken"}</button>
@@ -4475,6 +4695,7 @@ function ansichtUeber(){
         <div class="reihe">
           <button class="knopf" data-gehe="liste">Plätze in deiner Nähe</button>
           <button class="knopf zweit" data-gehe="vereine">Für Vereine</button>
+          <button class="knopf zweit" data-einfuehrung="1">Einführung ansehen</button>
         </div>
       </div>
       <div class="ueber-teil">
@@ -4664,6 +4885,13 @@ function ansichtRechtliches(){
         Stunden). Andere sehen nur, wie viele Leute gerade an einem Platz sind,
         und das erst ab zwei Personen. Mit „Wieder weg“ checkst du sofort aus,
         spätestens nach einem Tag wird der Eintrag gelöscht.</p>
+        <p><b>Wann ist meist was los:</b> Aus jedem Check-in merken wir uns
+        den Platz, den Tag, die Stunde und eine verschlüsselte Form der
+        Geräte-Nummer, damit niemand doppelt zählt. Daraus zeigt die App, zu
+        welchen Zeiten an einem Platz meistens gespielt wird. Öffentlich
+        sind nur Prozentwerte je Wochentag und Stunde, und erst wenn an
+        mindestens fünf Tagen von drei Geräten eingecheckt wurde. Nach acht
+        Wochen löschen wir die Einträge.</p>
         <p><b>Mitspieler gesucht:</b> Wenn du ein Spiel ansetzt oder zusagst,
         speichern wir Platz, Zeit, Sportart, die gewünschte Anzahl und die
         Geräte-Nummer. Öffentlich sichtbar sind nur Zeit, Sportart und wie
@@ -5297,10 +5525,15 @@ document.addEventListener("click", e=>{
                              "[data-schildok],[data-schildweg],[data-loeschen],[data-fehlersenden],[data-fehlererledigt],"+
                              "[data-suchweg],[data-teilen],[data-abmelden],[data-hierpunkt],[data-vereinszeitensenden],"+
                              "[data-neuok],[data-neuweg],[data-vzok],[data-vzweg],[data-hier],[data-hierweg],"+
-                             "[data-zusage],[data-spielweg],[data-spielform],[data-spielansetzen],[data-tipp],[data-tippsoffen],[data-osmladen],[data-osmstop]");
+                             "[data-jetzt],[data-einfuehrung],[data-ausltag],[data-zusage],[data-spielweg],[data-spielform],[data-spielansetzen],[data-tipp],[data-tippsoffen],[data-osmladen],[data-osmstop]");
   if (!t) return;
 
   if (t.dataset.thema)      { return themaUmschalten(); }
+  if (t.dataset.jetzt)      { return jetztSpielen(); }
+  if (t.dataset.einfuehrung){ return einfuehrungZeigen(true); }
+  if (t.dataset.ausltag)    { Z.auslastungTag = +t.dataset.ausltag;
+    const k = document.getElementById("auslastung"); if (k) k.outerHTML = auslastungBlock(ort(Z.auswahlId));
+    return; }
   if (t.dataset.hierpunkt)  { return hierPunktSetzen(); }
   if (t.dataset.hier)       { return hierEinchecken(t.dataset.hier); }
   if (t.dataset.hierweg)    { return hierAuschecken(); }
@@ -5570,6 +5803,7 @@ karte.on("dragstart", () => sheet.klein());
 adminAdresseOeffnen();
 
 (async function start(){
+  einfuehrungZeigen();
   await adminPruefen();
   await datenLaden();
   platzAusAdresse();
