@@ -7,15 +7,8 @@
 
 <!-- PWA: macht die Seite installierbar (Icon, Name, Vollbild). -->
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#F1EFE8" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#131E30" media="(prefers-color-scheme: dark)">
-
-<!-- Schriften aus dem Markensystem "Linienspiel v2": Source Sans 3 für Titel
-     und Wortmarke, Inter für alle Texte und Labels. -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Sans+3:wght@600;700&display=swap">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320.0' height='420' viewBox='0 0 320 420' aria-hidden='true'%3E%3Cpath d='M160 0C71.634 0 0 70 0 158C0 244 84 348 149 414C155 420 165 420 171 414C236 348 320 244 320 158C320 70 248.366 0 160 0Z' fill='currentColor'/%3E%3Cpath d='M124 62V100H196V62M124 282V244H196V282M70 172H250M86 62H234C244.667 62 250 67.3333 250 78V266C250 276.667 244.667 282 234 282H86C75.3333 282 70 276.667 70 266V78C70 67.3333 75.3333 62 86 62ZM187 172C187 186.912 174.912 199 160 199C145.088 199 133 186.912 133 172C133 157.088 145.088 145 160 145C174.912 145 187 157.088 187 172Z' fill='none' stroke='%23fff' style='stroke:var(--logo-innen,%23fff)' stroke-width='12' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#FFFFFF">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320.0' height='420' viewBox='0 0 320 420' aria-hidden='true'%3E%3Cpath d='M160 0C71.634 0 0 70 0 158C0 244 84 348 149 414C155 420 165 420 171 414C236 348 320 244 320 158C320 70 248.366 0 160 0Z' fill='%2305B630'/%3E%3Cpath d='M124 62V100H196V62M124 282V244H196V282M70 172H250M86 62H234C244.667 62 250 67.3333 250 78V266C250 276.667 244.667 282 234 282H86C75.3333 282 70 276.667 70 266V78C70 67.3333 75.3333 62 86 62ZM187 172C187 186.912 174.912 199 160 199C145.088 199 133 186.912 133 172C133 157.088 145.088 145 160 145C174.912 145 187 157.088 187 172Z' fill='none' stroke='%23fff' stroke-width='12' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="mobile-web-app-capable" content="yes">
 
@@ -37,44 +30,32 @@
    =========================================================================== */
 
 :root{
-  /* Markensystem "Linienspiel v2" (Figma): Kobalt als Markenakzent,
-     warme Kalkstein- und Kreideflächen, Zitrone als Spielimpuls.
-     Die alten Namen (--gruen …) bleiben, damit der übrige Code passt. */
-  --gruen:#164AF2;          /* Markenakzent Kobalt */
-  --gruen-tief:#1240D6;
-  --gruen-zart:rgba(22,74,242,.08);
-  --auf-akzent:#F7F4EB;     /* Schrift auf Kobalt */
-  --impuls:#E2EF83;         /* Spielimpuls Zitrone */
-  --grund:#F1EFE8;          /* Hintergrund */
-  --logo:#111719;--logo-innen:#fff;   /* Logo schwarz-weiß */
-  --flaeche:#FAF8F2;        /* Oberfläche */
-  --tinte:#202C40;          /* Primärtext */
-  --tinte-2:#636B74;        /* Sekundärtext */
-  --tinte-3:#7A818A;
-  --kante:#D8D7CF;          /* Kontur */
+  --gruen:#0B9463;
+  --gruen-tief:#087B51;
+  --gruen-zart:#E7F5EE;
+  --grund:#F6F8F6;
+  --flaeche:#FFFFFF;
+  --tinte:#0F1A15;
+  --tinte-2:#3D4B44;
+  --tinte-3:#7C8B83;
+  --kante:rgba(15,26,21,.07);
 
-  /* Zugang: Farbe + eigenes Symbol + Klartext */
-  --frei:#147563;         --frei-bg:rgba(20,117,99,.08);
-  --absprache:#906017;    --absprache-bg:rgba(144,96,23,.08);
-  --zu:#626775;           --zu-bg:rgba(98,103,117,.08);
-  --verein:#526884;       --verein-bg:rgba(82,104,132,.08);
-  --unklar:#636B74;       --unklar-bg:rgba(98,103,117,.07);
-  --warnung:#B3342A;      --warnung-bg:rgba(179,52,42,.08);
+  --frei:#0E7C43;         --frei-bg:#E4F6EA;
+  --absprache:#A8620B;    --absprache-bg:#FDF0DC;
+  --zu:#B3342A;           --zu-bg:#FCE9E7;
+  --verein:#6248B8;       --verein-bg:#EFEBFB;
+  --unklar:#6B7A72;       --unklar-bg:#EFF2F0;
 
-  /* Radien: Labels 9 · Kontrollen 14 · Karten 20 · Panels 28 */
-  --r-karte:20px;
-  --r-feld:14px;
-  --r-pille:14px;
-  --r-label:9px;
-  /* Keine dekorativen Schatten – Flächen trennen sich über die Kontur. */
-  --schatten:0 0 0 1px var(--kante);
-  --schatten-hoch:0 0 0 1px var(--tinte-3);
-  --schatten-karte:0 2px 10px rgba(32,44,64,.16);
+  --r-karte:18px;
+  --r-feld:12px;
+  --r-pille:999px;
+  --schatten:0 1px 2px rgba(15,26,21,.04), 0 6px 18px -6px rgba(15,26,21,.10);
+  --schatten-hoch:0 2px 4px rgba(15,26,21,.05), 0 14px 32px -10px rgba(15,26,21,.16);
 
   /* §15 Typografie: Systemschrift zuerst. Sie bringt optische Größen,
      Tracking-Tabellen und Lesbarkeitsfeinschliff bereits mit. */
-  --schrift:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif;
-  --schrift-titel:'Source Sans 3','Inter',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  --schrift:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI Variable',
+            'Segoe UI',system-ui,Roboto,'Helvetica Neue',sans-serif;
 
   /* §4 Bewegung: Kurven, die einen kritisch gedämpften Feder-Verlauf
      annähern – kein Überschwingen, weicher Auslauf. */
@@ -92,9 +73,7 @@ body{font-family:var(--schrift);font-size:15px;line-height:1.5;letter-spacing:0;
   color:var(--tinte);background:var(--grund);
   display:flex;flex-direction:column;overflow:hidden;
   -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
-::selection{background:var(--gruen);color:var(--auf-akzent)}
-/* Titel und Wortmarke in Source Sans 3 */
-header h1,.dname,.held h2,.ueber-teil > h3,.zahl b,.los-titel{font-family:var(--schrift-titel)}
+::selection{background:var(--gruen);color:#fff}
 
 /* §1 Reaktion: Alles Drückbare antwortet beim Drücken, nicht beim Loslassen. */
 button,.zeile,.chip,.stern,[role="button"]{touch-action:manipulation;
@@ -105,51 +84,49 @@ button:active,.zeile:active,.chip:active,.knopf:active,.adminknopf:active{
 /* ---------- Kopf: schwebende Materialschicht (§12) ---------- */
 header{position:relative;z-index:20;flex-shrink:0;height:62px;padding:0 22px;
   display:flex;align-items:center;gap:14px;
-  background:rgba(241,239,232,.88);
-  backdrop-filter:saturate(160%) blur(18px);
-  -webkit-backdrop-filter:saturate(160%) blur(18px);
-  box-shadow:0 1px 0 var(--kante)}
-/* Offizielles Logo: grüner Spielfeld-Pin und Wortmarke (Pfad aus Figma) */
-header h1{font-size:26px;font-weight:700;letter-spacing:-.01em;line-height:1;
-  display:flex;align-items:center;gap:8px;color:var(--gruen)}
-header h1 em{font-family:var(--schrift);font-style:normal;font-weight:400;font-size:13.5px;
-  letter-spacing:0;color:var(--tinte-2);margin-left:4px}
-.pf-marke{display:block;flex-shrink:0;fill:currentColor}
-.pf-wort{display:block;flex-shrink:0;height:.8em;width:auto;aspect-ratio:294/79;fill:currentColor}
-header h1,.suche-logo{color:var(--logo)}
-.vf-fuss .marke-wort{--logo-innen:#131E30}
+  background:rgba(255,255,255,.72);
+  backdrop-filter:saturate(180%) blur(22px);
+  -webkit-backdrop-filter:saturate(180%) blur(22px);
+  /* §12 Helle Oberkante: das Licht, das sich im Material fängt.
+     Statt harter Trennlinie unten ein weicher Kantenverlauf. */
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.65),
+             0 1px 0 rgba(15,26,21,.05)}
+header h1{font-size:19px;font-weight:700;letter-spacing:-.021em;line-height:1.2;
+  display:flex;align-items:center;gap:9px}
+header h1 em{font-style:normal;font-weight:400;font-size:13.5px;letter-spacing:-.004em;
+  color:var(--tinte-3)}
 .kopfnotiz{font-size:12.5px;letter-spacing:.004em;color:var(--tinte-3);
   margin-right:auto;font-variant-numeric:tabular-nums}
 .adminknopf{font-family:var(--schrift);font-size:13.5px;font-weight:600;
   letter-spacing:-.005em;padding:9px 18px;border:0;border-radius:var(--r-pille);
-  background:var(--gruen);color:var(--auf-akzent);cursor:pointer;
+  background:var(--gruen);color:#fff;cursor:pointer;
   transition:background 160ms var(--feder-schnell),transform var(--druck)}
 .adminknopf:hover{background:var(--gruen-tief)}
 .adminknopf[hidden]{display:none}
-.adminknopf.an{background:var(--tinte);color:var(--grund)}
+.adminknopf.an{background:var(--tinte)}
 .adminknopf:focus-visible{outline:2px solid var(--gruen);outline-offset:2px}
 
 /* ---------- Layout ---------- */
 main{flex:1;display:flex;min-height:0}
-#karte{flex:1;z-index:1;background:#E9E7DF}
+#karte{flex:1;z-index:1;background:#E6EAE7}
 aside{width:420px;flex-shrink:0;background:var(--grund);
   border-left:1px solid var(--kante);display:flex;flex-direction:column;min-height:0}
 #seite{display:flex;flex-direction:column;min-height:0;height:100%}
 
 .leaflet-control-zoom a,.leaflet-control-layers{border:0!important;
-  border-radius:14px!important;box-shadow:0 0 0 1px var(--kante),var(--schatten-karte)!important;color:var(--tinte)!important;background:var(--flaeche)!important}
+  border-radius:14px!important;box-shadow:var(--schatten)!important;color:var(--tinte)!important}
 .leaflet-control-zoom{border:0!important;box-shadow:none!important}
 .leaflet-control-zoom a:first-child{border-radius:14px 14px 4px 4px!important}
 .leaflet-control-zoom a:last-child{border-radius:4px 4px 14px 14px!important;margin-top:3px}
 .standort-knopf{border:0!important;box-shadow:none!important}
 .standort-knopf .neu-knopf{margin-top:8px}
-.standort-knopf a.neu-knopf{background:var(--gruen)!important;color:var(--auf-akzent)!important}
+.standort-knopf a.neu-knopf{background:var(--gruen)!important;color:#fff!important}
 .standort-knopf a{display:flex!important;align-items:center;justify-content:center;
   width:34px!important;height:34px!important;border:0!important;border-radius:14px!important;
-  box-shadow:0 0 0 1px var(--kante),var(--schatten-karte)!important;color:var(--tinte)!important;background:var(--flaeche)}
+  box-shadow:var(--schatten)!important;color:var(--tinte)!important;background:var(--grund)}
 .leaflet-control-layers-expanded{font-family:var(--schrift)!important;font-size:13.5px!important;
   padding:12px 14px!important;border-radius:14px!important}
-.leaflet-control-attribution{font-size:9.5px!important;background:rgba(250,248,242,.85)!important;
+.leaflet-control-attribution{font-size:9.5px!important;background:rgba(255,255,255,.8)!important;
   border-radius:8px 0 0 0!important;padding:2px 6px!important}
 
 /* ---------- Laptop: Suche und Filter oben über die ganze Breite ---------- */
@@ -164,6 +141,12 @@ aside{width:420px;flex-shrink:0;background:var(--grund);
     padding:12px 22px;background:var(--grund);border-bottom:1px solid var(--kante);position:relative;z-index:15}
   #leiste .suche{margin:0;flex:0 0 min(400px,34vw)}
   #leiste .filter{flex:1;min-width:0;padding:2px 0}
+  aside{width:clamp(420px,44vw,760px);container-type:inline-size}
+  /* Breite Liste: Plätze in zwei Spalten */
+  @container (min-width:640px){
+    .rolle{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:max-content;column-gap:12px;align-content:start}
+    .rolle > :not(.zeile){grid-column:1/-1}
+  }
   /* Ganze Seiten (Über Platzfrei, Für Vereine) ohne Karte */
   body.vollseite #karte{display:none}
   body.vollseite aside{width:100%;border-left:0}
@@ -219,14 +202,13 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
   .filter .chips:not(:first-of-type) > .chip:first-child{margin-left:11px}
 }
 .chip{font-family:var(--schrift);font-size:13.5px;font-weight:600;letter-spacing:-.005em;
-  padding:9px 13px;border:0;background:var(--flaeche);color:var(--tinte);
+  padding:8px 15px;border:0;background:var(--flaeche);color:var(--tinte-2);
   border-radius:var(--r-pille);cursor:pointer;line-height:1.2;
-  display:inline-flex;align-items:center;
-  box-shadow:inset 0 0 0 1px var(--kante);
+  box-shadow:0 1px 2px rgba(15,26,21,.05);
   transition:background 160ms var(--feder-schnell),color 160ms var(--feder-schnell),
              box-shadow 160ms var(--feder-schnell),transform var(--druck)}
-.chip:hover{box-shadow:inset 0 0 0 1px var(--tinte-3)}
-.chip[aria-pressed="true"]{background:var(--gruen);color:var(--auf-akzent);box-shadow:none}
+.chip:hover{color:var(--tinte);box-shadow:0 1px 3px rgba(15,26,21,.12)}
+.chip[aria-pressed="true"]{background:var(--tinte);color:#fff;box-shadow:none}
 .chip.mehr{background:transparent;box-shadow:inset 0 0 0 1.5px var(--kante);color:var(--tinte-3)}
 .chip.mehr:hover{box-shadow:inset 0 0 0 1.5px var(--tinte-3)}
 .chip.mehr[aria-pressed="true"]{background:transparent;color:var(--tinte);
@@ -242,24 +224,10 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
   color:var(--tinte);box-shadow:inset 0 0 0 1.5px var(--kante);appearance:none;-webkit-appearance:none}
 .suche input::placeholder{color:var(--tinte-3);font-weight:450}
 .suche input:focus{outline:none;box-shadow:inset 0 0 0 2px var(--gruen)}
-.suche input{border-radius:var(--r-feld)}
 .suche input::-webkit-search-cancel-button{display:none}
 .suche-weg{position:absolute;right:8px;width:28px;height:28px;border:0;border-radius:50%;
   background:var(--unklar-bg);color:var(--tinte-2);font-size:12px;cursor:pointer}
 .chip-icon{margin-right:6px}
-/* Sporticons aus dem Markensystem: Linien, 1,6 px Kontur. Als Maske,
-   damit sie die Schriftfarbe annehmen (Kobalt, auf aktivem Filter Kreide). */
-.sport-ic{display:inline-block;width:18px;height:18px;flex-shrink:0;background:currentColor;
-  -webkit-mask:var(--ic) center/contain no-repeat;mask:var(--ic) center/contain no-repeat}
-.chip .sport-ic{margin-right:6px;color:var(--gruen)}
-.chip[aria-pressed="true"] .sport-ic{color:inherit}
-.ic-fussball{--ic:url("data:image/svg+xml,%3Csvg width='28' height='28' viewBox='0 0 28 28' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cmask fill='white'%3E%3Cpath d='M28 14C28 15.3948 27.7919 16.7682 27.3928 18.0786C26.7295 20.2564 25.5387 22.2603 23.8995 23.8995C21.274 26.525 17.713 28 14 28C10.287 28 6.72601 26.525 4.1005 23.8995C2.46128 22.2603 1.27054 20.2564 0.60724 18.0786C0.208147 16.7682 0 15.3948 0 14C0 10.287 1.475 6.72601 4.1005 4.1005C6.72601 1.475 10.287 0 14 0C17.713 0 21.274 1.475 23.8995 4.1005C26.525 6.72601 28 10.287 28 14Z'/%3E%3C/mask%3E%3Cpath d='M27.3928 18.0786L27.5497 17.2941V17.2941L27.3928 18.0786ZM0.60724 18.0786L0.450347 17.2941H0.450346L0.60724 18.0786ZM9.8 9.8V10.6H18.2V9.8V9H9.8V9.8ZM18.2 9.8L17.4572 10.0971L20.2572 17.0971L21 16.8L21.7428 16.5029L18.9428 9.50289L18.2 9.8ZM21 16.8L20.5002 16.1753L13.5002 21.7753L14 22.4L14.4998 23.0247L21.4998 17.4247L21 16.8ZM14 22.4L14.4998 21.7753L7.49976 16.1753L7 16.8L6.50024 17.4247L13.5002 23.0247L14 22.4ZM7 16.8L7.74278 17.0971L10.5428 10.0971L9.8 9.8L9.05722 9.50289L6.25722 16.5029L7 16.8ZM9.8 9.8L10.5428 9.50289L7.74278 2.50289L7 2.8L6.25722 3.09711L9.05722 10.0971L9.8 9.8ZM18.2 9.8L18.886 10.2116L23.086 3.2116L22.4 2.8L21.714 2.3884L17.514 9.3884L18.2 9.8ZM21 16.8L20.8431 17.5845L27.2359 18.863L27.3928 18.0786L27.5497 17.2941L21.1569 16.0155L21 16.8ZM27.3928 18.0786L27.2359 18.863L27.8431 18.9845L28 18.2L28.1569 17.4155L27.5497 17.2941L27.3928 18.0786ZM14 22.4H13.2V28H14H14.8V22.4H14ZM7 16.8L6.84311 16.0155L0.450347 17.2941L0.60724 18.0786L0.764132 18.863L7.15689 17.5845L7 16.8ZM0.60724 18.0786L0.450346 17.2941L-0.156894 17.4155L0 18.2L0.156894 18.9845L0.764133 18.863L0.60724 18.0786ZM27.3928 18.0786L25.8622 17.6124V17.6124L27.3928 18.0786ZM4.1005 23.8995L2.96913 25.0309H2.96913L4.1005 23.8995ZM0.60724 18.0786L2.13783 17.6124V17.6124L0.60724 18.0786ZM4.1005 4.1005L2.96913 2.96913V2.96913L4.1005 4.1005ZM23.8995 4.1005L25.0309 2.96913L23.8995 4.1005ZM28 14H26.4C26.4 15.2355 26.2156 16.4518 25.8622 17.6124L27.3928 18.0786L28.9233 18.5447C29.3681 17.0846 29.6 15.5542 29.6 14H28ZM27.3928 18.0786L25.8622 17.6124C25.2746 19.5415 24.22 21.3163 22.7681 22.7681L23.8995 23.8995L25.0309 25.0309C26.8575 23.2043 28.1843 20.9713 28.9233 18.5447L27.3928 18.0786ZM23.8995 23.8995L22.7681 22.7681C20.4427 25.0936 17.2887 26.4 14 26.4V28V29.6C18.1374 29.6 22.1053 27.9564 25.0309 25.0309L23.8995 23.8995ZM14 28V26.4C10.7113 26.4 7.55733 25.0936 5.23188 22.7681L4.1005 23.8995L2.96913 25.0309C5.8947 27.9564 9.86262 29.6 14 29.6V28ZM4.1005 23.8995L5.23188 22.7681C3.78002 21.3163 2.72536 19.5415 2.13783 17.6124L0.60724 18.0786L-0.923346 18.5447C-0.184284 20.9713 1.14254 23.2043 2.96913 25.0309L4.1005 23.8995ZM0.60724 18.0786L2.13783 17.6124C1.78435 16.4518 1.6 15.2355 1.6 14H0H-1.6C-1.6 15.5542 -1.36806 17.0846 -0.923346 18.5447L0.60724 18.0786ZM0 14H1.6C1.6 10.7113 2.90642 7.55733 5.23188 5.23188L4.1005 4.1005L2.96913 2.96913C0.0435666 5.8947 -1.6 9.86262 -1.6 14H0ZM4.1005 4.1005L5.23188 5.23188C7.55733 2.90642 10.7113 1.6 14 1.6V0V-1.6C9.86262 -1.6 5.8947 0.0435666 2.96913 2.96913L4.1005 4.1005ZM14 0V1.6C17.2887 1.6 20.4427 2.90642 22.7681 5.23188L23.8995 4.1005L25.0309 2.96913C22.1053 0.0435667 18.1374 -1.6 14 -1.6V0ZM23.8995 4.1005L22.7681 5.23188C25.0936 7.55733 26.4 10.7113 26.4 14H28H29.6C29.6 9.86262 27.9564 5.8947 25.0309 2.96913L23.8995 4.1005Z' fill='%23164AF2' mask='url(%23stroke0_0_37)'/%3E%3C/svg%3E")}
-.ic-basketball{--ic:url("data:image/svg+xml,%3Csvg width='28' height='28' viewBox='0 0 28 28' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cmask fill='white'%3E%3Cpath d='M28 14C28 17.713 26.525 21.274 23.8995 23.8995C21.274 26.525 17.713 28 14 28C10.287 28 6.72601 26.525 4.1005 23.8995C1.475 21.274 0 17.713 0 14C0 10.287 1.475 6.72601 4.1005 4.1005C6.72601 1.475 10.287 0 14 0C17.713 0 21.274 1.475 23.8995 4.1005C26.525 6.72601 28 10.287 28 14Z'/%3E%3C/mask%3E%3Cpath d='M0 14V14.8H11.2V14V13.2H0V14ZM11.2 14V14.8H14V14V13.2H11.2V14ZM14 14V14.8H16.8V14V13.2H14V14ZM16.8 14V14.8H28V14V13.2H16.8V14ZM14 0H13.2V14H14H14.8V0H14ZM14 14H13.2V28H14H14.8V14H14ZM4.2 4.2L3.74123 4.85539C8.35029 8.08173 10.4 11.1398 10.4 14H11.2H12C12 10.3269 9.38304 6.8516 4.65877 3.54461L4.2 4.2ZM11.2 14H10.4C10.4 16.8602 8.35029 19.9183 3.74123 23.1446L4.2 23.8L4.65877 24.4554C9.38304 21.1484 12 17.6731 12 14H11.2ZM23.8 4.2L23.3412 3.54461C18.617 6.8516 16 10.3269 16 14H16.8H17.6C17.6 11.1398 19.6497 8.08173 24.2588 4.85539L23.8 4.2ZM16.8 14H16C16 17.6731 18.617 21.1484 23.3412 24.4554L23.8 23.8L24.2588 23.1446C19.6497 19.9183 17.6 16.8602 17.6 14H16.8ZM4.1005 23.8995L2.96913 25.0309L4.1005 23.8995ZM4.1005 4.1005L2.96913 2.96913V2.96913L4.1005 4.1005ZM23.8995 4.1005L25.0309 2.96913L23.8995 4.1005ZM28 14H26.4C26.4 17.2887 25.0936 20.4427 22.7681 22.7681L23.8995 23.8995L25.0309 25.0309C27.9564 22.1053 29.6 18.1374 29.6 14H28ZM23.8995 23.8995L22.7681 22.7681C20.4427 25.0936 17.2887 26.4 14 26.4V28V29.6C18.1374 29.6 22.1053 27.9564 25.0309 25.0309L23.8995 23.8995ZM14 28V26.4C10.7113 26.4 7.55733 25.0936 5.23188 22.7681L4.1005 23.8995L2.96913 25.0309C5.8947 27.9564 9.86262 29.6 14 29.6V28ZM4.1005 23.8995L5.23188 22.7681C2.90642 20.4427 1.6 17.2887 1.6 14H0H-1.6C-1.6 18.1374 0.0435667 22.1053 2.96913 25.0309L4.1005 23.8995ZM0 14H1.6C1.6 10.7113 2.90642 7.55733 5.23188 5.23188L4.1005 4.1005L2.96913 2.96913C0.0435666 5.8947 -1.6 9.86262 -1.6 14H0ZM4.1005 4.1005L5.23188 5.23188C7.55733 2.90642 10.7113 1.6 14 1.6V0V-1.6C9.86262 -1.6 5.8947 0.0435666 2.96913 2.96913L4.1005 4.1005ZM14 0V1.6C17.2887 1.6 20.4427 2.90642 22.7681 5.23188L23.8995 4.1005L25.0309 2.96913C22.1053 0.0435667 18.1374 -1.6 14 -1.6V0ZM23.8995 4.1005L22.7681 5.23188C25.0936 7.55733 26.4 10.7113 26.4 14H28H29.6C29.6 9.86262 27.9564 5.8947 25.0309 2.96913L23.8995 4.1005Z' fill='%23164AF2' mask='url(%23stroke0_0_36)'/%3E%3C/svg%3E")}
-.ic-tischtennis{--ic:url("data:image/svg+xml,%3Csvg width='28' height='28' viewBox='0 0 28 28' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cmask fill='white'%3E%3Cpath d='M23.0588 1.23944C31.2941 6.87324 24.7059 18.1408 14.8235 19.5493L4.94118 26.5915L0 22.3662L8.23529 15.3239C3.29412 4.05634 13.1765 -2.98592 23.0588 1.23944Z'/%3E%3Cpath d='M22.3766 23.1912C21.7588 23.7195 21.4118 24.436 21.4118 25.1831C21.4118 25.9302 21.7588 26.6467 22.3766 27.1749C22.9944 27.7032 23.8322 28 24.7059 28C25.5795 28 26.4174 27.7032 27.0352 27.1749C27.6529 26.6467 28 25.9302 28 25.1831C28 24.436 27.6529 23.7195 27.0352 23.1912C26.4174 22.663 25.5795 22.3662 24.7059 22.3662C23.8322 22.3662 22.9944 22.663 22.3766 23.1912Z'/%3E%3C/mask%3E%3Cpath d='M8.23529 15.3239L7.80341 15.9973L14.3916 20.2227L14.8235 19.5493L15.2554 18.8759L8.66718 14.6505L8.23529 15.3239ZM23.0588 1.23944L23.9622 -0.0811202L23.8324 -0.169909L23.6878 -0.231731L23.0588 1.23944ZM14.8235 19.5493L14.5978 17.9653L14.2122 18.0203L13.895 18.2463L14.8235 19.5493ZM4.94118 26.5915L3.90132 27.8076L4.85153 28.6201L5.86971 27.8946L4.94118 26.5915ZM0 22.3662L-1.03986 21.1502L-2.46188 22.3662L-1.03986 23.5822L0 22.3662ZM8.23529 15.3239L9.27515 16.54L10.1773 15.7685L9.70059 14.6814L8.23529 15.3239ZM22.3766 23.1912L21.3367 21.9752L21.3367 21.9752L22.3766 23.1912ZM27.0352 23.1912L28.075 21.9752L28.075 21.9752L27.0352 23.1912ZM27.0352 27.1749L25.9953 25.9589L25.9953 25.9589L27.0352 27.1749ZM22.3766 27.1749L23.4164 25.9589L23.4164 25.9589L22.3766 27.1749ZM23.0588 1.23944L22.1554 2.55999C23.9083 3.75916 24.7752 5.17844 25.069 6.60242C25.3684 8.05289 25.1043 9.66694 24.3049 11.262C22.6907 14.4827 19.0278 17.3339 14.5978 17.9653L14.8235 19.5493L15.0493 21.1333C20.5016 20.3562 25.074 16.8694 27.1657 12.6958C28.2192 10.5936 28.6757 8.24641 28.203 5.95568C27.7248 3.63846 26.327 1.53662 23.9622 -0.0811202L23.0588 1.23944ZM14.8235 19.5493L13.895 18.2463L4.01264 25.2885L4.94118 26.5915L5.86971 27.8946L15.7521 20.8523L14.8235 19.5493ZM4.94118 26.5915L5.98103 25.3755L1.03986 21.1502L0 22.3662L-1.03986 23.5822L3.90132 27.8076L4.94118 26.5915ZM0 22.3662L1.03986 23.5822L9.27515 16.54L8.23529 15.3239L7.19544 14.1079L-1.03986 21.1502L0 22.3662ZM8.23529 15.3239L9.70059 14.6814C7.45839 9.56836 8.6725 5.7877 11.1281 3.68785C13.6728 1.51177 17.943 0.792196 22.4298 2.7106L23.0588 1.23944L23.6878 -0.231731C18.2923 -2.53867 12.6801 -1.8498 9.04838 1.25581C5.3275 4.43765 4.07103 9.81192 6.77 15.9665L8.23529 15.3239ZM21.4118 25.1831H23.0118C23.0118 24.9484 23.1188 24.6618 23.4164 24.4073L22.3766 23.1912L21.3367 21.9752C20.3989 22.7772 19.8118 23.9236 19.8118 25.1831H21.4118ZM22.3766 23.1912L23.4164 24.4073C23.7218 24.1461 24.1827 23.9662 24.7059 23.9662V22.3662V20.7662C23.4818 20.7662 22.2669 21.1798 21.3367 21.9752L22.3766 23.1912ZM24.7059 22.3662V23.9662C25.2291 23.9662 25.6899 24.1461 25.9953 24.4073L27.0352 23.1912L28.075 21.9752C27.1449 21.1798 25.93 20.7662 24.7059 20.7662V22.3662ZM27.0352 23.1912L25.9953 24.4073C26.293 24.6618 26.4 24.9484 26.4 25.1831H28H29.6C29.6 23.9236 29.0129 22.7772 28.075 21.9752L27.0352 23.1912ZM28 25.1831H26.4C26.4 25.4178 26.293 25.7044 25.9953 25.9589L27.0352 27.1749L28.075 28.391C29.0129 27.589 29.6 26.4425 29.6 25.1831H28ZM27.0352 27.1749L25.9953 25.9589C25.6899 26.2201 25.2291 26.4 24.7059 26.4V28V29.6C25.93 29.6 27.1449 29.1864 28.075 28.391L27.0352 27.1749ZM24.7059 28V26.4C24.1827 26.4 23.7218 26.2201 23.4164 25.9589L22.3766 27.1749L21.3367 28.391C22.2669 29.1864 23.4818 29.6 24.7059 29.6V28ZM22.3766 27.1749L23.4164 25.9589C23.1188 25.7044 23.0118 25.4178 23.0118 25.1831H21.4118H19.8118C19.8118 26.4426 20.3989 27.589 21.3367 28.391L22.3766 27.1749Z' fill='%23164AF2' mask='url(%23stroke0_0_51)'/%3E%3C/svg%3E")}
-.ic-skaten{--ic:url("data:image/svg+xml,%3Csvg width='28' height='28' viewBox='0 0 28 28' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cmask fill='white'%3E%3Cpath d='M6.63158 14C0.736842 14 -1.22807 9.33333 0.736842 0H2.21053C1.22807 6.22222 2.70175 9.33333 6.63158 9.33333H21.3684C25.2982 9.33333 26.7719 6.22222 25.7895 0H27.2632C29.2281 9.33333 27.2632 14 21.3684 14H6.63158Z'/%3E%3Cpath d='M8.19466 22.0251C7.7801 21.3687 7.21785 21 6.63158 21C6.04531 21 5.48306 21.3687 5.0685 22.0251C4.65395 22.6815 4.42105 23.5717 4.42105 24.5C4.42105 25.4283 4.65395 26.3185 5.0685 26.9749C5.48306 27.6313 6.04531 28 6.63158 28C7.21785 28 7.7801 27.6313 8.19466 26.9749C8.60921 26.3185 8.8421 25.4283 8.8421 24.5C8.8421 23.5717 8.60921 22.6815 8.19466 22.0251Z'/%3E%3Cpath d='M22.9315 22.0251C22.5169 21.3687 21.9547 21 21.3684 21C20.7822 21 20.2199 21.3687 19.8053 22.0251C19.3908 22.6815 19.1579 23.5717 19.1579 24.5C19.1579 25.4283 19.3908 26.3185 19.8053 26.9749C20.2199 27.6313 20.7822 28 21.3684 28C21.9547 28 22.5169 27.6313 22.9315 26.9749C23.3461 26.3185 23.5789 25.4283 23.5789 24.5C23.5789 23.5717 23.3461 22.6815 22.9315 22.0251Z'/%3E%3C/mask%3E%3Cpath d='M0.736842 0C-1.22807 9.33333 0.736842 14 6.63158 14H21.3684C27.2632 14 29.2281 9.33333 27.2632 0H25.7895C26.7719 6.22222 25.2982 9.33333 21.3684 9.33333H6.63158C2.70175 9.33333 1.22807 6.22222 2.21053 0H0.736842ZM6.63158 21C7.21785 21 7.7801 21.3687 8.19466 22.0251C8.60921 22.6815 8.8421 23.5717 8.8421 24.5C8.8421 25.4283 8.60921 26.3185 8.19466 26.9749C7.7801 27.6313 7.21785 28 6.63158 28C6.04531 28 5.48306 27.6313 5.0685 26.9749C4.65395 26.3185 4.42105 25.4283 4.42105 24.5C4.42105 23.5717 4.65395 22.6815 5.0685 22.0251C5.48306 21.3687 6.04531 21 6.63158 21ZM21.3684 21C21.9547 21 22.5169 21.3687 22.9315 22.0251C23.3461 22.6815 23.5789 23.5717 23.5789 24.5C23.5789 25.4283 23.3461 26.3185 22.9315 26.9749C22.5169 27.6313 21.9547 28 21.3684 28C20.7822 28 20.2199 27.6313 19.8053 26.9749C19.3908 26.3185 19.1579 25.4283 19.1579 24.5C19.1579 23.5717 19.3908 22.6815 19.8053 22.0251C20.2199 21.3687 20.7822 21 21.3684 21Z' stroke-width='3.2' stroke='%23164AF2' mask='url(%23stroke0_0_34)'/%3E%3C/svg%3E")}
-.ic-calisthenics{--ic:url("data:image/svg+xml,%3Csvg width='28' height='28' viewBox='0 0 28 28' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cmask fill='white'%3E%3Cpath d='M0 28V0H28V28H25.2V2.8H21V12.6L15.4 16.8V22.4L21 28H16.8L14 23.8L11.2 28H7L12.6 22.4V16.8L7 12.6V2.8H2.8V28H0Z'/%3E%3C/mask%3E%3Cpath d='M9.8 11.2H9V11.6281L9.35624 11.8656L9.8 11.2ZM14 14L13.5562 14.6656L14 14.9615L14.4438 14.6656L14 14ZM18.2 11.2L18.6438 11.8656L19 11.6281V11.2H18.2ZM12.0201 6.4201L11.4544 5.85442V5.85442L12.0201 6.4201ZM15.9799 6.4201L16.5456 5.85442V5.85442L15.9799 6.4201ZM15.9799 10.3799L16.5456 10.9456V10.9456L15.9799 10.3799ZM21 2.8V2H18.2V2.8V3.6H21V2.8ZM18.2 2.8V2H9.8V2.8V3.6H18.2V2.8ZM9.8 2.8V2H7V2.8V3.6H9.8V2.8ZM9.8 2.8H9V11.2H9.8H10.6V2.8H9.8ZM9.8 11.2L9.35624 11.8656L13.5562 14.6656L14 14L14.4438 13.3344L10.2438 10.5344L9.8 11.2ZM14 14L14.4438 14.6656L18.6438 11.8656L18.2 11.2L17.7562 10.5344L13.5562 13.3344L14 14ZM18.2 11.2H19V2.8H18.2H17.4V11.2H18.2ZM11.2 8.4H12C12 7.86957 12.2107 7.36086 12.5858 6.98579L12.0201 6.4201L11.4544 5.85442C10.7793 6.52955 10.4 7.44522 10.4 8.4H11.2ZM12.0201 6.4201L12.5858 6.98579C12.9609 6.61071 13.4696 6.4 14 6.4V5.6V4.8C13.0452 4.8 12.1295 5.17928 11.4544 5.85442L12.0201 6.4201ZM14 5.6V6.4C14.5304 6.4 15.0391 6.61071 15.4142 6.98579L15.9799 6.4201L16.5456 5.85442C15.8705 5.17928 14.9548 4.8 14 4.8V5.6ZM15.9799 6.4201L15.4142 6.98579C15.7893 7.36086 16 7.86957 16 8.4H16.8H17.6C17.6 7.44522 17.2207 6.52955 16.5456 5.85442L15.9799 6.4201ZM16.8 8.4H16C16 8.93043 15.7893 9.43914 15.4142 9.81421L15.9799 10.3799L16.5456 10.9456C17.2207 10.2705 17.6 9.35478 17.6 8.4H16.8ZM15.9799 10.3799L15.4142 9.81421C15.0391 10.1893 14.5304 10.4 14 10.4V11.2V12C14.9548 12 15.8705 11.6207 16.5456 10.9456L15.9799 10.3799ZM14 11.2V10.4C13.4696 10.4 12.9609 10.1893 12.5858 9.81421L12.0201 10.3799L11.4544 10.9456C12.1295 11.6207 13.0452 12 14 12V11.2ZM12.0201 10.3799L12.5858 9.81421C12.2107 9.43914 12 8.93043 12 8.4H11.2H10.4C10.4 9.35478 10.7793 10.2705 11.4544 10.9456L12.0201 10.3799ZM0 28H-1.6V29.6H0V28ZM0 0V-1.6H-1.6V0H0ZM28 0H29.6V-1.6H28V0ZM28 28V29.6H29.6V28H28ZM25.2 28H23.6V29.6H25.2V28ZM25.2 2.8H26.8V1.2H25.2V2.8ZM21 2.8V1.2H19.4V2.8H21ZM7 2.8H8.6V1.2H7V2.8ZM2.8 2.8V1.2H1.2V2.8H2.8ZM2.8 28V29.6H4.4V28H2.8ZM21 12.6L21.96 13.88L22.6 13.4V12.6H21ZM15.4 16.8L14.44 15.52L13.8 16V16.8H15.4ZM15.4 22.4H13.8V23.0627L14.2686 23.5314L15.4 22.4ZM21 28V29.6H24.8627L22.1314 26.8686L21 28ZM16.8 28L15.4687 28.8875L15.9437 29.6H16.8V28ZM14 23.8L15.3313 22.9125L14 20.9156L12.6687 22.9125L14 23.8ZM11.2 28V29.6H12.0563L12.5313 28.8875L11.2 28ZM7 28L5.86863 26.8686L3.13726 29.6H7V28ZM12.6 22.4L13.7314 23.5314L14.2 23.0627V22.4H12.6ZM12.6 16.8H14.2V16L13.56 15.52L12.6 16.8ZM7 12.6H5.4V13.4L6.04 13.88L7 12.6ZM0 28H1.6V0H0H-1.6V28H0ZM0 0V1.6H28V0V-1.6H0V0ZM28 0H26.4V28H28H29.6V0H28ZM28 28V26.4H25.2V28V29.6H28V28ZM25.2 28H26.8V2.8H25.2H23.6V28H25.2ZM25.2 2.8V1.2H21V2.8V4.4H25.2V2.8ZM7 2.8V1.2H2.8V2.8V4.4H7V2.8ZM2.8 2.8H1.2V28H2.8H4.4V2.8H2.8ZM2.8 28V26.4H0V28V29.6H2.8V28ZM21 2.8H19.4V12.6H21H22.6V2.8H21ZM21 12.6L20.04 11.32L14.44 15.52L15.4 16.8L16.36 18.08L21.96 13.88L21 12.6ZM15.4 16.8H13.8V22.4H15.4H17V16.8H15.4ZM15.4 22.4L14.2686 23.5314L19.8686 29.1314L21 28L22.1314 26.8686L16.5314 21.2686L15.4 22.4ZM21 28V26.4H16.8V28V29.6H21V28ZM16.8 28L18.1313 27.1125L15.3313 22.9125L14 23.8L12.6687 24.6875L15.4687 28.8875L16.8 28ZM14 23.8L12.6687 22.9125L9.86872 27.1125L11.2 28L12.5313 28.8875L15.3313 24.6875L14 23.8ZM11.2 28V26.4H7V28V29.6H11.2V28ZM7 28L8.13137 29.1314L13.7314 23.5314L12.6 22.4L11.4686 21.2686L5.86863 26.8686L7 28ZM12.6 22.4H14.2V16.8H12.6H11V22.4H12.6ZM12.6 16.8L13.56 15.52L7.96 11.32L7 12.6L6.04 13.88L11.64 18.08L12.6 16.8ZM7 12.6H8.6V2.8H7H5.4V12.6H7Z' fill='%23164AF2' mask='url(%23stroke0_0_55)'/%3E%3C/svg%3E")}
-.ic-beachvolleyball{--ic:url("data:image/svg+xml,%3Csvg width='28' height='28' viewBox='0 0 28 28' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg stroke='%23000' stroke-width='1.6' stroke-linecap='round'%3E%3Ccircle cx='14' cy='14' r='13'/%3E%3Cpath d='M14 1c-1 6 1 11 6 14M27 14c-6-1-11 1-14 6M5 23c3-5 4-10 2-16'/%3E%3C/g%3E%3C/svg%3E")}
-.ic-laufen{--ic:url("data:image/svg+xml,%3Csvg width='28' height='28' viewBox='0 0 28 28' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='17' cy='4.5' r='2.5'/%3E%3Cpath d='M10 10l5-2 4 4 4 1M15 8l-3 8 5 4-2 7M12 16l-3 5H4'/%3E%3C/g%3E%3C/svg%3E")}
 .anzahl{padding:2px 20px 8px;font-size:13px;font-weight:600;color:var(--tinte-3);
   letter-spacing:.002em;flex-shrink:0}
 
@@ -272,14 +240,10 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
 .status.frei{background:var(--frei-bg);color:var(--frei)}
 .status.absprache{background:var(--absprache-bg);color:var(--absprache)}
 .status.vermutet{background:var(--frei-bg);color:var(--frei);outline:1.5px dashed var(--frei);outline-offset:-1.5px}
-.status.vermutet .status-icon{background:transparent;color:var(--frei);box-shadow:inset 0 0 0 2px var(--frei)}
-.status.zu{background:var(--zu-bg);color:var(--zu)}
-.status.zu .status-icon{background:var(--zu)}
-.status-icon.mit-symbol::before{width:22px;height:22px}
+.status.vermutet .status-icon{background:#8FD9A3;color:#0F3D1E}
 .status-icon{width:40px;height:40px;flex-shrink:0;border-radius:50%;display:grid;
-  place-items:center;font-size:20px;font-weight:800;background:var(--unklar);color:var(--grund)}
+  place-items:center;font-size:20px;font-weight:800;background:var(--unklar);color:#fff}
 .status.frei .status-icon{background:var(--frei)}
-.status{border-radius:var(--r-karte)}
 .status.absprache .status-icon{background:var(--absprache)}
 .status-text{display:flex;flex-direction:column;min-width:0}
 .status-text b{font-size:18px;letter-spacing:-.015em}
@@ -305,42 +269,43 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
 
 .zeile{width:100%;text-align:left;border:0;cursor:pointer;font-family:var(--schrift);
   display:flex;gap:14px;align-items:flex-start;position:relative;overflow:hidden;
-  background:var(--flaeche);border-radius:var(--r-karte);box-shadow:inset 0 0 0 1px var(--kante);
-  padding:12px 14px 12px 12px;margin-bottom:10px;
+  background:var(--flaeche);border-radius:var(--r-karte);box-shadow:var(--schatten);
+  padding:15px 17px 15px 20px;margin-bottom:11px;
   transition:box-shadow 220ms var(--feder),transform 220ms var(--feder)}
-/* Ausgewählt: 2 px Akzentkontur (Figma "Platzkarte ausgewählt") */
-.zeile:hover,.zeile.gewaehlt{box-shadow:inset 0 0 0 2px var(--gruen)}
+.zeile::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
+  background:var(--streifen,var(--unklar))}
+.zeile:hover{box-shadow:var(--schatten-hoch);transform:translateY(-1px)}
 .zeile:focus-visible{outline:2px solid var(--gruen);outline-offset:2px}
 .punkt{display:none}
 
 /* Satellitenausschnitt: zeigt beim Scrollen, ob Käfig oder Wiese. */
-.luftbild{width:64px;height:72px;flex-shrink:0;border-radius:14px;object-fit:cover;
-  background:#164AF2}
+.luftbild{width:56px;height:56px;flex-shrink:0;border-radius:12px;object-fit:cover;
+  background:#DDE3DA;box-shadow:inset 0 0 0 1px rgba(15,26,21,.08)}
 
 /* Gezeichnete Spielfläche je Sportart, mit dem Sport-Zeichen als Plakette */
 .platzbild{position:relative;overflow:hidden;display:block}
 .platzbild svg{display:block;width:100%;height:100%}
-.platzbild i{position:absolute;right:4px;bottom:4px;width:22px;height:22px;border-radius:8px;
-  background:#F7F4EB;color:#164AF2;display:flex;align-items:center;justify-content:center}
-.platzbild i .sport-ic{width:16px;height:16px}
+.platzbild i{position:absolute;right:3px;bottom:3px;width:21px;height:21px;border-radius:50%;
+  background:rgba(255,255,255,.94);font-style:normal;font-size:12px;line-height:1;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.25)}
 
 /* Knopf über der Karte */
-.bereich-knopf{position:absolute;left:50%;top:14px;transform:translateX(-50%);color:var(--gruen)!important;
+.bereich-knopf{position:absolute;left:50%;top:14px;transform:translateX(-50%);
   z-index:500;font-family:var(--schrift);font-size:13.5px;font-weight:600;
   letter-spacing:-.005em;padding:10px 18px;border:0;border-radius:var(--r-pille);
-  background:rgba(250,248,242,.96);backdrop-filter:saturate(180%) blur(18px);
+  background:rgba(255,255,255,.9);backdrop-filter:saturate(180%) blur(18px);
   -webkit-backdrop-filter:saturate(180%) blur(18px);color:var(--tinte);cursor:pointer;
-  box-shadow:0 0 0 1px var(--kante),var(--schatten-karte);
+  box-shadow:0 2px 10px rgba(15,26,21,.18);
   transition:background 160ms var(--feder-schnell),transform var(--druck)}
-.bereich-knopf:hover{background:var(--flaeche)}
+.bereich-knopf:hover{background:#fff}
 .bereich-knopf[hidden]{display:none}
 .abschnitt[hidden]{display:none}
 .daemmerung.bereich{background:var(--gruen-zart)}
 .abschnitt.luecke{border-left:3px solid var(--absprache)}
 .zt{flex:1;min-width:0}
-.zname{font-size:17px;font-weight:600;letter-spacing:-.01em;line-height:1.25;
+.zname{font-size:16.5px;font-weight:600;letter-spacing:-.014em;line-height:1.28;
   color:var(--tinte);display:block}
-.zsub{font-size:12.5px;letter-spacing:0;color:var(--tinte-2);margin-top:3px;
+.zsub{font-size:13px;letter-spacing:.002em;color:var(--tinte-3);margin-top:3px;
   display:block;font-weight:450;line-height:1.4}
 
 .zrechts{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0}
@@ -348,29 +313,20 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
   font-variant-numeric:tabular-nums;line-height:1;display:flex;align-items:baseline;gap:3px}
 .zdist small{font-size:11.5px;font-weight:600;color:var(--tinte-3);letter-spacing:.006em}
 
-.marke{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;max-width:100%;
+.marke{display:inline-flex;align-items:center;white-space:nowrap;max-width:100%;
   overflow:hidden;text-overflow:ellipsis;font-size:12px;font-weight:600;
-  letter-spacing:0;padding:5px 9px;border-radius:var(--r-label);
+  letter-spacing:.004em;padding:4px 10px;border-radius:var(--r-pille);
   margin:8px 6px 0 0;line-height:1.35;background:var(--unklar-bg);color:var(--unklar)}
-/* Zugang nie nur über Farbe: jede Art hat ihr eigenes Symbol. */
-.marke.frei::before,.marke.vermutet::before,.marke.absprache::before,.marke.verein::before,.marke.zu::before,
-.status-icon.mit-symbol::before{content:"";width:16px;height:16px;flex-shrink:0;background:currentColor;
-  -webkit-mask:var(--zs) center/contain no-repeat;mask:var(--zs) center/contain no-repeat}
-.zs-frei,.marke.frei,.marke.vermutet,.status.frei,.status.vermutet{--zs:url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg%3E%3Cpath d='M13.3328 4L6.0002 11.3328L2.6672 7.99971' stroke-width='1.8' stroke-linecap='round' stroke='%23147563'/%3E%3C/g%3E%3C/svg%3E")}
-.zs-absprache,.marke.absprache,.status.absprache{--zs:url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg%3E%3Cpath d='M14.6672 11.3334C14.6672 11.687 14.5267 12.0261 14.2766 12.2762C14.0266 12.5262 13.6874 12.6667 13.3338 12.6667H4.55172C4.1981 12.6668 3.85899 12.8073 3.60898 13.0574L2.14086 14.5254C2.07466 14.5916 1.99032 14.6367 1.8985 14.6549C1.80669 14.6732 1.71152 14.6638 1.62503 14.628C1.53854 14.5922 1.46461 14.5315 1.4126 14.4537C1.36058 14.3758 1.33281 14.2843 1.3328 14.1907V3.33334C1.3328 2.97972 1.47329 2.64058 1.72336 2.39053C1.97342 2.14048 2.31259 2 2.66624 2H13.3338C13.6874 2 14.0266 2.14048 14.2766 2.39053C14.5267 2.64058 14.6672 2.97972 14.6672 3.33334V11.3334Z' stroke-width='1.8' stroke-linecap='round' stroke='%23906017'/%3E%3C/g%3E%3C/svg%3E")}
-.zs-verein,.marke.verein,.status.verein{--zs:url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg%3E%3Cpath d='M13.3328 8.66667C13.3328 12.0001 10.9997 13.6668 8.22664 14.6335C8.08143 14.6827 7.9237 14.6804 7.78002 14.6269C5.0003 13.6668 2.6672 12.0001 2.6672 8.66667V3.99985C2.6672 3.82304 2.73743 3.65346 2.86244 3.52843C2.98745 3.4034 3.15701 3.33316 3.3338 3.33316C4.667 3.33316 6.3335 2.53314 7.49338 1.51977C7.63461 1.3991 7.81425 1.3328 8 1.3328C8.18575 1.3328 8.36539 1.3991 8.50662 1.51977C9.67317 2.53981 11.333 3.33316 12.6662 3.33316C12.843 3.33316 13.0125 3.4034 13.1376 3.52843C13.2626 3.65346 13.3328 3.82304 13.3328 3.99985V8.66667Z' stroke-width='1.8' stroke-linecap='round' stroke='%23526884'/%3E%3C/g%3E%3C/svg%3E")}
-.zs-zu,.marke.zu,.status.zu{--zs:url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg%3E%3Cpath d='M4.66667 6.66656V4.6664C4.66667 3.78227 5.01786 2.93436 5.64298 2.30919C6.2681 1.68402 7.11595 1.3328 8 1.3328C8.88406 1.3328 9.7319 1.68402 10.357 2.30919C10.9821 2.93436 11.3333 3.78227 11.3333 4.6664V6.66656M4.66667 6.66656H3.33333C2.59695 6.66656 2 7.26356 2 8V13.3338C2 14.0702 2.59695 14.6672 3.33333 14.6672H12.6667C13.403 14.6672 14 14.0702 14 13.3338V8C14 7.26356 13.403 6.66656 12.6667 6.66656H11.3333M4.66667 6.66656H11.3333M8.66667 10.6669C8.66667 11.0351 8.36819 11.3336 8 11.3336C7.63181 11.3336 7.33333 11.0351 7.33333 10.6669C7.33333 10.2987 7.63181 10.0002 8 10.0002C8.36819 10.0002 8.66667 10.2987 8.66667 10.6669Z' stroke-width='1.8' stroke-linecap='round' stroke='%23626775'/%3E%3C/g%3E%3C/svg%3E")}
 .marke.frei{background:var(--frei-bg);color:var(--frei)}
 .marke.absprache{background:var(--absprache-bg);color:var(--absprache)}
-.marke.vermutet{background:transparent;color:var(--frei);box-shadow:inset 0 0 0 1px var(--frei);opacity:.9}
+.marke.vermutet{background:transparent;color:var(--frei);box-shadow:inset 0 0 0 1.5px #8FD9A3}
 .marke.unklar{background:var(--unklar-bg);color:var(--unklar)}
-.marke.zu{background:var(--zu-bg);color:var(--zu)}
 .marke.verein{background:var(--verein-bg);color:var(--verein);margin-left:0}
 .marke.boden{margin-left:0}
 .marke.boden.gut{background:var(--frei-bg);color:var(--frei)}
 .marke.boden.mittel{background:var(--absprache-bg);color:var(--absprache)}
-.marke.boden.schlecht{background:var(--warnung-bg);color:var(--warnung)}
-.marke.warnung{background:var(--warnung-bg);color:var(--warnung);margin-left:0}
+.marke.boden.schlecht{background:var(--zu-bg);color:var(--zu)}
+.marke.warnung{background:var(--zu-bg);color:var(--zu);margin-left:0}
 .marke.bestaetigt{background:var(--frei-bg);color:var(--frei);margin-left:0}
 .marke.live{background:var(--frei-bg);color:var(--frei);margin-left:0}
 
@@ -453,13 +409,12 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
 .los-titel small{font-size:12.5px;font-weight:500;color:var(--tinte-3);margin-left:auto}
 .los-karte.live{background:var(--frei-bg)}
 .los-karte.spiel{background:var(--flaeche);border-color:var(--gruen-tief)}
-.los-karte.ansetzen{background:#164AF2;color:#F7F4EB}
-.los-karte.ansetzen .los-art{color:#E2EF83}
-.los-karte.ansetzen small{color:rgba(247,244,235,.85)}
+.los-karte.ansetzen{background:linear-gradient(140deg,#0B9463,#06603F);color:#fff}
+.los-karte.ansetzen .los-art,.los-karte.ansetzen small{color:rgba(255,255,255,.85)}
 .los-pille{position:absolute;left:50%;top:14px;transform:translateX(-50%);z-index:500;
   font-family:var(--schrift);font-size:13.5px;font-weight:600;padding:9px 16px;border:0;
-  border-radius:var(--r-pille);background:var(--gruen);color:var(--auf-akzent);cursor:pointer;
-  box-shadow:var(--schatten-karte);display:flex;align-items:center;gap:6px;white-space:nowrap}
+  border-radius:var(--r-pille);background:var(--gruen-tief);color:#fff;cursor:pointer;
+  box-shadow:0 2px 10px rgba(15,26,21,.25);display:flex;align-items:center;gap:6px;white-space:nowrap}
 .los-pille[hidden]{display:none}
 .bereich-knopf:not([hidden]) ~ .los-pille{top:62px}
 /* Leiste und Überschrift scrollen mit der Liste mit – sonst bleibt auf
@@ -509,7 +464,7 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
   font-size:13px;font-weight:600;letter-spacing:-.004em;color:var(--gruen-tief);
   cursor:pointer;padding:6px 13px;border-radius:var(--r-pille);
   transition:background 160ms var(--feder-schnell),transform var(--druck)}
-.inline-knopf:hover{background:rgba(22,74,242,.14)}
+.inline-knopf:hover{background:#D8EDE3}
 
 /* ---------- Detail ---------- */
 .dkopf{padding:22px 20px 16px;flex-shrink:0}
@@ -559,7 +514,7 @@ label.inline-knopf{display:inline-block;margin-top:10px}
 .form label{display:block;font-size:13px;font-weight:600;color:var(--tinte-2);
   margin:18px 0 7px;letter-spacing:-.002em;text-transform:none}
 .form input,.form select,.form textarea{width:100%;font-family:var(--schrift);
-  font-size:15px;padding:13px 15px;border:1px solid var(--kante);
+  font-size:15px;padding:13px 15px;border:1.5px solid transparent;
   background:var(--flaeche);color:var(--tinte);border-radius:var(--r-feld);
   box-shadow:0 1px 2px rgba(15,26,21,.05);appearance:none;-webkit-appearance:none;
   font-weight:450;letter-spacing:-.002em;
@@ -567,7 +522,7 @@ label.inline-knopf{display:inline-block;margin-top:10px}
 .form select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1.5 1.5L6 6l4.5-4.5' stroke='%237C8B83' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:right 15px center;padding-right:38px}
 .form input:focus,.form select:focus,.form textarea:focus{outline:0;
-  border-color:var(--gruen);box-shadow:0 0 0 4px rgba(22,74,242,.13)}
+  border-color:var(--gruen);box-shadow:0 0 0 4px rgba(11,148,99,.13)}
 .form textarea{resize:vertical;min-height:74px;line-height:1.55}
 .gesperrt{opacity:.5}
 .hinweis{font-size:13px;color:var(--tinte-3);margin-top:14px;line-height:1.6}
@@ -586,26 +541,25 @@ label.inline-knopf{display:inline-block;margin-top:10px}
 /* ---------- Fußleiste: zweite Materialschicht (§12) ---------- */
 .fuss{padding:14px 20px calc(14px + env(safe-area-inset-bottom,0));flex-shrink:0;
   display:flex;gap:9px;
-  background:rgba(241,239,232,.9);
-  backdrop-filter:saturate(160%) blur(18px);
-  -webkit-backdrop-filter:saturate(160%) blur(18px);
-  box-shadow:inset 0 1px 0 var(--kante)}
+  background:rgba(246,248,246,.78);
+  backdrop-filter:saturate(180%) blur(22px);
+  -webkit-backdrop-filter:saturate(180%) blur(22px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7)}
 .knopf{flex:1;font-family:var(--schrift);font-size:14.5px;font-weight:600;
-  letter-spacing:-.008em;padding:13px 20px;min-height:48px;border:0;border-radius:var(--r-pille);
-  background:var(--gruen);color:var(--auf-akzent);cursor:pointer;line-height:1.25;
+  letter-spacing:-.008em;padding:14px 16px;border:0;border-radius:var(--r-pille);
+  background:var(--gruen);color:#fff;cursor:pointer;line-height:1.25;
   transition:background 160ms var(--feder-schnell),box-shadow 200ms var(--feder),
              transform var(--druck)}
 .knopf:hover{background:var(--gruen-tief)}
 /* §12 Nie helles Milchglas auf hellem Milchglas – der Zweitknopf ist deckend. */
-.knopf.zweit{background:var(--flaeche);color:var(--gruen);box-shadow:inset 0 0 0 1px var(--kante)}
-.knopf:disabled{background:var(--kante);color:var(--tinte-2);cursor:default}
-.knopf.zweit:hover{box-shadow:inset 0 0 0 1px var(--tinte-3)}
+.knopf.zweit{background:var(--flaeche);color:var(--tinte);box-shadow:var(--schatten)}
+.knopf.zweit:hover{box-shadow:var(--schatten-hoch)}
 .knopf:focus-visible{outline:2px solid var(--gruen);outline-offset:2px}
 
 /* ---------- Meldung ---------- */
 /* §7 Räumliche Konsistenz: taucht von unten auf und verschwindet nach unten. */
 #meldung{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(90px);
-  background:var(--tinte);color:var(--grund);padding:14px 24px;font-size:14px;font-weight:600;
+  background:var(--tinte);color:#fff;padding:14px 24px;font-size:14px;font-weight:600;
   letter-spacing:-.006em;border-radius:var(--r-pille);z-index:1000;
   max-width:88vw;text-align:center;box-shadow:0 10px 34px rgba(15,26,21,.28);
   transition:transform 420ms var(--feder)}
@@ -628,16 +582,16 @@ label.inline-knopf{display:inline-block;margin-top:10px}
 
 /* ---------- Marker ---------- */
 .eigenermarker{background:none;border:0}
-.mk{width:15px;height:15px;border:3px solid #F7F4EB;border-radius:50%;
+.mk{width:15px;height:15px;border:3px solid #fff;border-radius:50%;
   box-shadow:0 2px 6px rgba(15,26,21,.3);transition:transform 180ms var(--feder)}
 .eigenermarker:hover .mk{transform:scale(1.25)}
 /* Bündel: mehrere Orte nah beieinander, Zahl in der Mitte. Der farbige
    Ring zeigt die beste Zugangsangabe darin (grün = mindestens ein freier). */
 .buendel{background:none;border:0}
 .buendel span{display:flex;align-items:center;justify-content:center;box-sizing:border-box;
-  border-radius:14px;background:var(--flaeche);border:1.5px solid var(--tinte);
-  color:var(--tinte);font:700 13px/1 var(--schrift);letter-spacing:-.01em;
-  box-shadow:inset 0 -3px 0 var(--ring),var(--schatten-karte);cursor:pointer;
+  border-radius:50%;background:rgba(255,255,255,.95);border:3px solid var(--ring);
+  color:#0F1A15;font:700 12.5px/1 var(--schrift);letter-spacing:-.01em;
+  box-shadow:0 2px 8px rgba(15,26,21,.25);cursor:pointer;
   transition:transform 180ms var(--feder)}
 .buendel:hover span{transform:scale(1.08)}
 /* Im Bündel wird gerade gespielt: kleiner grüner Punkt oben rechts.
@@ -663,11 +617,11 @@ label.inline-knopf{display:inline-block;margin-top:10px}
   aside{position:fixed;left:0;right:0;bottom:0;z-index:10;
     height:94dvh;width:100%;border-left:0;
     border-radius:22px 22px 0 0;
-    border-radius:28px 28px 0 0;
-    background:rgba(241,239,232,.97);
-    backdrop-filter:saturate(160%) blur(20px);
-    -webkit-backdrop-filter:saturate(160%) blur(20px);
-    box-shadow:0 -1px 0 var(--kante),0 -8px 30px -12px rgba(32,44,64,.25);
+    background:rgba(246,248,246,.94);
+    backdrop-filter:saturate(180%) blur(24px);
+    -webkit-backdrop-filter:saturate(180%) blur(24px);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.8),
+               0 -8px 34px -10px rgba(15,26,21,.22);
     /* Startposition wird beim Laden per JS gesetzt. */
     transform:translateY(52vh);
     will-change:transform;
@@ -678,9 +632,9 @@ label.inline-knopf{display:inline-block;margin-top:10px}
     touch-action:none;-webkit-tap-highlight-color:transparent}
   .griff::before{content:"";position:absolute;top:11px;left:50%;
     transform:translateX(-50%);width:40px;height:5px;border-radius:3px;
-    background:#C9C7BE;transition:background 160ms var(--feder-schnell)}
+    background:#C9D2CC;transition:background 160ms var(--feder-schnell)}
   .griff:active{cursor:grabbing}
-  .griff:active::before{background:#A9A79E}
+  .griff:active::before{background:#A9B5AD}
   .griff:focus-visible{outline:2px solid var(--gruen);outline-offset:-4px;border-radius:12px}
 
   #seite{height:calc(var(--sichtbar, 68dvh) - 34px);min-height:0}
@@ -712,7 +666,7 @@ label.inline-knopf{display:inline-block;margin-top:10px}
     background:transparent;color:var(--tinte-2);font-family:var(--schrift);font-size:14px;
     line-height:1.4;cursor:pointer}
   .eintragen-karte > span:first-child{width:40px;height:40px;flex-shrink:0;border-radius:50%;
-    display:grid;place-items:center;background:var(--gruen);color:var(--auf-akzent);font-size:22px;font-weight:700}
+    display:grid;place-items:center;background:var(--gruen);color:#fff;font-size:22px;font-weight:700}
   .eintragen-karte b{color:var(--tinte);font-size:15.5px}
   .admin-reihe{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
   .admin-reihe .knopf{font-size:13.5px;padding:11px 8px}
@@ -720,7 +674,7 @@ label.inline-knopf{display:inline-block;margin-top:10px}
 
   /* Kompaktere Karten: mehr Plätze auf einen Blick. */
   .zeile{padding:12px 14px 12px 17px;margin-bottom:10px;gap:12px;align-items:center}
-  .luftbild{width:64px;height:72px;border-radius:14px}
+  .luftbild{width:64px;height:64px;border-radius:14px}
   .zname{font-size:16.5px}
   .zsub{font-size:13px;margin-top:1px}
 
@@ -761,7 +715,7 @@ label.inline-knopf{display:inline-block;margin-top:10px}
   .daemmerung{margin:0 20px 10px;padding:11px 14px;font-size:13px}
   .dkopf,.form{padding-left:16px;padding-right:16px}
   .fuss{padding:12px 20px calc(12px + env(safe-area-inset-bottom,0));
-    background:rgba(241,239,232,.92)}
+    background:rgba(246,248,246,.86)}
   .dname{font-size:24px;letter-spacing:-.024em}
 
   /* Beschriftungsspalte schmaler, sonst brechen kurze Wörter um. */
@@ -783,45 +737,49 @@ label.inline-knopf{display:inline-block;margin-top:10px}
    =========================================================================== */
 @media(prefers-color-scheme:dark){
   :root{
-    /* Abendlicht */
-    --gruen:#A9BEFF;
-    --gruen-tief:#BFCEFF;
-    --gruen-zart:rgba(169,190,255,.12);
-    --auf-akzent:#131E30;
-    --grund:#131E30;
-    --logo:#F7F4EB;--logo-innen:#131E30;
-    --flaeche:#223047;
-    --tinte:#F7F4EB;
-    --tinte-2:#C1CDC9;
-    --tinte-3:#9AA6AE;
-    --kante:#44516A;
+    --gruen:#2BC98A;
+    --gruen-tief:#22B27A;
+    --gruen-zart:#12332A;
+    --grund:#0E1512;
+    --flaeche:#18211D;
+    --tinte:#EDF2EF;
+    --tinte-2:#B6C2BC;
+    --tinte-3:#86978E;
+    --kante:rgba(255,255,255,.10);
 
-    --frei:#8CDBBF;         --frei-bg:rgba(140,219,191,.10);
-    --absprache:#F1C477;    --absprache-bg:rgba(241,196,119,.10);
-    --zu:#C6CAD1;           --zu-bg:rgba(198,202,209,.10);
-    --verein:#B6CBE9;       --verein-bg:rgba(182,203,233,.10);
-    --unklar:#C1CDC9;       --unklar-bg:rgba(198,202,209,.08);
-    --warnung:#F2A196;      --warnung-bg:rgba(242,161,150,.10);
-    --schatten-karte:0 2px 10px rgba(0,0,0,.45);
+    --frei:#4FD182;         --frei-bg:#14331F;
+    --absprache:#F0AE4E;    --absprache-bg:#35270F;
+    --zu:#F2705F;           --zu-bg:#3A1B18;
+    --verein:#A996F5;       --verein-bg:#241E3D;
+    --unklar:#93A39B;       --unklar-bg:#1E2724;
+
+    --schatten:0 1px 2px rgba(0,0,0,.4), 0 6px 18px -6px rgba(0,0,0,.5);
+    --schatten-hoch:0 2px 4px rgba(0,0,0,.45), 0 14px 32px -10px rgba(0,0,0,.6);
   }
-  header{background:rgba(19,30,48,.86);box-shadow:0 1px 0 var(--kante)}
-  .fuss{background:rgba(19,30,48,.86);box-shadow:inset 0 1px 0 var(--kante)}
+  header{background:rgba(24,33,29,.72);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 1px 0 rgba(0,0,0,.35)}
+  .fuss{background:rgba(14,21,18,.78);box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+  .adminknopf{color:#08211A}
   /* Aktiver Filter: heller Grund braucht dunkle Schrift, sonst Weiß auf Weiß. */
-
+  .chip[aria-pressed="true"]{color:var(--grund)}
+  .knopf{color:#08211A}
+  .knopf.zweit{color:var(--tinte)}
   .inline-knopf{color:var(--gruen)}
-  #karte{background:#131E30}
-  .bereich-knopf{background:rgba(34,48,71,.94);color:var(--tinte)}
-  .bereich-knopf:hover{background:#223047}
-  #meldung{background:#F7F4EB;color:#131E30}
-  .stern{color:#44516A}
+  #karte{background:#141B18}
+  .luftbild{background:#141B18;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+  .bereich-knopf{background:rgba(24,33,29,.9);color:var(--tinte)}
+  .bereich-knopf:hover{background:#18211D}
+  .buendel span{background:rgba(24,33,29,.95);color:var(--tinte)}
+  #meldung{background:#E9F0EC;color:#0E1512}
+  .stern{color:#3A4844}
   .form input,.form select,.form textarea{border-color:var(--kante)}
   .form select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1.5 1.5L6 6l4.5-4.5' stroke='%2386978E' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
   .daten tr:not(:last-child) th,.daten tr:not(:last-child) td{
     border-bottom:1px solid rgba(255,255,255,.07)}
-  aside{background:rgba(19,30,48,.96)}
-  .griff::before{background:#44516A}
-  .griff:active::before{background:#5A6884}
-  .leaflet-control-zoom a,.leaflet-control-layers,.standort-knopf a{background:#223047!important;
+  aside{background:rgba(14,21,18,.94)}
+  .griff::before{background:#3A4844}
+  .griff:active::before{background:#4E605A}
+  .leaflet-control-zoom a,.leaflet-control-layers,.standort-knopf a{background:#18211D!important;
     color:var(--tinte)!important}
 }
 
@@ -849,7 +807,7 @@ label.inline-knopf{display:inline-block;margin-top:10px}
 }
 
 @media(prefers-contrast:more){
-  :root{--kante:#9A9A92;--tinte-3:#4A515A}
+  :root{--kante:rgba(15,26,21,.35);--tinte-3:#4A574F}
   header,.fuss{background:#fff;backdrop-filter:none;-webkit-backdrop-filter:none}
   .zeile,.abschnitt,.daten,.leer,.daemmerung{border:1.5px solid var(--kante)}
   .chip{border:1.5px solid var(--kante)}
@@ -857,437 +815,45 @@ label.inline-knopf{display:inline-block;margin-top:10px}
   .rolle{-webkit-mask-image:none;mask-image:none}
 }
 
-/* ======================================================================
-   Linienspiel v2 · Bildschirme (Entdecken, Platzdetail, Für Vereine)
-   ====================================================================== */
-.ui-ic{display:inline-block;width:20px;height:20px;flex-shrink:0;background:currentColor;
-  -webkit-mask:var(--ic) center/contain no-repeat;mask:var(--ic) center/contain no-repeat}
-.i-search{--ic:url("data:image/svg+xml,%3Csvg width=%2220%22 height=%2220%22 viewBox=%220 0 20 20%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E %3Cg id=%22search%22%3E %3Cpath id=%22Vector%22 d=%22M17.5001 17.5001L13.8835 13.8835M15.8333 9.16667C15.8333 12.8486 12.8486 15.8333 9.16667 15.8333C5.48477 15.8333 2.5 12.8486 2.5 9.16667C2.5 5.48477 5.48477 2.5 9.16667 2.5C12.8486 2.5 15.8333 5.48477 15.8333 9.16667Z%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke=%22%23164AF2%22/%3E %3C/g%3E %3C/svg%3E")}
-.i-locate{--ic:url("data:image/svg+xml,%3Csvg width=%2220%22 height=%2220%22 viewBox=%220 0 20 20%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E %3Cg id=%22locate-fixed%22 clip-path=%22url(%23clip0_0_9)%22%3E %3Cpath id=%22Vector%22 d=%22M1.666 10H4.1662M4.1662 10C4.1662 13.2219 6.77808 15.8338 10 15.8338M4.1662 10C4.1662 6.77808 6.77808 4.1662 10 4.1662M10 15.8338C13.2219 15.8338 15.8338 13.2219 15.8338 10M10 15.8338V18.334M10 4.1662C13.2219 4.1662 15.8338 6.77808 15.8338 10M10 4.1662V1.666M15.8338 10H18.334M12.5002 10C12.5002 11.3808 11.3808 12.5002 10 12.5002C8.61918 12.5002 7.4998 11.3808 7.4998 10C7.4998 8.61918 8.61918 7.4998 10 7.4998C11.3808 7.4998 12.5002 8.61918 12.5002 10Z%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke=%22%23164AF2%22/%3E %3C/g%3E %3Cdefs%3E %3CclipPath id=%22clip0_0_9%22%3E %3Crect width=%2220%22 height=%2220%22 fill=%22white%22/%3E %3C/clipPath%3E %3C/defs%3E %3C/svg%3E")}
-.i-map{--ic:url("data:image/svg+xml,%3Csvg width=%2222%22 height=%2222%22 viewBox=%220 0 22 22%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E %3Cg id=%22map%22%3E %3Cpath id=%22Vector%22 d=%22M13.75 5.28281C13.4655 5.28281 13.185 5.21661 12.9305 5.08945L9.0695 3.15895C8.81504 3.0318 8.53447 2.9656 8.25 2.9656M13.75 5.28281C14.0345 5.28281 14.315 5.21661 14.5695 5.08945L17.9236 3.41195C18.0634 3.34207 18.2189 3.30911 18.375 3.31623C18.5312 3.32334 18.683 3.37028 18.8159 3.45259C18.9488 3.5349 19.0585 3.64984 19.1345 3.78649C19.2105 3.92313 19.2502 4.07694 19.25 4.23329V15.9336C19.2499 16.1038 19.2024 16.2706 19.1129 16.4154C19.0234 16.5601 18.8953 16.677 18.7431 16.7531L14.5695 18.8404C14.315 18.9675 14.0345 19.0337 13.75 19.0337C13.4655 19.0337 13.185 18.9675 12.9305 18.8404L9.0695 16.9099C8.81504 16.7827 8.53447 16.7165 8.25 16.7165C7.96553 16.7165 7.68497 16.7827 7.4305 16.9099L4.07642 18.5874C3.93649 18.6573 3.781 18.6902 3.62474 18.6831C3.46848 18.6759 3.31665 18.6289 3.18369 18.5465C3.05074 18.4641 2.94109 18.349 2.86518 18.2122C2.78927 18.0755 2.74962 17.9215 2.75 17.7651V6.0657C2.75009 5.89551 2.79756 5.72871 2.88709 5.58397C2.97662 5.43923 3.10468 5.32228 3.25692 5.2462L7.4305 3.15895C7.68497 3.0318 7.96553 2.9656 8.25 2.9656M13.75 5.28281L13.75 19.0323M8.25 2.9656L8.25 16.7156%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke=%22%23164AF2%22/%3E %3C/g%3E %3C/svg%3E")}
-.i-bookmark{--ic:url("data:image/svg+xml,%3Csvg width=%2222%22 height=%2222%22 viewBox=%220 0 22 22%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E %3Cg id=%22bookmark%22%3E %3Cpath id=%22Vector%22 d=%22M15.5839 2.75C16.0701 2.75 16.5365 2.94316 16.8804 3.28698C17.2242 3.6308 17.4174 4.09713 17.4174 4.58337V18.3336C17.4173 18.4941 17.3751 18.6518 17.295 18.7909C17.2148 18.93 17.0996 19.0456 16.9607 19.1262C16.8219 19.2068 16.6643 19.2495 16.5037 19.25C16.3432 19.2505 16.1853 19.2089 16.0459 19.1293L11.9094 16.7661C11.6325 16.6079 11.319 16.5247 11 16.5247C10.681 16.5247 10.3675 16.6079 10.0906 16.7661L5.95409 19.1293C5.81469 19.2089 5.65682 19.2505 5.49627 19.25C5.33573 19.2495 5.17815 19.2068 5.03928 19.1262C4.90042 19.0456 4.78515 18.93 4.70501 18.7909C4.62486 18.6518 4.58265 18.4941 4.5826 18.3336V4.58337C4.5826 4.09713 4.77578 3.6308 5.11963 3.28698C5.46349 2.94316 5.92986 2.75 6.41614 2.75H15.5839Z%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke=%22%23636B74%22/%3E %3C/g%3E %3C/svg%3E")}
-.i-shieldcheck{--ic:url("data:image/svg+xml,%3Csvg width=%2222%22 height=%2222%22 viewBox=%220 0 22 22%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E %3Cg id=%22shield-check%22%3E %3Cpath id=%22Vector%22 d=%22M8.25027 10.9996L10.0834 12.833L13.7497 9.16617M18.3326 11.9167C18.3326 16.5002 15.1246 18.7919 11.3116 20.1211C11.112 20.1888 10.8951 20.1855 10.6975 20.1119C6.87541 18.7919 3.6674 16.5002 3.6674 11.9167V5.4998C3.6674 5.25667 3.76397 5.02351 3.93586 4.8516C4.10775 4.67968 4.34088 4.5831 4.58398 4.5831C6.41712 4.5831 8.70856 3.48307 10.3034 2.08969C10.4976 1.92376 10.7446 1.8326 11 1.8326C11.2554 1.8326 11.5024 1.92376 11.6966 2.08969C13.3006 3.49223 15.5829 4.5831 17.416 4.5831C17.6591 4.5831 17.8923 4.67968 18.0641 4.8516C18.236 5.02351 18.3326 5.25667 18.3326 5.4998V11.9167Z%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke=%22%23636B74%22/%3E %3C/g%3E %3C/svg%3E")}
-.i-arrowleft{--ic:url("data:image/svg+xml,%3Csvg width=%2220%22 height=%2220%22 viewBox=%220 0 20 20%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E %3Cg id=%22arrow-left%22%3E %3Cpath id=%22Vector%22 d=%22M10 4.166L4.166 10L10 15.834M4.166 10H15.834%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke=%22%23F7F4EB%22/%3E %3C/g%3E %3C/svg%3E")}
-.i-layers{--ic:url("data:image/svg+xml,%3Csvg width=%2222%22 height=%2222%22 viewBox=%220 0 22 22%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E %3Cg id=%22layers%22 clip-path=%22url(%23clip0_0_12)%22%3E %3Cpath id=%22Vector%22 d=%22M1.8326 10.9998C1.83217 11.1751 1.88203 11.3469 1.97627 11.4948C2.07051 11.6426 2.20518 11.7603 2.36431 11.834L10.2482 15.4184C10.4858 15.526 10.7437 15.5816 11.0045 15.5816C11.2653 15.5816 11.5232 15.526 11.7608 15.4184L19.6263 11.8432C19.7886 11.7702 19.9262 11.6516 20.0222 11.5019C20.1182 11.3521 20.1686 11.1777 20.1672 10.9998M1.8326 15.5834C1.83217 15.7587 1.88203 15.9305 1.97627 16.0783C2.07051 16.2262 2.20518 16.3439 2.36431 16.4176L10.2482 20.0019C10.4858 20.1095 10.7437 20.1652 11.0045 20.1652C11.2653 20.1652 11.5232 20.1095 11.7608 20.0019L19.6263 16.4267C19.7886 16.3538 19.9262 16.2352 20.0222 16.0855C20.1182 15.9357 20.1686 15.7613 20.1672 15.5834M11.7612 1.99794C11.5223 1.88898 11.2629 1.8326 11.0003 1.8326C10.7378 1.8326 10.4783 1.88898 10.2394 1.99794L2.38305 5.57314C2.22038 5.64486 2.08207 5.76235 1.98497 5.91127C1.88788 6.0602 1.83618 6.23415 1.83618 6.41193C1.83618 6.58972 1.88788 6.76366 1.98497 6.91259C2.08207 7.06152 2.22038 7.179 2.38305 7.25073L10.2486 10.8351C10.4875 10.944 10.7469 11.0004 11.0095 11.0004C11.272 11.0004 11.5315 10.944 11.7704 10.8351L19.6359 7.2599C19.7986 7.18817 19.9369 7.07069 20.034 6.92176C20.1311 6.77283 20.1828 6.59888 20.1828 6.4211C20.1828 6.24332 20.1311 6.06937 20.034 5.92044C19.9369 5.77151 19.7986 5.65403 19.6359 5.5823L11.7612 1.99794Z%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke=%22%23A9BEFF%22/%3E %3C/g%3E %3Cdefs%3E %3CclipPath id=%22clip0_0_12%22%3E %3Crect width=%2222%22 height=%2222%22 fill=%22white%22/%3E %3C/clipPath%3E %3C/defs%3E %3C/svg%3E")}
-.i-route{--ic:url("data:image/svg+xml,%3Csvg width=%2222%22 height=%2222%22 viewBox=%220 0 22 22%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E %3Cg id=%22route%22%3E %3Cpath id=%22Vector%22 d=%22M8.25 17.4172C8.25 18.9361 7.01878 20.1674 5.5 20.1674C3.98122 20.1674 2.75 18.9361 2.75 17.4172C2.75 15.8983 3.98122 14.667 5.5 14.667C7.01878 14.667 8.25 15.8983 8.25 17.4172ZM8.25 17.4172H16.0417C16.8926 17.4172 17.7086 17.0791 18.3103 16.4774C18.912 15.8757 19.25 15.0596 19.25 14.2086C19.25 13.3576 18.912 12.5415 18.3103 11.9398C17.7086 11.338 16.8926 11 16.0417 11H5.95833C5.10743 11 4.29138 10.662 3.6897 10.0602C3.08802 9.4585 2.75 8.64238 2.75 7.79141C2.75 6.94044 3.08802 6.12432 3.6897 5.52259C4.29138 4.92087 5.10743 4.58282 5.95833 4.58282H13.75M13.75 4.58282C13.75 6.10172 14.9812 7.33304 16.5 7.33304C18.0188 7.33304 19.25 6.10172 19.25 4.58282C19.25 3.06392 18.0188 1.8326 16.5 1.8326C14.9812 1.8326 13.75 3.06392 13.75 4.58282Z%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke=%22%23A9BEFF%22/%3E %3C/g%3E %3C/svg%3E")}
-.i-info{--ic:url("data:image/svg+xml,%3Csvg width=%2218%22 height=%2218%22 viewBox=%220 0 18 18%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E %3Cg id=%22info%22 clip-path=%22url(%23clip0_0_10)%22%3E %3Cpath id=%22Vector%22 d=%22M9 12.0002V9M9 5.99976H9.0075M16.5006 9C16.5006 13.1425 13.1425 16.5006 9 16.5006C4.85753 16.5006 1.4994 13.1425 1.4994 9C1.4994 4.85753 4.85753 1.4994 9 1.4994C13.1425 1.4994 16.5006 4.85753 16.5006 9Z%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke=%22%23A9BEFF%22/%3E %3C/g%3E %3Cdefs%3E %3CclipPath id=%22clip0_0_10%22%3E %3Crect width=%2218%22 height=%2218%22 fill=%22white%22/%3E %3C/clipPath%3E %3C/defs%3E %3C/svg%3E")}
-.i-kalender{--ic:url("data:image/svg+xml,%3Csvg width=%2228%22 height=%2228%22 viewBox=%220 0 28 28%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E %3Cg id=%22calendar-days%22%3E %3Cpath id=%22Vector%22 d=%22M9.33333 2.3324V4.66592M9.33333 4.66592V6.99944M9.33333 4.66592H5.83333C4.54467 4.66592 3.5 5.71067 3.5 6.99944V11.6665M9.33333 4.66592H18.6667M18.6667 2.3324V4.66592M18.6667 4.66592V6.99944M18.6667 4.66592H22.1667C23.4553 4.66592 24.5 5.71067 24.5 6.99944V11.6665M3.5 11.6665H24.5M3.5 11.6665V23.3341C3.5 24.6229 4.54467 25.6676 5.83333 25.6676H22.1667C23.4553 25.6676 24.5 24.6229 24.5 23.3341V11.6665M9.33333 16.3335H9.345M14 16.3335H14.0117M18.6667 16.3335H18.6783M9.33333 21.0006H9.345M14 21.0006H14.0117M18.6667 21.0006H18.6783%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke=%22%23164AF2%22/%3E %3C/g%3E %3C/svg%3E")}
-.i-listchecks{--ic:url("data:image/svg+xml,%3Csvg width=%2228%22 height=%2228%22 viewBox=%220 0 28 28%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E %3Cg id=%22list-checks%22%3E %3Cpath id=%22Vector%22 d=%22M15.1667 5.8324H24.5M15.1667 14H24.5M15.1667 22.1676H24.5M3.5 19.834L5.83333 22.1676L10.5 17.5004M3.5 8.166L5.83333 10.4996L10.5 5.8324%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke=%22%23164AF2%22/%3E %3C/g%3E %3C/svg%3E")}
-.i-fileclock{--ic:url("data:image/svg+xml,%3Csvg width=%2220%22 height=%2220%22 viewBox=%220 0 20 20%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E %3Cg id=%22file-clock%22%3E %3Cpath id=%22Vector%22 d=%22M13.3327 18.334H14.9993C15.4414 18.334 15.8653 18.1584 16.1778 17.8458C16.4904 17.5332 16.666 17.1093 16.666 16.6672V6.6664M16.666 6.6664C16.6666 6.40231 16.615 6.1407 16.514 5.89667C16.413 5.65264 16.2647 5.43103 16.0777 5.24462L13.0877 2.25439C12.9013 2.0673 12.6797 1.91899 12.4357 1.818C12.1917 1.71702 11.9301 1.66536 11.666 1.66601M16.666 6.6664L12.4993 6.6664C12.2783 6.6664 12.0664 6.57859 11.9101 6.4223C11.7538 6.26601 11.666 6.05403 11.666 5.833V1.66601M11.666 1.66601H4.99933C4.5573 1.66601 4.13338 1.84161 3.82082 2.1542C3.50826 2.46679 3.33267 2.89074 3.33267 3.33281V5.70799M6.666 11.6668V13.5003L7.99933 14.3337M11.666 13.3336C11.666 16.0952 9.42742 18.334 6.666 18.334C3.90458 18.334 1.666 16.0952 1.666 13.3336C1.666 10.572 3.90458 8.3332 6.666 8.3332C9.42742 8.3332 11.666 10.572 11.666 13.3336Z%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke=%22%23164AF2%22/%3E %3C/g%3E %3C/svg%3E")}
-.i-filepen{--ic:url("data:image/svg+xml,%3Csvg width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E %3Cg id=%22file-pen-line%22%3E %3Cpath id=%22Vector%22 d=%22M14.4877 7.85767C14.3393 7.76896 14.2164 7.64327 14.1311 7.49288C14.0457 7.34249 14.0008 7.17253 14.0007 6.9996V1.9992M14.0007 1.9992L6.00079 1.99921C5.47036 1.99921 4.96165 2.20994 4.58658 2.58504C4.21151 2.96014 4.0008 3.46889 4.0008 3.99937V20.0006C4.0008 20.5311 4.21151 21.0399 4.58658 21.415C4.96165 21.7901 5.47036 22.0008 6.00079 22.0008H18.0007C18.5311 22.0008 19.0398 21.7901 19.4149 21.415C19.79 21.0399 20.0007 20.5311 20.0007 20.0006V19.6456M14.0007 1.9992C14.3173 1.99869 14.6308 2.06081 14.9233 2.18199C15.2157 2.30317 15.4813 2.481 15.7047 2.70526L18.2207 5.22146M8.00077 18.0005H9.00077M14.3647 13.6343C14.127 13.8719 13.9529 14.1657 13.8587 14.4883L13.0217 17.3586C12.9966 17.4446 12.9951 17.5359 13.0174 17.6227C13.0396 17.7095 13.0848 17.7888 13.1482 17.8522C13.2115 17.9156 13.2908 17.9607 13.3776 17.983C13.4644 18.0052 13.5557 18.0037 13.6417 17.9786L16.5117 17.1416C16.8344 17.0473 17.1281 16.8733 17.3657 16.6355L21.3787 12.6262C21.777 12.2278 22.0008 11.6875 22.0008 11.1241C22.0008 10.5607 21.777 10.0203 21.3787 9.62196C20.9803 9.22357 20.44 8.99976 19.8767 8.99976C19.3133 8.99976 18.773 9.22357 18.3747 9.62196L14.3647 13.6343Z%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke=%22%23164AF2%22/%3E %3C/g%3E %3C/svg%3E")}
-.i-clipboard{--ic:url("data:image/svg+xml,%3Csvg width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E %3Cg id=%22clipboard-check%22%3E %3Cpath id=%22Vector%22 d=%22M15.9996 3.99936H17.9994C18.5298 3.99936 19.0384 4.21009 19.4135 4.58519C19.7885 4.9603 19.9992 5.46904 19.9992 5.99952V20.0006C19.9992 20.5311 19.7885 21.0399 19.4135 21.415C19.0384 21.7901 18.5298 22.0008 17.9994 22.0008H6.0006C5.47022 22.0008 4.96156 21.7901 4.58653 21.415C4.21149 21.0399 4.0008 20.5311 4.0008 20.0006V5.99952C4.0008 5.46904 4.21149 4.9603 4.58653 4.58519C4.96156 4.21009 5.47022 3.99936 6.0006 3.99936H8.0004M15.9996 3.99936V2.99928C15.9996 2.44695 15.5519 1.9992 14.9997 1.9992H9.0003C8.44807 1.9992 8.0004 2.44695 8.0004 2.99928V3.99936M15.9996 3.99936V4.99944C15.9996 5.55177 15.5519 5.99952 14.9997 5.99952H9.0003C8.44807 5.99952 8.0004 5.55177 8.0004 4.99944V3.99936M9.0003 14.0002L11.0001 16.0003L14.9997 12%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke=%22%23164AF2%22/%3E %3C/g%3E %3C/svg%3E")}
-.i-history{--ic:url("data:image/svg+xml,%3Csvg width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E %3Cg id=%22history%22%3E %3Cpath id=%22Vector%22 d=%22M3 12C3 13.78 3.52784 15.5201 4.51677 17.0001C5.50571 18.4802 6.91131 19.6337 8.55585 20.3149C10.2004 20.9961 12.01 21.1743 13.7558 20.8271C15.5016 20.4798 17.1053 19.6226 18.364 18.364C19.6226 17.1053 20.4798 15.5016 20.8271 13.7558C21.1743 12.01 20.9961 10.2004 20.3149 8.55585C19.6337 6.91131 18.4802 5.50571 17.0001 4.51677C15.5201 3.52784 13.78 3 12 3C9.48395 3.00947 7.06897 3.99122 5.26 5.74L3 8M8 8H3V3M12 7V12L16 14%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke=%22%23164AF2%22/%3E %3C/g%3E %3C/svg%3E")}
-.i-regelcheck{--ic:url("data:image/svg+xml,%3Csvg width=%2217%22 height=%2217%22 viewBox=%220 0 17 17%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E %3Cg id=%22check%22%3E %3Cpath id=%22Vector%22 d=%22M14.1661 4.25L6.37521 12.0411L2.8339 8.49969%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke=%22%23A9BEFF%22/%3E %3C/g%3E %3C/svg%3E")}
-.i-lock{--ic:url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg%3E%3Cpath d='M4.66667 6.66656V4.6664C4.66667 3.78227 5.01786 2.93436 5.64298 2.30919C6.2681 1.68402 7.11595 1.3328 8 1.3328C8.88406 1.3328 9.7319 1.68402 10.357 2.30919C10.9821 2.93436 11.3333 3.78227 11.3333 4.6664V6.66656M4.66667 6.66656H3.33333C2.59695 6.66656 2 7.26356 2 8V13.3338C2 14.0702 2.59695 14.6672 3.33333 14.6672H12.6667C13.403 14.6672 14 14.0702 14 13.3338V8C14 7.26356 13.403 6.66656 12.6667 6.66656H11.3333M4.66667 6.66656H11.3333M8.66667 10.6669C8.66667 11.0351 8.36819 11.3336 8 11.3336C7.63181 11.3336 7.33333 11.0351 7.33333 10.6669C7.33333 10.2987 7.63181 10.0002 8 10.0002C8.36819 10.0002 8.66667 10.2987 8.66667 10.6669Z' stroke-width='1.8' stroke-linecap='round' stroke='%23626775'/%3E%3C/g%3E%3C/svg%3E")}
-.zs-frei{color:var(--frei)} .zs-absprache{color:var(--absprache)}
-.zs-verein{color:var(--verein)} .zs-zu{color:var(--zu)}
-.pin-z{display:inline-block;width:16px;height:16px;flex-shrink:0;background:currentColor;
-  -webkit-mask:var(--zs) center/contain no-repeat;mask:var(--zs) center/contain no-repeat}
-.pin-z.vermutet{opacity:.55}
-
-/* Kopf */
-.kopf-cta{font-family:var(--schrift);font-size:15px;font-weight:600;padding:13px 20px;border:0;
-  border-radius:14px;background:var(--gruen);color:var(--auf-akzent);cursor:pointer;flex-shrink:0}
-.kopf-cta:hover{background:var(--gruen-tief)}
-
-/* Suchfeld: Lupe links, Standort rechts */
-.suche-lupe{position:absolute;left:16px;color:var(--gruen);display:none}
-.suche-ort{position:absolute;right:8px;width:38px;height:38px;border:0;border-radius:12px;
-  background:none;color:var(--gruen);display:grid;place-items:center;cursor:pointer}
-.suche-ort:hover{background:var(--gruen-zart)}
-.suche input{padding-right:52px}
-.leiste-titel{display:none}
-
-/* Listenkopf */
-.liste-kopf{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px 0 12px}
-.liste-titel{font-family:var(--schrift-titel);font-size:26px;font-weight:600;letter-spacing:-.01em;
-  line-height:1.15;margin:0;color:var(--tinte)}
-.rolle .liste-kopf .anzahl{padding:5px 0 0;font-size:13px;font-weight:400;color:var(--tinte-2)}
-.sort-knopf{border:0;background:none;font-family:var(--schrift);font-size:12px;font-weight:500;
-  color:var(--tinte-2);padding:8px 2px;cursor:pointer;white-space:nowrap}
-.sort-knopf:hover{color:var(--gruen)}
-.chip.zyklus{font-weight:600}
-
-/* Platzkarten */
-.zeile{align-items:center;padding:10px 14px 10px 10px}
-.zeile .luftbild{width:82px;height:94px}
-.zmarken{display:flex;flex-wrap:wrap}
-.zhinweis{display:block;font-size:11px;color:var(--tinte-2);margin-top:7px;line-height:1.3}
-.zeile > .stern{align-self:flex-start}
-
-/* Legende */
-.legende-titel{font-size:13px;color:var(--tinte);margin-bottom:8px}
-.legende-marken{display:flex;flex-wrap:wrap;gap:6px}
-.legende .marke{margin:0}
-.legende-notiz{font-size:11px;color:var(--tinte-2);margin-top:6px;line-height:1.4}
-.legende.in-liste{margin:0 0 14px}
-.karten-legende{display:none}
-
-/* Marker: Pille mit Sport- und Zugangssymbol */
-.pin-wrap{background:none;border:0}
-.pin{position:absolute;left:0;top:0;transform:translate(-50%,-50%);display:flex;align-items:center;
-  gap:6px;padding:7px 10px;border-radius:14px;background:var(--flaeche);color:var(--tinte);
-  box-shadow:0 0 0 1px var(--kante),0 2px 8px rgba(32,44,64,.14);white-space:nowrap;cursor:pointer}
-.pin .sport-ic{width:19px;height:19px;color:var(--tinte)}
-.pin.an{background:#164AF2;box-shadow:0 0 0 3px #E2EF83,0 2px 10px rgba(22,74,242,.35)}
-.pin.an .sport-ic,.pin.an .pin-z{color:#F7F4EB}
-.pin-name{position:absolute;bottom:calc(100% + 12px);left:50%;transform:translateX(-50%);
-  background:#164AF2;color:#F7F4EB;font:600 14px/1 var(--schrift);padding:9px 11px;border-radius:9px;
-  white-space:nowrap;pointer-events:none}
-.buendel2{background:none;border:0}
-.bpille{position:absolute;left:0;top:0;transform:translate(-50%,-50%);display:flex;flex-direction:column;
-  align-items:stretch;gap:3px;padding:4px 8px 5px;border-radius:10px;background:var(--flaeche);color:var(--tinte);
-  white-space:nowrap;cursor:pointer;font:700 12.5px/1.1 var(--schrift);text-align:center;
-  /* Rand in der Farbe des besten Zugangs im Bündel, unten kräftiger */
-  --ring:var(--tinte-3);
-  box-shadow:0 0 0 2px var(--ring),0 2px 6px rgba(32,44,64,.18)}
-.bpille.r-frei{--ring:var(--frei)}
-.bpille.r-vermutet{--ring:color-mix(in srgb,var(--frei) 55%,var(--flaeche))}
-.bpille.r-absprache{--ring:var(--absprache)}
-.bpille.r-verein{--ring:var(--verein)}
-.bpille.r-zu{--ring:var(--zu)}
-.bpille .bbalken{display:flex;gap:1px;height:4px;min-width:22px;border-radius:2px;overflow:hidden}
-.bbalken .r-frei{background:var(--frei)}
-.bbalken .r-vermutet{background:color-mix(in srgb,var(--frei) 55%,var(--flaeche))}
-.bbalken .r-absprache{background:var(--absprache)}
-.bbalken .r-verein{background:var(--verein)}
-.bbalken .r-zu{background:var(--zu)}
-.bpille i{position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;
-  background:#34C759;border:2px solid #fff;animation:puls 1.8s ease-out infinite}
-
-/* Platzdetail */
-.dkopf2{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 10px}
-.dkopf2 .zurueck{display:flex;align-items:center;gap:8px;padding:8px 0;color:var(--tinte);font-size:15px;font-weight:500}
-.merk-knopf{width:44px;height:44px;border:0;border-radius:14px;background:var(--flaeche);
-  box-shadow:0 0 0 1px var(--kante);color:var(--tinte);display:grid;place-items:center;cursor:pointer}
-.merk-knopf.an{background:var(--gruen);color:var(--auf-akzent);box-shadow:none}
-.dbild{position:relative;height:216px;border-radius:20px;background:#164AF2;overflow:hidden;
-  display:grid;place-items:center;margin:0 0 20px}
-.dbild > img{width:82%;height:auto;max-height:80%}
-.dbild > .luftbild{height:100%;width:auto;aspect-ratio:64/72;border-radius:0}
-.dbild-ball{position:absolute;left:73%;top:62%;width:14px;height:14px;border-radius:50%;background:#E2EF83}
-.dbild-tag{position:absolute;left:8px;bottom:8px;background:rgba(19,30,48,.85);color:#F7F4EB;
-  font-size:11px;padding:5px 8px;border-radius:7px}
-.rolle > .dname{font-size:32px;font-weight:600;letter-spacing:-.015em;line-height:1.1;margin:0 0 8px}
-.rolle > .dort{margin:0 0 10px}
-.dmarken{display:flex;flex-wrap:wrap}
-.dmarken .marke{margin-top:0}
-.dhinweis{font-size:15px;line-height:1.5;color:var(--tinte-2);margin:14px 0 18px}
-.deigen{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:16px 0;margin:0 0 22px;
-  border-top:1px solid var(--kante);border-bottom:1px solid var(--kante)}
-.deigen > div{display:flex;flex-direction:column;gap:4px;min-width:0}
-.deigen .ui-ic,.deigen .sport-ic{width:22px;height:22px;color:var(--gruen);margin-bottom:6px}
-.deigen b{font-size:15px;font-weight:600;color:var(--tinte);overflow:hidden;text-overflow:ellipsis}
-.deigen small{font-size:11.5px;color:var(--tinte-2)}
-.gut-zu-wissen h3,.dteil-titel{font-family:var(--schrift-titel);font-size:24px;font-weight:600;
-  letter-spacing:-.01em;margin:0 0 6px;color:var(--tinte)}
-.rubrik{font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--gruen)}
-.regeln{list-style:none;padding:0;margin:12px 0 20px}
-.regeln li{display:flex;gap:12px;font-size:15px;line-height:1.45;color:var(--tinte);margin-bottom:12px}
-.regeln .ui-ic{width:17px;height:17px;color:var(--gruen);margin-top:2px}
-.herkunft,.kinderschutz{background:var(--flaeche);border-radius:20px;box-shadow:0 0 0 1px var(--kante);
-  padding:16px 18px;margin:0 0 18px}
-.herkunft h4{display:flex;align-items:center;gap:8px;margin:0 0 8px;font-size:15px;font-weight:600;color:var(--tinte)}
-.herkunft h4 .ui-ic{color:var(--gruen)}
-.herkunft p{font-size:13px;line-height:1.55;color:var(--tinte-2);margin:0}
-.live2{margin:0 0 12px}
-.live2 .live-text{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--tinte);margin-bottom:10px}
-.knopf.voll{width:100%;display:flex;justify-content:center}
-.live-notiz{display:flex;gap:8px;font-size:12.5px;line-height:1.45;color:var(--tinte-2);margin:10px 0 0}
-.live-notiz .ui-ic{width:15px;height:15px;margin-top:1px}
-.melden-knopf{margin:0 0 18px}
-.kinderschutz{display:flex;gap:12px}
-.kinderschutz .ui-ic{color:var(--gruen);width:22px;height:22px}
-.kinderschutz b{display:block;font-size:15px;color:var(--tinte);margin-bottom:4px}
-.kinderschutz p{font-size:13px;line-height:1.5;color:var(--tinte-2);margin:0}
-.dteil-titel{margin-top:8px;margin-bottom:12px}
-.rolle .schnell.zwei{grid-template-columns:1fr 1fr;margin-left:0;margin-right:0}
-.rolle .daten{width:100%;margin-left:0;margin-right:0}
-
-/* Untere Navigation (nur Handy) und Vertrauensleiste (nur Laptop) */
-#unternav,#vertrauen{display:none}
-
-/* ---------- Laptop ---------- */
-@media (min-width:881px){
-  header{height:80px;padding:0 40px;background:var(--flaeche);box-shadow:0 1px 0 var(--kante);
-    backdrop-filter:none;-webkit-backdrop-filter:none}
-  header h1{font-size:32px;gap:10px}
-  header h1 .pf-marke{width:auto;height:34px}
-  .kopfnav{margin-left:auto;gap:6px}
-  .kopfnav button{font-size:16px;font-weight:400;color:var(--tinte);padding:10px 14px;border-radius:14px}
-  .kopfnav button:hover{background:var(--gruen-zart);color:var(--gruen)}
-  .kopfnav button[aria-current=page]{background:none;color:var(--gruen);font-weight:600}
-  .kopfnotiz{display:none}
-  header .kopf-cta{margin-left:18px}
-
-  body.mit-leiste #leiste{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,510px);
-    gap:18px 32px;align-items:center;padding:24px 40px 22px;background:var(--grund);border-bottom:0}
-  #leiste .leiste-titel{display:block;grid-column:1}
-  .leiste-titel h2{font-family:var(--schrift-titel);font-size:42px;font-weight:600;letter-spacing:-.015em;
-    line-height:1;margin:0;color:var(--tinte)}
-  .leiste-titel p{font-size:14px;color:var(--tinte-2);margin:10px 0 0}
-  #leiste .suche{grid-column:2;margin:0;flex:none}
-  #leiste .suche input{padding-left:48px;background:var(--flaeche);box-shadow:inset 0 0 0 1px var(--kante);
-    height:50px;font-size:16px}
-  #leiste .suche input:focus{box-shadow:inset 0 0 0 2px var(--gruen)}
-  #leiste .suche-logo{display:none}
-  #leiste .suche-lupe{display:block}
-  #leiste .filter{grid-column:1/-1;padding:0;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-  #leiste .filtertitel,#leiste .notiz-klein{display:none}
-  #leiste .chips{display:contents}
-  #leiste .filter{overflow:visible;-webkit-mask-image:none;mask-image:none;scroll-snap-type:none}
-  #leiste .filter .chips:not(:first-of-type) > .chip:first-child{margin-left:0}
-  #leiste .chip.zyklus.erster{margin-left:auto}
-  /* "Platz vorschlagen" steht oben im Kopf – unten bleiben nur Admin-Knöpfe */
-  .listenfuss .knopf[data-gehe="neu"]{display:none}
-  .fuss.listenfuss:not(:has(.zweit)){display:none}
-
-  body:not(.vollseite) main{padding:0 24px 20px;gap:20px;background:var(--grund)}
-  body:not(.vollseite) aside{order:-1;width:clamp(380px,34vw,488px);border-left:0;background:var(--flaeche);
-    border-radius:28px;overflow:hidden;container-type:normal}
-  body:not(.vollseite) #karte{border-radius:28px;overflow:hidden}
-  .rolle{padding:0 22px 22px}
-  body:not(.vollseite) .dkopf2{padding:18px 22px 10px}
-
-  .karten-legende{display:block;position:absolute;left:20px;bottom:20px;z-index:500;
-    max-width:calc(100% - 110px);background:var(--flaeche);border-radius:20px;padding:14px 18px;
-    box-shadow:0 0 0 1px var(--kante),0 4px 18px rgba(32,44,64,.12)}
-  body.vollseite .karten-legende{display:none}
-  .legende.in-liste{display:none}
-  .bereich-knopf{left:20px;top:20px;transform:none;font-size:12px;font-weight:500;padding:8px 12px;
-    border-radius:9px;color:var(--tinte)!important}
-  .leaflet-top.leaflet-right{margin-top:10px;margin-right:10px}
-  .leaflet-bottom.leaflet-right .standort-knopf{margin-right:20px;margin-bottom:20px}
-
-  #vertrauen{display:flex;align-items:center;gap:14px;padding:0 40px;height:56px;flex-shrink:0;
-    background:#131E30;color:#F7F4EB;font-size:14px}
-  #vertrauen .ui-ic{color:#A9BEFF}
-  #vertrauen small{margin-left:auto;font-size:11.5px;color:#C1CDC9}
-  body.vollseite #vertrauen{display:none}
-  body.seite-vereine #seite{max-width:none}
-}
-
-/* ---------- Handy ---------- */
-@media (max-width:880px){
-  aside{bottom:var(--unten-h,0px);height:calc((100dvh - var(--unten-h,0px)) * .94)}
-  .leaflet-bottom.leaflet-left,.leaflet-bottom.leaflet-right{bottom:calc(var(--blatt-sichtbar, 42vh) + 4px)}
-  #unternav{display:block;position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--flaeche);
-    box-shadow:0 -1px 0 var(--kante);padding:8px 8px calc(6px + env(safe-area-inset-bottom,0))}
-  #unternav .reihe{display:grid;grid-template-columns:repeat(3,1fr)}
-  #unternav button{display:flex;flex-direction:column;align-items:center;gap:4px;border:0;background:none;
-    font-family:var(--schrift);font-size:11.5px;font-weight:500;color:var(--tinte-2);padding:6px 0;cursor:pointer}
-  #unternav button[aria-current]{color:var(--gruen);font-weight:600}
-  #unternav .ui-ic{width:22px;height:22px}
-  #unternav p{text-align:center;font-size:10.5px;color:var(--tinte-2);margin:2px 0 0}
-  .listenende{padding-bottom:12px}
-  .fuss{padding-bottom:12px}
-  .zeile .luftbild{width:70px;height:80px}
-  .liste-titel{font-size:22px}
-  .rolle .liste-kopf{padding-top:12px}
-  .dkopf2{padding:4px 16px 8px}
-  .rolle > .dname{font-size:28px}
-  .dbild{height:190px}
-}
-
-@media(prefers-color-scheme:dark){
-  .pin{box-shadow:0 0 0 1px var(--kante),0 2px 8px rgba(0,0,0,.35)}
-  .bpille{box-shadow:0 0 0 2px var(--ring),0 2px 6px rgba(0,0,0,.35)}
-  #vertrauen{background:#0C1424}
-}
-
-/* ---------- Für Vereine ---------- */
-.rolle.vf{padding:0;background:var(--grund);color:var(--tinte)}
-.vf-teil{padding:72px clamp(20px,5vw,64px)}
-.vf-teil.hell{background:var(--flaeche)}
-.vf-teil.dunkel{background:#131E30;color:#F7F4EB}
-.vf-teil.kobalt{background:#164AF2;color:#F7F4EB}
-.vf-innen{max-width:1180px;margin:0 auto}
-.vf .rubrik{display:block;margin-bottom:14px}
-.vf-teil.dunkel .rubrik{color:#A9BEFF}
-.vf h2{font-family:var(--schrift-titel);font-size:clamp(30px,3.6vw,46px);font-weight:600;line-height:1.12;
-  letter-spacing:-.015em;margin:0 0 18px}
-.vf p{font-size:16px;line-height:1.6;color:var(--tinte-2);margin:0 0 14px}
-.vf-teil.dunkel p,.vf-teil.kobalt p{color:#C1CDC9}
-.vf-teil.kobalt p{color:#E6EBFF}
-.vf small,.vf .klein{font-size:12.5px;color:var(--tinte-2);line-height:1.5}
-.vf-zwei{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
-.vf-held h1{font-family:var(--schrift-titel);font-size:clamp(40px,5.6vw,72px);font-weight:600;line-height:1.02;
-  letter-spacing:-.02em;margin:0 0 22px;color:var(--tinte)}
-.vf-held .rubrik{color:var(--gruen)}
-.vf-knoepfe{display:flex;gap:12px;flex-wrap:wrap;margin:24px 0 18px}
-.vf-knoepfe .knopf{flex:0 0 auto;padding-left:22px;padding-right:22px;text-decoration:none}
-.vf-karte{background:var(--flaeche);border-radius:28px;padding:22px;box-shadow:0 0 0 1px var(--kante)}
-.vf-karte-kopf{display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-bottom:12px}
-.vf-karte-kopf small{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase}
-.vf-karte img{display:block;width:100%;height:auto;border-radius:20px}
-.vf-karte-zeile{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin:18px 0 12px}
-.vf-karte-zeile b{font-family:var(--schrift-titel);font-size:20px;font-weight:600;display:block}
-.vf-karte-zeile .marke{margin:0}
-.vf-notiz{display:flex;gap:10px;background:var(--grund);border-radius:14px;padding:12px 14px;font-size:12.5px;
-  line-height:1.5;color:var(--tinte-2)}
-.vf-notiz .ui-ic{color:var(--gruen);width:18px;height:18px}
-.vf-drei{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:30px}
-.vf-kachel{background:var(--grund);border-radius:20px;padding:24px}
-.vf-kachel .ui-ic{color:var(--gruen);width:24px;height:24px;margin-bottom:18px}
-.vf-kachel h3{font-family:var(--schrift-titel);font-size:22px;font-weight:600;margin:0 0 10px}
-.vf-kachel p{font-size:14.5px;margin:0}
-.vf-verwaltung{background:var(--flaeche);border-radius:28px;padding:24px;box-shadow:0 0 0 1px var(--kante)}
-.vf-verwaltung-kopf{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
-.vf-verwaltung-kopf b{font-family:var(--schrift-titel);font-size:24px;font-weight:600;display:block}
-.vf-tabs{display:flex;gap:20px;font-size:13px;margin:16px 0 8px;color:var(--tinte-2)}
-.vf-tabs span:first-child{color:var(--gruen);font-weight:600}
-.vf-tabelle{width:100%;border-collapse:collapse;font-size:13px}
-.vf-tabelle th{text-align:left;font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
-  color:var(--tinte-2);padding:12px 8px 8px 0;border-bottom:1px solid var(--kante)}
-.vf-tabelle td{padding:12px 8px 12px 0;border-bottom:1px solid var(--kante);color:var(--tinte)}
-.vf-tabelle td:last-child{color:var(--tinte-2)}
-.vf-tabelle .marke{margin:0}
-.vf-verwaltung-fuss{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-top:16px}
-.vf-rollen{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:34px}
-.vf-rollen > div{border-top:1px solid #44516A;padding-top:22px}
-.vf-rollen h3{font-family:var(--schrift-titel);font-size:32px;font-weight:600;color:#E2EF83;margin:0 0 14px}
-.vf-rollen p{font-size:14.5px}
-.vf-schritte-box{background:var(--grund);border-radius:28px;padding:22px 24px}
-.vf-schritt{display:flex;gap:14px;padding:12px 0}
-.vf-schritt .ui-ic{color:var(--gruen);width:22px;height:22px}
-.vf-schritt b{display:block;font-size:15px;margin-bottom:4px}
-.vf-schritt p{font-size:13.5px;margin:0}
-.vf-schutz{display:flex;flex-direction:column;gap:14px}
-.vf-schutz .kinderschutz{margin:0}
-.vf-beispiel{background:#131E30;color:#F7F4EB;border-radius:20px;padding:20px}
-.vf-beispiel .knopf{background:#A9BEFF;color:#131E30;width:100%;justify-content:center;display:flex}
-.vf-beispiel p{color:#C1CDC9;font-size:13px;margin:12px 0 0}
-.vf-beispiel small{display:block;color:#9AA6AE;font-size:11.5px;margin-top:10px;padding-top:10px;border-top:1px solid #44516A}
-.vf-vier{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:34px}
-.vf-vier > div{border-top:2px solid var(--kante);padding-top:16px}
-.vf-vier .nr{font-family:var(--schrift-titel);font-size:32px;color:var(--gruen);display:block;margin-bottom:22px}
-.vf-vier h3{font-family:var(--schrift-titel);font-size:22px;font-weight:600;margin:0 0 10px}
-.vf-vier p{font-size:14px}
-.vf-faq{display:grid;grid-template-columns:1fr 2fr;gap:48px}
-.vf-faq details{border-bottom:1px solid var(--kante);padding:16px 0}
-.vf-faq summary{font-size:17px;font-weight:600;cursor:pointer;color:var(--tinte)}
-.vf-faq details p{margin:10px 0 0;font-size:14.5px}
-.vf-cta{display:flex;justify-content:space-between;align-items:center;gap:32px}
-.vf-cta h2{color:#F7F4EB}
-.vf-cta .knopf{background:#A9BEFF;color:#131E30;min-width:260px;justify-content:center;display:flex;text-decoration:none}
-.vf-cta small{display:block;color:#E6EBFF;text-align:center;margin-top:10px}
-.vf-fuss{display:grid;grid-template-columns:1.4fr 1fr 1fr 1.4fr;gap:24px;font-size:13.5px}
-.vf-fuss .marke-wort{display:flex;align-items:center;gap:8px;font-family:var(--schrift-titel);font-size:26px;
-  font-weight:700;color:#F7F4EB}
-.vf-fuss button,.vf-fuss a{display:block;background:none;border:0;padding:4px 0;color:#F7F4EB;
-  font:inherit;cursor:pointer;text-decoration:none;text-align:left}
-.vf-fuss p{font-size:13px;color:#C1CDC9}
-.vf-fussende{display:flex;justify-content:space-between;font-size:11.5px;color:#9AA6AE;
-  border-top:1px solid #44516A;margin-top:36px;padding-top:16px}
-@media (max-width:880px){
-  .vf-teil{padding:44px 20px}
-  .vf-zwei,.vf-drei,.vf-rollen,.vf-vier,.vf-faq,.vf-fuss{grid-template-columns:1fr;gap:22px}
-  .vf-cta{flex-direction:column;align-items:flex-start}
-  .vf-tabelle th:nth-child(4),.vf-tabelle td:nth-child(4){display:none}
-  .vf-verwaltung-fuss{flex-direction:column;align-items:flex-start}
-}
+/* Offizielles Logo: grüner Spielfeld-Pin und Wortmarke */
+.pf-marke{display:block;flex-shrink:0}
+.pf-wort{display:block;flex-shrink:0;height:.95em;width:auto;aspect-ratio:294/79;fill:currentColor;margin-top:2px}
+header h1 .pf-marke{height:30px;width:auto}
+@media (max-width:880px){ header h1 .pf-marke{height:26px} }
 
 /* Filter als Ausklappmenü (natives select: auf dem Handy öffnet sich die Systemauswahl) */
 .wahl{position:relative;display:inline-flex;align-items:center;flex-shrink:0}
 .wahl select.chip{-webkit-appearance:none;appearance:none;padding-right:30px;field-sizing:content;
-  max-width:260px;text-overflow:ellipsis}
-.wahl select.chip.an{background:var(--gruen);color:var(--auf-akzent);box-shadow:none}
-.wahl-pfeil{position:absolute;right:11px;pointer-events:none;width:10px;height:10px;color:var(--tinte-2);
+  max-width:260px;text-overflow:ellipsis;cursor:pointer}
+.wahl select.chip.an{background:var(--tinte);color:#fff;box-shadow:none}
+.wahl-pfeil{position:absolute;right:12px;pointer-events:none;width:7px;height:7px;color:var(--tinte-2);
   border-right:1.8px solid currentColor;border-bottom:1.8px solid currentColor;transform:translateY(-2px) rotate(45deg)}
-.wahl select.chip.an + .wahl-pfeil{color:var(--auf-akzent)}
-.wahl.leise select{background:none;box-shadow:none;border:0;font-family:var(--schrift);font-size:12px;font-weight:500;
-  color:var(--tinte-2);padding:8px 20px 8px 2px;cursor:pointer;text-align:right;text-align-last:right}
-.wahl.leise .wahl-pfeil{right:4px;width:7px;height:7px;border-width:1.5px}
-@media (min-width:881px){ #leiste .wahl.erster{margin-left:auto} }
+.wahl select.chip.an + .wahl-pfeil{color:#fff}
 
 /* Hell/Dunkel-Schalter */
-.thema-knopf{display:inline-flex;align-items:center;gap:7px;font-family:var(--schrift);font-size:14px;font-weight:500;
-  color:var(--tinte);background:none;border:0;border-radius:14px;padding:10px 12px;cursor:pointer;flex-shrink:0}
-.thema-knopf:hover{background:var(--gruen-zart);color:var(--gruen)}
-.thema-steuerung a{display:flex!important;align-items:center;justify-content:center;width:40px!important;height:40px!important;
-  border:0!important;border-radius:14px!important;background:var(--flaeche)!important;color:var(--tinte)!important;
-  box-shadow:0 0 0 1px var(--kante),var(--schatten-karte)!important}
-.thema-steuerung{border:0!important;box-shadow:none!important}
+.thema-knopf{display:inline-flex;align-items:center;gap:7px;font-family:var(--schrift);font-size:14px;font-weight:600;
+  color:var(--tinte-2);background:none;border:0;border-radius:var(--r-pille);padding:8px 12px;cursor:pointer;flex-shrink:0}
+.thema-knopf:hover{background:var(--gruen-zart);color:var(--gruen-tief)}
+@media (max-width:880px){ .thema-knopf .thema-text{display:none} .thema-knopf{margin-left:auto;padding:8px} }
+.thema-steuerung .thema-text{display:none}
+.thema-steuerung a{display:flex!important;align-items:center;justify-content:center}
 @media (min-width:881px){ .thema-steuerung{display:none} }
 
 /* Plus auf der Karte: Sprechblase, sobald die Maus in die Nähe kommt */
 .standort-knopf a.neu-knopf{position:relative;overflow:visible}
-.neu-blase{position:absolute;right:calc(100% + 14px);top:50%;transform:translate(10px,-50%) scale(.9);
-  transform-origin:right center;opacity:0;pointer-events:none;white-space:nowrap;
-  background:var(--gruen);color:var(--auf-akzent);font:600 14px/1 var(--schrift);padding:11px 15px;border-radius:14px;
-  box-shadow:0 6px 18px rgba(22,74,242,.28);transition:opacity 160ms ease,transform 260ms var(--feder)}
-.neu-blase::after{content:"";position:absolute;right:-5px;top:50%;width:12px;height:12px;background:inherit;
+.neu-blase{position:absolute;left:calc(100% + 14px);top:50%;transform:translate(-10px,-50%) scale(.9);
+  transform-origin:left center;opacity:0;pointer-events:none;white-space:nowrap;
+  background:var(--gruen);color:#fff;font:600 14px/1 var(--schrift);padding:11px 15px;border-radius:14px;
+  box-shadow:0 6px 18px rgba(11,148,99,.28);transition:opacity 160ms ease,transform 260ms var(--feder)}
+.neu-blase::after{content:"";position:absolute;left:-5px;top:50%;width:12px;height:12px;background:inherit;
   border-radius:2px;transform:translateY(-50%) rotate(45deg)}
 .neu-knopf.nah .neu-blase,.neu-knopf:hover .neu-blase,.neu-knopf:focus-visible .neu-blase{
   opacity:1;transform:translate(0,-50%) scale(1);pointer-events:auto}
 @media (prefers-reduced-motion:reduce){ .neu-blase{transition:opacity 120ms ease} }
-.thema-steuerung .thema-text{display:none}
-/* Legende kompakt: eine schmale Zeile, Erklärung nur als Tooltip */
-.legende{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px}
-.legende-titel{margin:0;font-size:12px;font-weight:600}
-.legende-marken{gap:4px}
-.legende .marke{font-size:11px;padding:3px 7px;gap:4px}
-.legende .marke::before{width:12px!important;height:12px!important}
-.legende-notiz{display:none}
-@media (min-width:881px){
-  .karten-legende{left:16px;bottom:16px;padding:7px 12px;border-radius:14px;max-width:calc(100% - 100px)}
-  .karten-legende.legende,.karten-legende .legende-marken{flex-wrap:nowrap}
-  .karten-legende.legende{display:flex}
-  body.vollseite .karten-legende.legende{display:none}
-  .karten-legende .legende-titel{white-space:nowrap}
-}
-.legende.in-liste{margin:0 0 10px}
-@media (max-width:880px){ .karten-legende.legende{display:none} }
-
-/* Laptop: Filter in einer Zeile. Die Sportarten scrollen seitlich,
-   Zugang, Umkreis und Mehr Filter stehen fest rechts daneben. */
-@media (min-width:881px){
-  #leiste .filter{flex-wrap:wrap;column-gap:14px;row-gap:8px}
-  #leiste .filter .chips{display:flex;flex-wrap:nowrap;gap:6px;align-items:center}
-  #leiste .filter .filtertitel:first-child + .chips{flex:1 1 0;min-width:0;overflow-x:auto;scrollbar-width:none;
-    -webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 32px),transparent);
-            mask-image:linear-gradient(90deg,#000 calc(100% - 32px),transparent);padding:2px 28px 2px 2px}
-  #leiste .filter .filtertitel:first-child + .chips::-webkit-scrollbar{display:none}
-  #leiste .filter .chips{flex:none}
-  #leiste .filter .filtertitel:first-child + .chips{flex:1 1 0}
-  #leiste .filter .chip{flex-shrink:0}
-  #leiste .wahl.erster{margin-left:0}
-
-  /* Kompakter: weniger Platz für Kopf, Überschrift und Rahmen, mehr für Liste und Karte */
-  header{height:60px;padding:0 28px}
-  header h1{font-size:25px;gap:8px}
-  header h1 .pf-marke{width:auto;height:28px}
-  .kopfnav button,.thema-knopf{font-size:14.5px;padding:8px 11px}
-  .kopf-cta{font-size:14px;padding:9px 16px;border-radius:12px}
-  body.mit-leiste #leiste{padding:12px 28px 12px;gap:10px 24px}
-  .leiste-titel{display:flex!important;align-items:baseline;gap:12px}
-  .leiste-titel h2{font-size:26px}
-  .leiste-titel p{margin:0;font-size:13px}
-  #leiste .suche input{height:42px;font-size:15px}
-  #leiste .chip,#leiste .wahl select.chip{padding:7px 12px;font-size:13px}
-  #leiste .wahl select.chip{padding-right:28px}
-  body:not(.vollseite) main{padding:0 16px 14px;gap:14px}
-  body:not(.vollseite) aside{width:clamp(340px,30vw,440px);border-radius:20px}
-  body:not(.vollseite) #karte{border-radius:20px}
-  .rolle{padding:0 16px 16px}
-  .liste-kopf{padding:12px 0 8px}
-  .liste-titel{font-size:20px}
-  .zeile{padding:8px 12px 8px 8px;gap:12px;margin-bottom:8px}
-  .zeile .luftbild{width:60px;height:68px;border-radius:12px}
-  .zname{font-size:15.5px}
-  .zhinweis{margin-top:5px}
-  .marke{margin-top:6px}
-  #vertrauen{height:34px;padding:0 28px;font-size:12.5px;gap:10px}
-  #vertrauen .ui-ic{width:16px;height:16px}
-  .dbild{height:170px}
-  .rolle > .dname{font-size:26px}
-  .deigen{padding:12px 0;margin-bottom:16px}
-}
-@media (max-width:880px){
-  .liste-titel{font-size:19px}
-  .zeile .luftbild{width:60px;height:68px}
-  .dbild{height:160px}
-  .rolle > .dname{font-size:24px}
+@media(prefers-color-scheme:dark){
+  .wahl select.chip.an{color:var(--grund)}
+  .wahl select.chip.an + .wahl-pfeil{color:var(--grund)}
+  .neu-blase{color:#08211A}
 }
 </style>
 <!-- Besucherzähler GoatCounter: ohne Cookies, ohne personenbezogene Daten -->
@@ -1296,19 +862,18 @@ label.inline-knopf{display:inline-block;margin-top:10px}
 <body>
 
 <header>
-  <h1>
-    <svg class="pf-marke" width="22.9" height="30" viewBox="0 0 320 420" aria-hidden="true"><path d="M160 0C71.634 0 0 70 0 158C0 244 84 348 149 414C155 420 165 420 171 414C236 348 320 244 320 158C320 70 248.366 0 160 0Z" fill="currentColor"/><path d="M124 62V100H196V62M124 282V244H196V282M70 172H250M86 62H234C244.667 62 250 67.3333 250 78V266C250 276.667 244.667 282 234 282H86C75.3333 282 70 276.667 70 266V78C70 67.3333 75.3333 62 86 62ZM187 172C187 186.912 174.912 199 160 199C145.088 199 133 186.912 133 172C133 157.088 145.088 145 160 145C174.912 145 187 157.088 187 172Z" fill="none" stroke="#fff" style="stroke:var(--logo-innen,#fff)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    <svg class="pf-wort" viewBox="173 543 294 79" role="img" aria-label="platzfrei"><path d="M195.884 605.84C192.972 605.84 190.34 605.252 187.988 604.076C185.636 602.844 183.76 601.192 182.36 599.12C180.96 597.048 180.204 594.668 180.092 591.98V577.616C180.204 574.928 180.96 572.548 182.36 570.476C183.816 568.348 185.692 566.668 187.988 565.436C190.34 564.204 192.972 563.588 195.884 563.588C199.636 563.588 202.996 564.512 205.964 566.36C208.932 568.208 211.256 570.728 212.936 573.92C214.672 577.112 215.54 580.724 215.54 584.756C215.54 588.732 214.672 592.316 212.936 595.508C211.256 598.7 208.932 601.22 205.964 603.068C202.996 604.916 199.636 605.84 195.884 605.84ZM173.372 621.968V564.428H184.376V575.096L182.528 584.924L184.292 594.752V621.968H173.372ZM193.952 595.676C195.968 595.676 197.76 595.228 199.328 594.332C200.896 593.38 202.1 592.092 202.94 590.468C203.836 588.788 204.284 586.856 204.284 584.672C204.284 582.544 203.836 580.668 202.94 579.044C202.1 577.364 200.896 576.076 199.328 575.18C197.76 574.228 195.968 573.752 193.952 573.752C191.992 573.752 190.228 574.228 188.66 575.18C187.092 576.076 185.86 577.364 184.964 579.044C184.124 580.668 183.704 582.544 183.704 584.672C183.704 586.856 184.124 588.788 184.964 590.468C185.86 592.092 187.064 593.38 188.576 594.332C190.144 595.228 191.936 595.676 193.952 595.676ZM220.235 605V544.268H231.239V605H220.235ZM255.437 605.84C251.741 605.84 248.409 604.916 245.441 603.068C242.473 601.22 240.149 598.7 238.469 595.508C236.789 592.316 235.949 588.732 235.949 584.756C235.949 580.724 236.789 577.112 238.469 573.92C240.149 570.728 242.473 568.208 245.441 566.36C248.409 564.512 251.741 563.588 255.437 563.588C258.349 563.588 260.953 564.176 263.249 565.352C265.545 566.528 267.365 568.18 268.709 570.308C270.109 572.38 270.865 574.732 270.977 577.364V591.98C270.865 594.668 270.109 597.048 268.709 599.12C267.365 601.192 265.545 602.844 263.249 604.076C260.953 605.252 258.349 605.84 255.437 605.84ZM257.453 595.676C260.533 595.676 263.025 594.668 264.929 592.652C266.833 590.58 267.785 587.92 267.785 584.672C267.785 582.544 267.337 580.668 266.441 579.044C265.601 577.364 264.397 576.076 262.829 575.18C261.317 574.228 259.525 573.752 257.453 573.752C255.437 573.752 253.645 574.228 252.077 575.18C250.565 576.076 249.361 577.364 248.465 579.044C247.625 580.668 247.205 582.544 247.205 584.672C247.205 586.856 247.625 588.788 248.465 590.468C249.361 592.092 250.565 593.38 252.077 594.332C253.645 595.228 255.437 595.676 257.453 595.676ZM267.197 605V594.08L268.961 584.168L267.197 574.424V564.428H278.117V605H267.197ZM291.296 605V547.544H302.3V605H291.296ZM281.804 574.088V564.428H311.792V574.088H281.804ZM311.456 598.7L332.96 570.728H346.232L324.728 598.7H311.456ZM311.456 605V598.7L320.192 595.424H345.728V605H311.456ZM312.968 574.004V564.428H346.232V570.728L337.412 574.004H312.968ZM355.312 605V560.06C355.312 556.812 356.012 553.956 357.412 551.492C358.812 548.972 360.8 546.984 363.376 545.528C365.952 544.072 368.976 543.344 372.448 543.344C375.08 543.344 377.348 543.792 379.252 544.688C381.156 545.584 382.864 546.816 384.376 548.384L377.404 555.44C376.788 554.824 376.116 554.348 375.388 554.012C374.66 553.676 373.736 553.508 372.616 553.508C370.6 553.508 369.032 554.068 367.912 555.188C366.848 556.252 366.316 557.792 366.316 559.808V605H355.312ZM345.904 574.088V564.428H378.328V574.088H345.904ZM381.131 605V564.428H392.135V605H381.131ZM392.135 582.572L387.851 579.716C388.355 574.732 389.811 570.812 392.219 567.956C394.627 565.044 398.099 563.588 402.635 563.588C404.595 563.588 406.359 563.924 407.927 564.596C409.495 565.212 410.923 566.248 412.211 567.704L405.323 575.6C404.707 574.928 403.951 574.424 403.055 574.088C402.215 573.752 401.235 573.584 400.115 573.584C397.763 573.584 395.831 574.34 394.319 575.852C392.863 577.308 392.135 579.548 392.135 582.572ZM431.812 605.84C427.556 605.84 423.776 604.944 420.472 603.152C417.168 601.304 414.536 598.784 412.576 595.592C410.672 592.4 409.72 588.76 409.72 584.672C409.72 580.64 410.644 577.056 412.492 573.92C414.396 570.728 416.972 568.208 420.22 566.36C423.468 564.456 427.08 563.504 431.056 563.504C434.976 563.504 438.42 564.4 441.388 566.192C444.412 567.928 446.764 570.336 448.444 573.416C450.18 576.44 451.048 579.884 451.048 583.748C451.048 584.476 450.992 585.232 450.88 586.016C450.824 586.744 450.684 587.584 450.46 588.536L416.356 588.62V580.388L445.336 580.304L440.884 583.748C440.772 581.34 440.324 579.324 439.54 577.7C438.812 576.076 437.72 574.844 436.264 574.004C434.864 573.108 433.128 572.66 431.056 572.66C428.872 572.66 426.968 573.164 425.344 574.172C423.72 575.124 422.46 576.496 421.564 578.288C420.724 580.024 420.304 582.096 420.304 584.504C420.304 586.968 420.752 589.124 421.648 590.972C422.6 592.764 423.944 594.164 425.68 595.172C427.416 596.124 429.432 596.6 431.728 596.6C433.8 596.6 435.676 596.264 437.356 595.592C439.036 594.864 440.492 593.8 441.724 592.4L448.192 598.868C446.232 601.164 443.824 602.9 440.968 604.076C438.168 605.252 435.116 605.84 431.812 605.84ZM455.333 605V564.428H466.421V605H455.333ZM460.877 557.876C459.085 557.876 457.601 557.288 456.425 556.112C455.249 554.88 454.661 553.368 454.661 551.576C454.661 549.84 455.249 548.356 456.425 547.124C457.601 545.892 459.085 545.276 460.877 545.276C462.725 545.276 464.209 545.892 465.329 547.124C466.505 548.356 467.093 549.84 467.093 551.576C467.093 553.368 466.505 554.88 465.329 556.112C464.209 557.288 462.725 557.876 460.877 557.876Z"/></svg>
+  <h1 style="display:flex;align-items:center;gap:8px">
+    <svg class="pf-marke" width="22.9" height="30" viewBox="0 0 320 420" aria-hidden="true"><path d="M160 0C71.634 0 0 70 0 158C0 244 84 348 149 414C155 420 165 420 171 414C236 348 320 244 320 158C320 70 248.366 0 160 0Z" fill="#05B630"/><path d="M124 62V100H196V62M124 282V244H196V282M70 172H250M86 62H234C244.667 62 250 67.3333 250 78V266C250 276.667 244.667 282 234 282H86C75.3333 282 70 276.667 70 266V78C70 67.3333 75.3333 62 86 62ZM187 172C187 186.912 174.912 199 160 199C145.088 199 133 186.912 133 172C133 157.088 145.088 145 160 145C174.912 145 187 157.088 187 172Z" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <svg class="pf-wort" viewBox="173 543 294 79" role="img" aria-label="platzfrei"><path d="M195.884 605.84C192.972 605.84 190.34 605.252 187.988 604.076C185.636 602.844 183.76 601.192 182.36 599.12C180.96 597.048 180.204 594.668 180.092 591.98V577.616C180.204 574.928 180.96 572.548 182.36 570.476C183.816 568.348 185.692 566.668 187.988 565.436C190.34 564.204 192.972 563.588 195.884 563.588C199.636 563.588 202.996 564.512 205.964 566.36C208.932 568.208 211.256 570.728 212.936 573.92C214.672 577.112 215.54 580.724 215.54 584.756C215.54 588.732 214.672 592.316 212.936 595.508C211.256 598.7 208.932 601.22 205.964 603.068C202.996 604.916 199.636 605.84 195.884 605.84ZM173.372 621.968V564.428H184.376V575.096L182.528 584.924L184.292 594.752V621.968H173.372ZM193.952 595.676C195.968 595.676 197.76 595.228 199.328 594.332C200.896 593.38 202.1 592.092 202.94 590.468C203.836 588.788 204.284 586.856 204.284 584.672C204.284 582.544 203.836 580.668 202.94 579.044C202.1 577.364 200.896 576.076 199.328 575.18C197.76 574.228 195.968 573.752 193.952 573.752C191.992 573.752 190.228 574.228 188.66 575.18C187.092 576.076 185.86 577.364 184.964 579.044C184.124 580.668 183.704 582.544 183.704 584.672C183.704 586.856 184.124 588.788 184.964 590.468C185.86 592.092 187.064 593.38 188.576 594.332C190.144 595.228 191.936 595.676 193.952 595.676ZM220.235 605V544.268H231.239V605H220.235ZM255.437 605.84C251.741 605.84 248.409 604.916 245.441 603.068C242.473 601.22 240.149 598.7 238.469 595.508C236.789 592.316 235.949 588.732 235.949 584.756C235.949 580.724 236.789 577.112 238.469 573.92C240.149 570.728 242.473 568.208 245.441 566.36C248.409 564.512 251.741 563.588 255.437 563.588C258.349 563.588 260.953 564.176 263.249 565.352C265.545 566.528 267.365 568.18 268.709 570.308C270.109 572.38 270.865 574.732 270.977 577.364V591.98C270.865 594.668 270.109 597.048 268.709 599.12C267.365 601.192 265.545 602.844 263.249 604.076C260.953 605.252 258.349 605.84 255.437 605.84ZM257.453 595.676C260.533 595.676 263.025 594.668 264.929 592.652C266.833 590.58 267.785 587.92 267.785 584.672C267.785 582.544 267.337 580.668 266.441 579.044C265.601 577.364 264.397 576.076 262.829 575.18C261.317 574.228 259.525 573.752 257.453 573.752C255.437 573.752 253.645 574.228 252.077 575.18C250.565 576.076 249.361 577.364 248.465 579.044C247.625 580.668 247.205 582.544 247.205 584.672C247.205 586.856 247.625 588.788 248.465 590.468C249.361 592.092 250.565 593.38 252.077 594.332C253.645 595.228 255.437 595.676 257.453 595.676ZM267.197 605V594.08L268.961 584.168L267.197 574.424V564.428H278.117V605H267.197ZM291.296 605V547.544H302.3V605H291.296ZM281.804 574.088V564.428H311.792V574.088H281.804ZM311.456 598.7L332.96 570.728H346.232L324.728 598.7H311.456ZM311.456 605V598.7L320.192 595.424H345.728V605H311.456ZM312.968 574.004V564.428H346.232V570.728L337.412 574.004H312.968ZM355.312 605V560.06C355.312 556.812 356.012 553.956 357.412 551.492C358.812 548.972 360.8 546.984 363.376 545.528C365.952 544.072 368.976 543.344 372.448 543.344C375.08 543.344 377.348 543.792 379.252 544.688C381.156 545.584 382.864 546.816 384.376 548.384L377.404 555.44C376.788 554.824 376.116 554.348 375.388 554.012C374.66 553.676 373.736 553.508 372.616 553.508C370.6 553.508 369.032 554.068 367.912 555.188C366.848 556.252 366.316 557.792 366.316 559.808V605H355.312ZM345.904 574.088V564.428H378.328V574.088H345.904ZM381.131 605V564.428H392.135V605H381.131ZM392.135 582.572L387.851 579.716C388.355 574.732 389.811 570.812 392.219 567.956C394.627 565.044 398.099 563.588 402.635 563.588C404.595 563.588 406.359 563.924 407.927 564.596C409.495 565.212 410.923 566.248 412.211 567.704L405.323 575.6C404.707 574.928 403.951 574.424 403.055 574.088C402.215 573.752 401.235 573.584 400.115 573.584C397.763 573.584 395.831 574.34 394.319 575.852C392.863 577.308 392.135 579.548 392.135 582.572ZM431.812 605.84C427.556 605.84 423.776 604.944 420.472 603.152C417.168 601.304 414.536 598.784 412.576 595.592C410.672 592.4 409.72 588.76 409.72 584.672C409.72 580.64 410.644 577.056 412.492 573.92C414.396 570.728 416.972 568.208 420.22 566.36C423.468 564.456 427.08 563.504 431.056 563.504C434.976 563.504 438.42 564.4 441.388 566.192C444.412 567.928 446.764 570.336 448.444 573.416C450.18 576.44 451.048 579.884 451.048 583.748C451.048 584.476 450.992 585.232 450.88 586.016C450.824 586.744 450.684 587.584 450.46 588.536L416.356 588.62V580.388L445.336 580.304L440.884 583.748C440.772 581.34 440.324 579.324 439.54 577.7C438.812 576.076 437.72 574.844 436.264 574.004C434.864 573.108 433.128 572.66 431.056 572.66C428.872 572.66 426.968 573.164 425.344 574.172C423.72 575.124 422.46 576.496 421.564 578.288C420.724 580.024 420.304 582.096 420.304 584.504C420.304 586.968 420.752 589.124 421.648 590.972C422.6 592.764 423.944 594.164 425.68 595.172C427.416 596.124 429.432 596.6 431.728 596.6C433.8 596.6 435.676 596.264 437.356 595.592C439.036 594.864 440.492 593.8 441.724 592.4L448.192 598.868C446.232 601.164 443.824 602.9 440.968 604.076C438.168 605.252 435.116 605.84 431.812 605.84ZM455.333 605V564.428H466.421V605H455.333ZM460.877 557.876C459.085 557.876 457.601 557.288 456.425 556.112C455.249 554.88 454.661 553.368 454.661 551.576C454.661 549.84 455.249 548.356 456.425 547.124C457.601 545.892 459.085 545.276 460.877 545.276C462.725 545.276 464.209 545.892 465.329 547.124C466.505 548.356 467.093 549.84 467.093 551.576C467.093 553.368 466.505 554.88 465.329 556.112C464.209 557.288 462.725 557.876 460.877 557.876Z"/></svg> <em>— wo darf ich spielen?</em>
   </h1>
   <nav class="kopfnav" aria-label="Seiten">
-    <button data-gehe="liste" data-nav="liste">Entdecken</button>
+    <button data-gehe="liste" data-nav="liste">Karte</button>
+    <button data-gehe="ueber" data-nav="ueber">Über Platzfrei</button>
     <button data-gehe="vereine" data-nav="vereine">Für Vereine</button>
-    <button data-gehe="ueber" data-nav="ueber">Über platzfrei</button>
   </nav>
   <span class="kopfnotiz" id="kopfnotiz">Version 0.1</span>
-  <button class="adminknopf" id="adminknopf" hidden>Abmelden</button>
   <button class="thema-knopf" data-thema="1"></button>
-  <button class="kopf-cta" data-gehe="neu">Platz vorschlagen</button>
+  <button class="adminknopf" id="adminknopf" hidden>Abmelden</button>
 </header>
 
 <div id="leiste"></div>
@@ -1320,21 +885,6 @@ label.inline-knopf{display:inline-block;margin-top:10px}
     <div id="seite"></div>
   </aside>
 </main>
-
-<!-- Laptop: Vertrauensleiste unten -->
-<div id="vertrauen"><span class="ui-ic i-shieldcheck" aria-hidden="true"></span>
-  Keine Profilbilder. Kein Chat. Wer gerade spielt, erscheint nur anonym als Zahl.
-  <small>Alle Angaben ohne Gewähr · vor Ort gilt das Schild</small></div>
-
-<!-- Handy: untere Navigation -->
-<nav id="unternav" aria-label="Bereiche">
-  <div class="reihe">
-    <button data-unten="entdecken"><span class="ui-ic i-map" aria-hidden="true"></span>Entdecken</button>
-    <button data-unten="merkliste"><span class="ui-ic i-bookmark" aria-hidden="true"></span>Merkliste</button>
-    <button data-unten="privat"><span class="ui-ic i-shieldcheck" aria-hidden="true"></span>Privatsphäre</button>
-  </div>
-  <p>Keine Profilbilder. Kein Chat.</p>
-</nav>
 
 <div id="meldung" role="status" aria-live="polite"></div>
 
@@ -1670,7 +1220,6 @@ function deutschlandZoom(){
 }
 deutschlandZoom();
 window.addEventListener("resize", deutschlandZoom);
-karte.zoomControl.setPosition("topright");
 
 /* Straßenkarte von CARTO (Voyager, im Dunkelmodus Dark Matter), Satellit von
    Esri. CARTO braucht seit 2026 einen kostenlosen Schlüssel
@@ -1702,8 +1251,7 @@ function themaAnwenden(){
   }
   const d = dunkelAktiv();
   document.documentElement.style.colorScheme = d ? "dark" : "light";
-  document.querySelectorAll('meta[name="theme-color"]').forEach(m => {
-    m.removeAttribute("media"); m.content = d ? "#131E30" : "#F1EFE8"; });
+  document.querySelectorAll('meta[name="theme-color"]').forEach(m => { m.content = d ? "#0E1512" : "#FFFFFF"; });
   document.querySelectorAll("[data-thema], .thema-anzeige").forEach(b => {
     b.innerHTML = d ? `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span class="thema-text">Hell</span>` : `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg><span class="thema-text">Dunkel</span>`;
     b.title = b.ariaLabel = d ? "Zum hellen Design wechseln" : "Zum dunklen Design wechseln";
@@ -1740,7 +1288,7 @@ const strassenKarte = d => CARTO_SCHLUESSEL ? cartoEbene(d) : grauEbene(d);
 
 let strassenEbene = strassenKarte(dunkelAktiv()).addTo(karte);
 
-/* Wechselt der Modus (System oder Schalter), wechselt auch die Karte. */
+/* Wechselt der Systemmodus, wechselt auch die Karte. */
 dunkel.addEventListener("change", () => { themaAnwenden(); karteThemaNeu(); });
 function karteThemaNeu(){
   const warAktiv = karte.hasLayer(strassenEbene);
@@ -1768,24 +1316,21 @@ const ebenenSchalter = L.control.layers(
 let markerEbene = L.layerGroup().addTo(karte);
 let ichMarker = null;
 
-/* Zugangsfarben aus dem Markensystem (frei Grünblau, Absprache Ocker,
-   Verein Stahlblau, nicht zugänglich Schiefer). Ungeklärt bleibt hellgrau. */
-const GRAU = "#A9AAA3";
 const FARBE = {
-  "öffentlich":"#147563",
-  "vermutlich öffentlich":"#6FAE9F",
-  "vermutlich Schulhof":"#C49A5A",
-  "Vereinsgelände frei betretbar":"#147563",
-  "Vereinsgelände nach Absprache":"#906017",
-  "Schulhof nach Unterricht":"#906017",
-  "Vereinsgelände abgeschlossen":"#626775",
-  "unklar":GRAU
+  "öffentlich":"#34C759",
+  "vermutlich öffentlich":"#8FD9A3",
+  "vermutlich Schulhof":"#FFC978",
+  "Vereinsgelände frei betretbar":"#34C759",
+  "Vereinsgelände nach Absprache":"#FF9F0A",
+  "Schulhof nach Unterricht":"#FF9F0A",
+  "Vereinsgelände abgeschlossen":"#FF3B30",
+  "unklar":"#8E8E93"
 };
 function farbe(o){
   // Ungeklärt, aber Vereinshinweis: eigene Farbe, damit man auf der Karte
   // sofort sieht, wo man besser erst fragt.
-  if (o.zugang === "unklar" && vereinsMarke(o)) return "#526884";
-  return FARBE[o.zugang] || GRAU;
+  if (o.zugang === "unklar" && vereinsMarke(o)) return "#7A5EA8";
+  return FARBE[o.zugang] || "#8E8E93";
 }
 
 /* Bei wenigen Orten wären einzelne HTML-Marker fein – bei tausenden wird der
@@ -1806,31 +1351,12 @@ const BUENDEL_BIS_ZOOM = 13;   // bis hier bündeln, ab 14 einzelne Punkte
 const BUENDEL_ZELLE = 60;      // Bündelgröße in Bildschirmpunkten
 
 /* Welche Farbe ein Bündel bekommt: die "beste" Nachricht darin gewinnt. */
-const BUENDEL_RANG = ["#147563", "#6FAE9F", "#906017", "#C49A5A", "#526884", "#626775", GRAU];
-
-/* Zugangsart eines Ortes für Marker und Bündel. Ungeklärte Orte (grau)
-   haben keine – sie bleiben kleine Punkte. */
-function pinArt(o){
-  if (farbe(o) === GRAU) return null;
-  const art = markeArt(o)[0];
-  return art === "unklar" ? "verein" : art;
-}
-function zsKlasse(art){ return art === "vermutet" ? "zs-frei vermutet" : "zs-" + art; }
-/* Pillen sind HTML-Elemente. Bei sehr vielen Orten im Bild wäre das zäh,
-   dann bleibt es bei den gezeichneten Punkten. */
-const PILLEN_MAX = 300;
-let pillenModus = false;
+const BUENDEL_RANG = ["#34C759", "#8FD9A3", "#FF9F0A", "#FFC978", "#7A5EA8", "#FF3B30", "#8E8E93"];
 
 /* Hervorgehoben wird ein Platz nur, solange er geöffnet ist. Zurück in
    der Liste verschwindet die Markierung wieder. */
 function istOffen(o){
   return ["detail", "bearbeiten", "melden"].includes(Z.ansicht) && String(o.id) === String(Z.auswahlId);
-}
-
-function ortAusKarteOeffnen(o){
-  Z.auswahlId=o.id; Z.ansicht="detail"; zeichne();
-  sheet.mitte();
-  karte.flyTo([o.lat, o.lon], Math.max(karte.getZoom(), 16), { duration:.6 });
 }
 
 function punktZeichnen(o){
@@ -1845,55 +1371,40 @@ function punktZeichnen(o){
       icon: L.divIcon({ className:"live-ring", html:"<span></span>", iconSize:[30,30] }),
       interactive:false, keyboard:false
     }).addTo(markerEbene);
-  const grau = farbe(o) === GRAU;
+  const grau = farbe(o) === "#8E8E93";
   const gewaehlt = istOffen(o);
-  const art = pillenModus ? pinArt(o) : null;
-  if (art) {
-    L.marker([o.lat, o.lon], {
-      icon: L.divIcon({ className:"pin-wrap", iconSize:null,
-        html:`<span class="pin ${art}${gewaehlt ? " an" : ""}" title="${esc(o.name)}">${
-          gewaehlt ? `<b class="pin-name">${esc(o.name)}</b>` : ``}${
-          sportIcon((o.sportarten || [])[0])}<span class="pin-z ${zsKlasse(art)}"></span></span>` }),
-      keyboard:false, zIndexOffset: gewaehlt ? 1000 : 0
-    })
-    .on("click", () => ortAusKarteOeffnen(o))
-    .addTo(markerEbene);
-    return;
-  }
   const klein = karte.getZoom() < 15;
   L.circleMarker([o.lat, o.lon], {
     renderer: stift,
-    radius: gewaehlt ? 10 : grau ? (klein ? 4 : 5) : (klein ? 6 : 7),
-    color: gewaehlt ? "#E2EF83" : "#F7F4EB",
+    radius: gewaehlt ? 9 : grau ? (klein ? 4 : 5) : (klein ? 6 : 7),
+    color: gewaehlt ? "#0F1A15" : "#fff",
     weight: gewaehlt ? 3 : grau ? 1.5 : 2,
-    fillColor: gewaehlt ? "#164AF2" : farbe(o), fillOpacity: grau && !gewaehlt ? .7 : 1
+    fillColor: farbe(o), fillOpacity: grau && !gewaehlt ? .6 : 1
   })
-  .on("click", () => ortAusKarteOeffnen(o))
+  .on("click", () => {
+    Z.auswahlId=o.id; Z.ansicht="detail"; zeichne();
+    sheet.mitte();
+    karte.flyTo([o.lat, o.lon], Math.max(karte.getZoom(), 16), { duration:.6 });
+  })
   .addTo(markerEbene);
 }
 
-/* Bündel: Anzahl der Orte und darunter die Zugänge getrennt gezählt. */
-function kurzZahl(n){ return n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(".", ",") + "k" : n; }
 function buendelZeichnen(gruppe, mitte){
   const n = gruppe.length;
-  let lat = 0, lon = 0;
-  const zaehler = { frei:0, vermutet:0, absprache:0, verein:0, zu:0 };
+  let lat = 0, lon = 0, rang = BUENDEL_RANG.length - 1;
   for (const o of gruppe) {
     lat += o.lat; lon += o.lon;
-    const art = pinArt(o);
-    if (art) zaehler[art]++;
+    const r = BUENDEL_RANG.indexOf(farbe(o));
+    if (r >= 0 && r < rang) rang = r;
   }
-  const bester = ["frei","vermutet","absprache","verein","zu"].find(art => zaehler[art]);
-  const NAMEN = { frei:"frei", vermutet:"vermutlich frei", absprache:"nach Absprache", verein:"Verein", zu:"nicht zugänglich" };
-  const mit = Object.entries(zaehler).filter(([, z]) => z);
-  const summe = mit.reduce((s, [, z]) => s + z, 0);
-  const teile = mit.map(([art, z]) => `<span class="r-${art}" style="flex:${Math.max(z / summe, .08)}"></span>`).join("");
-  const titel = `${n} Orte` + (mit.length ? ": " + mit.map(([art, z]) => `${z} ${NAMEN[art]}`).join(", ") : "");
+  const groesse = buendelGroesse(n);
+  const text = n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(".", ",") + "k" : n;
   L.marker(mitte ? karte.unproject(mitte, karte.getZoom()) : [lat / n, lon / n], {
     icon: L.divIcon({
-      className: "buendel2", iconSize: null,
-      html: `<span class="bpille${bester ? " r-" + bester : ""}" title="${titel}"><span>${kurzZahl(n)}</span>${teile ? `<span class="bbalken">${teile}</span>` : ``}${
-        gruppe.some(o => (Z.aktiv[o.id] || 0) >= 2) ? `<i title="Hier wird gerade gespielt"></i>` : ``}</span>`
+      className: "buendel",
+      html: `<span style="--ring:${BUENDEL_RANG[rang]};width:${groesse}px;height:${groesse}px">${text}</span>${
+        gruppe.some(o => (Z.aktiv[o.id] || 0) >= 2) ? `<i title="Hier wird gerade gespielt"></i>` : ``}`,
+      iconSize: [groesse, groesse]
     }),
     keyboard: false
   })
@@ -1919,14 +1430,12 @@ function markerZeichnen(){
   const imBild = sichtbareOrte().filter(o => rahmen.contains([o.lat, o.lon]));
 
   /* Graue zuerst, damit die farbigen obenauf liegen. */
-  const grauZuerst = (a,b) => (farbe(b) === GRAU) - (farbe(a) === GRAU);
+  const grauZuerst = (a,b) => (farbe(b) === "#8E8E93") - (farbe(a) === "#8E8E93");
 
   if (karte.getZoom() > BUENDEL_BIS_ZOOM) {
-    pillenModus = imBild.filter(o => farbe(o) !== GRAU).length <= PILLEN_MAX;
     imBild.sort(grauZuerst).forEach(punktZeichnen);
     return;
   }
-  pillenModus = true;
 
   /* Bündeln über ein Raster in Bildschirmpunkten – schnell genug für
      zehntausende Orte und ohne zusätzliche Bibliothek. */
@@ -1943,7 +1452,7 @@ function markerZeichnen(){
      überlappen. Deshalb so lange zusammenlegen, bis keine zwei Kreise sich
      mehr berühren. Die neue Mitte ist nach Anzahl gewichtet. */
   let gruppen = [...zellen.values()].map(orte => ({ orte, mitte: bildMitte(orte, zoom) }));
-  const ABSTAND = 6;    // Mindestlücke zwischen zwei Pillen in Punkten
+  const ABSTAND = 6;    // Mindestlücke zwischen zwei Kreisen in Punkten
   for (let geaendert = true; geaendert; ) {
     geaendert = false;
     gruppen.sort((a, b) => b.orte.length - a.orte.length);
@@ -1953,10 +1462,9 @@ function markerZeichnen(){
       for (let j = i + 1; j < gruppen.length; j++) {
         const b = gruppen[j];
         if (!b) continue;
-        const breit = g => g.orte.length > 1 ? 20 + 8 * String(kurzZahl(g.orte.length)).length : 18;
-        const hoch = g => g.orte.length > 1 ? 32 : 18;
-        if (Math.abs(a.mitte.x - b.mitte.x) >= (breit(a) + breit(b)) / 2 + ABSTAND ||
-            Math.abs(a.mitte.y - b.mitte.y) >= (hoch(a) + hoch(b)) / 2 + ABSTAND) continue;
+        const ra = a.orte.length > 1 ? buendelGroesse(a.orte.length) / 2 : 7;
+        const rb = b.orte.length > 1 ? buendelGroesse(b.orte.length) / 2 : 7;
+        if (a.mitte.distanceTo(b.mitte) >= ra + rb + ABSTAND) continue;
         const na = a.orte.length, nb = b.orte.length;
         a.mitte = L.point((a.mitte.x * na + b.mitte.x * nb) / (na + nb),
                           (a.mitte.y * na + b.mitte.y * nb) / (na + nb));
@@ -1992,14 +1500,6 @@ document.getElementById("karte").appendChild(bereichKnopf);
 
 /* Grüne Pille oben auf der Karte, sobald in der Nähe etwas los ist –
    damit man die Community auch sieht, wenn die Liste zugeklappt ist. */
-/* Legende über der Karte (Laptop). Auf dem Handy steht sie in der Liste. */
-const kartenLegende = document.createElement("div");
-kartenLegende.className = "karten-legende legende";
-kartenLegende.innerHTML = legendeHtml();
-document.getElementById("karte").appendChild(kartenLegende);
-L.DomEvent.disableClickPropagation(kartenLegende);
-L.DomEvent.disableScrollPropagation(kartenLegende);
-
 var losPille = document.createElement("button");   // var: markerZeichnen läuft evtl. schon vorher
 losPille.className = "los-pille";
 losPille.hidden = true;
@@ -2085,7 +1585,7 @@ function markeArt(o){
   if (o.zugang === "vermutlich Schulhof") return ["absprache","vermutlich Schulhof"];
   if (o.zugang.includes("Absprache")||o.zugang.includes("Schulhof"))
     return ["absprache","nach Absprache"];
-  return o.zugang==="unklar" ? ["unklar","Zugang unklar"] : ["zu","nicht zugänglich"];
+  return ["unklar", o.zugang==="unklar" ? "Zugang unklar" : "nicht zugänglich"];
 }
 
 /* Vereinsanlage: sicher, wenn der Zugang es sagt – sonst Verdacht aus dem
@@ -2272,56 +1772,45 @@ const seite = document.getElementById("seite");
 /* Kleines Bild für die Liste: eine gezeichnete Spielfläche passend zur
    ersten Sportart (bei Fußball auch zum Untergrund), keine Fotos. */
 function platzBild(o){
-  /* Markensystem: präzise Feldlinien auf mattem Kobalt, ein kleiner
-     zitroniger Spielimpuls. Hochformat, wie die Platzkarte in Figma. */
   const sport = o.sportarten[0] || "Fußball";
-  const L = 'fill="none" stroke="#F7F4EB" stroke-opacity=".82" stroke-width="1.6"';
-  let linien, ball = [44, 52];
-  if (sport === "Basketball") linien = `<rect x="6" y="7" width="52" height="58" rx="1"/>
-    <line x1="6" y1="36" x2="58" y2="36"/><circle cx="32" cy="36" r="6"/>
-    <rect x="23" y="7" width="18" height="13"/><rect x="23" y="52" width="18" height="13"/>
-    <path d="M14 7v6a18 18 0 0 0 36 0V7M14 65v-6a18 18 0 0 1 36 0v6"/>`;
-  else if (sport === "Tischtennis") { linien = `<rect x="14" y="12" width="36" height="48" rx="1"/>
-    <line x1="32" y1="12" x2="32" y2="60"/><line x1="9" y1="36" x2="55" y2="36" stroke-width="2.4" stroke-opacity="1"/>`; ball = [40, 24]; }
-  else if (sport === "Beachvolleyball") linien = `<rect x="9" y="9" width="46" height="54" rx="1"/>
-    <line x1="4" y1="36" x2="60" y2="36" stroke-dasharray="2.5 1.5" stroke-width="2.2"/>`;
-  else if (sport === "Laufen") { linien = `<rect x="6" y="6" width="52" height="60" rx="24"/>
-    <rect x="12" y="12" width="40" height="48" rx="18"/><line x1="6" y1="36" x2="12" y2="36"/>`; ball = [32, 36]; }
-  else if (sport === "Skaten") linien = `<path d="M4 46 Q24 46 30 70"/><path d="M60 24 Q38 26 34 2"/>
-    <path d="M4 52 Q20 52 25 70" stroke-opacity=".4"/>`;
-  else if (sport === "Calisthenics") { linien = `<g stroke-width="2.4" stroke-linecap="round">
-    <line x1="14" y1="18" x2="50" y2="18"/><line x1="14" y1="18" x2="14" y2="58"/><line x1="50" y1="18" x2="50" y2="58"/>
-    <line x1="24" y1="38" x2="40" y2="38"/></g>`; ball = [32, 50]; }
-  else linien = `<rect x="6" y="7" width="52" height="58" rx="1"/><line x1="6" y1="36" x2="58" y2="36"/>
-    <circle cx="32" cy="36" r="7"/><rect x="18" y="7" width="28" height="11"/><rect x="18" y="54" width="28" height="11"/>
-    <rect x="25" y="7" width="14" height="4"/><rect x="25" y="61" width="14" height="4"/>`;
-  return `<span class="luftbild platzbild" aria-hidden="true"><svg viewBox="0 0 64 72" preserveAspectRatio="xMidYMid slice">
-    <rect width="64" height="72" fill="#164AF2"/><g ${L}>${linien}</g>
-    <circle cx="${ball[0]}" cy="${ball[1]}" r="3.2" fill="#E2EF83"/></svg></span>`;
+  const L = 'fill="none" stroke="#fff" stroke-width="1.6" stroke-opacity=".9"';
+  let bild;
+  if (sport === "Basketball") bild = `<rect width="56" height="56" fill="#D9824A"/>
+    <rect x="0" y="0" width="56" height="28" fill="#E08D55"/>
+    <g ${L}><rect x="5" y="6" width="46" height="44" rx="1"/><line x1="5" y1="28" x2="51" y2="28"/>
+    <circle cx="28" cy="28" r="6"/><rect x="20" y="6" width="16" height="11"/><rect x="20" y="39" width="16" height="11"/></g>`;
+  else if (sport === "Tischtennis") bild = `<rect width="56" height="56" fill="#5E7F6B"/>
+    <rect x="10" y="8" width="36" height="40" rx="2" fill="#1F5FA8"/>
+    <g ${L}><rect x="10" y="8" width="36" height="40" rx="2"/><line x1="28" y1="8" x2="28" y2="48"/></g>
+    <line x1="7" y1="28" x2="49" y2="28" stroke="#0F1A15" stroke-width="2.4"/>`;
+  else if (sport === "Beachvolleyball") bild = `<rect width="56" height="56" fill="#E6CB8E"/>
+    <circle cx="14" cy="16" r="1" fill="#C9AC6C"/><circle cx="40" cy="40" r="1" fill="#C9AC6C"/><circle cx="38" cy="12" r="1" fill="#C9AC6C"/>
+    <g fill="none" stroke="#2F6FB8" stroke-width="1.6"><rect x="7" y="8" width="42" height="40"/></g>
+    <line x1="4" y1="28" x2="52" y2="28" stroke="#0F1A15" stroke-width="2.2" stroke-dasharray="2 1.2"/>`;
+  else if (sport === "Laufen") bild = `<rect width="56" height="56" fill="#C4553D"/>
+    <g fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="1.2">
+    <rect x="4" y="5" width="48" height="46" rx="20"/><rect x="9" y="10" width="38" height="36" rx="15"/></g>
+    <rect x="14" y="15" width="28" height="26" rx="11" fill="#3E9A54"/>`;
+  else if (sport === "Skaten") bild = `<rect width="56" height="56" fill="#A3ABA7"/>
+    <path d="M0 36 Q18 36 24 56 L0 56Z" fill="#8A938F"/><path d="M56 22 Q36 24 32 0 L56 0Z" fill="#8A938F"/>
+    <path d="M0 36 Q18 36 24 56" fill="none" stroke="#6E7773" stroke-width="1.6"/>
+    <path d="M56 22 Q36 24 32 0" fill="none" stroke="#6E7773" stroke-width="1.6"/>`;
+  else if (sport === "Calisthenics") bild = `<rect width="56" height="56" fill="#45574F"/>
+    <g stroke="#C8D2CD" stroke-width="2.4" stroke-linecap="round">
+    <line x1="12" y1="14" x2="44" y2="14"/><line x1="12" y1="14" x2="12" y2="46"/><line x1="44" y1="14" x2="44" y2="46"/>
+    <line x1="22" y1="30" x2="34" y2="30"/></g>`;
+  else {
+    const asche = /asche|tenne/i.test(o.untergrund || "");
+    const [a, b] = asche ? ["#B8673F", "#C2724A"] : ["#3E9A54", "#48A85E"];
+    bild = `<rect width="56" height="56" fill="${a}"/>
+      <rect x="0" y="0" width="56" height="11" fill="${b}"/><rect x="0" y="22" width="56" height="11" fill="${b}"/><rect x="0" y="44" width="56" height="12" fill="${b}"/>
+      <g ${L}><rect x="5" y="6" width="46" height="44" rx="1"/><line x1="5" y1="28" x2="51" y2="28"/>
+      <circle cx="28" cy="28" r="7"/><rect x="17" y="6" width="22" height="9"/><rect x="17" y="41" width="22" height="9"/></g>`;
+  }
+  return `<span class="luftbild platzbild" aria-hidden="true"><svg viewBox="0 0 56 56" preserveAspectRatio="xMidYMid slice">${bild}</svg>${
+    SPORT_ICON[sport] ? `<i>${SPORT_ICON[sport]}</i>` : ``}</span>`;
 }
 
-/* Großes Spielfeld für die Platzansicht */
-const FELD_GROSS = "data:image/svg+xml,%3Csvg width=%22296%22 height=%22164.16%22 viewBox=%220 0 296 164.16%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E %3Cmask id=%22stroke0_0_18%22 fill=%22white%22%3E %3Cpath d=%22M0 0H148H296V40.5205V61.3003V102.86V123.64V164.16H148H0V123.64V102.86V61.3003V40.5205V0Z%22/%3E %3C/mask%3E %3Cpath id=%22Spielfeldlinien%22 d=%22M127.632 60.7744L128.21 61.3273V61.3273L127.632 60.7744ZM127.632 103.386L128.21 102.833V102.833L127.632 103.386ZM46.6846 40.5205H47.4846V39.7205H46.6846V40.5205ZM46.6846 123.64V124.44H47.4846V123.64H46.6846ZM249.315 40.5205V39.7205H248.515V40.5205H249.315ZM249.315 123.64H248.515V124.44H249.315V123.64ZM16.8859 61.3003H17.6859V60.5003H16.8859V61.3003ZM16.8859 102.86V103.66H17.6859V102.86H16.8859ZM279.114 61.3003V60.5003H278.314V61.3003H279.114ZM279.114 102.86H278.314V103.66H279.114V102.86ZM148 0H147.2V51.9494H148H148.8V0H148ZM148 51.9494H147.2V112.211H148H148.8V51.9494H148ZM148 112.211H147.2V164.16H148H148.8V112.211H148ZM119.195 82.08H119.995C119.995 74.2897 122.954 66.8253 128.21 61.3273L127.632 60.7744L127.053 60.2216C121.505 66.0247 118.395 73.888 118.395 82.08H119.195ZM127.632 60.7744L128.21 61.3273C133.465 55.8304 140.584 52.7494 148 52.7494V51.9494V51.1494C140.136 51.1494 132.602 54.4173 127.053 60.2216L127.632 60.7744ZM148 51.9494V52.7494C155.416 52.7494 162.535 55.8304 167.79 61.3273L168.368 60.7744L168.947 60.2216C163.398 54.4173 155.864 51.1494 148 51.1494V51.9494ZM168.368 60.7744L167.79 61.3273C173.046 66.8253 176.005 74.2897 176.005 82.08H176.805H177.605C177.605 73.888 174.495 66.0247 168.947 60.2216L168.368 60.7744ZM176.805 82.08H176.005C176.005 89.8703 173.046 97.3347 167.79 102.833L168.368 103.386L168.947 103.938C174.495 98.1353 177.605 90.272 177.605 82.08H176.805ZM168.368 103.386L167.79 102.833C162.535 108.33 155.416 111.411 148 111.411V112.211V113.011C155.864 113.011 163.398 109.743 168.947 103.938L168.368 103.386ZM148 112.211V111.411C140.584 111.411 133.465 108.33 128.21 102.833L127.632 103.386L127.053 103.938C132.602 109.743 140.136 113.011 148 113.011V112.211ZM127.632 103.386L128.21 102.833C122.954 97.3347 119.995 89.8703 119.995 82.08H119.195H118.395C118.395 90.272 121.505 98.1353 127.053 103.938L127.632 103.386ZM0 40.5205V41.3205H46.6846V40.5205V39.7205H0V40.5205ZM46.6846 40.5205H45.8846V123.64H46.6846H47.4846V40.5205H46.6846ZM46.6846 123.64V122.84H0V123.64V124.44H46.6846V123.64ZM296 40.5205V39.7205H249.315V40.5205V41.3205H296V40.5205ZM249.315 40.5205H248.515V123.64H249.315H250.115V40.5205H249.315ZM249.315 123.64V124.44H296V123.64V122.84H249.315V123.64ZM0 61.3003V62.1003H16.8859V61.3003V60.5003H0V61.3003ZM16.8859 61.3003H16.0859V102.86H16.8859H17.6859V61.3003H16.8859ZM16.8859 102.86V102.06H0V102.86V103.66H16.8859V102.86ZM296 61.3003V60.5003H279.114V61.3003V62.1003H296V61.3003ZM279.114 61.3003H278.314V102.86H279.114H279.914V61.3003H279.114ZM279.114 102.86V103.66H296V102.86V102.06H279.114V102.86ZM0 0V-1.6H-1.6V0H0ZM296 0H297.6V-1.6H296V0ZM296 164.16V165.76H297.6V164.16H296ZM0 164.16H-1.6V165.76H0V164.16ZM0 0V1.6H148V0V-1.6H0V0ZM148 0V1.6H296V0V-1.6H148V0ZM296 0H294.4V40.5205H296H297.6V0H296ZM296 40.5205H294.4V61.3003H296H297.6V40.5205H296ZM296 61.3003H294.4V102.86H296H297.6V61.3003H296ZM296 102.86H294.4V123.64H296H297.6V102.86H296ZM296 123.64H294.4V164.16H296H297.6V123.64H296ZM296 164.16V162.56H148V164.16V165.76H296V164.16ZM148 164.16V162.56H0V164.16V165.76H148V164.16ZM0 164.16H1.6V123.64H0H-1.6V164.16H0ZM0 123.64H1.6V102.86H0H-1.6V123.64H0ZM0 102.86H1.6V61.3003H0H-1.6V102.86H0ZM0 61.3003H1.6V40.5205H0H-1.6V61.3003H0ZM0 40.5205H1.6V0H0H-1.6V40.5205H0Z%22 fill=%22%23F7F4EB%22 fill-opacity=%220.811765%22 mask=%22url(%23stroke0_0_18)%22/%3E %3C/svg%3E";
-function platzBildGross(o){
-  const sport = o.sportarten[0] || "Fußball";
-  return `<div class="dbild" aria-hidden="true">${sport === "Fußball"
-    ? `<img src="${FELD_GROSS}" alt="" width="296" height="164"><span class="dbild-ball"></span>`
-    : platzBild(o)}<span class="dbild-tag">Spielfeldillustration · kein Foto</span></div>`;
-}
-
-/* "Darf ich hier spielen?" – Karte (Laptop) und Liste (Handy) */
-function legendeHtml(){
-  return `<div class="legende-titel">Darf ich hier spielen?</div>
-    <div class="legende-marken"><span class="marke frei">frei zugänglich</span><span class="marke absprache">nach Absprache</span><span class="marke verein">Vereinsanlage</span><span class="marke zu">nicht zugänglich</span></div>
-    <div class="legende-notiz">Graue Punkte: Zugang noch ungeklärt. Bündel zeigen Anzahl und Zugänge getrennt.</div>`;
-}
-
-/* Linien-Sporticons aus dem Markensystem (CSS-Klassen .ic-…) */
-const SPORT_KLASSE = { "Fußball":"fussball", "Basketball":"basketball", "Tischtennis":"tischtennis",
-  "Beachvolleyball":"beachvolleyball", "Laufen":"laufen", "Calisthenics":"calisthenics", "Skaten":"skaten" };
-function sportIcon(s){
-  return SPORT_KLASSE[s] ? `<span class="sport-ic ic-${SPORT_KLASSE[s]}" aria-hidden="true"></span>` : ``;
-}
 const SPORT_ICON = { "Fußball":"⚽", "Basketball":"🏀", "Tischtennis":"🏓",
   "Beachvolleyball":"🏐", "Laufen":"🏃", "Calisthenics":"💪", "Skaten":"🛹" };
 
@@ -2404,14 +1893,6 @@ function losLeiste(){
     <div class="los-leiste">${karten.join("")}</div></div>`;
 }
 
-/* Ausklappmenü für einen Filter. Der erste Eintrag ist die Grundeinstellung. */
-function auswahl(name, titel, wert, optionen, extra = ""){
-  return `<span class="wahl ${extra}"><select class="${extra === "leise" ? "" : "chip"}${
-      wert !== optionen[0][0] && extra !== "leise" ? " an" : ""}" data-filterwahl="${name}" aria-label="${esc(titel)}" title="${esc(titel)}">${
-    optionen.map(([w, text]) => `<option value="${w}"${w === wert ? " selected" : ""}>${text}</option>`).join("")
-  }</select><span class="wahl-pfeil" aria-hidden="true"></span></span>`;
-}
-
 function ansichtListe(nurListe){
   const alleOrte = sichtbareOrte();
   const orte = alleOrte.slice(0, 150);   // Liste zeigt die 150 nächsten;
@@ -2431,7 +1912,7 @@ function ansichtListe(nurListe){
 
   const sportChips = ["alle", ...AUSWAHL.sportarten].map(s=>
     `<button class="chip" data-sport="${esc(s)}" aria-pressed="${Z.sportart===s}">${
-       sportIcon(s)}${
+       SPORT_ICON[s] ? `<span class="chip-icon" aria-hidden="true">${SPORT_ICON[s]}</span>` : ``}${
        s==="alle"?"Alle Sportarten":esc(s)}</button>`).join("");
 
   const zeilen = orte.length ? orte.map(o=>{
@@ -2440,13 +1921,12 @@ function ansichtListe(nurListe){
     const bs = bespielbarkeit(o);
     const anzMeld = Z.meldungen[o.id] || 0;
     const km = entfernungKm(Z.position,o);
-    const gew = istOffen(o) ? " gewaehlt" : "";
-    return `<button class="zeile${gew}" data-ort="${o.id}">
+    return `<button class="zeile" data-ort="${o.id}" style="--streifen:${farbe(o)}">
       ${platzBild(o)}
       <span class="zt">
         <span class="zname">${esc(o.name)}</span>
-        <span class="zsub">${esc(o.sportarten.join(" · "))} · ${esc(o.untergrund)} · ${entfText(km)}</span>
-        <span class="zmarken"><span class="marke ${cls}">${text}</span>${v ? `
+        <span class="zsub">${esc(o.sportarten.join(" · "))} · ${esc(o.untergrund)}</span>
+        <span class="marke ${cls}">${text}</span>${v ? `
         <span class="marke verein">${v[0]}</span>` : ``}${bs ? `
         <span class="marke boden ${bs[0]}">${bs[1]}</span>` : ``}${anzMeld >= 3 ? `
         <span class="marke warnung">${anzMeld}× weggeschickt</span>` : ``}${
@@ -2455,12 +1935,14 @@ function ansichtListe(nurListe){
           (Z.aktiv[o.id] || 0) >= 2 ? `
         <span class="marke live"><span class="puls" aria-hidden="true"></span>${Z.aktiv[o.id]} spielen gerade</span>` : ``}${
           !belegt(o) && nutzerBestaetigt(o) ? `
-        <span class="marke bestaetigt">✓ von Nutzern bestätigt</span>` : ``}</span>
-        <span class="zhinweis">${belegt(o) ? `Belegt: ${esc(o.bestaetigtDurch)}` : `Zugang vor Ort prüfen`}</span>
+        <span class="marke bestaetigt">✓ von Nutzern bestätigt</span>` : ``}
       </span>
-      <span class="stern${GEMERKT.has(o.id) ? " an" : ""}" data-merken="${o.id}"
-            role="button" tabindex="0"
-            aria-label="${GEMERKT.has(o.id) ? "Aus Merkliste entfernen" : "Merken"}">★</span>
+      <span class="zrechts">
+        <span class="zdist">${km < 0.1 ? "0" : (km < 10 ? km.toFixed(1).replace(".",",") : Math.round(km))}<small>${km < 0.1 ? "hier" : "km"}</small></span>
+        <span class="stern${GEMERKT.has(o.id) ? " an" : ""}" data-merken="${o.id}"
+              role="button" tabindex="0"
+              aria-label="${GEMERKT.has(o.id) ? "Aus Merkliste entfernen" : "Merken"}">★</span>
+      </span>
     </button>`;
   }).join("") : Z.suche.trim() ? `<div class="leer"><b>Nichts gefunden für „${esc(Z.suche.trim())}“.</b><br>
       Anders schreiben, Filter lockern – oder den Platz selbst eintragen.</div>`
@@ -2489,19 +1971,13 @@ function ansichtListe(nurListe){
   orte.slice(0, 6).forEach(adresseErgaenzen);
 
   const anzahl = alleOrte.length;
-  const titel = Z.suche.trim()
-    ? `${anzahl.toLocaleString("de-DE")} Treffer`
-    : `${anzahl.toLocaleString("de-DE")} ${anzahl === 1 ? "Ort" : "Orte"} für dein Spiel`;
-  const ueberschrift = Z.suche.trim() ? `für „${Z.suche.trim()}“`
-    : Z.bereich ? `im Kartenausschnitt`
-    : anzahl > 150 ? `die nächsten zuerst`
-    : Z.positionEcht ? `in deiner Nähe` : `rund um München-Mitte`;
-  const SORT_TEXT = { entfernung:"Distanz ↑", zustand:"Zustand ↓", geprueft:"Zuletzt geprüft" };
+  const ueberschrift = Z.suche.trim()
+    ? `${anzahl} Treffer`
+    : Z.bereich ? `${anzahl} ${anzahl === 1 ? "Platz" : "Plätze"} im Kartenausschnitt`
+    : anzahl > 150 ? `${anzahl.toLocaleString("de-DE")} Plätze · die nächsten zuerst`
+    : `${anzahl} ${anzahl === 1 ? "Platz" : "Plätze"} in deiner Nähe`;
 
-  const rolleInhalt = `${Z.suche.trim() ? `` : losLeiste()}<div class="liste-kopf"><div>
-      <h2 class="liste-titel">${titel}</h2><div class="anzahl">${esc(ueberschrift)}</div></div>
-      ${auswahl("sort", "Sortieren", Z.sortierung, Object.entries(SORT_TEXT), "leise")}</div>
-    <div class="legende in-liste">${legendeHtml()}</div>${zeilen}${alleOrte.length > orte.length
+  const rolleInhalt = `${Z.suche.trim() ? `` : losLeiste()}<div class="anzahl">${ueberschrift}</div>${zeilen}${alleOrte.length > orte.length
       ? `<div class="leer">… und ${(alleOrte.length - orte.length).toLocaleString("de-DE")} weitere.<br>
          Filter setzen, suchen oder auf der Karte zoomen.</div>` : ``}${listenende}`;
 
@@ -2515,38 +1991,36 @@ function ansichtListe(nurListe){
     return;
   }
 
-  const zugangText = Z.nurBelegt ? "sicher" : Z.nurFrei ? "frei" : "alle";
   seite.innerHTML = `
-    <div class="leiste-titel"><h2>Draußen spielen.</h2><p>wo darf ich spielen?</p></div>
     <div class="suche">
-      <span class="ui-ic i-search suche-lupe" aria-hidden="true"></span>
-      <svg class="suche-logo pf-marke" width="16.8" height="22" viewBox="0 0 320 420" aria-hidden="true"><path d="M160 0C71.634 0 0 70 0 158C0 244 84 348 149 414C155 420 165 420 171 414C236 348 320 244 320 158C320 70 248.366 0 160 0Z" fill="currentColor"/><path d="M124 62V100H196V62M124 282V244H196V282M70 172H250M86 62H234C244.667 62 250 67.3333 250 78V266C250 276.667 244.667 282 234 282H86C75.3333 282 70 276.667 70 266V78C70 67.3333 75.3333 62 86 62ZM187 172C187 186.912 174.912 199 160 199C145.088 199 133 186.912 133 172C133 157.088 145.088 145 160 145C174.912 145 187 157.088 187 172Z" fill="none" stroke="#fff" style="stroke:var(--logo-innen,#fff)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <svg class="suche-logo" width="16.8" height="22" viewBox="0 0 320 420" aria-hidden="true"><path d="M160 0C71.634 0 0 70 0 158C0 244 84 348 149 414C155 420 165 420 171 414C236 348 320 244 320 158C320 70 248.366 0 160 0Z" fill="#05B630"/><path d="M124 62V100H196V62M124 282V244H196V282M70 172H250M86 62H234C244.667 62 250 67.3333 250 78V266C250 276.667 244.667 282 234 282H86C75.3333 282 70 276.667 70 266V78C70 67.3333 75.3333 62 86 62ZM187 172C187 186.912 174.912 199 160 199C145.088 199 133 186.912 133 172C133 157.088 145.088 145 160 145C174.912 145 187 157.088 187 172Z" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <input id="suchfeld" type="search" enterkeyhint="search" autocomplete="off"
         placeholder="Platz, Ort oder Sportart suchen" value="${esc(Z.suche)}"
         aria-label="Platz, Ort oder Sportart suchen">
-      ${Z.suche ? `<button class="suche-weg" data-suchweg="1" aria-label="Suche löschen">✕</button>`
-        : `<button class="suche-ort" data-standort="1" aria-label="Zu meinem Standort" title="Zu meinem Standort"><span class="ui-ic i-locate" aria-hidden="true"></span></button>`}
+      ${Z.suche ? `<button class="suche-weg" data-suchweg="1" aria-label="Suche löschen">✕</button>` : ``}
     </div>
     <div class="filter">
       <div class="filtertitel">Sportart</div>
       <div class="chips">${sportChips}</div>
       <div class="filtertitel" style="margin-top:12px">Zugang</div>
       <div class="chips">
+        ${auswahl("zugang", "Zugang", Z.nurBelegt ? "sicher" : Z.nurFrei ? "frei" : "alle",
+          [["alle","Alles zeigen"],["frei","Nur frei zugänglich"],["sicher","Nur wo ich sicher darf"]])}
         <button class="chip" data-nurlos="${Z.nurLos ? "0" : "1"}" aria-pressed="${!!Z.nurLos}">👥 Hier ist was los</button>
-        ${auswahl("zugang", "Zugang", zugangText,
-          [["alle","Zugang · alle"],["frei","Zugang · frei zugänglich"],["sicher","Zugang · sicher (belegt)"]], "erster")}
-        ${auswahl("umkreis", Z.positionEcht ? "Umkreis" : "Umkreis, gemessen ab München-Mitte", String(Z.maxKm || 0),
-          [["0","Umkreis · alle"],["2","Umkreis · 2 km"],["5","Umkreis · 5 km"],["10","Umkreis · 10 km"],["25","Umkreis · 25 km"]])}
         <button class="chip mehr" data-mehr="${Z.filterOffen ? "0" : "1"}"
           aria-pressed="${Z.filterOffen}">${Z.filterOffen ? "Weniger" : "Mehr Filter"}</button>
       </div>
       ${Z.filterOffen ? `
+      <div class="filtertitel" style="margin-top:12px">Entfernung</div>
+      ${Z.positionEcht ? `` : `<div class="notiz-klein">Gemessen ab München-Mitte – Standort nicht freigegeben.</div>`}
+      <div class="chips">
+        ${auswahl("umkreis", "Entfernung", String(Z.maxKm || 0),
+          [["0","Alle Entfernungen"],["2","bis 2 km"],["5","bis 5 km"],["10","bis 10 km"],["25","bis 25 km"]])}
+      </div>
       <div class="filtertitel" style="margin-top:12px">Sortieren</div>
       <div class="chips">
-        ${[["entfernung","Entfernung"],["zustand","Zustand"],["geprueft","Zuletzt geprüft"]]
-          .map(([wert,text]) =>
-            `<button class="chip" data-sortierung="${wert}"
-               aria-pressed="${Z.sortierung===wert}">${text}</button>`).join("")}
+        ${auswahl("sort", "Sortieren", Z.sortierung,
+          [["entfernung","Nach Entfernung"],["zustand","Nach Zustand"],["geprueft","Zuletzt geprüft"]])}
       </div>
       ${GEMERKT.size ? `
       <div class="filtertitel" style="margin-top:12px">Merkliste</div>
@@ -2573,7 +2047,7 @@ function ansichtListe(nurListe){
   /* Laptop: Suche und Filter oben über die ganze Breite, damit die Liste
      darunter mehr Höhe bekommt. Die Klicks laufen über document, deshalb
      funktionieren sie dort genauso. */
-  if (breit.matches) leiste.append(seite.querySelector(".leiste-titel"), seite.querySelector(".suche"), seite.querySelector(".filter"));
+  if (breit.matches) leiste.append(seite.querySelector(".suche"), seite.querySelector(".filter"));
 }
 
 /* Suchfeld: tippen filtert sofort, Enter zeigt die Treffer auf der Karte. */
@@ -2820,16 +2294,14 @@ function liveBlock(o){
   const ich = hierHier(o.id);
   const bis = ich ? new Date(meinCheckin().bis)
     .toLocaleTimeString("de-DE", { hour:"2-digit", minute:"2-digit" }) : "";
-  const text = ich && n >= 2 ? `Du und ${n - 1} ${n - 1 === 1 ? "weiterer" : "weitere"} seid gerade hier`
-    : ich ? `Du bist hier eingecheckt bis ${bis} Uhr`
-    : n >= 2 ? `${n} spielen gerade hier` : ``;
-  return `<div class="live2">
-      ${text ? `<div class="live-text"><span class="puls" aria-hidden="true"></span><b>${text}</b></div>` : ``}
-      ${ich ? `<button class="knopf zweit voll" data-hierweg="1">Wieder weg</button>`
-            : `<button class="knopf voll" data-hier="${o.id}">${n >= 2 ? "Ich bin auch hier" : "Ich bin gerade hier"}</button>`}
-      <p class="live-notiz"><span class="ui-ic i-lock" aria-hidden="true"></span>
-        <span>Anonym, ohne Namen, gilt 2 Stunden. Andere sehen nur eine Zahl, und erst ab zwei Personen.
-        Dein Standort prüft nur, ob du am Platz bist, und wird niemandem gezeigt.</span></p>
+  const text = ich && n >= 2 ? `<b>Du und ${n - 1} ${n - 1 === 1 ? "weiterer" : "weitere"} seid gerade hier</b>`
+    : ich ? `<span><b>Du bist hier eingecheckt</b><small>bis ${bis} Uhr · andere sehen es, sobald ihr zu zweit seid</small></span>`
+    : n >= 2 ? `<b>${n} spielen gerade hier</b>`
+    : `<span><b>Bist du gerade hier?</b><small>Zeig anderen, dass hier gespielt wird. Anonym, ohne Namen, gilt 2 Stunden.</small></span>`;
+  return `<div class="live-kasten">
+      <span class="live-text">${n >= 2 || ich ? `<span class="puls" aria-hidden="true"></span>` : ``}${text}</span>
+      ${ich ? `<button class="inline-knopf" data-hierweg="1">Wieder weg</button>`
+            : `<button class="inline-knopf" data-hier="${o.id}">${n >= 2 ? "Ich bin auch hier" : "Ich bin gerade hier"}</button>`}
     </div>`;
 }
 
@@ -2857,55 +2329,31 @@ function ansichtDetail(){
 
   const [statusArt, statusText] = markeArt(o);
   adresseErgaenzen(o);
-  const statusIcon = statusArt === "unklar" ? "?" : "";
+  const statusIcon = statusArt === "frei" || statusArt === "vermutet" ? "✓" : statusArt === "absprache" ? "!" : "?";
 
-  const gemerkt = GEMERKT.has(o.id);
-  const quelle = o.bestaetigtDurch === "Lage (OSM)" ? "Lage in OpenStreetMap, nicht amtlich bestätigt"
-    : o.bestaetigtDurch === "nur vermutet" ? "Vermutung, nicht belegt" : o.bestaetigtDurch;
   seite.innerHTML = `
-    <div class="dkopf dkopf2">
-      <button class="zurueck" data-gehe="liste"><span class="ui-ic i-arrowleft" aria-hidden="true"></span>Entdecken</button>
-      <button class="merk-knopf${gemerkt ? " an" : ""}" data-merken="${o.id}"
-        aria-label="${gemerkt ? "Aus Merkliste entfernen" : "Merken"}" title="${gemerkt ? "Gemerkt" : "Merken"}"><span class="ui-ic i-bookmark" aria-hidden="true"></span></button>
+    <div class="dkopf">
+      <button class="zurueck" data-gehe="liste">← Liste</button>
+      <div class="dname">${esc(o.name)}</div>
+      <div class="dort">${esc(o.ort)} · ${entfText(entfernungKm(Z.position,o))} entfernt</div>
+      ${verein ? `<span class="marke verein">${verein[0]}</span>` : ``}
     </div>
     <div class="rolle">
-      ${platzBildGross(o)}
-      <div class="dname">${esc(o.name)}</div>
-      <div class="dort">${esc(o.ort)}</div>
-      <!-- Das Wichtigste zuerst: Darf ich hier spielen? -->
-      <div class="dmarken"><span class="marke ${statusArt}">${statusText}</span>${
-        verein ? `<span class="marke verein">${verein[0]}</span>` : ``}</div>
-      <p class="dhinweis">Zugang vor Ort prüfen. Dieser Eintrag ersetzt keine Nutzungserlaubnis.</p>
-      <div class="deigen">
-        <div>${sportIcon(o.sportarten[0]) || `<span class="ui-ic i-map" aria-hidden="true"></span>`}<b>${esc(o.sportarten.join(", "))}</b><small>Sportart</small></div>
-        <div><span class="ui-ic i-layers" aria-hidden="true"></span><b>${esc(o.untergrund)}</b><small>Belag</small></div>
-        <div><span class="ui-ic i-route" aria-hidden="true"></span><b>${entfText(entfernungKm(Z.position,o))}</b><small>Entfernung</small></div>
-      </div>
-      <div class="gut-zu-wissen">
-        <h3>Gut zu wissen</h3>
-        <div class="rubrik">Allgemeine Hinweise</div>
-        <ul class="regeln">
-          <li><span class="ui-ic i-regelcheck" aria-hidden="true"></span>Bitte nimm Rücksicht auf die Nachbarschaft.</li>
-          <li><span class="ui-ic i-regelcheck" aria-hidden="true"></span>Halte Zugänge frei und nimm deinen Müll wieder mit.</li>
-          <li><span class="ui-ic i-regelcheck" aria-hidden="true"></span>Beachte Beschilderung und mögliche Sperrungen vor Ort.</li>
-        </ul>
-      </div>
-      <div class="herkunft">
-        <h4><span class="ui-ic i-info" aria-hidden="true"></span>Woher stammen die Angaben?</h4>
-        <p>Quelle: ${esc(quelle)}.<br>
-        Zugang: ${esc(o.zugang)}${o.zeiten && o.zeiten !== "unbekannt" ? ` · ${esc(o.zeiten)}` : ` · keine bestätigten Zeiten`}.<br>
-        Aktualität: ${o.geprueft ? `zuletzt geprüft am ${o.geprueft.split("-").reverse().join(".")}` : `nicht vor Ort geprüft`}.
-        Bitte gleiche die Angaben mit der Beschilderung ab.</p>
+      <!-- Das Wichtigste zuerst: Darf ich hier spielen, und wann? -->
+      <div class="status ${statusArt}">
+        <span class="status-icon" aria-hidden="true">${statusIcon}</span>
+        <span class="status-text"><b>${statusText.charAt(0).toUpperCase() + statusText.slice(1)}</b>
+          <span>${o.bestaetigtDurch === "Lage (OSM)" ? "nach Lage in OpenStreetMap" : esc(o.zugang)}${o.zeiten && o.zeiten !== "unbekannt" ? ` · ${esc(o.zeiten)}` : ``}</span></span>
       </div>
       ${liveBlock(o)}
-      <button class="knopf zweit voll melden-knopf" data-gehe="melden">Angaben melden</button>
-      <div class="schnell zwei">
+      <div class="schnell">
         <button data-route="${o.id}"><span aria-hidden="true">➜</span>Route</button>
+        <button data-merken="${o.id}" class="${GEMERKT.has(o.id) ? "an" : ""}"><span aria-hidden="true">${GEMERKT.has(o.id) ? "★" : "☆"}</span>${GEMERKT.has(o.id) ? "Gemerkt" : "Merken"}</button>
         <button data-teilen="${o.id}"><span aria-hidden="true">↗</span>Teilen</button>
+        <button data-gehe="melden"><span aria-hidden="true">⚑</span>Melden</button>
       </div>
       ${spieleBlock(o)}
       ${tippsBlock(o)}
-      <h3 class="dteil-titel">Alle Angaben</h3>
       <table class="daten">
         <tr class="geschuetzt"><th>Zugang</th><td><b>${esc(o.zugang)}</b></td></tr>
         <tr class="geschuetzt"><th>Erlaubte Zeiten</th><td>${esc(o.zeiten)}</td></tr>
@@ -2985,9 +2433,6 @@ function ansichtDetail(){
       </div>` : ``}
       ${offen ? `<div class="abschnitt"><h3>Offene Vorschläge</h3>
         <p>${offen} Änderung${offen>1?"en":""} wartet auf Freigabe.</p></div>` : ``}
-      <div class="kinderschutz"><span class="ui-ic i-shieldcheck" aria-hidden="true"></span>
-        <div><b>Keine Profilbilder. Kein Chat.</b>
-        <p>Du entdeckst Orte, keine Personen. Wer gerade spielt, erscheint nur als Zahl, ohne Namen.</p></div></div>
     </div>
     <div class="fuss">
       <button class="knopf" data-gehe="bearbeiten">Angaben ergänzen</button>
@@ -3367,11 +2812,6 @@ function zeichne(){
   document.body.classList.toggle("vollseite", Z.ansicht === "ueber" || Z.ansicht === "vereine");
   document.querySelectorAll("[data-nav]").forEach(b =>
     b.toggleAttribute("aria-current", b.dataset.nav === (Z.ansicht === "vereine" || Z.ansicht === "ueber" ? Z.ansicht : "liste")));
-  document.body.classList.toggle("seite-vereine", Z.ansicht === "vereine");
-  const unten = Z.ansicht === "rechtliches" ? "privat"
-    : Z.ansicht === "liste" && Z.nurGemerkt ? "merkliste"
-    : Z.ansicht === "liste" || Z.ansicht === "detail" ? "entdecken" : "";
-  document.querySelectorAll("[data-unten]").forEach(b => b.toggleAttribute("aria-current", b.dataset.unten === unten));
   if (document.body.className !== klasseVorher) setTimeout(() => karte.invalidateSize(), 0);
 
   ({ liste:ansichtListe, detail:ansichtDetail, bearbeiten:ansichtBearbeiten,
@@ -5078,159 +4518,49 @@ function ansichtUeber(){
 
 function ansichtVereine(){
   const z = kennzahlen();
-  const mail = `mailto:${esc(RECHT.email)}?subject=platzfrei%20f%C3%BCr%20Vereine`;
-  const marke = `<svg class="pf-marke" width="24.4" height="32" viewBox="0 0 320 420" aria-hidden="true"><path d="M160 0C71.634 0 0 70 0 158C0 244 84 348 149 414C155 420 165 420 171 414C236 348 320 244 320 158C320 70 248.366 0 160 0Z" fill="currentColor"/><path d="M124 62V100H196V62M124 282V244H196V282M70 172H250M86 62H234C244.667 62 250 67.3333 250 78V266C250 276.667 244.667 282 234 282H86C75.3333 282 70 276.667 70 266V78C70 67.3333 75.3333 62 86 62ZM187 172C187 186.912 174.912 199 160 199C145.088 199 133 186.912 133 172C133 157.088 145.088 145 160 145C174.912 145 187 157.088 187 172Z" fill="none" stroke="#fff" style="stroke:var(--logo-innen,#fff)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-  const zeile = (tag, zeit, art, text, regel) =>
-    `<tr><td>${tag}</td><td>${zeit}</td><td><span class="marke ${art}">${text}</span></td><td>${regel}</td></tr>`;
   seite.innerHTML = `
-    <div class="rolle vf">
-      <section class="vf-teil vf-held"><div class="vf-innen vf-zwei">
-        <div>
-          <span class="rubrik">Für Vereine, Verbände und Gemeinden</span>
-          <h1>Mehr Spiel.<br>Klare Zuständigkeit.</h1>
-          <p>Macht sichtbar, wann und unter welchen Regeln eure Plätze genutzt werden dürfen.
-          Ihr tragt eigene Platzzeiten ein und behaltet die Entscheidung. platzfrei macht eure
-          Angaben verständlich.</p>
-          <div class="vf-knoepfe">
-            <a class="knopf" href="${mail}">Gespräch vereinbaren</a>
-            <button class="knopf zweit" data-scrollzu="vf-ablauf">So funktioniert’s</button>
-          </div>
-          <small>Die App erteilt selbst keine Nutzungserlaubnis. Zuständig bleibt, wer über den Platz verfügen darf.<br>
-          Heute auf der Karte: ${zahlText(z.plaetze)} Plätze, davon ${zahlText(z.verein)} ${z.verein === 1 ? "Vereinsanlage" : "Vereinsanlagen"}.</small>
+    <div class="rolle">
+      <div class="held">
+        <div class="ueber-marke">Für Vereine</div>
+        <h2>Euer Platz. <em>Eure Zeiten.</em></h2>
+        <p>Kinder wollen kicken – oft genau auf eurem Platz. Mit Platzfrei seht ihr,
+        dass klar ist, wann trainiert wird und wann der Platz frei ist. Das spart Ärger
+        und bringt euch den Nachwuchs von nebenan.</p>
+        <div class="reihe">
+          <button class="knopf" data-gehe="liste" data-vereinsuche="1">Euren Platz finden</button>
+          <a class="knopf zweit" href="mailto:${esc(RECHT.email)}?subject=Platzfrei%20f%C3%BCr%20Vereine">Kontakt aufnehmen</a>
         </div>
-        <div class="vf-karte">
-          <div class="vf-karte-kopf"><span>Euer Platz. Eure Regeln.</span><small>Beispiel · Entwurf</small></div>
-          <img src="data:image/svg+xml,%3Csvg width=%22536%22 height=%22240%22 viewBox=%220 0 536 240%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E %3Cg id=%22Illustrierte Spielfl%26%23195;%26%23164;che%22%3E %3Crect width=%22536%22 height=%22240%22 rx=%2220%22 fill=%22%23164AF2%22/%3E %3Cmask id=%22stroke0_0_8%22 fill=%22white%22%3E %3Cpath d=%22M53.6 28.8H268H482.4V73.8228V96.9114V143.089V166.177V211.2H268H53.6V166.177V143.089V96.9114V73.8228V28.8Z%22/%3E %3C/mask%3E %3Cpath id=%22Spielfeldlinien%22 d=%22M238.493 96.3271L237.993 95.7031V95.7031L238.493 96.3271ZM297.507 96.3271L297.006 96.9511V96.9511L297.507 96.3271ZM297.507 143.673L297.006 143.049V143.049L297.507 143.673ZM238.493 143.673L237.993 144.297V144.297L238.493 143.673ZM121.23 73.8228H122.03V73.0228H121.23V73.8228ZM121.23 166.177V166.977H122.03V166.177H121.23ZM414.77 73.8228V73.0228H413.97V73.8228H414.77ZM414.77 166.177H413.97V166.977H414.77V166.177ZM78.0617 96.9114H78.8617V96.1114H78.0617V96.9114ZM78.0617 143.089V143.889H78.8617V143.089H78.0617ZM457.938 96.9114V96.1114H457.138V96.9114H457.938ZM457.938 143.089H457.138V143.889H457.938V143.089ZM268 28.8H267.2V86.5215H268H268.8V28.8H268ZM268 86.5215H267.2V153.478H268H268.8V86.5215H268ZM268 153.478H267.2V211.2H268H268.8V153.478H268ZM226.271 120H227.071C227.071 111.397 231.33 103.1 238.994 96.9511L238.493 96.3271L237.993 95.7031C230.005 102.111 225.471 110.845 225.471 120H226.271ZM238.493 96.3271L238.994 96.9511C246.663 90.7985 257.095 87.3215 268 87.3215V86.5215V85.7215C256.771 85.7215 245.975 89.2989 237.993 95.7031L238.493 96.3271ZM268 86.5215V87.3215C278.905 87.3215 289.337 90.7985 297.006 96.9511L297.507 96.3271L298.007 95.7031C290.025 89.2989 279.229 85.7215 268 85.7215V86.5215ZM297.507 96.3271L297.006 96.9511C304.67 103.1 308.929 111.397 308.929 120H309.729H310.529C310.529 110.845 305.994 102.111 298.007 95.7031L297.507 96.3271ZM309.729 120H308.929C308.929 128.603 304.67 136.9 297.006 143.049L297.507 143.673L298.007 144.297C305.994 137.889 310.529 129.155 310.529 120H309.729ZM297.507 143.673L297.006 143.049C289.337 149.201 278.905 152.678 268 152.678V153.478V154.278C279.229 154.278 290.025 150.701 298.007 144.297L297.507 143.673ZM268 153.478V152.678C257.095 152.678 246.663 149.201 238.994 143.049L238.493 143.673L237.993 144.297C245.975 150.701 256.771 154.278 268 154.278V153.478ZM238.493 143.673L238.994 143.049C231.33 136.9 227.071 128.603 227.071 120H226.271H225.471C225.471 129.155 230.005 137.889 237.993 144.297L238.493 143.673ZM53.6 73.8228V74.6228H121.23V73.8228V73.0228H53.6V73.8228ZM121.23 73.8228H120.43V166.177H121.23H122.03V73.8228H121.23ZM121.23 166.177V165.377H53.6V166.177V166.977H121.23V166.177ZM482.4 73.8228V73.0228H414.77V73.8228V74.6228H482.4V73.8228ZM414.77 73.8228H413.97V166.177H414.77H415.57V73.8228H414.77ZM414.77 166.177V166.977H482.4V166.177V165.377H414.77V166.177ZM53.6 96.9114V97.7114H78.0617V96.9114V96.1114H53.6V96.9114ZM78.0617 96.9114H77.2617V143.089H78.0617H78.8617V96.9114H78.0617ZM78.0617 143.089V142.289H53.6V143.089V143.889H78.0617V143.089ZM482.4 96.9114V96.1114H457.938V96.9114V97.7114H482.4V96.9114ZM457.938 96.9114H457.138V143.089H457.938H458.738V96.9114H457.938ZM457.938 143.089V143.889H482.4V143.089V142.289H457.938V143.089ZM53.6 28.8V27.2H52V28.8H53.6ZM482.4 28.8H484V27.2H482.4V28.8ZM482.4 211.2V212.8H484V211.2H482.4ZM53.6 211.2H52V212.8H53.6V211.2ZM53.6 28.8V30.4H268V28.8V27.2H53.6V28.8ZM268 28.8V30.4H482.4V28.8V27.2H268V28.8ZM482.4 28.8H480.8V73.8228H482.4H484V28.8H482.4ZM482.4 73.8228H480.8V96.9114H482.4H484V73.8228H482.4ZM482.4 96.9114H480.8V143.089H482.4H484V96.9114H482.4ZM482.4 143.089H480.8V166.177H482.4H484V143.089H482.4ZM482.4 166.177H480.8V211.2H482.4H484V166.177H482.4ZM482.4 211.2V209.6H268V211.2V212.8H482.4V211.2ZM268 211.2V209.6H53.6V211.2V212.8H268V211.2ZM53.6 211.2H55.2V166.177H53.6H52V211.2H53.6ZM53.6 166.177H55.2V143.089H53.6H52V166.177H53.6ZM53.6 143.089H55.2V96.9114H53.6H52V143.089H53.6ZM53.6 96.9114H55.2V73.8228H53.6H52V96.9114H53.6ZM53.6 73.8228H55.2V28.8H53.6H52V73.8228H53.6Z%22 fill=%22%23F7F4EB%22 fill-opacity=%220.811765%22 mask=%22url(%23stroke0_0_8)%22/%3E %3Ccircle id=%22Spielimpuls%22 cx=%22383.6%22 cy=%22154.8%22 r=%228.4%22 fill=%22%23E2EF83%22/%3E %3C/g%3E %3C/svg%3E" alt="Illustriertes Spielfeld" width="536" height="240">
-          <div class="vf-karte-zeile"><div><b>Bolzplatz Würmtal</b><small>Fußball · Kunstrasen · 0,8 km</small></div>
-            <span class="marke frei">frei zugänglich</span></div>
-          <div class="vf-notiz"><span class="ui-ic i-fileclock" aria-hidden="true"></span>
-            <span>Platzzeiten vorbereitet. Noch nicht freigegeben. Die zuständige Stelle prüft Regeln
-            und Zugang vor einer Veröffentlichung.</span></div>
-          <small style="display:block;margin-top:12px">Beispielansicht · Angaben vor Ort prüfen</small>
+      </div>
+      <div class="ueber-teil">
+        <div class="zahlen">
+          <div class="zahl lila"><b>${zahlText(z.verein)}</b><small>Vereinsanlagen auf der Karte</small></div>
+          <div class="zahl gruen"><b>${zahlText(z.vereinZeiten)}</b><small>Plätze mit Angaben direkt vom Verein</small></div>
         </div>
-      </div></section>
-
-      <section class="vf-teil hell"><div class="vf-innen">
-        <span class="rubrik">Weniger Unklarheit. Mehr Orientierung.</span>
-        <h2>Öffnen, was möglich ist. Schützen, was bleiben muss.</h2>
-        <div class="vf-drei">
-          <div class="vf-kachel"><span class="ui-ic i-kalender" aria-hidden="true"></span><h3>Eigene Platzzeiten eintragen</h3>
-            <p>Tragt freie Zeitfenster ein und grenzt Training, Spielbetrieb und externe Nutzung klar voneinander ab. Änderungen bleiben in eurer Hand.</p></div>
-          <div class="vf-kachel"><span class="ui-ic i-listchecks" aria-hidden="true"></span><h3>Regeln transparent machen</h3>
-            <p>Zeigt Belag, Sportarten und Nutzungsregeln direkt am Platz. So können Kinder, Jugendliche und Eltern besser einschätzen, was sie erwartet.</p></div>
-          <div class="vf-kachel"><span class="ui-ic i-shieldcheck" aria-hidden="true"></span><h3>Zuständigkeit behalten</h3>
-            <p>Benennt die verantwortliche Stelle. Ein veröffentlichter Eintrag macht eure Angaben sichtbar, überträgt aber keine Entscheidungsbefugnis an die App.</p></div>
+      </div>
+      <div class="ueber-teil">
+        <h3>Was ihr davon habt</h3>
+        <div class="schritte">
+          <div class="schritt"><span class="nr">1</span><b>Klare Zeiten</b>
+            <p>Tragt ein, wann Training ist. Die App zeigt dann genau, wann der Platz für alle offen ist und wann nicht.</p></div>
+          <div class="schritt"><span class="nr">2</span><b>Weniger Ärger</b>
+            <p>Wer nachschaut, weiß Bescheid. Platzwart und Trainer müssen niemanden mehr wegschicken.</p></div>
+          <div class="schritt"><span class="nr">3</span><b>Nachwuchs gewinnen</b>
+            <p>Die Kinder, die auf eurem Platz bolzen, sind eure Spieler von morgen. Platzfrei zeigt ihnen, wer der Verein ist.</p></div>
         </div>
-      </div></section>
-
-      <section class="vf-teil"><div class="vf-innen vf-zwei" style="grid-template-columns:1fr 1.6fr">
-        <div>
-          <span class="rubrik">Ein Blick in die Verwaltung</span>
-          <h2>Eure Zeiten. Verständlich für alle.</h2>
-          <p>Ein freies Zeitfenster ist nur dann hilfreich, wenn auch der Zugang klar ist. Verbindet jede Zeit mit einem Status und einer kurzen Regel.</p>
-          <p>Sperrungen und Änderungen werden von der zuständigen Stelle gepflegt. Unklare Angaben sollten vor einer Freigabe geklärt werden – nicht erst am Spielfeldrand.</p>
-          <small>Alle dargestellten Zeiten sind Beispiele, keine verbindlichen Öffnungszeiten.</small>
-        </div>
-        <div class="vf-verwaltung">
-          <div class="vf-verwaltung-kopf"><div><b>Bolzplatz Würmtal</b><small>Beispielverwaltung · Entwurf · nicht veröffentlicht</small></div></div>
-          <div class="vf-tabs"><span>Platzzeiten</span><span>Regeln</span><span>Freigabe</span></div>
-          <table class="vf-tabelle">
-            <tr><th>Tag</th><th>Zeitfenster</th><th>Zugang</th><th>Regel</th></tr>
-            ${zeile("Mittwoch","16:00–18:00","frei","frei zugänglich","Freies Spielen")}
-            ${zeile("Freitag","16:00–18:00","absprache","nach Absprache","Vorher Kontakt aufnehmen")}
-            ${zeile("Samstag","10:00–12:00","verein","Vereinsanlage","Vereinstraining")}
-            ${zeile("Sonntag","ganztägig","zu","nicht zugänglich","Platzpflege")}
-          </table>
-          <div class="vf-verwaltung-fuss"><small>Echte Zeiten tragt ihr direkt am Platz ein. Wir prüfen jede Angabe, bevor sie erscheint.</small>
-            <button class="knopf" data-gehe="liste" data-vereinsuche="1">Euren Platz finden</button></div>
-        </div>
-      </div></section>
-
-      <section class="vf-teil dunkel"><div class="vf-innen">
-        <span class="rubrik">Gemeinsam klarer</span>
-        <h2>Drei Perspektiven. Eine verlässliche Angabe.</h2>
-        <p>Für einzelne Vereine ebenso gedacht wie für Gemeinden und Verbände. Zuständigkeiten werden sichtbar, nicht vermischt. Eine Partnerschaft mit einem Verband wird damit nicht behauptet.</p>
-        <div class="vf-rollen">
-          <div><h3>Verein</h3><p>Pflegt die eigenen Platzzeiten, beschreibt Nutzungsregeln und benennt eine verantwortliche Kontaktstelle. Entscheidet im Rahmen seiner Berechtigung.</p></div>
-          <div><h3>Verband</h3><p>Kann Vereine bei einheitlichen Angaben und verständlichen Regeln unterstützen. Die Entscheidung über einzelne Plätze bleibt bei den Berechtigten.</p></div>
-          <div><h3>Gemeinde</h3><p>Kann Angaben zu kommunalen Flächen prüfen und bestätigen sowie die zuständige Stelle benennen. Eigentum und Nutzungsrechte werden dabei berücksichtigt.</p></div>
-        </div>
-      </div></section>
-
-      <section class="vf-teil hell"><div class="vf-innen vf-zwei">
-        <div>
-          <span class="rubrik">Vertrauen braucht Herkunft</span>
-          <h2>Nicht einfach ein Häkchen. Eine nachvollziehbare Quelle.</h2>
-          <p>Zu jeder Zugangsangabe gehören Herkunft und Stand. Ein Vereinseintrag ist nicht automatisch eine kommunale Bestätigung. Wenn eine Prüfung fehlt, wird das verständlich gekennzeichnet.</p>
-        </div>
-        <div class="vf-schritte-box">
-          <div class="vf-schritt"><span class="ui-ic i-filepen" aria-hidden="true"></span><div><b>Eintragen</b><p>Platz, Regeln und eigene Platzzeiten im Entwurf ergänzen.</p></div></div>
-          <div class="vf-schritt"><span class="ui-ic i-clipboard" aria-hidden="true"></span><div><b>Prüfen und freigeben</b><p>Die berechtigte Stelle prüft den Zugang und übernimmt die Verantwortung für ihre Angaben. Gemeinden können kommunale Angaben bestätigen.</p></div></div>
-          <div class="vf-schritt"><span class="ui-ic i-history" aria-hidden="true"></span><div><b>Herkunft sichtbar halten</b><p>Quelle, Stand und offene Fragen stehen direkt am Platz. Veraltete Angaben können gemeldet werden.</p></div></div>
-        </div>
-      </div></section>
-
-      <section class="vf-teil"><div class="vf-innen vf-zwei">
-        <div>
-          <span class="rubrik">Orte verbinden. Kinder schützen.</span>
-          <h2>Sportorte entdecken. Keine Menschen verfolgen.</h2>
-          <p>platzfrei richtet sich auch an Kinder und Jugendliche von 10 bis 17 Jahren. Deshalb gehört Privatsphäre zur Produktlogik – nicht ins Kleingedruckte.</p>
-          <p>Es gibt keine Profile, keine Personenlisten und keinen Chat. Wer „Ich bin gerade hier“ nutzt, erscheint nur als Zahl am Platz – erst ab zwei Personen und höchstens zwei Stunden lang.</p>
-        </div>
-        <div class="vf-schutz">
-          <div class="kinderschutz"><span class="ui-ic i-shieldcheck" aria-hidden="true"></span>
-            <div><b>Keine Profilbilder. Kein Chat.</b><p>Du entdeckst Orte, keine Personen.</p></div></div>
-          <div class="vf-beispiel">
-            <span class="knopf" aria-hidden="true">Ich bin gerade hier</span>
-            <p>Anonym, ohne Namen. Andere sehen nur eine Zahl, und erst ab zwei Personen. Der Standort prüft nur, ob man am Platz ist.</p>
-            <small>Kein öffentlicher Live-Standort. Keine sichtbaren Anwesenheitslisten.</small>
-          </div>
-        </div>
-      </div></section>
-
-      <section class="vf-teil hell" id="vf-ablauf"><div class="vf-innen">
-        <span class="rubrik">So funktioniert’s</span>
-        <h2>Vom ersten Gespräch zum verständlichen Eintrag.</h2>
-        <div class="vf-vier">
-          <div><span class="nr">01</span><h3>Zuständigkeit klären</h3><p>Wir besprechen, wer den Platz verwaltet und wer Angaben freigeben darf.</p></div>
-          <div><span class="nr">02</span><h3>Platz beschreiben</h3><p>Ihr ergänzt Sportarten, Belag, Regeln und eure eigenen Platzzeiten.</p></div>
-          <div><span class="nr">03</span><h3>Angaben prüfen</h3><p>Die berechtigte Stelle gleicht Zugang und Regeln ab. Unklarheiten bleiben nicht unsichtbar.</p></div>
-          <div><span class="nr">04</span><h3>Aktuell halten</h3><p>Ihr pflegt Änderungen. Herkunft und Stand bleiben für alle nachvollziehbar.</p></div>
-        </div>
-      </div></section>
-
-      <section class="vf-teil"><div class="vf-innen vf-faq">
-        <div><span class="rubrik">Gut zu wissen</span><h2>Klare Antworten vor dem ersten Eintrag.</h2></div>
-        <div>
-          <details open><summary>Erteilt platzfrei eine Nutzungserlaubnis?</summary>
-            <p>Nein. Eine Erlaubnis kann nur die zuständige und dazu berechtigte Stelle erteilen. platzfrei stellt die von ihr bereitgestellten Angaben verständlich dar. Regeln und Beschilderung vor Ort bleiben maßgeblich.</p></details>
-          <details open><summary>Müssen wir unseren Platz für alle öffnen?</summary>
-            <p>Nein. Ihr könnt auch abzusprechende Nutzungen, Vereinsanlagen oder gesperrte Flächen transparent kennzeichnen. Ein Eintrag verpflichtet nicht dazu, zusätzliche Zeiten freizugeben.</p></details>
-          <details open><summary>Was passiert bei falschen oder veralteten Angaben?</summary>
-            <p>Am Platz gibt es die Aktion „Angaben melden“. Quelle und Aktualität sollen sichtbar bleiben. Eine Meldung ist ein Hinweis zur Prüfung, keine automatische Änderung und keine neue Nutzungserlaubnis.</p></details>
-          <details open><summary>Wie passt das in den Trainingsbetrieb?</summary>
-            <p>Ihr grenzt eigene Trainings- und Spielzeiten von möglichen freien Zeitfenstern ab. Bei Platzpflege oder Änderungen pflegt die verantwortliche Stelle die Angaben nach. Beispielzeiten sind keine verbindlichen Öffnungszeiten.</p></details>
-          <details open><summary>Wie starten wir als Verband oder Gemeinde?</summary>
-            <p>In einem Gespräch klären wir eure Rolle, Zuständigkeiten und den gewünschten Umfang. Gemeinsam legen wir fest, welche Flächen zuerst erfasst werden und wie die Freigabe organisiert werden soll.</p></details>
-        </div>
-      </div></section>
-
-      <section class="vf-teil kobalt"><div class="vf-innen vf-cta">
-        <div><h2>Macht euren Spielraum sichtbar.</h2>
-          <p>Lasst uns besprechen, wie eure Plätze, Regeln und Zuständigkeiten in platzfrei verständlich werden.</p></div>
-        <div><a class="knopf" href="${mail}">Gespräch vereinbaren</a>
-          <small>Für Vereine, Verbände und Gemeinden.<br>Unverbindlich über euren Bedarf sprechen.</small></div>
-      </div></section>
-
-      <section class="vf-teil dunkel"><div class="vf-innen">
-        <div class="vf-fuss">
-          <div><span class="marke-wort">${marke}<svg class="pf-wort" viewBox="173 543 294 79" role="img" aria-label="platzfrei"><path d="M195.884 605.84C192.972 605.84 190.34 605.252 187.988 604.076C185.636 602.844 183.76 601.192 182.36 599.12C180.96 597.048 180.204 594.668 180.092 591.98V577.616C180.204 574.928 180.96 572.548 182.36 570.476C183.816 568.348 185.692 566.668 187.988 565.436C190.34 564.204 192.972 563.588 195.884 563.588C199.636 563.588 202.996 564.512 205.964 566.36C208.932 568.208 211.256 570.728 212.936 573.92C214.672 577.112 215.54 580.724 215.54 584.756C215.54 588.732 214.672 592.316 212.936 595.508C211.256 598.7 208.932 601.22 205.964 603.068C202.996 604.916 199.636 605.84 195.884 605.84ZM173.372 621.968V564.428H184.376V575.096L182.528 584.924L184.292 594.752V621.968H173.372ZM193.952 595.676C195.968 595.676 197.76 595.228 199.328 594.332C200.896 593.38 202.1 592.092 202.94 590.468C203.836 588.788 204.284 586.856 204.284 584.672C204.284 582.544 203.836 580.668 202.94 579.044C202.1 577.364 200.896 576.076 199.328 575.18C197.76 574.228 195.968 573.752 193.952 573.752C191.992 573.752 190.228 574.228 188.66 575.18C187.092 576.076 185.86 577.364 184.964 579.044C184.124 580.668 183.704 582.544 183.704 584.672C183.704 586.856 184.124 588.788 184.964 590.468C185.86 592.092 187.064 593.38 188.576 594.332C190.144 595.228 191.936 595.676 193.952 595.676ZM220.235 605V544.268H231.239V605H220.235ZM255.437 605.84C251.741 605.84 248.409 604.916 245.441 603.068C242.473 601.22 240.149 598.7 238.469 595.508C236.789 592.316 235.949 588.732 235.949 584.756C235.949 580.724 236.789 577.112 238.469 573.92C240.149 570.728 242.473 568.208 245.441 566.36C248.409 564.512 251.741 563.588 255.437 563.588C258.349 563.588 260.953 564.176 263.249 565.352C265.545 566.528 267.365 568.18 268.709 570.308C270.109 572.38 270.865 574.732 270.977 577.364V591.98C270.865 594.668 270.109 597.048 268.709 599.12C267.365 601.192 265.545 602.844 263.249 604.076C260.953 605.252 258.349 605.84 255.437 605.84ZM257.453 595.676C260.533 595.676 263.025 594.668 264.929 592.652C266.833 590.58 267.785 587.92 267.785 584.672C267.785 582.544 267.337 580.668 266.441 579.044C265.601 577.364 264.397 576.076 262.829 575.18C261.317 574.228 259.525 573.752 257.453 573.752C255.437 573.752 253.645 574.228 252.077 575.18C250.565 576.076 249.361 577.364 248.465 579.044C247.625 580.668 247.205 582.544 247.205 584.672C247.205 586.856 247.625 588.788 248.465 590.468C249.361 592.092 250.565 593.38 252.077 594.332C253.645 595.228 255.437 595.676 257.453 595.676ZM267.197 605V594.08L268.961 584.168L267.197 574.424V564.428H278.117V605H267.197ZM291.296 605V547.544H302.3V605H291.296ZM281.804 574.088V564.428H311.792V574.088H281.804ZM311.456 598.7L332.96 570.728H346.232L324.728 598.7H311.456ZM311.456 605V598.7L320.192 595.424H345.728V605H311.456ZM312.968 574.004V564.428H346.232V570.728L337.412 574.004H312.968ZM355.312 605V560.06C355.312 556.812 356.012 553.956 357.412 551.492C358.812 548.972 360.8 546.984 363.376 545.528C365.952 544.072 368.976 543.344 372.448 543.344C375.08 543.344 377.348 543.792 379.252 544.688C381.156 545.584 382.864 546.816 384.376 548.384L377.404 555.44C376.788 554.824 376.116 554.348 375.388 554.012C374.66 553.676 373.736 553.508 372.616 553.508C370.6 553.508 369.032 554.068 367.912 555.188C366.848 556.252 366.316 557.792 366.316 559.808V605H355.312ZM345.904 574.088V564.428H378.328V574.088H345.904ZM381.131 605V564.428H392.135V605H381.131ZM392.135 582.572L387.851 579.716C388.355 574.732 389.811 570.812 392.219 567.956C394.627 565.044 398.099 563.588 402.635 563.588C404.595 563.588 406.359 563.924 407.927 564.596C409.495 565.212 410.923 566.248 412.211 567.704L405.323 575.6C404.707 574.928 403.951 574.424 403.055 574.088C402.215 573.752 401.235 573.584 400.115 573.584C397.763 573.584 395.831 574.34 394.319 575.852C392.863 577.308 392.135 579.548 392.135 582.572ZM431.812 605.84C427.556 605.84 423.776 604.944 420.472 603.152C417.168 601.304 414.536 598.784 412.576 595.592C410.672 592.4 409.72 588.76 409.72 584.672C409.72 580.64 410.644 577.056 412.492 573.92C414.396 570.728 416.972 568.208 420.22 566.36C423.468 564.456 427.08 563.504 431.056 563.504C434.976 563.504 438.42 564.4 441.388 566.192C444.412 567.928 446.764 570.336 448.444 573.416C450.18 576.44 451.048 579.884 451.048 583.748C451.048 584.476 450.992 585.232 450.88 586.016C450.824 586.744 450.684 587.584 450.46 588.536L416.356 588.62V580.388L445.336 580.304L440.884 583.748C440.772 581.34 440.324 579.324 439.54 577.7C438.812 576.076 437.72 574.844 436.264 574.004C434.864 573.108 433.128 572.66 431.056 572.66C428.872 572.66 426.968 573.164 425.344 574.172C423.72 575.124 422.46 576.496 421.564 578.288C420.724 580.024 420.304 582.096 420.304 584.504C420.304 586.968 420.752 589.124 421.648 590.972C422.6 592.764 423.944 594.164 425.68 595.172C427.416 596.124 429.432 596.6 431.728 596.6C433.8 596.6 435.676 596.264 437.356 595.592C439.036 594.864 440.492 593.8 441.724 592.4L448.192 598.868C446.232 601.164 443.824 602.9 440.968 604.076C438.168 605.252 435.116 605.84 431.812 605.84ZM455.333 605V564.428H466.421V605H455.333ZM460.877 557.876C459.085 557.876 457.601 557.288 456.425 556.112C455.249 554.88 454.661 553.368 454.661 551.576C454.661 549.84 455.249 548.356 456.425 547.124C457.601 545.892 459.085 545.276 460.877 545.276C462.725 545.276 464.209 545.892 465.329 547.124C466.505 548.356 467.093 549.84 467.093 551.576C467.093 553.368 466.505 554.88 465.329 556.112C464.209 557.288 462.725 557.876 460.877 557.876Z"/></svg></span><p>wo darf ich spielen?</p></div>
-          <div><button data-gehe="liste">Entdecken</button><button data-gehe="vereine">Für Vereine</button><button data-gehe="ueber">Über platzfrei</button></div>
-          <div><button data-gehe="ueber">Kinderschutz</button><button data-gehe="rechtliches">Datenschutz</button><button data-gehe="rechtliches">Impressum</button><a href="mailto:${esc(RECHT.email)}">Kontakt</a></div>
-          <div><p>Keine Profilbilder. Kein Chat.<br>Anwesenheit nur anonym als Zahl.<br>Die App erteilt keine Nutzungserlaubnis.</p></div>
-        </div>
-        <div class="vf-fussende"><span>platzfrei · Für das Spiel draußen.</span><span>Angaben ohne Gewähr · vor Ort gilt das Schild</span></div>
-      </div></section>
+      </div>
+      <div class="ueber-teil">
+        <h3>So tragt ihr eure Zeiten ein</h3>
+        <div class="abschnitt"><p>1. Euren Platz suchen und öffnen.<br>
+          2. „Bist du vom Verein? Platzzeiten eintragen“ antippen.<br>
+          3. Trainingszeiten im Wochenraster markieren und absenden.</p>
+          <p>Wir prüfen jede Angabe, bevor sie erscheint. Kostenlos, ohne Konto.</p></div>
+      </div>
+      <div class="ueber-teil">
+        <h3>Für Verbände und Gemeinden</h3>
+        <p>Wir arbeiten gern mit Verbänden und Gemeinden zusammen, um Plätze und Zeiten
+        verlässlich einzutragen. Schreibt uns an ${esc(RECHT.email)}.</p>
+      </div>
+      ${ueberFuss()}
     </div>`;
 }
 
@@ -5711,8 +5041,6 @@ const sheet = (function(){
   const griff  = document.getElementById("griff");
   const mobil  = window.matchMedia("(max-width: 880px)");
   const sanft  = window.matchMedia("(prefers-reduced-motion: reduce)");
-  /* Höhe der unteren Navigation – das Blatt liegt darüber. */
-  const unten = () => mobil.matches ? (document.getElementById("unternav")?.offsetHeight || 0) : 0;
 
   /* Rastpunkte als Anteil der Bildschirmhöhe, den das Sheet einnimmt. */
   /* Unterste Stufe: nur Griff und Suchfeld schauen heraus, die Karte hat
@@ -5727,7 +5055,7 @@ const sheet = (function(){
     return h;
   })();
   const untersteRaste = () => {
-    RASTEN[0] = Math.min(0.2, (92 + (unten() ? 0 : sicherUnten)) / (window.innerHeight - unten()));
+    RASTEN[0] = Math.min(0.2, (92 + sicherUnten) / window.innerHeight);
   };
   untersteRaste();
   const HOEHE  = 0.94;              // muss zur CSS-Höhe passen
@@ -5740,14 +5068,13 @@ const sheet = (function(){
   let griffOffset = 0;
   let verlauf = [];                 // die letzten Punkte für die Geschwindigkeit
 
-  const vh = () => window.innerHeight - unten();
+  const vh = () => window.innerHeight;
   const yFuer = anteil => (HOEHE - anteil) * vh();
   const minY = () => yFuer(RASTEN[RASTEN.length - 1]);   // ganz offen
   const maxY = () => yFuer(RASTEN[0]);                   // ganz zu
 
   function setzen(neu){
     y = neu;
-    document.documentElement.style.setProperty("--unten-h", unten() + "px");
     aside.style.transform = `translateY(${y}px)`;
     /* Die Innenhöhe folgt dem sichtbaren Teil – sonst rutscht die
        Fußleiste unter den Bildschirmrand, sobald das Sheet halb zu ist. */
@@ -5956,16 +5283,13 @@ const sheet = (function(){
 
 /* Mausrad über der Filterzeile schiebt sie seitlich (Laptop ohne Trackpad). */
 document.addEventListener("wheel", e => {
-  /* Am Laptop scrollt nur die Sportarten-Gruppe, auf dem Handy die ganze Leiste. */
-  const gruppe = e.target.closest(".filter .chips");
-  const f = gruppe && gruppe.scrollWidth > gruppe.clientWidth ? gruppe : e.target.closest(".filter");
+  const f = e.target.closest(".filter");
   if (!f || Math.abs(e.deltaX) > Math.abs(e.deltaY) || f.scrollWidth <= f.clientWidth) return;
   f.scrollLeft += e.deltaY; e.preventDefault();
 }, { passive:false });
 
 document.addEventListener("click", e=>{
-  const t = e.target.closest("[data-thema],[data-standort],[data-unten],[data-scrollzu],"+
-                             "[data-sport],[data-nurfrei],[data-nurlos],[data-ort],[data-gehe],"+
+  const t = e.target.closest("[data-thema],[data-sport],[data-nurfrei],[data-nurlos],[data-ort],[data-gehe],"+
                              "[data-speichern],[data-neuspeichern],[data-geprueft],"+
                              "[data-export],[data-anmelden],[data-km],"+
                              "[data-merken],[data-gemerkt],[data-melden],[data-route],"+
@@ -5976,19 +5300,7 @@ document.addEventListener("click", e=>{
                              "[data-zusage],[data-spielweg],[data-spielform],[data-spielansetzen],[data-tipp],[data-tippsoffen],[data-osmladen],[data-osmstop]");
   if (!t) return;
 
-  if (t.dataset.standort)   { return zuMeinemStandort(); }
   if (t.dataset.thema)      { return themaUmschalten(); }
-  if (t.dataset.scrollzu)   { return document.getElementById(t.dataset.scrollzu)?.scrollIntoView({ behavior:"smooth" }); }
-  if (t.dataset.unten) {
-    const ziel = t.dataset.unten;
-    if (ziel === "merkliste" && !GEMERKT.size)
-      return melde("Noch nichts gemerkt. Öffne einen Platz und tippe auf das Lesezeichen.");
-    Z.ansicht = ziel === "privat" ? "rechtliches" : "liste";
-    Z.nurGemerkt = ziel === "merkliste";
-    zeichne();
-    if (ziel !== "entdecken") sheet.aufmachen();
-    return;
-  }
   if (t.dataset.hierpunkt)  { return hierPunktSetzen(); }
   if (t.dataset.hier)       { return hierEinchecken(t.dataset.hier); }
   if (t.dataset.hierweg)    { return hierAuschecken(); }
@@ -6092,7 +5404,12 @@ window.addEventListener("popstate", () => {
 
 /* Dateiauswahl beim Import – "change" steigt nicht wie "click" im Baum auf,
    deshalb ein eigener Lauscher. */
-/* Ausklappmenüs der Filter */
+/* Ausklappmenü für einen Filter. Der erste Eintrag ist die Grundeinstellung. */
+function auswahl(name, titel, wert, optionen){
+  return `<span class="wahl"><select class="chip${wert !== optionen[0][0] ? " an" : ""}" data-filterwahl="${name}" aria-label="${esc(titel)}" title="${esc(titel)}">${
+    optionen.map(([w, text]) => `<option value="${w}"${w === wert ? " selected" : ""}>${text}</option>`).join("")
+  }</select><span class="wahl-pfeil" aria-hidden="true"></span></span>`;
+}
 document.addEventListener("change", e => {
   const w = e.target.closest?.("[data-filterwahl]");
   if (!w) return;
@@ -6185,7 +5502,7 @@ function zuMeinemStandort(){
 }
 
 const StandortKnopf = L.Control.extend({
-  options:{ position:"bottomright" },
+  options:{ position:"bottomleft" },
   onAdd(){
     const box = L.DomUtil.create("div", "leaflet-bar standort-knopf");
     box.innerHTML = `<a href="#" role="button" title="Zu meinem Standort" aria-label="Zu meinem Standort">
@@ -6212,7 +5529,7 @@ new StandortKnopf().addTo(karte);
 const ThemaKnopf = L.Control.extend({
   options:{ position:"topright" },
   onAdd(){
-    const box = L.DomUtil.create("div", "leaflet-bar thema-steuerung");
+    const box = L.DomUtil.create("div", "leaflet-bar standort-knopf thema-steuerung");
     box.innerHTML = `<a href="#" role="button" class="thema-anzeige"></a>`;
     L.DomEvent.disableClickPropagation(box);
     L.DomEvent.on(box.firstElementChild, "click", e => { L.DomEvent.preventDefault(e); themaUmschalten(); });
