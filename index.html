@@ -936,19 +936,22 @@ label.inline-knopf{display:inline-block;margin-top:10px}
   white-space:nowrap;pointer-events:none}
 .buendel2{background:none;border:0}
 .bpille{position:absolute;left:0;top:0;transform:translate(-50%,-50%);display:flex;flex-direction:column;
-  gap:4px;padding:7px 10px;border-radius:14px;background:var(--flaeche);color:var(--tinte);
-  white-space:nowrap;cursor:pointer;font:700 13px/1.1 var(--schrift);
+  align-items:stretch;gap:3px;padding:4px 8px 5px;border-radius:10px;background:var(--flaeche);color:var(--tinte);
+  white-space:nowrap;cursor:pointer;font:700 12.5px/1.1 var(--schrift);text-align:center;
   /* Rand in der Farbe des besten Zugangs im Bündel, unten kräftiger */
   --ring:var(--tinte-3);
-  box-shadow:0 0 0 2.5px var(--ring),inset 0 -4px 0 var(--ring),0 2px 8px rgba(32,44,64,.18);padding-bottom:10px}
+  box-shadow:0 0 0 2px var(--ring),0 2px 6px rgba(32,44,64,.18)}
 .bpille.r-frei{--ring:var(--frei)}
 .bpille.r-vermutet{--ring:color-mix(in srgb,var(--frei) 55%,var(--flaeche))}
 .bpille.r-absprache{--ring:var(--absprache)}
 .bpille.r-verein{--ring:var(--verein)}
 .bpille.r-zu{--ring:var(--zu)}
-.bpille .bz{display:flex;gap:7px;font-size:11.5px;font-weight:500}
-.bpille .bz span{display:inline-flex;align-items:center;gap:2px}
-.bpille .pin-z{width:13px;height:13px}
+.bpille .bbalken{display:flex;gap:1px;height:4px;min-width:22px;border-radius:2px;overflow:hidden}
+.bbalken .r-frei{background:var(--frei)}
+.bbalken .r-vermutet{background:color-mix(in srgb,var(--frei) 55%,var(--flaeche))}
+.bbalken .r-absprache{background:var(--absprache)}
+.bbalken .r-verein{background:var(--verein)}
+.bbalken .r-zu{background:var(--zu)}
 .bpille i{position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;
   background:#34C759;border:2px solid #fff;animation:puls 1.8s ease-out infinite}
 
@@ -1088,7 +1091,7 @@ label.inline-knopf{display:inline-block;margin-top:10px}
 
 @media(prefers-color-scheme:dark){
   .pin{box-shadow:0 0 0 1px var(--kante),0 2px 8px rgba(0,0,0,.35)}
-  .bpille{box-shadow:0 0 0 2.5px var(--ring),inset 0 -4px 0 var(--ring),0 2px 8px rgba(0,0,0,.35)}
+  .bpille{box-shadow:0 0 0 2px var(--ring),0 2px 6px rgba(0,0,0,.35)}
   #vertrauen{background:#0C1424}
 }
 
@@ -1800,7 +1803,7 @@ const stift = L.canvas({ padding: 0.4 });
      die Orte mit bekanntem Zugang stechen heraus.
    - Der gerade geöffnete Ort bekommt einen dunklen Ring. */
 const BUENDEL_BIS_ZOOM = 13;   // bis hier bündeln, ab 14 einzelne Punkte
-const BUENDEL_ZELLE = 90;      // Bündelgröße in Bildschirmpunkten
+const BUENDEL_ZELLE = 60;      // Bündelgröße in Bildschirmpunkten
 
 /* Welche Farbe ein Bündel bekommt: die "beste" Nachricht darin gewinnt. */
 const BUENDEL_RANG = ["#147563", "#6FAE9F", "#906017", "#C49A5A", "#526884", "#626775", GRAU];
@@ -1881,12 +1884,15 @@ function buendelZeichnen(gruppe, mitte){
     if (art) zaehler[art]++;
   }
   const bester = ["frei","vermutet","absprache","verein","zu"].find(art => zaehler[art]);
-  const teile = Object.entries(zaehler).filter(([, z]) => z)
-    .map(([art, z]) => `<span><span class="pin-z ${zsKlasse(art)}"></span>${kurzZahl(z)}</span>`).join("");
+  const NAMEN = { frei:"frei", vermutet:"vermutlich frei", absprache:"nach Absprache", verein:"Verein", zu:"nicht zugänglich" };
+  const mit = Object.entries(zaehler).filter(([, z]) => z);
+  const summe = mit.reduce((s, [, z]) => s + z, 0);
+  const teile = mit.map(([art, z]) => `<span class="r-${art}" style="flex:${Math.max(z / summe, .08)}"></span>`).join("");
+  const titel = `${n} Orte` + (mit.length ? ": " + mit.map(([art, z]) => `${z} ${NAMEN[art]}`).join(", ") : "");
   L.marker(mitte ? karte.unproject(mitte, karte.getZoom()) : [lat / n, lon / n], {
     icon: L.divIcon({
       className: "buendel2", iconSize: null,
-      html: `<span class="bpille${bester ? " r-" + bester : ""}"><span>${kurzZahl(n)} Orte</span>${teile ? `<span class="bz">${teile}</span>` : ``}${
+      html: `<span class="bpille${bester ? " r-" + bester : ""}" title="${titel}"><span>${kurzZahl(n)}</span>${teile ? `<span class="bbalken">${teile}</span>` : ``}${
         gruppe.some(o => (Z.aktiv[o.id] || 0) >= 2) ? `<i title="Hier wird gerade gespielt"></i>` : ``}</span>`
     }),
     keyboard: false
@@ -1937,7 +1943,7 @@ function markerZeichnen(){
      überlappen. Deshalb so lange zusammenlegen, bis keine zwei Kreise sich
      mehr berühren. Die neue Mitte ist nach Anzahl gewichtet. */
   let gruppen = [...zellen.values()].map(orte => ({ orte, mitte: bildMitte(orte, zoom) }));
-  const ABSTAND = 10;   // Mindestlücke zwischen zwei Kreisen in Punkten
+  const ABSTAND = 6;    // Mindestlücke zwischen zwei Pillen in Punkten
   for (let geaendert = true; geaendert; ) {
     geaendert = false;
     gruppen.sort((a, b) => b.orte.length - a.orte.length);
@@ -1947,9 +1953,10 @@ function markerZeichnen(){
       for (let j = i + 1; j < gruppen.length; j++) {
         const b = gruppen[j];
         if (!b) continue;
-        const ra = a.orte.length > 1 ? 40 + 14 * Math.log10(a.orte.length) : 18;
-        const rb = b.orte.length > 1 ? 40 + 14 * Math.log10(b.orte.length) : 18;
-        if (a.mitte.distanceTo(b.mitte) >= ra + rb + ABSTAND) continue;
+        const breit = g => g.orte.length > 1 ? 20 + 8 * String(kurzZahl(g.orte.length)).length : 18;
+        const hoch = g => g.orte.length > 1 ? 32 : 18;
+        if (Math.abs(a.mitte.x - b.mitte.x) >= (breit(a) + breit(b)) / 2 + ABSTAND ||
+            Math.abs(a.mitte.y - b.mitte.y) >= (hoch(a) + hoch(b)) / 2 + ABSTAND) continue;
         const na = a.orte.length, nb = b.orte.length;
         a.mitte = L.point((a.mitte.x * na + b.mitte.x * nb) / (na + nb),
                           (a.mitte.y * na + b.mitte.y * nb) / (na + nb));
