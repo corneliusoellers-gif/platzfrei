@@ -871,36 +871,46 @@ header h1 .pf-marke{height:30px;width:auto}
   .neu-blase{color:#08211A}
 }
 
-/* ---------- Listenkarten: Bild über die ganze Höhe, Sportarten als Schildchen ---------- */
-.zeile{padding:0;gap:0;align-items:stretch;min-height:104px}
+/* ---------- Listenkarten im Kartenstil: Bildfläche oben, Text darunter ---------- */
+.zeile{display:flex;flex-direction:column;align-items:stretch;gap:0;padding:0;min-height:0;
+  border-radius:20px;box-shadow:0 1px 2px rgba(15,26,21,.06),0 0 0 1px var(--kante);margin-bottom:14px}
+.zeile:hover{box-shadow:0 10px 28px rgba(15,26,21,.12),0 0 0 1px var(--kante);transform:translateY(-2px)}
 .zeile::before{display:none}
-.zeile > .platzbild{width:96px;height:auto;min-height:104px;border-radius:0;align-self:stretch;
-  box-shadow:none;position:relative}
-.zeile > .platzbild::after{content:"";position:absolute;right:0;top:0;bottom:0;width:4px;
+.zeile > .platzbild{width:100%;height:118px;border-radius:0;box-shadow:none;display:flex;
+  align-items:center;justify-content:center;
+  background:radial-gradient(120% 140% at 30% 0%,color-mix(in srgb,var(--bild) 70%,#fff) 0%,var(--bild) 55%,color-mix(in srgb,var(--bild) 75%,#000) 100%)}
+.zeile > .platzbild svg{width:86px;height:86px;border-radius:16px;transform:rotate(-6deg);
+  box-shadow:0 10px 24px rgba(0,0,0,.28),0 0 0 3px rgba(255,255,255,.85)}
+.zeile > .platzbild i{display:none}
+.zeile > .platzbild::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;
   background:var(--streifen,var(--unklar))}
-.zeile > .platzbild i{right:10px;bottom:7px;width:24px;height:24px;font-size:13px}
-.zeile .zt{padding:13px 4px 13px 15px;display:flex;flex-direction:column;align-items:flex-start}
-.zeile .zt .zname{font-size:16px;line-height:1.3}
-.zeile .zrechts{padding:13px 14px 12px 6px;justify-content:space-between}
-.ztags{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin-top:7px}
-.ztag{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;line-height:1.3;
-  padding:3px 8px 3px 6px;border-radius:var(--r-pille);background:var(--gruen-zart);color:var(--gruen-tief)}
-.ztag span{font-size:11px}
-.ztag.mehr{padding:3px 8px;background:transparent;box-shadow:inset 0 0 0 1px var(--kante);color:var(--tinte-3)}
-.zbelag{font-size:12px;color:var(--tinte-3);font-weight:500;margin-left:3px}
-.zeile .marke{margin-top:8px}
+.zeile .zt{padding:13px 16px 15px;display:flex;flex-direction:column;align-items:flex-start}
+.zeile .zt .zname{font-size:16.5px;font-weight:700;letter-spacing:-.02em;line-height:1.28}
+.zeile .zrechts{position:absolute;top:10px;left:10px;right:10px;flex-direction:row;
+  align-items:center;justify-content:space-between;padding:0;gap:8px}
+.zeile .zdist{background:rgba(10,18,14,.55);color:#fff;padding:6px 11px;border-radius:999px;
+  font-size:14px;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.zeile .zdist small{color:rgba(255,255,255,.8)}
+.zeile .stern{width:34px;height:34px;margin:0;padding:0;display:flex;align-items:center;justify-content:center;
+  border-radius:50%;background:rgba(10,18,14,.45);color:rgba(255,255,255,.9);font-size:17px;
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.zeile .stern.an{color:#FFC93C}
+.ztags{display:flex;flex-wrap:wrap;align-items:center;gap:2px 12px;margin-top:5px}
+.ztag{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:500;color:var(--tinte-3)}
+.ztag span{font-size:12px}
+.ztag.mehr{font-weight:600}
+.zbelag{font-size:13px;color:var(--tinte-3);font-weight:500}
+.zbelag::before{content:"·";margin-right:10px}
+.zeile .marke{margin:10px 6px 0 0;font-size:11.5px;padding:4px 9px}
 .zeile .marke:not(.verein):not(.boden):not(.warnung):not(.spiel-marke)::before{content:"";width:6px;height:6px;
   border-radius:50%;background:currentColor;margin-right:6px;flex-shrink:0}
-.zdist{background:var(--hinter,rgba(15,26,21,.05));padding:6px 9px;border-radius:var(--r-pille);font-size:15px}
-.zdist small{font-size:11px}
-@media(prefers-color-scheme:dark){ .zdist{background:rgba(255,255,255,.07)} }
 @media (max-width:880px){
-  .zeile{padding:0;gap:0;align-items:stretch;min-height:96px}
-  .zeile > .platzbild{width:76px;min-height:96px;height:auto;border-radius:0}
-  .zeile .zt .zname{font-size:15.5px}
-  .ztag{font-size:11.5px}
-  .zeile .zt{padding:12px 4px 12px 13px}
-  .zeile .zrechts{padding:12px 12px 11px 4px}
+  .zeile{padding:0;gap:0;align-items:stretch;margin-bottom:12px}
+  .zeile > .platzbild{width:100%;height:104px;border-radius:0}
+  .zeile > .platzbild svg{width:76px;height:76px}
+  .zeile .zt{padding:12px 14px 14px}
+  .zeile .zrechts{padding:0}
+  .zeile .stern{margin:0;padding:0}
 }
 </style>
 <!-- Besucherzähler GoatCounter: ohne Cookies, ohne personenbezogene Daten -->
@@ -1854,7 +1864,8 @@ function platzBild(o){
       <g ${L}><rect x="5" y="6" width="46" height="44" rx="1"/><line x1="5" y1="28" x2="51" y2="28"/>
       <circle cx="28" cy="28" r="7"/><rect x="17" y="6" width="22" height="9"/><rect x="17" y="41" width="22" height="9"/></g>`;
   }
-  return `<span class="luftbild platzbild" aria-hidden="true"><svg viewBox="0 0 56 56" preserveAspectRatio="xMidYMid slice">${bild}</svg>${
+  const grund = (/fill="(#[0-9A-Fa-f]{6})"/.exec(bild) || [, "#3E9A54"])[1];
+  return `<span class="luftbild platzbild" style="--bild:${grund}" aria-hidden="true"><svg viewBox="0 0 56 56" preserveAspectRatio="xMidYMid slice">${bild}</svg>${
     SPORT_ICON[sport] ? `<i>${SPORT_ICON[sport]}</i>` : ``}</span>`;
 }
 
