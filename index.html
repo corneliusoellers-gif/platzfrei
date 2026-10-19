@@ -870,6 +870,38 @@ header h1 .pf-marke{height:30px;width:auto}
   .wahl select.chip.an + .wahl-pfeil{color:var(--grund)}
   .neu-blase{color:#08211A}
 }
+
+/* ---------- Listenkarten: Bild über die ganze Höhe, Sportarten als Schildchen ---------- */
+.zeile{padding:0;gap:0;align-items:stretch;min-height:104px}
+.zeile::before{display:none}
+.zeile > .platzbild{width:96px;height:auto;min-height:104px;border-radius:0;align-self:stretch;
+  box-shadow:none;position:relative}
+.zeile > .platzbild::after{content:"";position:absolute;right:0;top:0;bottom:0;width:4px;
+  background:var(--streifen,var(--unklar))}
+.zeile > .platzbild i{right:10px;bottom:7px;width:24px;height:24px;font-size:13px}
+.zeile .zt{padding:13px 4px 13px 15px;display:flex;flex-direction:column;align-items:flex-start}
+.zeile .zt .zname{font-size:16px;line-height:1.3}
+.zeile .zrechts{padding:13px 14px 12px 6px;justify-content:space-between}
+.ztags{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin-top:7px}
+.ztag{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;line-height:1.3;
+  padding:3px 8px 3px 6px;border-radius:var(--r-pille);background:var(--gruen-zart);color:var(--gruen-tief)}
+.ztag span{font-size:11px}
+.ztag.mehr{padding:3px 8px;background:transparent;box-shadow:inset 0 0 0 1px var(--kante);color:var(--tinte-3)}
+.zbelag{font-size:12px;color:var(--tinte-3);font-weight:500;margin-left:3px}
+.zeile .marke{margin-top:8px}
+.zeile .marke:not(.verein):not(.boden):not(.warnung):not(.spiel-marke)::before{content:"";width:6px;height:6px;
+  border-radius:50%;background:currentColor;margin-right:6px;flex-shrink:0}
+.zdist{background:var(--hinter,rgba(15,26,21,.05));padding:6px 9px;border-radius:var(--r-pille);font-size:15px}
+.zdist small{font-size:11px}
+@media(prefers-color-scheme:dark){ .zdist{background:rgba(255,255,255,.07)} }
+@media (max-width:880px){
+  .zeile{padding:0;gap:0;align-items:stretch;min-height:96px}
+  .zeile > .platzbild{width:76px;min-height:96px;height:auto;border-radius:0}
+  .zeile .zt .zname{font-size:15.5px}
+  .ztag{font-size:11.5px}
+  .zeile .zt{padding:12px 4px 12px 13px}
+  .zeile .zrechts{padding:12px 12px 11px 4px}
+}
 </style>
 <!-- Besucherzähler GoatCounter: ohne Cookies, ohne personenbezogene Daten -->
 <script data-goatcounter="https://platzfrei.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
@@ -2121,7 +2153,10 @@ function ansichtListe(nurListe){
       ${platzBild(o)}
       <span class="zt">
         <span class="zname">${esc(o.name)}</span>
-        <span class="zsub">${esc([...o.sportarten, o.untergrund].filter(x => x && x !== "—").join(" · "))}</span>
+        <span class="ztags">${o.sportarten.slice(0, 3).map(sp =>
+          `<span class="ztag">${SPORT_ICON[sp] ? `<span aria-hidden="true">${SPORT_ICON[sp]}</span>` : ``}${esc(sp)}</span>`).join("")}${
+          o.sportarten.length > 3 ? `<span class="ztag mehr">+${o.sportarten.length - 3}</span>` : ``}${
+          o.untergrund && o.untergrund !== "—" ? `<span class="zbelag">${esc(o.untergrund)}</span>` : ``}</span>
         <span class="marke ${cls}">${text}</span>${v ? `
         <span class="marke verein">${v[0]}</span>` : ``}${bs ? `
         <span class="marke boden ${bs[0]}">${bs[1]}</span>` : ``}${anzMeld >= 3 ? `
