@@ -374,7 +374,7 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
 .los-titel{margin:0 20px 8px;font-size:13px;font-weight:700;color:var(--tinte-2);
   display:flex;align-items:center;gap:6px}
 .los-leiste{display:flex;gap:10px;overflow-x:auto;padding:2px 20px 4px;scroll-snap-type:x mandatory;
-  scrollbar-width:none}
+  scroll-padding-inline:20px;scrollbar-width:none}  /* sonst schnappt die erste Karte an den Rand */
 .los-leiste::-webkit-scrollbar{display:none}
 .los-karte{flex:0 0 auto;width:212px;scroll-snap-align:start;text-align:left;border:0;cursor:pointer;
   background:var(--flaeche);border-radius:var(--r-karte);box-shadow:var(--schatten);
@@ -447,7 +447,7 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
 @media (max-width:880px){
   .rolle .los{margin:2px -16px 14px}
   .rolle .los-titel{margin-left:16px;margin-right:16px}
-  .rolle .los-leiste{padding-left:16px;padding-right:16px}
+  .rolle .los-leiste{padding-left:16px;padding-right:16px;scroll-padding-inline:16px}
   .rolle .anzahl{padding:0 0 6px}
 }
 .spiel-ring{pointer-events:none}
