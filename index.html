@@ -188,19 +188,9 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
   color:var(--tinte-3);margin:16px 0 9px}
 .filtertitel:first-child{margin-top:0}
 .chips{display:flex;gap:7px;flex-wrap:wrap}
-/* Auch am Laptop nur EINE Filterzeile – die drei beschrifteten Blöcke
-   haben dort fast die ganze Seitenleiste gefüllt. Mausrad scrollt seitlich. */
-@media (min-width:881px){
-  .filter{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:7px;padding:14px 20px 12px;
-    scrollbar-width:none;scroll-snap-type:x proximity;scroll-padding-inline:20px;
-    -webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);
-            mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent)}
-  .filter::-webkit-scrollbar{display:none}
-  .filtertitel,.filter .notiz-klein{display:none}
-  .filter .chips{display:contents}
-  .filter .chip{flex-shrink:0;scroll-snap-align:start}
-  .filter .chips:not(:first-of-type) > .chip:first-child{margin-left:11px}
-}
+/* Filter: wenige Ausklappmenüs nebeneinander, die bei Platzmangel
+   umbrechen – kein seitliches Scrollen mehr. */
+.filter{display:flex;flex-wrap:wrap;gap:7px;padding:14px 20px 12px}
 .chip{font-family:var(--schrift);font-size:13.5px;font-weight:600;letter-spacing:-.005em;
   padding:8px 15px;border:0;background:var(--flaeche);color:var(--tinte-2);
   border-radius:var(--r-pille);cursor:pointer;line-height:1.2;
@@ -672,11 +662,12 @@ label.inline-knopf{display:inline-block;margin-top:10px}
 
   #seite{height:calc(var(--sichtbar, 68dvh) - 34px);min-height:0}
 
-  /* Ziehen geht auch über Kopfbereich und Filterleiste: dort wischt man
-     waagerecht durch die Filter, senkrecht bewegt man das Blatt. Die Liste
-     scrollt senkrecht und gibt das Ziehen am oberen Rand ans Blatt ab. */
+  /* Ziehen geht auch über Kopfbereich und Filterleiste: senkrecht bewegt
+     man dort das Blatt. Die Liste scrollt senkrecht und gibt das Ziehen
+     am oberen Rand ans Blatt ab. */
   .rolle{touch-action:pan-y;overscroll-behavior:contain}
   .filter{touch-action:pan-x;overscroll-behavior-x:contain}
+
 
   /* Keine Kopfleiste auf dem Handy: Die Karte geht bis oben, das Logo
      sitzt im Suchfeld. So wirkt es wie eine App statt wie eine Webseite. */
@@ -733,17 +724,8 @@ label.inline-knopf{display:inline-block;margin-top:10px}
   header h1 em,.kopfnotiz{display:none}
   header .adminknopf{margin-left:auto}
 
-  /* §6 Einfachheit: EINE Filterzeile statt drei beschrifteter Blöcke.
-     display:contents löst die Gruppen auf, ohne das HTML zu ändern. */
-  .filter{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:7px;
-    padding:12px 20px 10px;scrollbar-width:none;-ms-overflow-style:none;
-    scroll-snap-type:x proximity}
-  .filter::-webkit-scrollbar{display:none}
-  .filtertitel,.notiz-klein{display:none}
-  .chips{display:contents}
-  .chip{flex-shrink:0;scroll-snap-align:start}
-  /* §Gruppierung: kleiner Abstand markiert den Wechsel der Filtergruppe. */
-  .chips:not(:first-of-type) > .chip:first-child{margin-left:11px}
+  .filter{padding:12px 16px 10px;gap:6px}
+  .filter .wahl select.chip{padding:9px 28px 9px 13px;font-size:14px}
 
   .daemmerung{margin:0 20px 10px;padding:11px 14px;font-size:13px}
   .dkopf,.form{padding-left:16px;padding-right:16px}
@@ -2129,11 +2111,6 @@ function ansichtListe(nurListe){
         ? `Nur Plätze mit Flutlicht. <button class="inline-knopf" data-nurlicht="0">Alle zeigen</button>`
         : null);
 
-  const sportChips = ["alle", ...AUSWAHL.sportarten].map(s=>
-    `<button class="chip" data-sport="${esc(s)}" aria-pressed="${Z.sportart===s}">${
-       SPORT_ICON[s] ? `<span class="chip-icon" aria-hidden="true">${SPORT_ICON[s]}</span>` : ``}${
-       s==="alle"?"Alle Sportarten":esc(s)}</button>`).join("");
-
   const zeilen = orte.length ? orte.map(o=>{
     const [cls,text] = markeArt(o);
     const v = vereinsMarke(o);
@@ -2219,34 +2196,17 @@ function ansichtListe(nurListe){
       ${Z.suche ? `<button class="suche-weg" data-suchweg="1" aria-label="Suche löschen">✕</button>` : ``}
     </div>
     <div class="filter">
-      <div class="filtertitel">Sportart</div>
-      <div class="chips">${sportChips}</div>
-      <div class="filtertitel" style="margin-top:12px">Zugang</div>
-      <div class="chips">
-        ${auswahl("zugang", "Zugang", Z.nurBelegt ? "sicher" : Z.nurFrei ? "frei" : "alle",
-          [["alle","Alles zeigen"],["frei","Nur frei zugänglich"],["sicher","Nur wo ich sicher darf"]])}
-        <button class="chip" data-nurlos="${Z.nurLos ? "0" : "1"}" aria-pressed="${!!Z.nurLos}">👥 Hier ist was los</button>
-        <button class="chip mehr" data-mehr="${Z.filterOffen ? "0" : "1"}"
-          aria-pressed="${Z.filterOffen}">${Z.filterOffen ? "Weniger" : "Mehr Filter"}</button>
-      </div>
-      ${Z.filterOffen ? `
-      <div class="filtertitel" style="margin-top:12px">Entfernung</div>
-      ${Z.positionEcht ? `` : `<div class="notiz-klein">Gemessen ab München-Mitte – Standort nicht freigegeben.</div>`}
-      <div class="chips">
-        ${auswahl("umkreis", "Entfernung", String(Z.maxKm || 0),
-          [["0","Alle Entfernungen"],["2","bis 2 km"],["5","bis 5 km"],["10","bis 10 km"],["25","bis 25 km"]])}
-      </div>
-      <div class="filtertitel" style="margin-top:12px">Sortieren</div>
-      <div class="chips">
-        ${auswahl("sort", "Sortieren", Z.sortierung,
-          [["entfernung","Nach Entfernung"],["zustand","Nach Zustand"],["geprueft","Zuletzt geprüft"]])}
-      </div>
-      ${GEMERKT.size ? `
-      <div class="filtertitel" style="margin-top:12px">Merkliste</div>
-      <div class="chips">
-        <button class="chip" data-gemerkt="0" aria-pressed="${!Z.nurGemerkt}">Alle Plätze</button>
-        <button class="chip" data-gemerkt="1" aria-pressed="${Z.nurGemerkt}">Nur gemerkte (${GEMERKT.size})</button>
-      </div>` : ``}` : ``}
+      ${auswahl("sport", "Sportart", Z.sportart,
+        ["alle", ...AUSWAHL.sportarten].map(sp => [sp, sp === "alle" ? "Alle Sportarten" : sp]))}
+      ${auswahl("zugang", "Zugang", Z.nurBelegt ? "sicher" : Z.nurFrei ? "frei" : "alle",
+        [["alle","Jeder Zugang"],["frei","Nur frei zugänglich"],["sicher","Nur wo ich sicher darf"]])}
+      ${auswahl("umkreis", Z.positionEcht ? "Entfernung" : "Entfernung (ab München-Mitte)", String(Z.maxKm || 0),
+        [["0","Jede Entfernung"],["2","bis 2 km"],["5","bis 5 km"],["10","bis 10 km"],["25","bis 25 km"]])}
+      ${auswahl("zeigen", "Anzeigen", Z.nurLos ? "los" : Z.nurGemerkt ? "gemerkt" : "alle",
+        [["alle","Alle Plätze"],["los","Hier ist was los"],
+         ...(GEMERKT.size || Z.nurGemerkt ? [["gemerkt",`Nur gemerkte (${GEMERKT.size})`]] : [])])}
+      ${auswahl("sort", "Sortieren", Z.sortierung,
+        [["entfernung","Nächste zuerst"],["zustand","Bester Zustand"],["geprueft","Zuletzt geprüft"]])}
     </div>
     ${Z.bereich ? `<div class="daemmerung bereich">Zeigt den Kartenausschnitt.
       <button class="inline-knopf" data-bereich="aus">Wieder Umgebung zeigen</button></div>` : ``}
@@ -5664,6 +5624,8 @@ document.addEventListener("change", e => {
   if (w.dataset.filterwahl === "zugang") { Z.nurFrei = w.value === "frei"; Z.nurBelegt = w.value === "sicher"; }
   if (w.dataset.filterwahl === "umkreis") Z.maxKm = +w.value || null;
   if (w.dataset.filterwahl === "sort") Z.sortierung = w.value;
+  if (w.dataset.filterwahl === "sport") Z.sportart = w.value;
+  if (w.dataset.filterwahl === "zeigen") { Z.nurLos = w.value === "los"; Z.nurGemerkt = w.value === "gemerkt"; }
   zeichne();
 });
 
