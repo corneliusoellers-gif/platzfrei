@@ -2144,7 +2144,7 @@ function ansichtListe(nurListe){
       ${platzBild(o)}
       <span class="zt">
         <span class="zname">${esc(o.name)}</span>
-        <span class="zsub">${esc(o.sportarten.join(" · "))} · ${esc(o.untergrund)}</span>
+        <span class="zsub">${esc([...o.sportarten, o.untergrund].filter(x => x && x !== "—").join(" · "))}</span>
         <span class="marke ${cls}">${text}</span>${v ? `
         <span class="marke verein">${v[0]}</span>` : ``}${bs ? `
         <span class="marke boden ${bs[0]}">${bs[1]}</span>` : ``}${anzMeld >= 3 ? `
@@ -3091,10 +3091,24 @@ const DB_SPALTE = { bestaetigtDurch:"bestaetigt_durch", geprueft:"geprueft_am" }
 const OFFENE_FELDER = ["untergrund","groesse","ausstattung","umzaeunt",
                        "beleuchtung","zustand","drumherum","notizen"];
 
+/* Plätze ohne Namen heißen in der Datenbank "Tischtennis-Fläche" o. ä.
+   Angezeigt wird ein lesbarer Name, mit Ort, wenn wir ihn kennen
+   (gleiche Wörter wie orte-namen-mit-ort.sql). */
+const PLATZHALTER_NAME = { "Fußball":"Fußballplatz", "Basketball":"Basketballplatz",
+  "Calisthenics":"Calisthenics-Park", "Beachvolleyball":"Beachvolleyballfeld",
+  "Laufen":"Laufbahn", "Tischtennis":"Tischtennisplatte", "Skaten":"Skatepark" };
+function lesbarerName(name, ort){
+  const m = /^(.+)-Fläche$/.exec(name || "");
+  if (!m) return name;
+  const basis = PLATZHALTER_NAME[m[1]] || m[1] + "-Platz";
+  return ort && ort !== "—" ? basis + " " + ort : basis;
+}
+
 /* Eine Zeile aus der Datenbank in die Form bringen, die die App benutzt. */
 function ausDb(r){
   return {
-    id:r.id, name:r.name, ort:r.ort || "—",
+    id:r.id, name:lesbarerName(r.name, r.ort), ort:r.ort || "—",
+    platzhalter:/-Fläche$/.test(r.name || ""),
     lat:r.lat, lon:r.lon,
     sportarten:r.sportarten || [],
     zugang:r.zugang, zeiten:r.zeiten, bestaetigtDurch:r.bestaetigt_durch,
@@ -3726,14 +3740,15 @@ async function adresseNaechste(){
 
 /* Gleiche Regel wie die Datenbankfunktion adresse_ergaenzen: Endet der Name
    auf den alten Ort, wird der Ort ersetzt und die Straße angehängt. */
-function neuerNameMitAdresse(name, altOrt, ortNeu, strasse){
+function neuerNameMitAdresse(name, altOrt, ortNeu, strasse, platzhalter){
+  if (platzhalter && (!altOrt || altOrt === "—")) return name + " " + ortNeu + ", " + strasse;
   if (altOrt && altOrt !== "—" && name.endsWith(" " + altOrt))
     return name.slice(0, name.length - altOrt.length) + ortNeu + ", " + strasse;
   return name;
 }
 
 async function adresseUebernehmen(o, ortNeu, strasse){
-  const nameNeu = neuerNameMitAdresse(o.name, o.ort, ortNeu, strasse);
+  const nameNeu = neuerNameMitAdresse(o.name, o.ort, ortNeu, strasse, o.platzhalter);
   o.name = nameNeu;
   o.ort = ortNeu + ", " + strasse;
   if (ECHT) {
@@ -4235,7 +4250,7 @@ function mitNeuenMischen(gesammelt, k){
     if (!z.untergrund && k.untergrund) z.untergrund = k.untergrund;
 
     // Ein echter Name schlägt den Platzhalter "…-Fläche".
-    if (/-Fläche$/.test(z.name) && !/-Fläche$/.test(k.name)) z.name = k.name;
+    if ((z.platzhalter || /-Fläche$/.test(z.name)) && !k.platzhalter && !/-Fläche$/.test(k.name)) { z.name = k.name; z.platzhalter = false; }
 
     z._teile = (z._teile || 1) + 1;
     return true;
