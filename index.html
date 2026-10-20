@@ -1014,6 +1014,12 @@ header h1 .pf-marke{height:30px;width:auto}
 @media (max-width:880px){ .blatt-hoch #zur-karte{display:flex} }
 @media (min-width:881px){ body.nurliste #zur-karte{display:flex;bottom:150px} }
 @media (max-width:880px){ .blatt-hoch .listenende{padding-bottom:80px} }
+.rolle .los{margin:2px 0 12px}
+.rolle .los .los-titel{margin:0 0 8px}
+.los-zeilen{margin-bottom:0}
+.los-zeilen .los-karte .los-innen{gap:2px}
+.los-zeilen .los-karte.ansetzen{border:0}
+.los-mehr{margin:8px 0 0}
 </style>
 <!-- Besucherzähler GoatCounter: ohne Cookies, ohne personenbezogene Daten -->
 <script data-goatcounter="https://platzfrei.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
@@ -2109,13 +2115,14 @@ function losLeiste(teil = "leiste"){
     return k.slice(0, a) + `<span class="los-innen">` + k.slice(a, z) + `</span>` + k.slice(z); };
   karten.splice(0, karten.length, ...karten.map(innen));
   if (!karten.length) return ``;
-  const mehrere = karten.length > 1;
+  /* Breite Zeilen untereinander wie "Jetzt spielen" – erst drei, der Rest
+     auf Wunsch, damit die Plätze nicht zu weit nach unten rutschen. */
+  const MAX = 3, alle = Z.losAlle || karten.length <= MAX + 1;
   return `<section class="los" aria-label="Was ist los in der Nähe"><div class="los-titel">Was ist los in der Nähe${
-      zahl ? `<small>${zahl} aktiv</small>` : ``}${mehrere ? `<span class="los-pfeile">
-      <button class="los-pfeil" data-losscroll="-1" aria-label="Vorige Karte">‹</button>
-      <button class="los-pfeil" data-losscroll="1" aria-label="Nächste Karte">›</button></span>` : ``}</div>
-    <div class="los-leiste${mehrere ? " karussell" : ""}" role="list">${karten.join("")}</div>${
-      mehrere ? `<div class="los-hinweis" aria-hidden="true">${karten.length} Karten · zur Seite wischen</div>` : ``}</section>`;
+      zahl ? `<small>${zahl} aktiv</small>` : ``}</div>
+    <div class="oben-karten los-zeilen">${(alle ? karten : karten.slice(0, MAX)).join("")}</div>${
+      karten.length > MAX + 1 ? `<button class="inline-knopf los-mehr" data-losalle="${alle ? "0" : "1"}">${
+        alle ? "Weniger zeigen" : `${karten.length - MAX} weitere zeigen`}</button>` : ``}</section>`;
 }
 
 /* --------------------------------------------------------------------------
@@ -5958,7 +5965,7 @@ document.addEventListener("click", e=>{
                              "[data-suchweg],[data-teilen],[data-abmelden],[data-hierpunkt],[data-vereinszeitensenden],"+
                              "[data-neuok],[data-neuweg],[data-vzok],[data-vzweg],[data-hier],[data-hierweg],"+
                              "[data-jetzt],[data-einfuehrung],[data-ausltag],[data-zusage],[data-spielweg],[data-spielform],[data-spielansetzen],[data-tipp],[data-tippsoffen],[data-osmladen],[data-osmstop],"+
-                             "[data-startpunkt],[data-standort],[data-losscroll],[data-filterweg],[data-korrektur],[data-modus]");
+                             "[data-startpunkt],[data-standort],[data-losscroll],[data-losalle],[data-filterweg],[data-korrektur],[data-modus]");
   if (!t) return;
 
   if (t.dataset.startpunkt) {
@@ -5972,6 +5979,7 @@ document.addEventListener("click", e=>{
   }
   if (t.dataset.standort)   { return zuMeinemStandort(); }
   if (t.dataset.modus)      { return ansichtModus(t.dataset.modus); }
+  if (t.dataset.losalle)    { Z.losAlle = t.dataset.losalle === "1"; return zeichne(); }
   if (t.dataset.losscroll)  {
     const l = t.closest(".los")?.querySelector(".los-leiste");
     l?.scrollBy({ left: +t.dataset.losscroll * Math.max(200, l.clientWidth * .8), behavior:"smooth" });
