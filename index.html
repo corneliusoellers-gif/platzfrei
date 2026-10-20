@@ -141,7 +141,7 @@ aside{width:420px;flex-shrink:0;background:var(--grund);
     padding:12px 22px;background:var(--grund);border-bottom:1px solid var(--kante);position:relative;z-index:15}
   #leiste .suche{margin:0;flex:0 0 min(400px,34vw)}
   #leiste .filter{flex:1;min-width:0;padding:2px 0}
-  aside{width:clamp(420px,44vw,760px);container-type:inline-size}
+  aside{width:clamp(360px,30vw,440px);container-type:inline-size}
   /* Breite Liste: Plätze in zwei Spalten */
   @container (min-width:640px){
     .rolle{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:max-content;column-gap:12px;align-content:start}
@@ -871,46 +871,34 @@ header h1 .pf-marke{height:30px;width:auto}
   .neu-blase{color:#08211A}
 }
 
-/* ---------- Listenkarten im Kartenstil: Bildfläche oben, Text darunter ---------- */
-.zeile{display:flex;flex-direction:column;align-items:stretch;gap:0;padding:0;min-height:0;
-  border-radius:20px;box-shadow:0 1px 2px rgba(15,26,21,.06),0 0 0 1px var(--kante);margin-bottom:14px}
-.zeile:hover{box-shadow:0 10px 28px rgba(15,26,21,.12),0 0 0 1px var(--kante);transform:translateY(-2px)}
+/* ---------- Listenzeilen kompakt: kleines Platzsymbol, zwei Textzeilen, Entfernung rechts ---------- */
+.zeile{align-items:center;gap:12px;padding:10px 12px;min-height:0;margin-bottom:6px;
+  border-radius:14px;box-shadow:0 0 0 1px var(--kante)}
+.zeile:hover{box-shadow:0 4px 14px rgba(15,26,21,.10),0 0 0 1px var(--kante);transform:none}
 .zeile::before{display:none}
-.zeile > .platzbild{width:100%;height:118px;border-radius:0;box-shadow:none;display:flex;
-  align-items:center;justify-content:center;
-  background:radial-gradient(120% 140% at 30% 0%,color-mix(in srgb,var(--bild) 70%,#fff) 0%,var(--bild) 55%,color-mix(in srgb,var(--bild) 75%,#000) 100%)}
-.zeile > .platzbild svg{width:86px;height:86px;border-radius:16px;transform:rotate(-6deg);
-  box-shadow:0 10px 24px rgba(0,0,0,.28),0 0 0 3px rgba(255,255,255,.85)}
+.zeile > .platzbild{width:40px;height:40px;border-radius:11px;flex-shrink:0;
+  box-shadow:0 0 0 2px var(--flaeche),0 0 0 3.5px var(--streifen,var(--unklar))}
 .zeile > .platzbild i{display:none}
-.zeile > .platzbild::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;
-  background:var(--streifen,var(--unklar))}
-.zeile .zt{padding:13px 16px 15px;display:flex;flex-direction:column;align-items:flex-start}
-.zeile .zt .zname{font-size:16.5px;font-weight:700;letter-spacing:-.02em;line-height:1.28}
-.zeile .zrechts{position:absolute;top:10px;left:10px;right:10px;flex-direction:row;
-  align-items:center;justify-content:space-between;padding:0;gap:8px}
-.zeile .zdist{background:rgba(10,18,14,.55);color:#fff;padding:6px 11px;border-radius:999px;
-  font-size:14px;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
-.zeile .zdist small{color:rgba(255,255,255,.8)}
-.zeile .stern{width:34px;height:34px;margin:0;padding:0;display:flex;align-items:center;justify-content:center;
-  border-radius:50%;background:rgba(10,18,14,.45);color:rgba(255,255,255,.9);font-size:17px;
-  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
-.zeile .stern.an{color:#FFC93C}
-.ztags{display:flex;flex-wrap:wrap;align-items:center;gap:2px 12px;margin-top:5px}
-.ztag{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:500;color:var(--tinte-3)}
-.ztag span{font-size:12px}
-.ztag.mehr{font-weight:600}
-.zbelag{font-size:13px;color:var(--tinte-3);font-weight:500}
-.zbelag::before{content:"·";margin-right:10px}
-.zeile .marke{margin:10px 6px 0 0;font-size:11.5px;padding:4px 9px}
-.zeile .marke:not(.verein):not(.boden):not(.warnung):not(.spiel-marke)::before{content:"";width:6px;height:6px;
-  border-radius:50%;background:currentColor;margin-right:6px;flex-shrink:0}
+.zeile .zt{display:block;min-width:0}
+.zeile .zt .zname{font-size:14.5px;font-weight:650;letter-spacing:-.012em;line-height:1.25;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ztags{display:flex;align-items:center;gap:0 8px;margin-top:2px;white-space:nowrap;overflow:hidden;
+  -webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent)}
+.ztag{display:inline-flex;align-items:center;gap:3px;font-size:12px;font-weight:500;color:var(--tinte-3)}
+.ztag span{font-size:11px}
+.zbelag{font-size:12px;color:var(--tinte-3)}
+.zbelag::before{content:"·";margin-right:8px}
+.zeile .marke{margin:5px 4px 0 0;font-size:11px;padding:2px 8px}
+.zeile .marke:not(.verein):not(.boden):not(.warnung):not(.spiel-marke)::before{content:"";width:5px;height:5px;
+  border-radius:50%;background:currentColor;margin-right:5px;flex-shrink:0}
+.zeile .zrechts{gap:4px;align-self:stretch;justify-content:space-between}
+.zeile .zdist{font-size:14px}
+.zeile .zdist small{font-size:10.5px}
+.zeile .stern{font-size:15px}
 @media (max-width:880px){
-  .zeile{padding:0;gap:0;align-items:stretch;margin-bottom:12px}
-  .zeile > .platzbild{width:100%;height:104px;border-radius:0}
-  .zeile > .platzbild svg{width:76px;height:76px}
-  .zeile .zt{padding:12px 14px 14px}
-  .zeile .zrechts{padding:0}
-  .zeile .stern{margin:0;padding:0}
+  .zeile{padding:10px 12px;gap:12px;margin-bottom:6px;align-items:center}
+  .zeile > .platzbild{width:42px;height:42px;border-radius:11px}
+  .zeile .zt .zname{font-size:15px}
 }
 </style>
 <!-- Besucherzähler GoatCounter: ohne Cookies, ohne personenbezogene Daten -->
