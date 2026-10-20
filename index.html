@@ -1005,6 +1005,15 @@ header h1 .pf-marke{height:30px;width:auto}
 .gemeldet small{color:var(--tinte-2);font-size:12.5px;margin-top:4px}
 @media (max-width:880px){ .gemeldet{margin-left:0;margin-right:0} }
 @media (max-width:880px){ .blatt-hoch .modus-knopf{visibility:hidden} }
+/* Zurück zur Karte: schwebt immer sichtbar, solange die Liste die Karte verdeckt */
+#zur-karte{display:none;position:fixed;left:50%;transform:translateX(-50%);z-index:900;
+  bottom:calc(20px + env(safe-area-inset-bottom,0px));align-items:center;gap:6px;
+  border:0;border-radius:var(--r-pille);padding:12px 20px;font:inherit;font-size:15px;font-weight:650;
+  background:var(--tinte);color:var(--grund);box-shadow:var(--schatten-hoch);cursor:pointer}
+#zur-karte:focus-visible{outline:3px solid var(--gruen);outline-offset:2px}
+@media (max-width:880px){ .blatt-hoch #zur-karte{display:flex} }
+@media (min-width:881px){ body.nurliste #zur-karte{display:flex;bottom:150px} }
+@media (max-width:880px){ .blatt-hoch .listenende{padding-bottom:80px} }
 </style>
 <!-- Besucherzähler GoatCounter: ohne Cookies, ohne personenbezogene Daten -->
 <script data-goatcounter="https://platzfrei.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
@@ -1037,6 +1046,7 @@ header h1 .pf-marke{height:30px;width:auto}
 </main>
 
 <div id="meldung" role="status" aria-live="polite"></div>
+<button id="zur-karte" type="button" data-modus="karte">🗺 Karte</button>
 
 <script>
 /* ==========================================================================
@@ -2448,7 +2458,7 @@ function ansichtListe(nurListe){
         <button data-gehe="fehler">Fehler melden</button></div>
     </div>`;
 
-  orte.slice(0, 6).forEach(adresseErgaenzen);
+  orte.slice(0, 15).forEach(adresseErgaenzen);   // generische Namen bekommen ihre Straße
 
   /* Trefferzahl: immer sagen, WAS gezählt wird, und welche Filter wirken.
      Solange die Plätze noch laden, steht das dabei – sonst springt die Zahl
@@ -2475,8 +2485,7 @@ function ansichtListe(nurListe){
           DOPPELT ? ` ${DOPPELT.toLocaleString("de-DE")} doppelte Einträge sind zusammengefasst.` : ``}</span>` : ``}</div>`;
 
   const ohneSuche = !Z.suche.trim();
-  const rolleInhalt = `${Z.nurListe && breit.matches ? `<div class="modus-zurueck">Listenansicht ohne Karte
-      <button class="inline-knopf" data-modus="karte">🗺 Karte wieder zeigen</button></div>` : ``}${bezugZeile()}${trefferInfo}${ohneSuche ? losLeiste("oben") : ``}${
+  const rolleInhalt = `${bezugZeile()}${trefferInfo}${ohneSuche ? losLeiste("oben") : ``}${
       zeilenListe.slice(0, 5).join("")}${ohneSuche ? losLeiste() : ``}${zeilenListe.slice(5).join("")}${leer}${alleOrte.length > orte.length
       ? `<div class="leer">… und ${(alleOrte.length - orte.length).toLocaleString("de-DE")} weitere.<br>
          Filter setzen, suchen oder auf der Karte zoomen.</div>` : ``}${listenende}`;
@@ -3326,6 +3335,7 @@ function zeichne(){
   document.body.classList.toggle("mit-leiste", Z.ansicht === "liste");
   document.body.classList.toggle("vollseite", Z.ansicht === "ueber" || Z.ansicht === "vereine"
     || (Z.nurListe && breit.matches));
+  document.body.classList.toggle("nurliste", !!Z.nurListe && breit.matches);
   document.querySelectorAll("[data-modus]").forEach(b =>
     b.setAttribute("aria-pressed", String((b.dataset.modus === "liste") === !!Z.nurListe)));
   document.querySelectorAll("[data-nav]").forEach(b =>
