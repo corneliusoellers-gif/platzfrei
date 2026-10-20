@@ -2485,8 +2485,7 @@ function ansichtListe(nurListe){
           DOPPELT ? ` ${DOPPELT.toLocaleString("de-DE")} doppelte Einträge sind zusammengefasst.` : ``}</span>` : ``}</div>`;
 
   const ohneSuche = !Z.suche.trim();
-  const rolleInhalt = `${bezugZeile()}${trefferInfo}${ohneSuche ? losLeiste("oben") : ``}${
-      zeilenListe.slice(0, 5).join("")}${ohneSuche ? losLeiste() : ``}${zeilenListe.slice(5).join("")}${leer}${alleOrte.length > orte.length
+  const rolleInhalt = `${bezugZeile()}${trefferInfo}${ohneSuche ? losLeiste("oben") + losLeiste() : ``}${zeilenListe.join("")}${leer}${alleOrte.length > orte.length
       ? `<div class="leer">… und ${(alleOrte.length - orte.length).toLocaleString("de-DE")} weitere.<br>
          Filter setzen, suchen oder auf der Karte zoomen.</div>` : ``}${listenende}`;
 
