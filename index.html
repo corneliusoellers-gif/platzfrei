@@ -1866,7 +1866,7 @@ function sichtbareOrte(){
     .filter(o => !Z.nurGemerkt || GEMERKT.has(o.id))
     .filter(o => !Z.nurLicht || o.beleuchtung === "ja")
     .filter(o => !Z.nurLos || (Z.aktiv[o.id] || 0) >= 2 || naechstesSpiel(o.id))
-    .filter(o => sucht || !Z.maxKm || entfernungKm(Z.position,o) <= Z.maxKm)
+    .filter(o => sucht || !Z.maxKm || !mitKm() || entfernungKm(Z.position,o) <= Z.maxKm)
     /* "In diesem Bereich suchen": zeigt, was man gerade auf der Karte sieht,
        statt was in der Nähe ist – für Auswärtsspiele und Urlaub. */
     .filter(o => sucht || !Z.bereich || Z.bereich.contains([o.lat, o.lon]));
@@ -2092,7 +2092,7 @@ function losLeiste(teil = "leiste"){
     .sort((a, b) => a.km - b.km).slice(0, 6);
   for (const { o, n, km } of live) karten.push(`<button class="los-karte live" data-ort="${o.id}">
       <span class="los-art"><span class="puls" aria-hidden="true"></span>${n} spielen gerade</span>
-      <span class="los-name">${esc(o.name)}</span><small>${esc(o.sportarten.join(" · "))} · ${kmText(km)}</small></button>`);
+      <span class="los-name">${esc(o.name)}</span><small>${esc(o.sportarten.join(" · "))}${mitKm() ? " · " + kmText(km) : ""}</small></button>`);
 
   /* Kommende Spiele in der Nähe */
   const jetzt = new Date();
@@ -2103,7 +2103,7 @@ function losLeiste(teil = "leiste"){
   for (const { sp, o, km } of spiele) karten.push(`<button class="los-karte spiel" data-ort="${o.id}">
       <span class="los-art">📅 ${esc(spielZeit(sp.beginn))}</span>
       <span class="los-name">${esc(sp.sportart)} · ${esc(o.name)}</span>
-      <small>${sp.dabei} von ${sp.brauchen} dabei · ${kmText(km)}</small></button>`);
+      <small>${sp.dabei} von ${sp.brauchen} dabei${mitKm() ? " · " + kmText(km) : ""}</small></button>`);
 
   /* Immer ein Knopf zum Spiel ansetzen – am nächsten passenden Platz. */
   const ziel = sichtbareOrte()[0];
@@ -2164,7 +2164,7 @@ function jetztVorschlag(){
 }
 
 function jetztGrund(v){
-  const o = v.o, teile = [entfText(v.km)];
+  const o = v.o, teile = mitKm() ? [entfText(v.km)] : [];
   teile.push(belegt(o) ? "✓ frei, bestätigt" : nutzerBestaetigt(o) ? "✓ von Nutzern bestätigt" : "≈ vermutlich frei, ungeprüft");
   const bs = bespielbarkeit(o);
   if (Z.wetter) teile.push(Z.wetter.regnetGleich ? "gleich Regen" : bs ? bs[1] : "trocken");
@@ -2176,6 +2176,7 @@ function jetztGrund(v){
 }
 
 function jetztKarte(){
+  if (!mitKm()) return null;   // ohne Standort wäre "der nächste Platz" geraten
   const v = jetztVorschlag();
   if (!v) return null;
   return `<button class="los-karte jetzt" data-jetzt="1">
@@ -2252,7 +2253,7 @@ function auslastungBlock(o){
 const EINF_SCHLUESSEL = "platzfrei.einfuehrung";
 const EINF_SEITEN = [
   { bild:"📍", titel:"Ab deinem Standort rechnen?",
-    text:"Platzfrei funktioniert am besten mit deinem Standort: Entfernungen ab dir, die nächsten Plätze zuerst, „Jetzt spielen“ und Einchecken. Der Standort bleibt auf deinem Gerät und wird nicht gespeichert. Ohne Freigabe rechnet die App ab München-Mitte.",
+    text:"Platzfrei funktioniert am besten mit deinem Standort: Entfernungen ab dir, die nächsten Plätze zuerst, „Jetzt spielen“ und Einchecken. Der Standort bleibt auf deinem Gerät und wird nicht gespeichert.",
     standort:true },
   { bild:`<svg width="54" height="71" viewBox="0 0 320 420" aria-hidden="true"><path d="M160 0C71.634 0 0 70 0 158C0 244 84 348 149 414C155 420 165 420 171 414C236 348 320 244 320 158C320 70 248.366 0 160 0Z" fill="#05B630"/><path d="M124 62V100H196V62M124 282V244H196V282M70 172H250M86 62H234C244.667 62 250 67.3333 250 78V266C250 276.667 244.667 282 234 282H86C75.3333 282 70 276.667 70 266V78C70 67.3333 75.3333 62 86 62ZM187 172C187 186.912 174.912 199 160 199C145.088 199 133 186.912 133 172C133 157.088 145.088 145 160 145C174.912 145 187 157.088 187 172Z" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
     titel:"Wo darf ich spielen?",
@@ -2300,7 +2301,7 @@ function einfuehrungZeigen(immer){
           <span><i class="z-unklar" style="background:#8E8E93">?</i>Zugang ungeklärt</span></div>` : ``}
         <div class="einf-punkte" aria-hidden="true">${EINF_SEITEN.map((_, k) => `<i class="${k === i ? "an" : ""}"></i>`).join("")}</div>
         ${s.standort ? `<button class="knopf" data-einfstandort="1">Ja, ab meinem Standort</button>
-        <button class="knopf zweit einf-ohne" data-einfohne="1">Nein, ab München-Mitte</button>`
+        <button class="knopf zweit einf-ohne" data-einfohne="1">Nein, ohne Standort</button>`
         : `<button class="knopf" data-einfweiter="1">${letzte ? "Los geht’s" : "Weiter"}</button>`}</div>`;
     el.querySelector("[data-einfweiter],[data-einfstandort]").focus();
   };
@@ -2330,11 +2331,15 @@ function einfuehrungZeigen(immer){
 /* --------------------------------------------------------------------------
    Bezugspunkt: Ab wo rechnen die Entfernungen?
    --------------------------------------------------------------------------
-   Ohne Standort-Freigabe rechnet die App ab München-Mitte. Das steht immer
+   (Die Leiste darüber wird seit 21.10.2026 nicht mehr gezeigt; ohne Standort
+   gibt es keine Kilometer, siehe mitKm().) Ohne Standort-Freigabe rechnete die App ab München-Mitte. Das stand immer
    sichtbar über der Liste, damit niemand die Kilometer für die eigene
    Umgebung hält. Man kann einen Ort eintippen oder die Kartenmitte nehmen.
    -------------------------------------------------------------------------- */
 const STARTPUNKT_SCHLUESSEL = "platzfrei.startpunkt";
+/* Kilometer zeigen wir nur, wenn wir wissen, wo man ist. Ohne Standort
+   gibt es keine Entfernungen – sonst hält man sie für die eigenen. */
+function mitKm(){ return Z.positionEcht || !!Z.startpunkt; }
 function bezugName(){
   return Z.positionEcht ? "deinem Standort" : Z.startpunkt ? Z.startpunkt.name : "München-Mitte";
 }
@@ -2449,7 +2454,7 @@ function ansichtListe(nurListe){
         <span class="marke live"><span class="puls" aria-hidden="true"></span>${Z.aktiv[o.id]} spielen gerade</span>` : ``}
       </span>
       <span class="zrechts">
-        <span class="zdist">${km < 0.1 ? "0" : (km < 10 ? km.toFixed(1).replace(".",",") : Math.round(km))}<small>${km < 0.1 ? "hier" : "km"}</small></span>
+        ${mitKm() ? `<span class="zdist">${km < 0.1 ? "0" : (km < 10 ? km.toFixed(1).replace(".",",") : Math.round(km))}<small>${km < 0.1 ? "hier" : "km"}</small></span>` : ``}
         <span class="stern${GEMERKT.has(o.id) ? " an" : ""}" data-merken="${o.id}"
               role="button" tabindex="0"
               aria-label="${GEMERKT.has(o.id) ? "Aus Merkliste entfernen" : "Merken"}">★</span>
@@ -2491,7 +2496,7 @@ function ansichtListe(nurListe){
   const plaetze = anzahl === 1 ? "Platz" : "Plätze";
   const ueberschrift = Z.suche.trim() ? `${zahl} Treffer für „${Z.suche.trim()}“`
     : Z.bereich ? `${zahl} ${plaetze} im Kartenausschnitt`
-    : Z.maxKm ? `${zahl} ${plaetze} bis ${Z.maxKm} km`
+    : Z.maxKm && mitKm() ? `${zahl} ${plaetze} bis ${Z.maxKm} km`
     : Z.laedtNoch ? `${zahl} ${plaetze} in der Umgebung`
     : `${zahl} ${plaetze} in Deutschland`;
   const filterTeile = [
@@ -2509,7 +2514,7 @@ function ansichtListe(nurListe){
           DOPPELT ? ` ${DOPPELT.toLocaleString("de-DE")} doppelte Einträge sind zusammengefasst.` : ``}</span>` : ``}</div>`;
 
   const ohneSuche = !Z.suche.trim();
-  const rolleInhalt = `${bezugZeile()}${trefferInfo}${ohneSuche ? losLeiste("oben") + losLeiste() : ``}${zeilenListe.join("")}${leer}${alleOrte.length > orte.length
+  const rolleInhalt = `${trefferInfo}${ohneSuche ? losLeiste("oben") + losLeiste() : ``}${zeilenListe.join("")}${leer}${alleOrte.length > orte.length
       ? `<div class="leer">… und ${(alleOrte.length - orte.length).toLocaleString("de-DE")} weitere.<br>
          Filter setzen, suchen oder auf der Karte zoomen.</div>` : ``}${listenende}`;
 
@@ -2534,8 +2539,8 @@ function ansichtListe(nurListe){
         ["alle", ...AUSWAHL.sportarten].map(sp => [sp, sp === "alle" ? "Alle Sportarten" : sp]))}
       ${auswahl("zugang", "Zugang", Z.nurBelegt ? "sicher" : Z.nurFrei ? "frei" : "alle",
         [["alle","Jeder Zugang"],["frei","Nur frei zugänglich"],["sicher","Nur wo ich sicher darf"]])}
-      ${auswahl("umkreis", "Entfernung ab " + bezugName(), String(Z.maxKm || 0),
-        [["0","Jede Entfernung"],["2","bis 2 km"],["5","bis 5 km"],["10","bis 10 km"],["25","bis 25 km"]])}
+      ${mitKm() ? auswahl("umkreis", "Entfernung", String(Z.maxKm || 0),
+        [["0","Jede Entfernung"],["2","bis 2 km"],["5","bis 5 km"],["10","bis 10 km"],["25","bis 25 km"]]) : ``}
       ${auswahl("zeigen", "Anzeigen", Z.nurLos ? "los" : Z.nurGemerkt ? "gemerkt" : "alle",
         [["alle","Alle Plätze"],["los","Hier ist was los"],
          ...(GEMERKT.size || Z.nurGemerkt ? [["gemerkt",`Nur gemerkte (${GEMERKT.size})`]] : [])])}
@@ -2875,7 +2880,7 @@ function ansichtDetail(){
     <div class="dkopf">
       <button class="zurueck" data-gehe="liste">← Liste</button>
       <div class="dname">${esc(o.name)}</div>
-      <div class="dort">${esc(o.ort)} · ${entfText(entfernungKm(Z.position,o))} entfernt</div>
+      <div class="dort">${esc(o.ort)}${mitKm() ? ` · ${entfText(entfernungKm(Z.position,o))} entfernt` : ``}</div>
       ${verein ? `<span class="marke verein">${verein[0]}</span>` : ``}
     </div>
     <div class="rolle">
@@ -4230,7 +4235,7 @@ async function adresseUebernehmen(o, ortNeu, strasse){
   if (Z.ansicht === "detail" && Z.auswahlId === o.id) {
     const n = seite.querySelector(".dname"), d = seite.querySelector(".dort");
     if (n) n.textContent = o.name;
-    if (d) d.textContent = `${o.ort} · ${entfText(entfernungKm(Z.position,o))} entfernt`;
+    if (d) d.textContent = o.ort + (mitKm() ? ` · ${entfText(entfernungKm(Z.position,o))} entfernt` : ``);
   }
   const zeile = seite.querySelector(`.zeile[data-ort="${CSS.escape(String(o.id))}"] .zname`);
   if (zeile) zeile.textContent = o.name;
@@ -5431,8 +5436,7 @@ function ansichtRechtliches(){
         Einchecken einmal an unsere Datenbank zur Abstandsprüfung (siehe
         oben), ohne dass er gespeichert wird. Rechtsgrundlage für diese
         Nutzung ist Art. 6 Abs. 1 lit. f DSGVO (Plätze in deiner Nähe zeigen).
-        Ohne Freigabe rechnet die App ab München-Mitte oder ab einem Ort, den
-        du selbst wählst. Diesen Startpunkt speichert nur dein Gerät. Du kannst die
+        Ohne Freigabe zeigt die App keine Entfernungen an. Du kannst die
         Freigabe jederzeit in den Einstellungen deines Browsers oder Geräts
         widerrufen. Das berührt nicht, was vorher erlaubt war.</p>
 
