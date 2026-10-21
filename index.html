@@ -2251,15 +2251,15 @@ function auslastungBlock(o){
    -------------------------------------------------------------------------- */
 const EINF_SCHLUESSEL = "platzfrei.einfuehrung";
 const EINF_SEITEN = [
+  { bild:"📍", titel:"Ab deinem Standort rechnen?",
+    text:"Platzfrei funktioniert am besten mit deinem Standort: Entfernungen ab dir, die nächsten Plätze zuerst, „Jetzt spielen“ und Einchecken. Der Standort bleibt auf deinem Gerät und wird nicht gespeichert. Ohne Freigabe rechnet die App ab München-Mitte.",
+    standort:true },
   { bild:`<svg width="54" height="71" viewBox="0 0 320 420" aria-hidden="true"><path d="M160 0C71.634 0 0 70 0 158C0 244 84 348 149 414C155 420 165 420 171 414C236 348 320 244 320 158C320 70 248.366 0 160 0Z" fill="#05B630"/><path d="M124 62V100H196V62M124 282V244H196V282M70 172H250M86 62H234C244.667 62 250 67.3333 250 78V266C250 276.667 244.667 282 234 282H86C75.3333 282 70 276.667 70 266V78C70 67.3333 75.3333 62 86 62ZM187 172C187 186.912 174.912 199 160 199C145.088 199 133 186.912 133 172C133 157.088 145.088 145 160 145C174.912 145 187 157.088 187 172Z" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
     titel:"Wo darf ich spielen?",
     text:"Platzfrei zeigt Bolz-, Basketball- und Sportplätze in deiner Nähe und ob du dort frei spielen darfst.",
     legende:true },
   { bild:"👥", titel:"Sieh, wo was los ist",
     text:"Check ein, wenn du auf dem Platz bist, oder setz ein Spiel an. Andere sehen nur, wie viele kommen, nie deinen Namen." },
-  { bild:"📍", titel:"Ab wo soll ich rechnen?",
-    text:"Mit deinem Standort zeigt die App Entfernungen ab dir, findet bei „Jetzt spielen“ den nächsten freien Platz und lässt dich einchecken. Der Standort bleibt auf deinem Gerät und wird nicht gespeichert. Ohne Freigabe rechnet die App ab München-Mitte, oder du wählst einen Ort über der Liste.",
-    standort:true }
 ];
 
 function einfuehrungZeigen(immer){
@@ -2270,22 +2270,27 @@ function einfuehrungZeigen(immer){
   el.setAttribute("role", "dialog");
   el.setAttribute("aria-modal", "true");
   el.setAttribute("aria-label", "Einführung");
-  let i = 0;
-  const fertig = mitStandort => {
+  let i = 0, gewaehlt = false;
+  /* Erste Seite: Standort ja oder nein. Die Antwort zählt sofort (der
+     Browser fragt gleich), danach geht die Einführung weiter. */
+  const standortWahl = ja => {
+    gewaehlt = true;
+    try { localStorage.setItem("platzfrei.ohnestandort", ja ? "" : "1"); } catch {}
+    if (ja && !Z.positionEcht) zuMeinemStandort();
+    i++; bauen();
+  };
+  const fertig = () => {
     try { localStorage.setItem(EINF_SCHLUESSEL, "1"); } catch {}
     el.remove();
     document.removeEventListener("keydown", taste);
-    /* true = "Standort freigeben", false = "Ohne Standort weiter",
-       sonst übersprungen: dann fragt der Browser direkt. */
-    try { localStorage.setItem("platzfrei.ohnestandort", mitStandort === false ? "1" : ""); } catch {}
-    if (mitStandort === true && !Z.positionEcht) zuMeinemStandort();
-    else if (mitStandort !== false && !Z.positionEcht && !Z.startpunkt) standortHolen();
+    /* Ohne Antwort geschlossen: dann fragt der Browser direkt. */
+    if (!gewaehlt && !Z.positionEcht && !Z.startpunkt) standortHolen();
   };
   const taste = e => { if (e.key === "Escape") fertig(); };
   const bauen = () => {
     const s = EINF_SEITEN[i], letzte = i === EINF_SEITEN.length - 1;
     el.innerHTML = `<div class="einf-karte">
-        <button class="einf-weg" data-einfweg="1">Überspringen</button>
+        ${s.standort ? `` : `<button class="einf-weg" data-einfweg="1">Überspringen</button>`}
         <div class="einf-bild">${s.bild}</div>
         <h2>${s.titel}</h2><p>${s.text}</p>
         ${s.legende ? `<div class="einf-legende">
@@ -2294,14 +2299,14 @@ function einfuehrungZeigen(immer){
           <span><i style="background:#FF9F0A">!</i>nach Absprache</span>
           <span><i class="z-unklar" style="background:#8E8E93">?</i>Zugang ungeklärt</span></div>` : ``}
         <div class="einf-punkte" aria-hidden="true">${EINF_SEITEN.map((_, k) => `<i class="${k === i ? "an" : ""}"></i>`).join("")}</div>
-        ${s.standort ? `<button class="knopf" data-einfstandort="1">Standort freigeben</button>
-        <button class="knopf zweit einf-ohne" data-einfohne="1">Ohne Standort weiter</button>`
+        ${s.standort ? `<button class="knopf" data-einfstandort="1">Ja, ab meinem Standort</button>
+        <button class="knopf zweit einf-ohne" data-einfohne="1">Nein, ab München-Mitte</button>`
         : `<button class="knopf" data-einfweiter="1">${letzte ? "Los geht’s" : "Weiter"}</button>`}</div>`;
     el.querySelector("[data-einfweiter],[data-einfstandort]").focus();
   };
   el.addEventListener("click", e => {
-    if (e.target.closest("[data-einfstandort]")) return fertig(true);
-    if (e.target.closest("[data-einfohne]")) return fertig(false);
+    if (e.target.closest("[data-einfstandort]")) return standortWahl(true);
+    if (e.target.closest("[data-einfohne]")) return standortWahl(false);
     if (e.target.closest("[data-einfweg]")) return fertig();
     if (e.target.closest("[data-einfweiter]")) {
       if (i === EINF_SEITEN.length - 1) return fertig();
@@ -2313,8 +2318,9 @@ function einfuehrungZeigen(immer){
   el.addEventListener("touchend", e => {
     if (x0 === null) return;
     const dx = e.changedTouches[0].clientX - x0; x0 = null;
+    if (EINF_SEITEN[i].standort) return;   // hier bitte mit Ja oder Nein antworten
     if (dx < -50 && i < EINF_SEITEN.length - 1) { i++; bauen(); }
-    else if (dx > 50 && i > 0) { i--; bauen(); }
+    else if (dx > 50 && i > 0 && !EINF_SEITEN[i - 1].standort) { i--; bauen(); }
   });
   document.addEventListener("keydown", taste);
   document.body.appendChild(el);
