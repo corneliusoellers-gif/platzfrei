@@ -1701,6 +1701,11 @@ let mitteBeimZeichnen = karte.getCenter();
 
 karte.on("moveend", () => {
   markerZeichnen();
+  /* Solange ganz Deutschland noch lädt: den neuen Ausschnitt gleich holen. */
+  if (Z.laedtNoch && karte.getZoom() >= 10) {
+    const m = karte.getCenter();
+    umgebungLaden({ lat:m.lat, lon:m.lng });
+  }
   if (Z.ansicht !== "liste") { bereichKnopf.hidden = true; return; }
   const jetzt = karte.getCenter();
   /* Erst ab einer halben Kartenbreite Versatz – sonst blinkt der Knopf
@@ -2270,7 +2275,11 @@ function einfuehrungZeigen(immer){
     try { localStorage.setItem(EINF_SCHLUESSEL, "1"); } catch {}
     el.remove();
     document.removeEventListener("keydown", taste);
+    /* true = "Standort freigeben", false = "Ohne Standort weiter",
+       sonst übersprungen: dann fragt der Browser direkt. */
+    try { localStorage.setItem("platzfrei.ohnestandort", mitStandort === false ? "1" : ""); } catch {}
     if (mitStandort === true && !Z.positionEcht) zuMeinemStandort();
+    else if (mitStandort !== false && !Z.positionEcht && !Z.startpunkt) standortHolen();
   };
   const taste = e => { if (e.key === "Escape") fertig(); };
   const bauen = () => {
@@ -2286,12 +2295,13 @@ function einfuehrungZeigen(immer){
           <span><i class="z-unklar" style="background:#8E8E93">?</i>Zugang ungeklärt</span></div>` : ``}
         <div class="einf-punkte" aria-hidden="true">${EINF_SEITEN.map((_, k) => `<i class="${k === i ? "an" : ""}"></i>`).join("")}</div>
         ${s.standort ? `<button class="knopf" data-einfstandort="1">Standort freigeben</button>
-        <button class="knopf zweit einf-ohne" data-einfweg="1">Ohne Standort weiter</button>`
+        <button class="knopf zweit einf-ohne" data-einfohne="1">Ohne Standort weiter</button>`
         : `<button class="knopf" data-einfweiter="1">${letzte ? "Los geht’s" : "Weiter"}</button>`}</div>`;
     el.querySelector("[data-einfweiter],[data-einfstandort]").focus();
   };
   el.addEventListener("click", e => {
     if (e.target.closest("[data-einfstandort]")) return fertig(true);
+    if (e.target.closest("[data-einfohne]")) return fertig(false);
     if (e.target.closest("[data-einfweg]")) return fertig();
     if (e.target.closest("[data-einfweiter]")) {
       if (i === EINF_SEITEN.length - 1) return fertig();
@@ -2476,6 +2486,7 @@ function ansichtListe(nurListe){
   const ueberschrift = Z.suche.trim() ? `${zahl} Treffer für „${Z.suche.trim()}“`
     : Z.bereich ? `${zahl} ${plaetze} im Kartenausschnitt`
     : Z.maxKm ? `${zahl} ${plaetze} bis ${Z.maxKm} km`
+    : Z.laedtNoch ? `${zahl} ${plaetze} in der Umgebung`
     : `${zahl} ${plaetze} in Deutschland`;
   const filterTeile = [
     Z.sportart !== "alle" && Z.sportart,
@@ -2484,7 +2495,7 @@ function ansichtListe(nurListe){
   ].filter(Boolean);
   const gesamt = (DATEN.length - DOPPELT).toLocaleString("de-DE");
   const trefferInfo = `<div class="anzahl" role="status" aria-live="polite"><span class="anzahl-zahl">${esc(ueberschrift)}</span>${
-      Z.laedtNoch ? `<span class="anzahl-info">Plätze werden noch geladen, bisher ${gesamt} …</span>`
+      Z.laedtNoch ? `<span class="anzahl-info">Die Plätze in ganz Deutschland laden noch im Hintergrund …</span>`
       : filterTeile.length || Z.maxKm || Z.bereich || Z.suche.trim()
         ? `<span class="anzahl-info">von ${gesamt} insgesamt${filterTeile.length ? " · Filter: " + esc(filterTeile.join(", ")) : ""}
            <button class="inline-knopf" data-filterweg="1">Alle zeigen</button></span>`
@@ -3500,7 +3511,7 @@ function ausDb(r){
    -------------------------------------------------------------------------- */
 const LISTE_SPALTEN = "id,name,ort,lat,lon,sportarten,zugang,zeiten,bestaetigt_durch,"
                     + "untergrund,beleuchtung,zustand,verein,geprueft_am,freigegeben";
-const SPEICHER_ALTER_MIN = 15;
+const SPEICHER_ALTER_MIN = 24 * 60;   // ganz Deutschland sind gut 30 MB – höchstens einmal am Tag neu
 
 function speicherOeffnen(){
   return new Promise((ja, nein) => {
@@ -3582,14 +3593,64 @@ async function datenLaden(){
     if (frisch && !Z.admin) return;
   }
 
-  /* 2. Aus der Datenbank. Supabase liefert höchstens 1000 Zeilen pro
-     Anfrage – also erst zählen und dann mehrere Seiten gleichzeitig holen. */
+  /* 2. Erstbesuch: zuerst nur die Umgebung (ein paar tausend Plätze, in
+     ein bis zwei Sekunden da), danach ganz Deutschland im Hintergrund.
+     Früher kamen zuerst 6.000 zufällige Plätze aus ganz Deutschland – in
+     der eigenen Gegend war dann oft lange gar nichts zu sehen. */
+  if (!gespeichert) {
+    Z.laedtNoch = true;
+    const ok = await umgebungLaden(Z.position);
+    if (!ok) { Z.laedtNoch = false; fehler("Umgebung"); return; }
+  }
+  vollLaden(uebernehmen, !!gespeichert, fehler);   // läuft weiter, ohne den Start aufzuhalten
+}
+
+/* Plätze rund um einen Punkt holen (gut 20 km) und zu den gezeigten
+   dazunehmen. Läuft beim Start und noch einmal, sobald der echte Standort
+   da ist – solange ganz Deutschland noch lädt. */
+const UMGEBUNG_LAT = 0.2, UMGEBUNG_LON = 0.3;
+let UMGEBUNG_ZULETZT = null;
+async function umgebungLaden(pos){
+  if (!ECHT) return false;
+  if (UMGEBUNG_ZULETZT && entfernungKm(UMGEBUNG_ZULETZT, pos) < 5) return true;
+  UMGEBUNG_ZULETZT = { lat:pos.lat, lon:pos.lon };
+  const anfrage = von => db.from("orte").select(LISTE_SPALTEN)
+    .gte("lat", pos.lat - UMGEBUNG_LAT).lte("lat", pos.lat + UMGEBUNG_LAT)
+    .gte("lon", pos.lon - UMGEBUNG_LON).lte("lon", pos.lon + UMGEBUNG_LON)
+    .order("id").range(von, von + 999);
+  /* Erst drei Seiten gleichzeitig; weitere nur, wenn die letzte voll war.
+     Eine leere Seite ist für die Datenbank teuer (sie sucht bis zum Ende). */
+  let von = 0, runde = 3;
+  while (von < 10000) {
+    const antworten = await Promise.all(Array.from({ length: runde }, (_, i) => anfrage(von + i * 1000)));
+    if (antworten.some(a => a.error)) { console.error(antworten.find(a => a.error).error); return von > 0; }
+    dazuNehmen(antworten.flatMap(a => a.data || []));
+    if ((antworten[antworten.length - 1].data || []).length < 1000) break;
+    von += runde * 1000; runde = 2;
+  }
+  return true;
+}
+function dazuNehmen(zeilen){
+  if (!dazuNehmen.ausDb) { DATEN = []; dazuNehmen.ausDb = true; }   // Beispieldaten weg
+  const schon = new Set(DATEN.map(o => String(o.id)));
+  let neu = 0;
+  for (const z of zeilen) {
+    if (schon.has(String(z.id)) || !inDeutschland(z.lat, z.lon)) continue;
+    DATEN.push(ausDb(z)); schon.add(String(z.id)); neu++;
+  }
+  if (!neu) return;
+  doppelteMarkieren();
+  zeichne();
+}
+
+/* Ganz Deutschland: Supabase liefert höchstens 1000 Zeilen pro Anfrage –
+   also erst zählen und dann viele Seiten gleichzeitig holen. */
+async function vollLaden(uebernehmen, gespeichert, fehler){
   const { count, error: zaehlFehler } = await db.from("orte")
     .select("id", { count:"exact", head:true });
-  if (zaehlFehler) { if (!gespeichert) fehler(zaehlFehler); return; }
+  if (zaehlFehler) { Z.laedtNoch = false; if (!gespeichert) fehler(zaehlFehler); zeichne(); return; }
 
-  const SEITE = 1000, GLEICHZEITIG = 6;
-  Z.laedtNoch = !gespeichert;   // erst die ersten Seiten da: Anzahl ist vorläufig
+  const SEITE = 1000, GLEICHZEITIG = 10;
   const anfaenge = [];
   for (let von = 0; von < (count || 0) + SEITE; von += SEITE) anfaenge.push(von);
   const alle = [];
@@ -3597,11 +3658,9 @@ async function datenLaden(){
     const antworten = await Promise.all(anfaenge.slice(i, i + GLEICHZEITIG).map(von =>
       db.from("orte").select(LISTE_SPALTEN).order("id").range(von, von + SEITE - 1)));
     for (const { data, error } of antworten) {
-      if (error) { Z.laedtNoch = false; if (!gespeichert) fehler(error); return; }
+      if (error) { Z.laedtNoch = false; if (!gespeichert) fehler(error); zeichne(); return; }
       alle.push(...data);
     }
-    /* Beim allerersten Laden schon zwischendurch zeigen. */
-    if (!gespeichert && i === 0 && alle.length) { uebernehmen([...alle]); zeichne(); }
   }
 
   Z.laedtNoch = false;
@@ -3614,6 +3673,7 @@ async function datenLaden(){
   VORSCHLAEGE = [];
   if (Z.admin) await Promise.all([vorschlaegeLaden(), fehlerLaden(), pruefungLaden()]);
   zeichne();
+  markerZeichnen();
 }
 
 /* Offene Fehlermeldungen. Lesen darf die Tabelle nur der Admin (RLS);
@@ -3825,7 +3885,7 @@ function hierEinchecken(id){
     zaehle("checkins", id);
   },
   () => melde("Ohne Standort geht Einchecken nicht. Erlaube ihn in den Einstellungen."),
-  { enableHighAccuracy:true, timeout:10000, maximumAge:30000 });
+  { enableHighAccuracy:true, timeout:45000, maximumAge:30000 });
 }
 
 async function hierAuschecken(){
@@ -6157,31 +6217,66 @@ function hierPunktSetzen(){
       melde("Position gesetzt.");
     },
     () => melde("Standort nicht freigegeben. Tippe stattdessen auf die Karte."),
-    { enableHighAccuracy:true, timeout:10000 });
+    { enableHighAccuracy:true, timeout:45000 });
 }
 
-function standortHolen(){
+/* Standort einmal holen – robust. getCurrentPosition gibt nach seiner
+   Frist auf, und in der iPhone-App läuft diese Frist schon, während der
+   iOS-Dialog "Standort erlauben" noch offen ist. Wer dann erlaubt, bekam
+   nie einen Standort, und die App rechnete weiter ab München-Mitte.
+   watchPosition wartet dagegen, bis der Standort wirklich da ist. */
+function standortEinmal(ok, fehler, frist = 60000){
+  if (!navigator.geolocation) return fehler && fehler({ code:2 });
+  let fertig = false, id = null;
+  const ende = () => { fertig = true; clearTimeout(uhr);
+    if (id !== null) try { navigator.geolocation.clearWatch(id); } catch {} };
+  const uhr = setTimeout(() => { if (!fertig) { ende(); fehler && fehler({ code:3 }); } }, frist);
+  id = navigator.geolocation.watchPosition(
+    p => { if (fertig) return; ende(); ok(p); },
+    e => { if (fertig || e.code !== 1) return; ende(); fehler && fehler(e); },   // nur "verweigert" ist endgültig
+    { enableHighAccuracy:false, maximumAge:300000 });
+}
+
+/* Echter Standort ist da: Bezugspunkt, Punkt auf der Karte, Liste. */
+function standortUebernehmen(p){
+  try { localStorage.removeItem("platzfrei.ohnestandort"); } catch {}
+  Z.position = { lat:p.coords.latitude, lon:p.coords.longitude };
+  Z.positionEcht = true;
+  if (Z.startpunkt) {
+    Z.startpunkt = null;
+    try { localStorage.removeItem(STARTPUNKT_SCHLUESSEL); } catch {}
+  }
+  Z.startpunktOffen = false;
+  Z.bereich = null;
+  if (ichMarker) karte.removeLayer(ichMarker);
+  ichMarker = L.circleMarker([Z.position.lat, Z.position.lon], {
+    radius:7, color:"#fff", weight:2.5, fillColor:"#2E6BE0", fillOpacity:1
+  }).addTo(karte);
+  if (Z.laedtNoch) umgebungLaden(Z.position);
+  zeichne();
+  wetterLaden();
+}
+
+/* Gibt jemand den Standort frei – egal über welchen Dialog –, übernehmen
+   wir ihn sofort. */
+navigator.permissions?.query({ name:"geolocation" }).then(r => {
+  r.onchange = () => { if (r.state === "granted" && !Z.positionEcht) standortHolen(true); };
+}).catch(() => {});
+
+function standortHolen(erzwingen){
   if (!navigator.geolocation) return;
-  navigator.geolocation.getCurrentPosition(
+  standortEinmal(
     p => {
-      if (Z.startpunkt) return;   // selbst gewählter Startpunkt hat Vorrang
-      Z.position = { lat:p.coords.latitude, lon:p.coords.longitude };
-      Z.positionEcht = true;
-      if (ichMarker) karte.removeLayer(ichMarker);
-      ichMarker = L.circleMarker([Z.position.lat, Z.position.lon], {
-        radius:7, color:"#fff", weight:2.5, fillColor:"#2E6BE0", fillOpacity:1
-      }).addTo(karte);
+      if (Z.startpunkt && !erzwingen) return;   // selbst gewählter Startpunkt hat Vorrang
+      standortUebernehmen(p);
       /* Karte beim Start direkt am eigenen Standort öffnen – außer man hat
          sie inzwischen selbst bewegt oder ein geteilter Platz ist offen. */
       if (karteUnberuehrt && !Z.auswahlId) {
         mitteBeimZeichnen = L.latLng(Z.position.lat, Z.position.lon);   // kein "In diesem Bereich suchen"
         karte.setView(mitteBeimZeichnen, 15);
       }
-      zeichne();
-      wetterLaden();   // jetzt mit der echten Position
     },
-    () => {},   // kein Standort: München-Mitte bleibt der Bezugspunkt
-    { timeout:10000, maximumAge:300000 }
+    () => {}    // kein Standort: München-Mitte bleibt der Bezugspunkt
   );
 }
 
@@ -6189,25 +6284,17 @@ function standortHolen(){
    nach der Freigabe, falls das beim Start noch nicht passiert ist. */
 function zuMeinemStandort(){
   if (!navigator.geolocation) return melde("Dein Browser kann keinen Standort bestimmen.");
-  navigator.geolocation.getCurrentPosition(
+  if (!Z.positionEcht) melde("Standort wird gesucht …");
+  standortEinmal(
     p => {
       const neu = !Z.positionEcht;
-      Z.position = { lat:p.coords.latitude, lon:p.coords.longitude };
-      Z.positionEcht = true;
-      if (Z.startpunkt) {
-        Z.startpunkt = null;
-        try { localStorage.removeItem(STARTPUNKT_SCHLUESSEL); } catch {}
-      }
-      Z.startpunktOffen = false;
-      if (ichMarker) karte.removeLayer(ichMarker);
-      ichMarker = L.circleMarker([Z.position.lat, Z.position.lon], {
-        radius:7, color:"#fff", weight:2.5, fillColor:"#2E6BE0", fillOpacity:1
-      }).addTo(karte);
+      standortUebernehmen(p);
       karte.flyTo([Z.position.lat, Z.position.lon], Math.max(karte.getZoom(), 15), { duration:.6 });
-      if (neu) { zeichne(); wetterLaden(); melde("Entfernungen jetzt ab deinem Standort."); }
+      if (neu) melde("Entfernungen jetzt ab deinem Standort.");
     },
-    () => melde("Standort nicht freigegeben. Erlaube ihn in den Browser-Einstellungen."),
-    { enableHighAccuracy:true, timeout:10000, maximumAge:30000 }
+    e => melde(e.code === 1
+      ? "Standort nicht freigegeben. Erlaube ihn in den Einstellungen deines Browsers oder Handys."
+      : "Standort gerade nicht gefunden. Versuch es gleich noch einmal.")
   );
 }
 
@@ -6334,7 +6421,12 @@ function standortStart(){
   if (Z.startpunkt) return;
   let einfGesehen = false;
   try { einfGesehen = !!localStorage.getItem(EINF_SCHLUESSEL); } catch {}
-  if (window.webkit?.messageHandlers && einfGesehen) return standortHolen();
+  let nein = false;
+  try { nein = !!localStorage.getItem("platzfrei.ohnestandort"); } catch {}
+  /* Wer die Einführung kennt und nicht "Ohne Standort" gewählt hat, bekommt
+     beim Start sofort seinen Standort (Safari fragt dabei je nach
+     Einstellung noch einmal nach). */
+  if (einfGesehen && !nein) return standortHolen();
   navigator.permissions?.query({ name:"geolocation" })
     .then(r => { if (r.state === "granted") standortHolen(); }).catch(() => {});
 }
