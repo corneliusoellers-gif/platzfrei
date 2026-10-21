@@ -428,6 +428,9 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
   justify-content:center;padding:16px;font-family:var(--schrift)}
 .einf-karte{background:var(--flaeche);color:var(--tinte);border-radius:24px;max-width:380px;width:100%;
   padding:30px 24px 20px;box-shadow:var(--schatten-hoch);text-align:center;position:relative}
+.frage-knoepfe{display:grid;gap:8px;margin-top:18px}
+.frage-knoepfe .knopf{width:100%;margin:0}
+.frage-klein{display:block;margin-top:12px;font-size:12.5px;color:var(--tinte-3)}
 .einf-weg{position:absolute;top:12px;right:14px;border:0;background:none;color:var(--tinte-3);font:inherit;
   font-size:14px;cursor:pointer;padding:6px}
 .einf-bild{font-size:54px;line-height:1;height:84px;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
@@ -2832,7 +2835,7 @@ function liveBlock(o){
     : `<span><b>Bist du gerade hier?</b><small>Zeig anderen, dass hier gespielt wird. Anonym, ohne Namen, gilt 2 Stunden.</small></span>`;
   return `<div class="live-kasten">
       <span class="live-text">${n >= 2 || ich ? `<span class="puls" aria-hidden="true"></span>` : ``}${text}</span>
-      ${ich ? `<button class="inline-knopf" data-hierweg="1">Wieder weg</button>`
+      ${ich ? `${!belegt(o) && !BESTAETIGT.has(o.id) ? `<button class="inline-knopf" data-frage="${o.id}">Darf man hier spielen?</button>` : ``}<button class="inline-knopf" data-hierweg="1">Wieder weg</button>`
             : `<button class="inline-knopf" data-hier="${o.id}">${n >= 2 ? "Ich bin auch hier" : "Ich bin gerade hier"}</button>`}
     </div>`;
 }
@@ -3894,6 +3897,7 @@ function hierEinchecken(id){
     zeichne();
     melde("Eingecheckt für 2 Stunden. Viel Spaß!");
     zaehle("checkins", id);
+    zugangFragen(id);
   },
   () => melde("Ohne Standort geht Einchecken nicht. Erlaube ihn in den Einstellungen."),
   { enableHighAccuracy:true, timeout:45000, maximumAge:30000 });
@@ -3962,6 +3966,95 @@ async function alsGepruefT(id){
   if (neu) zaehle(null);   // Platzprüfer zählt BESTAETIGT direkt
 }
 
+/* Nach dem Check-in kurz fragen: Darf man hier spielen? Wer gerade am
+   Platz steht (der Server hat die 300 m geprüft), weiß es am besten.
+   "Ja" zählt wie "Hier gespielt", "Nein" wird zur Meldung oder zum
+   Schildfoto, "Weiß nicht" schließt nur. Pro Platz und Gerät nur einmal,
+   und nie bei Plätzen mit amtlichem Beleg. Ändert den Zugang nie direkt. */
+const GEFRAGT_SCHLUESSEL = "platzfrei.gefragt";
+function schonGefragt(id){
+  try { return (JSON.parse(localStorage.getItem(GEFRAGT_SCHLUESSEL) || "[]")).includes(String(id)); }
+  catch { return false; }
+}
+function gefragtMerken(id){
+  try {
+    const l = JSON.parse(localStorage.getItem(GEFRAGT_SCHLUESSEL) || "[]");
+    if (!l.includes(String(id))) l.push(String(id));
+    localStorage.setItem(GEFRAGT_SCHLUESSEL, JSON.stringify(l.slice(-500)));
+  } catch {}
+}
+function zugangFragen(id, immer){
+  const o = ort(id);
+  if (!o) return;
+  if (!immer && (belegt(o) || BESTAETIGT.has(o.id) || schonGefragt(o.id))) return;
+  document.querySelector(".einf")?.remove();
+  const el = document.createElement("div");
+  el.className = "einf";
+  el.setAttribute("role", "dialog");
+  el.setAttribute("aria-modal", "true");
+  el.setAttribute("aria-label", "Darf man hier spielen?");
+  const zu = () => { el.remove(); document.removeEventListener("keydown", taste); };
+  const taste = e => { if (e.key === "Escape") { gefragtMerken(o.id); zu(); } };
+  const st = zugangStufe(o);
+  const schritt1 = () => {
+    el.innerHTML = `<div class="einf-karte">
+        <button class="einf-weg" data-fweg="1">Später</button>
+        <div class="einf-bild">⚽️</div>
+        <h2>Darf man hier spielen?</h2>
+        <p>Du bist gerade bei <b>${esc(o.name)}</b>. Bisher steht dort:
+          ${st.icon} ${esc(st.titel)}. Deine Antwort hilft allen, die nach dir kommen.</p>
+        <div class="frage-knoepfe">
+          <button class="knopf" data-fja="1">Ja, hier darf man spielen</button>
+          <button class="knopf zweit" data-fnein="1">Nein, eher nicht</button>
+          <button class="knopf zweit" data-fweiss="1">Weiß ich nicht</button>
+        </div>
+        <label class="frage-klein"><input type="file" accept="image/*" hidden data-ffoto="1">
+          <span class="inline-knopf" tabindex="0" role="button">📷 Schild mit den Regeln fotografieren</span></label>
+        <small class="frage-klein">Anonym, ohne Namen. Bitte nur das Schild fotografieren, keine Personen.</small>
+      </div>`;
+    el.querySelector("[data-fja]").focus();
+  };
+  const schritt2 = () => {
+    el.innerHTML = `<div class="einf-karte">
+        <button class="einf-weg" data-fweg="1">Schließen</button>
+        <div class="einf-bild">✋</div>
+        <h2>Was spricht dagegen?</h2>
+        <p>Wir prüfen den Platz. Der Zugang ändert sich erst, wenn wir einen Beleg haben.</p>
+        <div class="frage-knoepfe">
+          <label class="knopf"><input type="file" accept="image/*" hidden data-ffoto="1">📷 Ein Schild verbietet es</label>
+          <button class="knopf zweit" data-fgrund="weggeschickt">Ich wurde weggeschickt</button>
+          <button class="knopf zweit" data-fgrund="abgesperrt">Tor ist zu oder abgesperrt</button>
+          <button class="knopf zweit" data-fweiss="1">Nur so ein Gefühl</button>
+        </div>
+      </div>`;
+  };
+  el.addEventListener("click", e => {
+    if (e.target.closest("[data-fja]"))   { gefragtMerken(o.id); zu(); return alsGepruefT(o.id); }
+    if (e.target.closest("[data-fnein]")) { gefragtMerken(o.id); return schritt2(); }
+    const g = e.target.closest("[data-fgrund]");
+    if (g) { zu(); return meldungAbgeben(g.dataset.fgrund, o.id); }
+    if (e.target.closest("[data-fweiss],[data-fweg]")) {
+      gefragtMerken(o.id); zu();
+      if (e.target.closest("[data-fweiss]")) melde("Kein Problem – danke fürs Einchecken.");
+      return;
+    }
+    if (e.target === el) { gefragtMerken(o.id); zu(); }
+  });
+  el.addEventListener("keydown", e => {
+    if ((e.key === "Enter" || e.key === " ") && e.target.matches(".frage-klein [role=button]")) {
+      e.preventDefault(); el.querySelector("[data-ffoto]").click();
+    }
+  });
+  el.addEventListener("change", e => {
+    if (!e.target.matches("[data-ffoto]") || !e.target.files?.[0]) return;
+    gefragtMerken(o.id); zu();
+    schildHochladen(e.target.files[0], o.id);
+  });
+  document.addEventListener("keydown", taste);
+  document.body.appendChild(el);
+  schritt1();
+}
+
 /* Export bleibt als Sicherheitsnetz: alles als JSON herunterladen. */
 async function exportieren(){
   if (!Z.admin) return;
@@ -4027,8 +4120,8 @@ async function korrekturSenden(art){
   melde("Danke! Wir prüfen das.");
 }
 
-async function meldungAbgeben(grund){
-  const o = ort(Z.auswahlId);
+async function meldungAbgeben(grund, id){
+  const o = ort(id ?? Z.auswahlId);
   if (!o) return;
 
   if (ECHT) {
@@ -4039,7 +4132,7 @@ async function meldungAbgeben(grund){
   eigeneMeldungMerken(o.id, { weggeschickt:"Ich wurde weggeschickt", abgesperrt:"Tor war zu",
     belegt:"Platz war belegt", "existiert nicht mehr":"Gibt es nicht mehr" }[grund] || grund);
 
-  Z.ansicht = "detail";
+  if (id == null || Z.ansicht === "melden") Z.ansicht = "detail";
   zeichne();
   melde("Danke – die Meldung ist angekommen.");
 }
@@ -4114,8 +4207,8 @@ async function bildVerkleinern(datei, maxPx = 1600, qualitaet = 0.82){
     c.toBlob(blob => blob ? ok(blob) : fehler(new Error("leer")), "image/jpeg", qualitaet));
 }
 
-async function schildHochladen(datei){
-  const o = ort(Z.auswahlId);
+async function schildHochladen(datei, id){
+  const o = ort(id ?? Z.auswahlId);
   if (!o || !datei) return;
   if (!datei.type.startsWith("image/")) return melde("Bitte ein Foto auswählen.");
 
@@ -6033,7 +6126,7 @@ document.addEventListener("click", e=>{
                              "[data-nurlicht],[data-belegt],[data-sortierung],[data-bereich],[data-mehr],"+
                              "[data-schildok],[data-schildweg],[data-loeschen],[data-fehlersenden],[data-fehlererledigt],"+
                              "[data-suchweg],[data-teilen],[data-abmelden],[data-hierpunkt],[data-vereinszeitensenden],"+
-                             "[data-neuok],[data-neuweg],[data-vzok],[data-vzweg],[data-hier],[data-hierweg],"+
+                             "[data-neuok],[data-neuweg],[data-vzok],[data-vzweg],[data-hier],[data-hierweg],[data-frage],"+
                              "[data-jetzt],[data-einfuehrung],[data-ausltag],[data-zusage],[data-spielweg],[data-spielform],[data-spielansetzen],[data-tipp],[data-tippsoffen],[data-osmladen],[data-osmstop],"+
                              "[data-startpunkt],[data-standort],[data-losscroll],[data-losalle],[data-filterweg],[data-korrektur],[data-modus]");
   if (!t) return;
@@ -6070,6 +6163,7 @@ document.addEventListener("click", e=>{
     return; }
   if (t.dataset.hierpunkt)  { return hierPunktSetzen(); }
   if (t.dataset.hier)       { return hierEinchecken(t.dataset.hier); }
+  if (t.dataset.frage)      { return zugangFragen(t.dataset.frage, true); }
   if (t.dataset.hierweg)    { return hierAuschecken(); }
   if (t.dataset.zusage)     { return spielZusagen(t.dataset.zusage); }
   if (t.dataset.spielweg)   { return spielLoeschen(t.dataset.spielweg); }
