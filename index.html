@@ -3293,7 +3293,7 @@ async function neuenOrtPruefen(id, annehmen){
     if (error) { console.error(error); return melde("Abgelehnt: " + error.message); }
     if (annehmen && data) {
       const { data:zeile } = await db.from("orte").select("*").eq("id", data).single();
-      if (zeile) DATEN.push(ausDb(zeile));
+      if (zeile) { DATEN.push(ausDb(zeile)); doppelteMarkieren(); speicherVeraltet(); }
     }
   }
   NEUE_ORTE = NEUE_ORTE.filter(n => String(n.id) !== String(id));
@@ -3622,7 +3622,7 @@ async function datenLaden(){
     uebernehmen(gespeichert.zeilen, true);
     zeichne();
     const frisch = Date.now() - gespeichert.zeit < SPEICHER_ALTER_MIN * 60000;
-    if (frisch && !Z.admin) return;
+    if (frisch && !Z.admin) return neueSeitSpeicher(gespeichert.zeit);
   }
 
   /* 2. Erstbesuch: zuerst nur die Umgebung (ein paar tausend Plätze, in
@@ -3635,6 +3635,27 @@ async function datenLaden(){
     if (!ok) { Z.laedtNoch = false; fehler("Umgebung"); return; }
   }
   vollLaden(uebernehmen, !!gespeichert, fehler);   // läuft weiter, ohne den Start aufzuhalten
+}
+
+/* Der Gerätespeicher wird nur einmal am Tag ganz erneuert. Damit neu
+   angenommene oder geänderte Plätze trotzdem gleich zu sehen sind, holen wir
+   beim Start alles nach, was seit dem Speichern geprüft wurde (geprueft_am). */
+async function neueSeitSpeicher(zeit){
+  const ab = new Date(zeit - 86400000).toISOString().slice(0,10);
+  const { data, error } = await db.from("orte").select(LISTE_SPALTEN)
+    .gte("geprueft_am", ab).order("id").limit(2000);
+  if (error) { console.error(error); return; }
+  if (!data?.length) return;
+  const frisch = new Map(data.filter(z => inDeutschland(z.lat, z.lon)).map(z => [String(z.id), z]));
+  DATEN = DATEN.map(o => {
+    const z = frisch.get(String(o.id));
+    if (!z) return o;
+    frisch.delete(String(o.id));
+    return o._voll ? o : ausDb(z);
+  });
+  for (const z of frisch.values()) DATEN.push(ausDb(z));
+  doppelteMarkieren();
+  zeichne();
 }
 
 /* Plätze rund um einen Punkt holen (gut 20 km) und zu den gezeigten
@@ -3867,9 +3888,9 @@ async function neuSpeichern(){
     umzaeunt: "nein",
     beleuchtung: "nein",
     zustand: 3,
-    notizen: Z.admin ? "" : "Von einem Nutzer eingetragen, noch nicht vor Ort geprüft.",
+    notizen: "",
     geprueft_am: heute(),
-    freigegeben: false          // immer erst in die Prüfung, auch bei Admins
+    freigegeben: true           // hier kommt nur der Admin an – er ist selbst die Prüfung
   };
 
   if (ECHT) {
@@ -3889,7 +3910,7 @@ async function neuSpeichern(){
   Z.neuerPunkt = null; Z.neuEntwurf = null;
   Z.ansicht = "liste";
   zeichne();
-  melde("Danke – der Ort geht in die Prüfung.");
+  melde("Gespeichert – der Platz ist jetzt für alle auf der Karte.");
 }
 
 /* "Ich bin gerade hier": Standort holen, die Datenbank prüft den Abstand. */
