@@ -1056,6 +1056,7 @@ header h1 .pf-marke{height:30px;width:auto}
     <button data-gehe="liste" data-nav="liste">Karte</button>
     <button data-gehe="ueber" data-nav="ueber">Über Platzfrei</button>
     <button data-gehe="vereine" data-nav="vereine">Für Vereine</button>
+    <button data-gehe="partner" data-nav="partner">Für Partner</button>
   </nav>
   <span class="kopfnotiz" id="kopfnotiz">Version 0.1</span>
   <button class="thema-knopf" data-thema="1"></button>
@@ -1076,6 +1077,7 @@ header h1 .pf-marke{height:30px;width:auto}
 <button id="zur-karte" type="button" data-modus="karte">🗺 Karte</button>
 
 <script>
+const VOLLSEITEN = ["ueber", "vereine", "partner"];
 /* ==========================================================================
    0. KONFIGURATION
    --------------------------------------------------------------------------
@@ -2501,7 +2503,7 @@ function ansichtListe(nurListe){
       <button class="abzeichen-link" data-einfuehrung="1">ⓘ Was bedeuten die Symbole?</button>
       <button class="abzeichen-link" data-gehe="abzeichen">🏅 Meine Abzeichen · ${abzeichenErreicht().length} von ${ABZEICHEN.length}</button>
       <div class="rechtliches-link">
-        <button data-gehe="ueber">Über Platzfrei</button> · <button data-gehe="vereine">Für Vereine</button><br>
+        <button data-gehe="ueber">Über Platzfrei</button> · <button data-gehe="vereine">Für Vereine</button> · <button data-gehe="partner">Für Partner</button><br>
         Alle Angaben ohne Gewähr – vor Ort gilt das Schild.<br>
         <button data-gehe="rechtliches">Impressum &amp; Datenschutz</button> ·
         <button data-gehe="fehler">Fehler melden</button></div>
@@ -3382,19 +3384,19 @@ function zeichne(){
   leiste.replaceChildren();
   const klasseVorher = document.body.className;
   document.body.classList.toggle("mit-leiste", Z.ansicht === "liste");
-  document.body.classList.toggle("vollseite", Z.ansicht === "ueber" || Z.ansicht === "vereine"
+  document.body.classList.toggle("vollseite", VOLLSEITEN.includes(Z.ansicht)
     || (Z.nurListe && breit.matches));
   document.body.classList.toggle("nurliste", !!Z.nurListe && breit.matches);
   document.querySelectorAll("[data-modus]").forEach(b =>
     b.setAttribute("aria-pressed", String((b.dataset.modus === "liste") === !!Z.nurListe)));
   document.querySelectorAll("[data-nav]").forEach(b =>
-    b.toggleAttribute("aria-current", b.dataset.nav === (Z.ansicht === "vereine" || Z.ansicht === "ueber" ? Z.ansicht : "liste")));
+    b.toggleAttribute("aria-current", b.dataset.nav === (VOLLSEITEN.includes(Z.ansicht) ? Z.ansicht : "liste")));
   if (document.body.className !== klasseVorher) setTimeout(() => karte.invalidateSize(), 0);
 
   ({ liste:ansichtListe, detail:ansichtDetail, bearbeiten:ansichtBearbeiten,
      neu:ansichtNeu, anmelden:ansichtAnmelden, importieren:ansichtImportieren,
      melden:ansichtMelden, rechtliches:ansichtRechtliches, vereinszeiten:ansichtVereinszeiten, pruefen:ansichtPruefen, fehler:ansichtFehler, fehlerliste:ansichtFehlerliste, abzeichen:ansichtAbzeichen,
-     ueber:ansichtUeber, vereine:ansichtVereine })[Z.ansicht]();
+     ueber:ansichtUeber, vereine:ansichtVereine, partner:ansichtPartner })[Z.ansicht]();
 
   /* §11 Nur transform und opacity bewegen – beides läuft im Compositor,
      ohne dass der Browser das Layout neu rechnen muss. */
@@ -4387,6 +4389,7 @@ async function teilen(id){
   catch { prompt("Link zum Platz:", url); }
 }
 function platzAusAdresse(){
+  if (location.hash === "#partner") { Z.ansicht = "partner"; zeichne(); sheet.aufmachen(); return; }
   const m = location.hash.match(/^#platz=(.+)$/);
   if (!m) return;
   const o = ort(decodeURIComponent(m[1]));
@@ -5422,6 +5425,69 @@ function ansichtVereine(){
     </div>`;
 }
 
+function ansichtPartner(){
+  const z = kennzahlen();
+  const mail = `mailto:${esc(RECHT.email)}?subject=Partnerschaft%20mit%20Platzfrei`;
+  seite.innerHTML = `
+    <div class="rolle">
+      <div class="held">
+        <div class="ueber-marke">Für Partner</div>
+        <h2>Mehr Kinder auf den Platz. <em>Gemeinsam.</em></h2>
+        <p>Viele Kinder werden vom Platz geschickt und hören irgendwann auf zu suchen.
+        Platzfrei zeigt ihnen, wo sie frei spielen dürfen und wann. Damit das überall
+        klappt, suchen wir Partner aus Sport, Jugendarbeit, Förderung und Handel.</p>
+        <div class="reihe">
+          <a class="knopf" href="${mail}">Partner werden</a>
+          <button class="knopf zweit" data-gehe="liste">App ansehen</button>
+        </div>
+      </div>
+      <div class="ueber-teil">
+        <div class="zahlen">
+          <div class="zahl"><b>${zahlText(z.plaetze)}</b><small>Plätze in ganz Deutschland</small></div>
+          <div class="zahl gruen"><b>${zahlText(z.frei)}</b><small>davon frei zugänglich</small></div>
+          <div class="zahl"><b>${zahlText(z.gemeinden)}</b><small>Gemeinden haben ihre Plätze bestätigt</small></div>
+          <div class="zahl"><b>${zahlText(z.sportarten)}</b><small>Sportarten</small></div>
+        </div>
+      </div>
+      <div class="ueber-teil">
+        <h3>Warum Platzfrei</h3>
+        <p>Ich bin Cornelius, war Jugendtrainer und habe als Jugendlicher selbst erlebt,
+        wie man vom Bolzplatz geschickt wird. Platzfrei habe ich neben Schule, Training
+        und Trainerdasein gebaut, heute studiere ich Sportökonomie in Bayreuth.
+        Die App ist kostenlos, zeigt keine Werbung und ist sicher für Kinder:
+        kein Chat, keine Profile, keine Direktnachrichten.</p>
+      </div>
+      <div class="ueber-teil">
+        <h3>So können wir zusammenarbeiten</h3>
+        <div class="schritte">
+          <div class="schritt"><span class="nr">1</span><b>Jugendarbeit und Verbände</b>
+            <p>Teilt Platzfrei mit euren Vereinen, Treffs und Trainern. Gemeinsam bestätigen wir Plätze und Zeiten in eurer Region.</p></div>
+          <div class="schritt"><span class="nr">2</span><b>Stiftungen und Krankenkassen</b>
+            <p>Fördert ein Projekt für mehr Bewegung im Alltag: freie Plätze sichtbar machen, Gemeinden einbinden, Kinder aktiv halten.</p></div>
+          <div class="schritt"><span class="nr">3</span><b>Marken und Händler</b>
+            <p>Gemeinsame Aktionen wie „Platz des Monats“ oder Gewinnspiele. Keine Werbebanner in der App, dafür eure Nennung hier und bei der Aktion.</p></div>
+          <div class="schritt"><span class="nr">4</span><b>Plattformen und offene Daten</b>
+            <p>Wir tauschen Daten aus, verlinken uns gegenseitig und melden Korrekturen an OpenStreetMap zurück.</p></div>
+          <div class="schritt"><span class="nr">5</span><b>Schulen und Hochschulen</b>
+            <p>Schulhof-Zeiten auf die Karte bringen, Platzfrei als Praxis- oder Studienprojekt nutzen.</p></div>
+        </div>
+      </div>
+      <div class="ueber-teil">
+        <h3>Was Partner bekommen</h3>
+        <div class="abschnitt"><p>Eure Nennung auf dieser Seite und bei gemeinsamen Aktionen.<br>
+          Eine Übersicht, wo in eurer Region Plätze fehlen oder ungeklärt sind.<br>
+          Gemeinsame Beiträge auf Instagram und in euren Kanälen.<br>
+          Einen direkten Draht: Wünsche und Ideen setze ich schnell um.</p></div>
+      </div>
+      <div class="ueber-teil">
+        <h3>Kontakt</h3>
+        <p>Schreib mir an <a href="${mail}">${esc(RECHT.email)}</a>. Ein kurzer Satz reicht,
+        ich melde mich schnell zurück.</p>
+      </div>
+      ${ueberFuss()}
+    </div>`;
+}
+
 function ansichtRechtliches(){
   const r = RECHT;
   seite.innerHTML = `
@@ -6274,7 +6340,7 @@ document.addEventListener("click", e=>{
       if (feld) { feld.scrollIntoView({ block:"center" }); feld.focus(); }
       sheet.aufmachen();
     }
-    if (Z.ansicht === "ueber" || Z.ansicht === "vereine") {
+    if (VOLLSEITEN.includes(Z.ansicht)) {
       seite.querySelector(".rolle")?.scrollTo(0, 0);
       sheet.aufmachen();
     }
@@ -6596,7 +6662,7 @@ karte.on("dragstart", () => sheet.klein());
 adminAdresseOeffnen();
 
 (async function start(){
-  einfuehrungZeigen();
+  if (location.hash !== "#partner") einfuehrungZeigen();
   await adminPruefen();
   await datenLaden();
   platzAusAdresse();
