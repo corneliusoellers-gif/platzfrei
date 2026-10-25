@@ -1007,16 +1007,34 @@ header h1 .pf-marke{height:30px;width:auto}
   background:var(--absprache-bg);color:var(--tinte);font-size:13.5px}
 .gemeldet small{color:var(--tinte-2);font-size:12.5px;margin-top:4px}
 @media (max-width:880px){ .gemeldet{margin-left:0;margin-right:0} }
-@media (max-width:880px){ .blatt-hoch .modus-knopf{visibility:hidden} }
+/* Handy, Blatt weit offen: Kartenknöpfe würden hinter dem Blatt hervorschauen
+   oder Standort/Plus nach oben über die anderen Knöpfe schieben – ausblenden. */
+@media (max-width:880px){
+  .leaflet-control-container .leaflet-top,.leaflet-control-container .leaflet-bottom,
+  .bereich-knopf,.los-pille{transition:opacity 160ms var(--feder-schnell)}
+  .blatt-hoch .leaflet-control-container .leaflet-top,
+  .blatt-mittel .leaflet-control-container .leaflet-bottom,
+  .blatt-hoch .bereich-knopf,.blatt-hoch .los-pille{opacity:0;pointer-events:none}
+  .blatt-hoch .leaflet-control-container .leaflet-top *,
+  .blatt-mittel .leaflet-control-container .leaflet-bottom *{pointer-events:none!important}
+  /* "In diesem Bereich suchen" unter den Umschalter Karte/Liste, nicht dahinter */
+  .bereich-knopf{top:calc(66px + env(safe-area-inset-top,0px));white-space:nowrap}
+  .los-pille{top:calc(66px + env(safe-area-inset-top,0px))}
+  .bereich-knopf:not([hidden]) ~ .los-pille{top:calc(114px + env(safe-area-inset-top,0px))}
+}
 /* Zurück zur Karte: schwebt immer sichtbar, solange die Liste die Karte verdeckt */
 #zur-karte{display:none;position:fixed;left:50%;transform:translateX(-50%);z-index:900;
   bottom:calc(20px + env(safe-area-inset-bottom,0px));align-items:center;gap:6px;
   border:0;border-radius:var(--r-pille);padding:12px 20px;font:inherit;font-size:15px;font-weight:650;
   background:var(--tinte);color:var(--grund);box-shadow:var(--schatten-hoch);cursor:pointer}
 #zur-karte:focus-visible{outline:3px solid var(--gruen);outline-offset:2px}
-@media (max-width:880px){ .blatt-hoch #zur-karte{display:flex} }
+/* Handy: "Karte" sitzt rechts in der Griffzeile des Blatts statt über der Liste */
+@media (max-width:880px){
+  .blatt-hoch #zur-karte{display:flex;left:auto;right:14px;transform:none;
+    bottom:calc(var(--blatt-sichtbar, 90vh) - 32px);padding:5px 12px;font-size:13px;
+    background:var(--gruen);color:#fff;box-shadow:0 1px 4px rgba(15,26,21,.2)}
+}
 @media (min-width:881px){ body.nurliste #zur-karte{display:flex;bottom:150px} }
-@media (max-width:880px){ .blatt-hoch .listenende{padding-bottom:80px} }
 .rolle .los{margin:2px 0 12px}
 .rolle .los .los-titel{margin:0 0 8px}
 .los-zeilen{margin-bottom:0}
@@ -5880,6 +5898,14 @@ const sheet = (function(){
     d.remove();
     return h;
   })();
+  const sicherOben = (() => {         // Notch / Statusleiste in der App
+    const d = document.createElement("div");
+    d.style.cssText = "position:fixed;top:0;padding-top:env(safe-area-inset-top,0px);visibility:hidden";
+    document.body.appendChild(d);
+    const h = parseFloat(getComputedStyle(d).paddingTop) || 0;
+    d.remove();
+    return h;
+  })();
   const untersteRaste = () => {
     RASTEN[0] = Math.min(0.2, (92 + sicherUnten) / window.innerHeight);
   };
@@ -5910,7 +5936,13 @@ const sheet = (function(){
     /* Für den Standort-Knopf, der auf dem Handy über dem Blatt schwebt. */
     document.documentElement.style.setProperty("--blatt-sichtbar", Math.max(0, HOEHE * vh() - y) + "px");
     /* Blatt fast ganz offen: Umschalter Karte/Liste wäre verdeckt. */
-    document.documentElement.classList.toggle("blatt-hoch", HOEHE * vh() - y > vh() * .72);
+    /* Reicht das Blatt an die Knöpfe oben auf der Karte heran, werden sie
+       ausgeblendet und "Karte" sitzt in der Kopfzeile des Blatts. Schon
+       etwas früher fallen Standort/Plus weg, weil sie über dem Blatt
+       schweben und sonst nach oben über die anderen Knöpfe rutschen. */
+    const blattOben = vh() - (HOEHE * vh() - y);
+    document.documentElement.classList.toggle("blatt-hoch", blattOben < 165 + sicherOben);
+    document.documentElement.classList.toggle("blatt-mittel", blattOben < 225 + sicherOben);
   }
 
   /* §9 Je weiter über den Rand, desto weniger folgt das Sheet. */
