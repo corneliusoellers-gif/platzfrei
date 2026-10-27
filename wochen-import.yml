@@ -1,0 +1,31 @@
+# Platzfrei: jede Woche neue Plätze aus OpenStreetMap holen und Doppelte
+# zusammenführen. Läuft montags um 5 Uhr (deutsche Zeit, ungefähr) und lässt
+# sich unter "Actions" → "Wöchentlicher Platz-Import" → "Run workflow" auch
+# von Hand starten.
+name: Wöchentlicher Platz-Import
+
+on:
+  schedule:
+    - cron: "0 4 * * 1"
+  workflow_dispatch:
+    inputs:
+      erzwingen:
+        description: "Auch importieren, wenn die Overture-Version schon drin ist"
+        type: boolean
+        default: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyarrow
+      - run: python import/wochen_import.py
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          ERZWINGEN: ${{ inputs.erzwingen }}
