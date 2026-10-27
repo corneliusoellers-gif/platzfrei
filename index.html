@@ -1117,7 +1117,7 @@ header h1 .pf-marke{height:30px;width:auto}
     <button data-gehe="vereine" data-nav="vereine">Für Vereine</button>
     <button data-gehe="partner" data-nav="partner">Für Partner</button>
   </nav>
-  <span class="kopfnotiz" id="kopfnotiz">Version 0.1</span>
+  <span class="kopfnotiz" id="kopfnotiz"></span>
   <button class="adminknopf" id="adminknopf" hidden>Abmelden</button>
 </header>
 
@@ -3650,8 +3650,8 @@ function zeichne(){
 
   const w = VORSCHLAEGE.length;
   document.getElementById("kopfnotiz").textContent =
-    `Version 0.1 · ${Z.laedtNoch ? "lädt Plätze …" : (DATEN.length - DOPPELT).toLocaleString("de-DE") + " Plätze"}`
-    + (w ? ` · ${w} Vorschläge offen` : "")
+    (Z.laedtNoch ? "lädt Plätze …" : (DATEN.length - DOPPELT).toLocaleString("de-DE") + " Plätze")
+    + (Z.admin && w ? ` · ${w} ${w === 1 ? "Änderungsvorschlag" : "Änderungsvorschläge"} offen` : "")
     + (ECHT ? "" : " · Testmodus");
 }
 
@@ -5657,11 +5657,10 @@ function ansichtUeber(){
             <b class="team-name">Cornelius Oellers</b>
             <span class="team-rolle">Gründer von Platzfrei</span>
             <p>Als Jugendlicher wurde Cornelius selbst oft von Plätzen geschickt, obwohl
-            dort gerade niemand trainierte. Später stand er auf der anderen Seite: zwei Jahre
-            als Jugendtrainer beim TV Stockdorf, seit 2026 als Trainer in den Fußballcamps des
-            VfB Stuttgart. Platzfrei hat er neben Abitur, eigenem Training und Trainerjob
-            gebaut, heute mit über 95.000 Plätzen in ganz Deutschland. Seit Oktober 2026
-            studiert er Sportökonomie an der Universität Bayreuth.</p>
+            dort gerade niemand trainierte. Später stand er auf der anderen Seite: als
+            Jugendtrainer und als Trainer in Fußballcamps. Platzfrei hat er neben Abitur,
+            eigenem Training und Trainerjob gebaut, heute mit über 95.000 Plätzen in ganz
+            Deutschland. Inzwischen studiert er Sportökonomie.</p>
             <blockquote>„Kein Kind soll am Zaun stehen und nicht wissen, ob es reindarf.“</blockquote>
             <a class="team-mail" href="mailto:${esc(RECHT.email)}">${esc(RECHT.email)}</a>
           </div>
