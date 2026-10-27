@@ -223,6 +223,22 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
 .suche-weg{position:absolute;right:8px;width:28px;height:28px;border:0;border-radius:50%;
   background:var(--unklar-bg);color:var(--tinte-2);font-size:12px;cursor:pointer}
 .chip-icon{margin-right:6px}
+.suche-einst{flex:none;margin-left:8px;width:44px;height:44px;border:0;border-radius:14px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;background:var(--flaeche);color:var(--tinte-2);
+  box-shadow:inset 0 0 0 1.5px var(--kante)}
+.suche-einst:hover{color:var(--gruen-tief)}
+.suche:has(.suche-einst) .suche-weg{right:60px}
+.los-sport{margin-left:auto;font:inherit;font-size:12.5px;font-weight:600;border:0;cursor:pointer;
+  background:var(--gruen-zart);color:var(--gruen-tief);border-radius:var(--r-pille);padding:4px 10px;white-space:nowrap}
+.los-titel small + .los-sport{margin-left:8px}
+/* Einstellungen */
+.einst-gruppe{margin:0 0 20px}
+.einst-gruppe h3{font-size:15px;margin:0 0 4px;color:var(--tinte)}
+.einst-gruppe p{font-size:13px;color:var(--tinte-3);margin:0 0 10px;line-height:1.45}
+.einst-chips{display:flex;flex-wrap:wrap;gap:8px}
+.einst-chips button{font:inherit;font-size:14px;font-weight:600;border:0;cursor:pointer;padding:8px 14px;
+  border-radius:var(--r-pille);background:var(--flaeche);color:var(--tinte);box-shadow:inset 0 0 0 1.5px var(--kante)}
+.einst-chips button[aria-pressed=true]{background:var(--gruen);color:#fff;box-shadow:none}
 .anzahl{padding:2px 20px 8px;font-size:13px;font-weight:600;color:var(--tinte-3);
   letter-spacing:.002em;flex-shrink:0}
 
@@ -360,6 +376,26 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
 .abzeichen.zu .ab-icon{filter:grayscale(1);opacity:.35}
 .abzeichen .ab-balken{height:5px;border-radius:3px;background:var(--kante);margin-top:8px;overflow:hidden}
 .abzeichen .ab-balken span{display:block;height:100%;background:#34C759}
+/* Abzeichen-Streifen oben in der Liste: zeigt Stand und das nächste Ziel */
+.abz-streifen{display:flex;align-items:center;gap:12px;width:100%;margin:0 0 14px;padding:10px 14px;
+  font:inherit;text-align:left;color:var(--tinte);cursor:pointer;border:0;border-radius:var(--r-karte);
+  background:linear-gradient(140deg,#FFF6D9,#FFE9B0);box-shadow:var(--schatten)}
+.abz-streifen .abz-icon{font-size:28px;line-height:1;flex:none}
+.abz-streifen .abz-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.abz-streifen b{font-size:14.5px;display:flex;align-items:center;gap:6px}
+.abz-streifen small{font-size:12.5px;color:#6B5310;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.abz-streifen .abz-balken{height:5px;border-radius:3px;background:rgba(107,83,16,.18);overflow:hidden;margin-top:3px}
+.abz-streifen .abz-balken span{display:block;height:100%;background:#E0A100}
+.abz-streifen .abz-pfeil{font-size:20px;color:#6B5310;flex:none}
+.abz-neu{font-size:11px;font-weight:700;background:#E5484D;color:#fff;border-radius:var(--r-pille);padding:1px 7px}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .abz-streifen{background:linear-gradient(140deg,#3A3114,#2B240E);color:#F5EBD0}
+  :root:not([data-theme="light"]) .abz-streifen small,:root:not([data-theme="light"]) .abz-streifen .abz-pfeil{color:#D9C68E}
+}
+:root[data-theme="dark"] .abz-streifen{background:linear-gradient(140deg,#3A3114,#2B240E);color:#F5EBD0}
+:root[data-theme="dark"] .abz-streifen small,:root[data-theme="dark"] .abz-streifen .abz-pfeil{color:#D9C68E}
+.kopfnav .nav-zahl{font-size:12px;font-weight:700;color:var(--tinte-3);margin-left:4px}
+#meldung[data-gehe]{cursor:pointer}
 .abzeichen-link{display:block;margin:0 auto 12px;font-family:var(--schrift);font-size:14px;font-weight:600;
   background:var(--flaeche);border:0;border-radius:var(--r-pille);padding:10px 18px;
   box-shadow:var(--schatten);color:var(--tinte);cursor:pointer}
@@ -1064,6 +1100,7 @@ header h1 .pf-marke{height:30px;width:auto}
     <button data-gehe="ueber" data-nav="ueber">Über Platzfrei</button>
     <button data-gehe="vereine" data-nav="vereine">Für Vereine</button>
     <button data-gehe="partner" data-nav="partner">Für Partner</button>
+    <button data-gehe="abzeichen" data-nav="abzeichen" id="nav-abzeichen">🏅 Abzeichen</button>
   </nav>
   <span class="kopfnotiz" id="kopfnotiz">Version 0.1</span>
   <button class="thema-knopf" data-thema="1"></button>
@@ -1226,10 +1263,17 @@ const NUR_ADMIN = ["zugang","zeiten","bestaetigtDurch"];
 
 const STANDARD_POSITION = { lat:48.1374, lon:11.5755 };   // München (Marienplatz) als Rückfall
 
+/* Hauptsportart aus den Einstellungen: filtert "Was ist los" und ist beim
+   Start als Sportart vorgewählt. "" = alle Sportarten. */
+const HAUPTSPORT_SCHLUESSEL = "platzfrei.hauptsport";
+let HAUPTSPORT = "";
+try { HAUPTSPORT = localStorage.getItem(HAUPTSPORT_SCHLUESSEL) || ""; } catch {}
+const passtHauptsport = sp => !HAUPTSPORT || (Array.isArray(sp) ? sp.includes(HAUPTSPORT) : sp === HAUPTSPORT);
+
 let Z = {
   ansicht:"liste",        // "liste" | "detail" | "bearbeiten" | "neu" | "anmelden" | "importieren" | "melden"
   auswahlId:null,
-  sportart:"alle",
+  sportart:HAUPTSPORT || "alle",
   nurFrei:false,
   maxKm:null,             // null = alle Entfernungen zeigen
   nurGemerkt:false,
@@ -1377,6 +1421,36 @@ const ABZEICHEN = [
 function abzeichenErreicht(s = statistik()){
   return ABZEICHEN.filter(a => a.wert(s) >= a.ziel);
 }
+/* Zahl hinter "🏅 Abzeichen" oben in der Kopfleiste (Laptop) */
+function abzeichenNav(){
+  const b = document.getElementById("nav-abzeichen");
+  if (b) b.innerHTML = `🏅 Abzeichen<span class="nav-zahl">${abzeichenErreicht().length}/${ABZEICHEN.length}</span>`;
+}
+/* Wie viele Abzeichen schon auf der Abzeichen-Seite angeschaut wurden –
+   für den roten "Neu"-Hinweis im Streifen. */
+const ABZ_GESEHEN = "platzfrei.abzeichen.gesehen";
+function abzeichenGesehen(){ try { return +localStorage.getItem(ABZ_GESEHEN) || 0; } catch { return 0; } }
+
+/* Streifen oben in der Liste: immer sichtbar, damit man weiß, dass es
+   Abzeichen gibt – mit dem Abzeichen, das als Nächstes am nächsten ist. */
+function abzeichenStreifen(){
+  const s = statistik();
+  const n = abzeichenErreicht(s).length, alle = ABZEICHEN.length;
+  const offen = ABZEICHEN.filter(a => a.wert(s) < a.ziel)
+    .sort((a, b) => b.wert(s) / b.ziel - a.wert(s) / a.ziel);
+  const naechstes = offen[0];
+  const neu = n > abzeichenGesehen();
+  return `<button class="abz-streifen" data-gehe="abzeichen">
+      <span class="abz-icon" aria-hidden="true">${naechstes && !neu ? naechstes.icon : "🏅"}</span>
+      <span class="abz-text">
+        <b>${n ? `Meine Abzeichen · ${n} von ${alle}` : `Sammle ${alle} Abzeichen`}${neu ? `<span class="abz-neu">Neu</span>` : ``}</b>
+        <small>${neu ? `Du hast ein neues Abzeichen. Schau es dir an!`
+          : naechstes ? `Als Nächstes: ${esc(naechstes.name)} – ${esc(naechstes.text)}`
+          : `Alle geschafft. Stark!`}</small>
+        <span class="abz-balken"><span style="width:${Math.round(n / alle * 100)}%"></span></span>
+      </span><span class="abz-pfeil" aria-hidden="true">›</span></button>`;
+}
+
 /* Zählt eine Aktion und meldet ein neu erreichtes Abzeichen. */
 function zaehle(art, ortId){
   const s = statistik();
@@ -1386,7 +1460,8 @@ function zaehle(art, ortId){
     s.checkinOrte.push(String(ortId));
   try { localStorage.setItem(STAT_SCHLUESSEL, JSON.stringify(s)); } catch {}
   const neu = abzeichenErreicht(s).find(a => !vorher.has(a.name));
-  if (neu) setTimeout(() => melde(`${neu.icon} Neues Abzeichen: ${neu.name}!`), 1600);
+  if (neu) setTimeout(() => melde(`${neu.icon} Neues Abzeichen: ${neu.name}! Antippen zum Ansehen`, "abzeichen", 5000), 1600);
+  abzeichenNav();
 }
 
 /* ==========================================================================
@@ -2005,12 +2080,14 @@ function bespielbarkeit(o){
   return null;
 }
 
-function melde(text){
+function melde(text, gehe, dauer = 3200){
   const m = document.getElementById("meldung");
   m.textContent = text;
+  /* Mit "gehe" lässt sich die Meldung antippen und öffnet diese Ansicht. */
+  if (gehe) m.dataset.gehe = gehe; else delete m.dataset.gehe;
   m.classList.add("zeigen");
   clearTimeout(melde.t);
-  melde.t = setTimeout(()=>m.classList.remove("zeigen"), 3200);
+  melde.t = setTimeout(()=>{ m.classList.remove("zeigen"); delete m.dataset.gehe; }, dauer);
 }
 
 function auswahlFeld(name, liste, wert, gesperrt){
@@ -2119,7 +2196,7 @@ function losLeiste(teil = "leiste"){
 
   /* Wo gerade gespielt wird (ab 2 Personen) */
   const live = Object.entries(Z.aktiv).filter(([, n]) => n >= 2)
-    .map(([id, n]) => ({ o: ort(id) || ort(+id), n })).filter(x => x.o)
+    .map(([id, n]) => ({ o: ort(id) || ort(+id), n })).filter(x => x.o && passtHauptsport(x.o.sportarten))
     .map(x => ({ ...x, km: entfernungKm(Z.position, x.o) })).filter(x => x.km <= LOS_RADIUS_KM)
     .sort((a, b) => a.km - b.km).slice(0, 6);
   for (const { o, n, km } of live) karten.push(`<button class="los-karte live" data-ort="${o.id}">
@@ -2129,6 +2206,7 @@ function losLeiste(teil = "leiste"){
   /* Kommende Spiele in der Nähe */
   const jetzt = new Date();
   const spiele = Z.spiele.filter(sp => new Date(sp.beginn) > new Date(jetzt - 2 * 3600e3))
+    .filter(sp => passtHauptsport(sp.sportart))
     .map(sp => ({ sp, o: ort(sp.ort_id) || ort(+sp.ort_id) })).filter(x => x.o)
     .map(x => ({ ...x, km: entfernungKm(Z.position, x.o) })).filter(x => x.km <= LOS_RADIUS_KM)
     .sort((a, b) => new Date(a.sp.beginn) - new Date(b.sp.beginn)).slice(0, 8);
@@ -2138,7 +2216,7 @@ function losLeiste(teil = "leiste"){
       <small>${sp.dabei} von ${sp.brauchen} dabei${mitKm() ? " · " + kmText(km) : ""}</small></button>`);
 
   /* Immer ein Knopf zum Spiel ansetzen – am nächsten passenden Platz. */
-  const ziel = sichtbareOrte()[0];
+  const ziel = sichtbareOrte().find(o => passtHauptsport(o.sportarten));
   if (ziel) karten.push(`<button class="los-karte ansetzen" data-ort="${ziel.id}" data-spielauf="1">
       <span class="los-art">＋ Mitspieler suchen</span>
       <span class="los-name">Spiel ansetzen</span>
@@ -2156,7 +2234,8 @@ function losLeiste(teil = "leiste"){
      auf Wunsch, damit die Plätze nicht zu weit nach unten rutschen. */
   const MAX = 3, alle = Z.losAlle || karten.length <= MAX + 1;
   return `<section class="los" aria-label="Was ist los in der Nähe"><div class="los-titel">Was ist los in der Nähe${
-      zahl ? `<small>${zahl} aktiv</small>` : ``}</div>
+      zahl ? `<small>${zahl} aktiv</small>` : ``}<button class="los-sport" data-gehe="einstellungen"
+      title="Hauptsportart in den Einstellungen ändern">${HAUPTSPORT ? esc(HAUPTSPORT) : "Alle Sportarten"} ⚙︎</button></div>
     <div class="oben-karten los-zeilen">${(alle ? karten : karten.slice(0, MAX)).join("")}</div>${
       karten.length > MAX + 1 ? `<button class="inline-knopf los-mehr" data-losalle="${alle ? "0" : "1"}">${
         alle ? "Weniger zeigen" : `${karten.length - MAX} weitere zeigen`}</button>` : ``}</section>`;
@@ -2177,7 +2256,7 @@ function jetztVorschlag(){
   let best = null, bestWert = Infinity;
   for (const o of DATEN) {
     if (o._doppelt || Math.abs(o.lat - Z.position.lat) > 0.14 || Math.abs(o.lon - Z.position.lon) > 0.21) continue;
-    if (Z.sportart !== "alle" && !o.sportarten.includes(Z.sportart)) continue;
+    if (Z.sportart !== "alle" ? !o.sportarten.includes(Z.sportart) : !passtHauptsport(o.sportarten)) continue;
     const bestaetigt = nutzerBestaetigt(o);
     if (!frei(o) && !vermutlichFrei(o) && !bestaetigt) continue;
     if ((Z.meldungen[o.id] || 0) >= 3 && !bestaetigt) continue;
@@ -2546,7 +2625,7 @@ function ansichtListe(nurListe){
           DOPPELT ? ` ${DOPPELT.toLocaleString("de-DE")} doppelte Einträge sind zusammengefasst.` : ``}</span>` : ``}</div>`;
 
   const ohneSuche = !Z.suche.trim();
-  const rolleInhalt = `${trefferInfo}${ohneSuche ? losLeiste("oben") + losLeiste() : ``}${zeilenListe.join("")}${leer}${alleOrte.length > orte.length
+  const rolleInhalt = `${trefferInfo}${ohneSuche ? losLeiste("oben") + losLeiste() + abzeichenStreifen() : ``}${zeilenListe.join("")}${leer}${alleOrte.length > orte.length
       ? `<div class="leer">… und ${(alleOrte.length - orte.length).toLocaleString("de-DE")} weitere.<br>
          Filter setzen, suchen oder auf der Karte zoomen.</div>` : ``}${listenende}`;
 
@@ -2565,6 +2644,8 @@ function ansichtListe(nurListe){
         placeholder="Platz, Ort oder Sportart suchen" value="${esc(Z.suche)}"
         aria-label="Platz, Ort oder Sportart suchen">
       ${Z.suche ? `<button class="suche-weg" data-suchweg="1" aria-label="Suche löschen">✕</button>` : ``}
+      <button class="suche-einst" data-gehe="einstellungen" aria-label="Einstellungen" title="Einstellungen">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
     </div>
     <div class="filter">
       ${auswahl("sport", "Sportart", Z.sportart,
@@ -2691,7 +2772,7 @@ function spieleBlock(o){
         <label>Uhrzeit<select id="spiel-uhr">${uhrzeiten.map(u =>
           `<option${u === vorschlag ? " selected" : ""}>${u}</option>`).join("")}</select></label>
         <label>Sportart<select id="spiel-sport">${o.sportarten.map(s =>
-          `<option>${esc(s)}</option>`).join("")}</select></label>
+          `<option${s === HAUPTSPORT ? " selected" : ""}>${esc(s)}</option>`).join("")}</select></label>
         <label>Wie viele insgesamt?<select id="spiel-anzahl">${[4,6,8,10,12,14,16,22].map(n =>
           `<option${n === 10 ? " selected" : ""}>${n}</option>`).join("")}</select></label>
         <div class="reihe">
@@ -2828,6 +2909,8 @@ async function tippUmschalten(k){
 function ansichtAbzeichen(){
   const s = statistik();
   const n = abzeichenErreicht(s).length;
+  try { localStorage.setItem(ABZ_GESEHEN, String(n)); } catch {}
+  abzeichenNav();
   seite.innerHTML = `
     <div class="dkopf">
       <button class="zurueck" data-gehe="liste">← Liste</button>
@@ -2848,6 +2931,41 @@ function ansichtAbzeichen(){
           ${w >= a.ziel ? `` : `<div class="ab-balken"><span style="width:${Math.round(w / a.ziel * 100)}%"></span></div>
           <small>${w} von ${a.ziel}</small>`}
         </div>`; }).join("")}
+      </div>
+    </div>`;
+}
+
+/* --------------------------------------------------------------------------
+   Einstellungen: Hauptsportart, Design, Abzeichen
+   -------------------------------------------------------------------------- */
+function ansichtEinstellungen(){
+  const chip = (wert, text, an, attr) =>
+    `<button ${attr}="${esc(wert)}" aria-pressed="${an}">${esc(text)}</button>`;
+  seite.innerHTML = `
+    <div class="dkopf">
+      <button class="zurueck" data-gehe="liste">← Liste</button>
+      <div class="dname">Einstellungen</div>
+      <div class="dort">Gilt nur auf diesem Gerät</div>
+    </div>
+    <div class="rolle">
+      <div class="einst-gruppe" style="margin-top:12px">
+        <h3>Meine Hauptsportart</h3>
+        <p>„Was ist los in der Nähe“ zeigt dann nur Spiele und Plätze dieser Sportart,
+        und die Liste startet mit ihr. Den Filter oben kannst du trotzdem jederzeit ändern.</p>
+        <div class="einst-chips">${chip("", "Alle Sportarten", !HAUPTSPORT, "data-hauptsport")}${
+          AUSWAHL.sportarten.map(sp => chip(sp, sp, HAUPTSPORT === sp, "data-hauptsport")).join("")}</div>
+      </div>
+      <div class="einst-gruppe">
+        <h3>Design</h3>
+        <div class="einst-chips">${[["auto","Wie das Gerät"],["hell","Hell"],["dunkel","Dunkel"]]
+          .map(([w, t]) => chip(w, t, THEMA === w, "data-themawahl")).join("")}</div>
+      </div>
+      <div class="einst-gruppe">
+        <h3>Abzeichen</h3>
+        ${abzeichenStreifen()}
+      </div>
+      <div class="einst-gruppe">
+        <button class="abzeichen-link" style="margin:0" data-einfuehrung="1">ⓘ Einführung noch mal ansehen</button>
       </div>
     </div>`;
 }
@@ -3437,7 +3555,7 @@ function ansichtAnmelden(){
 const ANSICHTS_TIEFE = {
   liste:0, importieren:1, anmelden:1, neu:1,
   detail:1, bearbeiten:2, melden:2, rechtliches:1, fehler:1, fehlerliste:1,
-  vereinszeiten:2, pruefen:1, abzeichen:1, ueber:1, vereine:1
+  vereinszeiten:2, pruefen:1, abzeichen:1, einstellungen:1, ueber:1, vereine:1
 };
 let letzteTiefe = 0;
 let letzterSchluessel = "liste";
@@ -3478,10 +3596,11 @@ function zeichne(){
   document.querySelectorAll("[data-nav]").forEach(b =>
     b.toggleAttribute("aria-current", b.dataset.nav === (VOLLSEITEN.includes(Z.ansicht) ? Z.ansicht : "liste")));
   if (document.body.className !== klasseVorher) setTimeout(() => karte.invalidateSize(), 0);
+  abzeichenNav();
 
   ({ liste:ansichtListe, detail:ansichtDetail, bearbeiten:ansichtBearbeiten,
      neu:ansichtNeu, anmelden:ansichtAnmelden, importieren:ansichtImportieren,
-     melden:ansichtMelden, rechtliches:ansichtRechtliches, vereinszeiten:ansichtVereinszeiten, pruefen:ansichtPruefen, fehler:ansichtFehler, fehlerliste:ansichtFehlerliste, abzeichen:ansichtAbzeichen,
+     melden:ansichtMelden, rechtliches:ansichtRechtliches, vereinszeiten:ansichtVereinszeiten, pruefen:ansichtPruefen, fehler:ansichtFehler, fehlerliste:ansichtFehlerliste, abzeichen:ansichtAbzeichen, einstellungen:ansichtEinstellungen,
      ueber:ansichtUeber, vereine:ansichtVereine, partner:ansichtPartner })[Z.ansicht]();
 
   /* §11 Nur transform und opacity bewegen – beides läuft im Compositor,
@@ -5813,7 +5932,7 @@ function ansichtRechtliches(){
 
         <h4>10. Auf deinem Gerät</h4>
         <p>Merkliste, Geräte-Nummer, eigene Bestätigungen, Zusagen und Tipps,
-        dein aktueller Check-in und deine Abzeichen speichert die App im
+        dein aktueller Check-in, deine Abzeichen und deine Einstellungen (Hauptsportart, Design) speichert die App im
         Speicher deines Browsers (localStorage). Damit die App auch ohne Netz
         startet, legt sie außerdem eine Kopie ihrer Dateien und der Platzliste
         im Browser ab (Cache und IndexedDB); die Platzliste enthält keine
@@ -6371,7 +6490,7 @@ document.addEventListener("wheel", e => {
 }, { passive:false });
 
 document.addEventListener("click", e=>{
-  const t = e.target.closest("[data-thema],[data-sport],[data-nurfrei],[data-nurlos],[data-ort],[data-gehe],"+
+  const t = e.target.closest("[data-hauptsport],[data-themawahl],[data-thema],[data-sport],[data-nurfrei],[data-nurlos],[data-ort],[data-gehe],"+
                              "[data-speichern],[data-neuspeichern],[data-geprueft],"+
                              "[data-export],[data-anmelden],[data-km],"+
                              "[data-merken],[data-gemerkt],[data-melden],[data-route],"+
@@ -6455,6 +6574,19 @@ document.addEventListener("click", e=>{
   if (t.dataset.anmelden)   { return anmelden(); }
 
   if (t.dataset.sport)      { Z.sportart = t.dataset.sport; return zeichne(); }
+  if (t.dataset.hauptsport !== undefined) {
+    HAUPTSPORT = t.dataset.hauptsport;
+    try { localStorage.setItem(HAUPTSPORT_SCHLUESSEL, HAUPTSPORT); } catch {}
+    Z.sportart = HAUPTSPORT || "alle";
+    melde(HAUPTSPORT ? `Hauptsportart: ${HAUPTSPORT}` : "Alle Sportarten");
+    return zeichne();
+  }
+  if (t.dataset.themawahl)  {
+    THEMA = t.dataset.themawahl;
+    try { localStorage.setItem(THEMA_SCHLUESSEL, THEMA); } catch {}
+    themaAnwenden(); karteThemaNeu();
+    return zeichne();
+  }
   if (t.dataset.nurfrei)    { Z.nurFrei = t.dataset.nurfrei==="1"; return zeichne(); }
   if (t.dataset.nurlos)     { Z.nurLos = t.dataset.nurlos==="1"; return zeichne(); }
   if (t.dataset.ort) {
