@@ -5,6 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Platzfrei – wo darf ich spielen?</title>
 <meta name="description" content="Platzfrei zeigt dir Bolzplätze, Spielplätze und Sportflächen in deiner Nähe und ob du dort spielen darfst.">
+<link rel="canonical" href="https://platzfrei.app/">
+
+<!-- Vorschau beim Teilen (WhatsApp, Instagram, iMessage, LinkedIn). -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Platzfrei">
+<meta property="og:locale" content="de_DE">
+<meta property="og:url" content="https://platzfrei.app/">
+<meta property="og:title" content="Platzfrei – wo darf ich spielen?">
+<meta property="og:description" content="Bolzplätze und Sportplätze in deiner Nähe – und ob du dort spielen darfst. Kostenlos, ohne Anmeldung.">
+<meta property="og:image" content="https://platzfrei.app/og-bild.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Platzfrei – wo darf ich spielen?">
+<meta name="twitter:card" content="summary_large_image">
 
 <!-- PWA: macht die Seite installierbar (Icon, Name, Vollbild). -->
 <link rel="manifest" href="manifest.webmanifest">
@@ -18,12 +32,16 @@
 <meta name="mobile-web-app-capable" content="yes">
 
 <!-- Leaflet: die Kartenbibliothek. Kostenlos, kein Schlüssel nötig. -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"
+      integrity="sha384-c6Rcwz4e4CITMbu/NBmnNS8yN2sC3cUElMEMfP3vqqKFp7GOYaaBBCqmaWBjmkjb" crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"
+        integrity="sha384-NElt3Op+9NBMCYaef5HxeJmU4Xeard/Lku8ek6hoPTvYkQPh3zLIrJP7KiRocsxO" crossorigin="anonymous"></script>
 
-<!-- Supabase: Anmeldung und Datenbank. Lädt die App auch ohne, dann läuft
-     sie im Testmodus mit den Daten aus dieser Datei. -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Supabase: Anmeldung und Datenbank. Feste Version mit Prüfsumme (SRI):
+     Ändert sich die Datei auf dem CDN, lädt der Browser sie nicht. Beim
+     Update Version UND integrity zusammen tauschen. -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.0/dist/umd/supabase.js"
+        integrity="sha384-xPW3QHswsICVC2mW6BFNwMbhpLkbZ133fKOhxNx3QGGgAOJfL3O9t8r2aWn1aez6" crossorigin="anonymous"></script>
 
 <style>
 /* ===========================================================================
@@ -383,6 +401,7 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
 .tipps-neu{margin-top:12px;padding-top:12px;border-top:1px dashed var(--kante)}
 
 /* ---------- Abzeichen ---------- */
+.einf-recht{background:none;border:0;font:inherit;font-size:12px;color:var(--tinte-3);text-decoration:underline;margin:10px auto 0;display:block;cursor:pointer}
 .abzeichen-gitter{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin:0 20px 12px}
 .abzeichen{background:var(--flaeche);border-radius:var(--r-karte);box-shadow:var(--schatten);
   padding:14px;text-align:center}
@@ -1147,10 +1166,6 @@ const VOLLSEITEN = ["ueber", "vereine", "partner"];
    Zeigt dein Projekt noch keinen, nimm unter "Legacy API Keys" den anon key –
    beide funktionieren gleich.
 
-   Solange hier die Platzhalter stehen, läuft die App im TESTMODUS: Daten
-   aus dieser Datei, Admin-Knopf ohne echte Prüfung. Zum Ausprobieren gut,
-   zum Veröffentlichen nicht.
-
    Wichtig: Dieser Schlüssel DARF öffentlich im Code stehen. Er ist kein
    Passwort, sondern nur eine Projekt-Kennung. Was er darf, entscheidet
    allein die Datenbank über die Regeln aus supabase-einrichtung.sql.
@@ -1170,83 +1185,13 @@ const db   = ECHT ? window.supabase.createClient(KONFIG.url, KONFIG.anonKey) : n
 /* ==========================================================================
    1. DIE DATEN
    --------------------------------------------------------------------------
-   Vorläufig direkt hier in der Datei. Später kommen sie aus Supabase –
-   dann ändert sich nur die Funktion datenLaden() weiter unten, sonst nichts.
+   Kommen aus Supabase (datenLaden() weiter unten).
 
    Felder wie in der Erfassungstabelle. "bestaetigtDurch" ist das
    wichtigste Feld: es sagt, wie verlässlich die Zugangsangabe ist.
    ========================================================================== */
 
-let DATEN = [
-  {
-    id:"O01", name:"Bolzplatz Krailling", ort:"Krailling, Brahmsstraße",
-    lat:48.092293, lon:11.418003,
-    sportarten:["Fußball","Basketball"],
-    zugang:"öffentlich", zeiten:"08:00–22:00", bestaetigtDurch:"nur vermutet",
-    untergrund:"Kunstrasen", groesse:"Kleinfeld",
-    ausstattung:"2 Tore mit Netz", umzaeunt:"ja", beleuchtung:"nein",
-    zustand:4, drumherum:"Bank, Dixi-Klo, Bus 967",
-    geprueft:"2026-07-12",
-    notizen:"Kleiner umzäunter Platz, nachmittags meist Kinder."
-  },
-  {
-    id:"O02", name:"Sportplatz Krailling", ort:"Krailling, Sportplatzweg",
-    lat:48.103228, lon:11.409580,
-    sportarten:["Fußball"],
-    zugang:"Vereinsgelände nach Absprache", zeiten:"unbekannt",
-    bestaetigtDurch:"nur vermutet",
-    untergrund:"Asche", groesse:"Großfeld",
-    ausstattung:"2 Tore mit Netz", umzaeunt:"ja", beleuchtung:"ja",
-    zustand:3, drumherum:"Parkplatz",
-    geprueft:null,
-    notizen:"Tor war beim ersten Vorbeifahren zu. Verein noch nicht gefragt."
-  },
-  {
-    id:"O03", name:"TV Stockdorf", ort:"Stockdorf, Maria-Eich-Straße",
-    lat:48.095412, lon:11.398259,
-    sportarten:["Fußball"],
-    zugang:"Vereinsgelände frei betretbar", zeiten:"außerhalb der Trainingszeiten",
-    bestaetigtDurch:"Auskunft Verein",
-    untergrund:"Kunstrasen", groesse:"Großfeld",
-    ausstattung:"2 Tore mit Netz, Jugendtore", umzaeunt:"ja", beleuchtung:"ja",
-    zustand:5, drumherum:"Bank, WC, Wasser, Parkplatz",
-    geprueft:"2026-07-26",
-    notizen:"Di/Do 17–19 Uhr Training. Flutlicht nach 20 Uhr auf Anfrage."
-  },
-  {
-    id:"O04", name:"Sportplatz Birkenstraße", ort:"Gauting, Birkenstraße",
-    lat:48.077396, lon:11.373404,
-    sportarten:["Fußball"],
-    zugang:"öffentlich", zeiten:"unbekannt", bestaetigtDurch:"nur vermutet",
-    untergrund:"Asche", groesse:"Kleinfeld",
-    ausstattung:"2 Tore ohne Netz", umzaeunt:"nein", beleuchtung:"nein",
-    zustand:2, drumherum:"nichts",
-    geprueft:"2026-07-12",
-    notizen:"Ohne Netze rennt man dem Ball nach. Bei Nässe schmierig."
-  },
-  {
-    id:"O05", name:"Postwiese", ort:"Gauting, Buchendorfer Straße",
-    lat:48.065064, lon:11.387755,
-    sportarten:["Fußball","Laufen"],
-    zugang:"öffentlich", zeiten:"unbekannt", bestaetigtDurch:"nur vermutet",
-    untergrund:"Naturrasen", groesse:"Großfeld",
-    ausstattung:"keine Tore", umzaeunt:"nein", beleuchtung:"nein",
-    zustand:3, drumherum:"Bank",
-    geprueft:"2026-07-12",
-    notizen:"Große Wiese, Trikots als Tore. Im Winter Rodelhügel."
-  },
-  {
-    id:"O06", name:"Fußballplatz Unterbrunn", ort:"Gauting-Unterbrunn",
-    lat:48.065463, lon:11.326016,
-    sportarten:["Fußball"],
-    zugang:"öffentlich", zeiten:"unbekannt", bestaetigtDurch:"nur vermutet",
-    untergrund:"Naturrasen", groesse:"Kleinfeld",
-    ausstattung:"2 Tore mit Netz", umzaeunt:"nein", beleuchtung:"nein",
-    zustand:4, drumherum:"Bank, Dorfweiher daneben",
-    geprueft:null,
-    notizen:"Noch nicht besucht. Angaben nur aus OpenStreetMap."
-  }
-];
+let DATEN = [];
 
 // Vorschläge von Nutzern, die auf Freigabe warten.
 // Später eine eigene Tabelle in Supabase.
@@ -1721,6 +1666,7 @@ function bildMitte(orte, zoom){
 function markerZeichnen(){
   if (losPille) losPilleAktualisieren();
   markerEbene.clearLayers();
+  if (rasterNutzen()) return rasterZeichnen();
   const rahmen = karte.getBounds().pad(0.5);
   const imBild = sichtbareOrte().filter(o => rahmen.contains([o.lat, o.lon]));
 
@@ -1821,8 +1767,13 @@ let mitteBeimZeichnen = karte.getCenter();
 
 karte.on("moveend", () => {
   markerZeichnen();
-  /* Solange ganz Deutschland noch lädt: den neuen Ausschnitt gleich holen. */
-  if (Z.laedtNoch && karte.getZoom() >= 10) {
+  /* Besucher: Plätze im neuen Ausschnitt holen. Admin: solange ganz
+     Deutschland noch lädt, den neuen Ausschnitt vorziehen. */
+  if (!Z.admin) {
+    ausschnittPlanen();
+    if (!mitKm() && Z.ansicht === "liste" && !Z.suche.trim()) ansichtListe(true);
+  }
+  else if (Z.laedtNoch && karte.getZoom() >= 10) {
     const m = karte.getCenter();
     umgebungLaden({ lat:m.lat, lon:m.lng });
   }
@@ -1870,7 +1821,7 @@ function entfText(km){
 function ort(id){ return DATEN.find(o=>o.id===id); }
 function esc(s){
   return String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
-                      .replace(/"/g,"&quot;");
+                      .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
 }
 function heute(){ return new Date().toISOString().slice(0,10); }
 function frei(o){
@@ -1992,9 +1943,11 @@ function sichtbareOrte(){
        statt was in der Nähe ist – für Auswärtsspiele und Urlaub. */
     .filter(o => sucht || !Z.bereich || Z.bereich.contains([o.lat, o.lon]));
 
+  /* Ohne Standort zählt die Kartenmitte ("Nahe Kartenmitte"). */
+  const mitteKarte = () => { const m = karte.getCenter(); return { lat:m.lat, lon:m.lng }; };
   const bezug = Z.bereich
     ? { lat:Z.bereich.getCenter().lat, lon:Z.bereich.getCenter().lng }
-    : Z.position;
+    : mitKm() ? Z.position : mitteKarte();
 
   const nachEntfernung = (a,b) => entfernungKm(bezug,a) - entfernungKm(bezug,b);
 
@@ -2378,7 +2331,7 @@ function auslastungBlock(o){
 const EINF_SCHLUESSEL = "platzfrei.einfuehrung";
 const EINF_SEITEN = [
   { bild:"📍", titel:"Ab deinem Standort rechnen?",
-    text:"Platzfrei funktioniert am besten mit deinem Standort: Entfernungen ab dir, die nächsten Plätze zuerst, „Jetzt spielen“ und Einchecken. Der Standort bleibt auf deinem Gerät und wird nicht gespeichert.",
+    text:"Dann siehst du Entfernungen, die nächsten Plätze zuerst und kannst einchecken. Gespeichert wird dein Standort nicht. Er verlässt dein Gerät nur beim Einchecken und gerundet fürs Wetter.",
     standort:true },
   { bild:`<svg width="54" height="71" viewBox="0 0 320 420" aria-hidden="true"><path d="M160 0C71.634 0 0 70 0 158C0 244 84 348 149 414C155 420 165 420 171 414C236 348 320 244 320 158C320 70 248.366 0 160 0Z" fill="#05B630"/><path d="M124 62V100H196V62M124 282V244H196V282M70 172H250M86 62H234C244.667 62 250 67.3333 250 78V266C250 276.667 244.667 282 234 282H86C75.3333 282 70 276.667 70 266V78C70 67.3333 75.3333 62 86 62ZM187 172C187 186.912 174.912 199 160 199C145.088 199 133 186.912 133 172C133 157.088 145.088 145 160 145C174.912 145 187 157.088 187 172Z" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
     titel:"Wo darf ich spielen?",
@@ -2424,6 +2377,7 @@ function einfuehrungZeigen(immer){
           <span><i class="z-vermutet" style="border-color:#34C759">≈</i>vermutet, ungeprüft</span>
           <span><i style="background:#FF9F0A">!</i>nach Absprache</span>
           <span><i class="z-unklar" style="background:#8E8E93">?</i>Zugang ungeklärt</span></div>` : ``}
+        <button class="einf-recht" data-einfrecht="1">Impressum &amp; Datenschutz</button>
         <div class="einf-punkte" aria-hidden="true">${EINF_SEITEN.map((_, k) => `<i class="${k === i ? "an" : ""}"></i>`).join("")}</div>
         ${s.standort ? `<button class="knopf" data-einfstandort="1">Ja, ab meinem Standort</button>
         <button class="knopf zweit einf-ohne" data-einfohne="1">Nein, ohne Standort</button>`
@@ -2434,6 +2388,10 @@ function einfuehrungZeigen(immer){
     if (e.target.closest("[data-einfstandort]")) return standortWahl(true);
     if (e.target.closest("[data-einfohne]")) return standortWahl(false);
     if (e.target.closest("[data-einfweg]")) return fertig();
+    if (e.target.closest("[data-einfrecht]")) {
+      el.remove(); document.removeEventListener("keydown", taste);   // beim nächsten Start wieder
+      Z.ansicht = "rechtliches"; zeichne(); sheet.aufmachen(); return;
+    }
     if (e.target.closest("[data-einfweiter]")) {
       if (i === EINF_SEITEN.length - 1) return fertig();
       i++; bauen();
@@ -2477,10 +2435,10 @@ function bezugZeile(){
         aria-expanded="${Z.startpunktOffen}">${Z.startpunktOffen ? "Schließen" : "Ändern"}</button>
     </div>${Z.startpunktOffen ? `<div class="startpunkt">
       <button class="knopf" data-standort="1">📍 Meinen Standort nutzen</button>
-      <p class="hinweis">Dein Standort bleibt auf deinem Gerät. Die App rechnet damit
-        Entfernungen, findet bei „Jetzt spielen“ den nächsten Platz und prüft beim
-        Einchecken nur, ob du nah genug dran bist. Gespeichert oder weitergegeben
-        wird er nicht.</p>
+      <p class="hinweis">Die App rechnet mit deinem Standort Entfernungen und findet
+        bei „Jetzt spielen“ den nächsten Platz. Gespeichert wird er nicht. Er verlässt
+        dein Gerät nur kurz: beim Einchecken zur Abstandsprüfung und auf etwa 1 km
+        gerundet fürs Wetter.</p>
       <form class="startpunkt-form" data-startpunktform="1">
         <label for="startpunkt-feld">Oder Ort wählen</label>
         <div class="startpunkt-reihe">
@@ -2595,7 +2553,7 @@ function ansichtListe(nurListe){
      statt in einer festen Leiste – so bleibt mehr Platz für die Plätze. */
   const listenende = `<div class="listenende">
       <button class="eintragen-karte" data-gehe="neu"><span aria-hidden="true">＋</span>
-        <span><b>Fehlt ein Platz?</b><br>Trag ihn ein – dauert eine Minute.</span></button>
+        <span><b>Fehlt ein Platz?</b><br>Platz eintragen – dauert eine Minute.</span></button>
       ${Z.admin ? `<div class="admin-reihe">
         <button class="knopf zweit" data-gehe="importieren">Import</button>
         <button class="knopf zweit" data-gehe="pruefen">Prüfen (${pruefAnzahl()})</button>
@@ -2612,8 +2570,6 @@ function ansichtListe(nurListe){
         <button data-gehe="fehler">Fehler melden</button></div>
     </div>`;
 
-  orte.slice(0, 15).forEach(adresseErgaenzen);   // generische Namen bekommen ihre Straße
-
   /* Trefferzahl: immer sagen, WAS gezählt wird, und welche Filter wirken.
      Solange die Plätze noch laden, steht das dabei – sonst springt die Zahl
      scheinbar grundlos (z. B. von 5.522 auf 95.829). */
@@ -2623,8 +2579,10 @@ function ansichtListe(nurListe){
   const ueberschrift = Z.suche.trim() ? `${zahl} Treffer für „${Z.suche.trim()}“`
     : Z.bereich ? `${zahl} ${plaetze} im Kartenausschnitt`
     : Z.maxKm && mitKm() ? `${zahl} ${plaetze} bis ${Z.maxKm} km`
-    : Z.laedtNoch ? `${zahl} ${plaetze} in der Umgebung`
-    : `${zahl} ${plaetze} in Deutschland`;
+    : Z.laedtNoch && mitKm() ? `${zahl} ${plaetze} in der Umgebung`
+    : Z.laedtNoch ? `${zahl} ${plaetze} geladen`
+    : Z.admin ? `${zahl} ${plaetze} in Deutschland`
+    : `${zahl} ${plaetze} in der Gegend`;
   const filterTeile = [
     Z.sportart !== "alle" && Z.sportart,
     Z.nurBelegt && "nur bestätigt", Z.nurFrei && !Z.nurBelegt && "frei oder vermutlich frei",
@@ -2632,15 +2590,31 @@ function ansichtListe(nurListe){
   ].filter(Boolean);
   const gesamt = (DATEN.length - DOPPELT).toLocaleString("de-DE");
   const trefferInfo = `<div class="anzahl" role="status" aria-live="polite"><span class="anzahl-zahl">${esc(ueberschrift)}</span>${
-      Z.laedtNoch ? `<span class="anzahl-info">Die Plätze in ganz Deutschland laden noch im Hintergrund …</span>`
+      Z.laedtNoch ? `<span class="anzahl-info">${Z.admin ? "Die Plätze in ganz Deutschland laden noch im Hintergrund …" : "Plätze werden geladen …"}</span>`
       : filterTeile.length || Z.maxKm || Z.bereich || Z.suche.trim()
-        ? `<span class="anzahl-info">von ${gesamt} insgesamt${filterTeile.length ? " · Filter: " + esc(filterTeile.join(", ")) : ""}
+        ? `<span class="anzahl-info">von ${gesamt} ${Z.admin ? "insgesamt" : "in der Gegend"}${filterTeile.length ? " · Filter: " + esc(filterTeile.join(", ")) : ""}
            <button class="inline-knopf" data-filterweg="1">Alle zeigen</button></span>`
-      : anzahl > orte.length ? `<span class="anzahl-info">Die ${orte.length} nächsten stehen in der Liste, alle auf der Karte.${
+      : anzahl > orte.length ? `<span class="anzahl-info">Die ${orte.length} ${mitKm() ? "nächsten" : "ersten"} stehen in der Liste, alle auf der Karte.${
+          Z.admin ? `` : ` Für andere Gegenden die Karte verschieben oder suchen.`}${
           DOPPELT ? ` ${DOPPELT.toLocaleString("de-DE")} doppelte Einträge sind zusammengefasst.` : ``}</span>` : ``}</div>`;
 
   const ohneSuche = !Z.suche.trim();
-  const rolleInhalt = `${trefferInfo}${ohneSuche ? losLeiste("oben") + losLeiste() + abzeichenStreifen() : ``}${zeilenListe.join("")}${leer}${alleOrte.length > orte.length
+  const ohneStandort = !mitKm() && ohneSuche ? `<div class="bezug">
+      <span class="bezug-text"><span aria-hidden="true">📍</span> <b>Ohne Standort:</b> Ort eingeben, dann stehen die Plätze dort oben.</span>
+      <button class="inline-knopf" data-startpunkt="${Z.startpunktOffen ? "zu" : "auf"}"
+        aria-expanded="${!!Z.startpunktOffen}">${Z.startpunktOffen ? "Schließen" : "Ort eingeben"}</button>
+    </div>${Z.startpunktOffen ? `<div class="startpunkt">
+      <form class="startpunkt-form" data-startpunktform="1">
+        <label for="startpunkt-feld">Ort</label>
+        <div class="startpunkt-reihe">
+          <input id="startpunkt-feld" type="search" enterkeyhint="search" autocomplete="off"
+            placeholder="Stadt, Stadtteil oder Adresse" value="">
+          <button class="knopf zweit" type="submit">Übernehmen</button>
+        </div>
+      </form>
+      <button class="inline-knopf" data-standort="1">📍 Doch meinen Standort nutzen</button>
+    </div>` : ``}` : ``;
+  const rolleInhalt = `${ohneStandort}${trefferInfo}${ohneSuche ? losLeiste("oben") + losLeiste() + abzeichenStreifen() : ``}${zeilenListe.join("")}${leer}${alleOrte.length > orte.length
       ? `<div class="leer">… und ${(alleOrte.length - orte.length).toLocaleString("de-DE")} weitere.<br>
          Filter setzen, suchen oder auf der Karte zoomen.</div>` : ``}${listenende}`;
 
@@ -2673,14 +2647,14 @@ function ansichtListe(nurListe){
         [["alle","Alle Plätze"],["los","Hier ist was los"],
          ...(GEMERKT.size || Z.nurGemerkt ? [["gemerkt",`Nur gemerkte (${GEMERKT.size})`]] : [])])}
       ${auswahl("sort", "Sortieren", Z.sortierung,
-        [["entfernung","Nächste zuerst"],["zustand","Bester Zustand"],["geprueft","Zuletzt geprüft"]])}
+        [["entfernung", mitKm() ? "Nächste zuerst" : "Nahe Kartenmitte"],["zustand","Bester Zustand"],["geprueft","Zuletzt geprüft"]])}
     </div>
     ${Z.bereich ? `<div class="daemmerung bereich">Zeigt den Kartenausschnitt.
       <button class="inline-knopf" data-bereich="aus">Wieder Umgebung zeigen</button></div>` : ``}
     ${daemmerung ? `<div class="daemmerung">${daemmerung}</div>` : ``}
     <div class="rolle">${rolleInhalt}</div>
     <div class="fuss listenfuss">
-      <button class="knopf" data-gehe="neu">Ort eintragen</button>
+      <button class="knopf" data-gehe="neu">Platz eintragen</button>
       ${Z.admin ? `<button class="knopf zweit" data-gehe="importieren">Import</button>` : ``}
       ${Z.admin ? `<button class="knopf zweit" data-gehe="pruefen">Prüfen (${pruefAnzahl()})</button>
       <button class="knopf zweit" data-gehe="fehlerliste">Fehler (${FEHLERBERICHTE.length})</button>` : ``}
@@ -2722,6 +2696,8 @@ document.addEventListener("input", e => {
     `<button class="suche-weg" data-suchweg="1" aria-label="Suche löschen">✕</button>`);
   clearTimeout(suchTimer);
   suchTimer = setTimeout(() => { ansichtListe(true); markerZeichnen(); }, 140);
+  clearTimeout(sucheServer.timer);
+  sucheServer.timer = setTimeout(() => sucheServer(Z.suche), 450);
 });
 document.addEventListener("focusin", e => {
   if (e.target.id === "suchfeld") sheet.aufmachen();
@@ -3251,7 +3227,7 @@ function ansichtNeu(){
   seite.innerHTML = `
     <div class="dkopf">
       <button class="zurueck" data-gehe="liste">← Abbrechen</button>
-      <div class="dname">Ort hinzufügen</div>
+      <div class="dname">Platz eintragen</div>
       <div class="dort">${p ? "Position gesetzt ✓" : "Tippe auf die Karte, um die Position zu setzen"}</div>
     </div>
     <div class="rolle">
@@ -3447,6 +3423,7 @@ async function pruefungLaden(){
     db.from("vereinszeiten").select("*").eq("status","offen").order("erstellt")]);
   NEUE_ORTE = a.data || [];
   VEREINSZEITEN = b.data || [];
+  await fotoLinksHolen(NEUE_ORTE.flatMap(n => [n.foto, n.schild_foto]));
 }
 function pruefAnzahl(){ return NEUE_ORTE.length + VEREINSZEITEN.length; }
 
@@ -3454,7 +3431,6 @@ function ansichtPruefen(){
   if (!Z.admin) { Z.ansicht = "liste"; return ansichtListe(); }
   const datum = t => new Date(t).toLocaleString("de-DE",
     { day:"2-digit", month:"2-digit", hour:"2-digit", minute:"2-digit" });
-  const fotoUrl = pfad => db.storage.from("schilder").getPublicUrl(pfad).data.publicUrl;
   seite.innerHTML = `
     <div class="dkopf">
       <button class="zurueck" data-gehe="liste">← Liste</button>
@@ -3506,7 +3482,7 @@ async function neuenOrtPruefen(id, annehmen){
   if (ECHT) {
     const beleg = document.querySelector(`select[name="beleg-${id}"]`)?.value || "nur vermutet";
     let { data, error } = await db.rpc("neuen_ort_pruefen", { p_id:+id, p_annehmen:annehmen, p_beleg:beleg });
-    // Datenbank noch ohne p_beleg (SQL nicht ausgeführt): alte Funktion.
+    // Ältere Datenbankfunktion ohne p_beleg.
     if (error && /p_beleg|function/i.test(error.message || ""))
       ({ data, error } = await db.rpc("neuen_ort_pruefen", { p_id:+id, p_annehmen:annehmen }));
     if (error) { console.error(error); return melde("Abgelehnt: " + error.message); }
@@ -3557,11 +3533,11 @@ function ansichtAnmelden(){
 
         <p class="hinweis" id="anmeldehinweis">${ECHT
           ? "Die Prüfung läuft auf dem Server. Auch wer den Code hier verändert, kommt an die geschützten Felder nicht heran."
-          : "<b>Testmodus.</b> Es ist noch kein Supabase-Projekt eingetragen (Abschnitt 0 im Code). Der Knopf unten schaltet den Admin-Modus nur zum Ausprobieren um – das ist keine Sicherung."}</p>
+          : "Keine Verbindung zur Datenbank."}</p>
       </form>
     </div>
     <div class="fuss">
-      <button class="knopf" data-anmelden="1">${Z.laden ? "…" : (ECHT ? "Anmelden" : "Testmodus einschalten")}</button>
+      <button class="knopf" data-anmelden="1">${Z.laden ? "…" : "Anmelden"}</button>
     </div>`;
 }
 
@@ -3652,9 +3628,9 @@ function zeichne(){
 
   const w = VORSCHLAEGE.length;
   document.getElementById("kopfnotiz").textContent =
-    (Z.laedtNoch ? "lädt Plätze …" : (DATEN.length - DOPPELT).toLocaleString("de-DE") + " Plätze")
+    (Z.laedtNoch ? "lädt Plätze …" : (KENNZAHLEN && !Z.admin ? KENNZAHLEN.plaetze : DATEN.length - DOPPELT).toLocaleString("de-DE") + " Plätze")
     + (Z.admin && w ? ` · ${w} ${w === 1 ? "Änderungsvorschlag" : "Änderungsvorschläge"} offen` : "")
-    + (ECHT ? "" : " · Testmodus");
+    + (ECHT ? "" : " · keine Verbindung");
 }
 
 /* ==========================================================================
@@ -3831,10 +3807,15 @@ function orteAbfrage(spalten, optionen){
   return DOPPELT_FILTER ? q.is("doppelt_von", null) : q;
 }
 
-/* Orte aus der Datenbank holen. Klappt das nicht, bleiben die Daten aus
-   Abschnitt 1 stehen – die App ist dann trotzdem benutzbar. */
+/* Orte aus der Datenbank holen. Besucher bekommen nur den Kartenausschnitt
+   (datenLadenAusschnitt), der Admin wie bisher ganz Deutschland – das
+   brauchen Import, Doppelte und Export. */
 async function datenLaden(){
   if (!ECHT) return;
+  if (!Z.admin) return datenLadenAusschnitt();
+  return datenLadenAlles();
+}
+async function datenLadenAlles(){
 
   const fehler = error => {
     melde("Datenbank nicht erreichbar. Schon das SQL-Skript ausgeführt?");
@@ -3924,16 +3905,198 @@ async function umgebungLaden(pos){
   return true;
 }
 function dazuNehmen(zeilen){
-  if (!dazuNehmen.ausDb) { DATEN = []; dazuNehmen.ausDb = true; }   // Beispieldaten weg
+  if (!dazuNehmen.ausDb) { DATEN = []; dazuNehmen.ausDb = true; }
   const schon = new Set(DATEN.map(o => String(o.id)));
   let neu = 0;
   for (const z of zeilen) {
     if (schon.has(String(z.id)) || !inDeutschland(z.lat, z.lon)) continue;
-    DATEN.push(ausDb(z)); schon.add(String(z.id)); neu++;
+    DATEN.push(ausDb(z)); schon.add(String(z.id)); ZEILEN.set(String(z.id), z); neu++;
   }
   if (!neu) return;
   doppelteMarkieren();
   zeichne();
+}
+
+/* --------------------------------------------------------------------------
+   Nur laden, was man sieht (seit 27.10.2026)
+   --------------------------------------------------------------------------
+   Deutschland ist in Kacheln von 0,2° × 0,3° geteilt (gut 20 × 22 km).
+   Ab Zoomstufe AUSSCHNITT_AB holt die App die Plätze der sichtbaren Kacheln,
+   jede höchstens einmal am Tag (Gerätespeicher). Weiter herausgezoomt zeigt
+   die Karte nur Kreise mit Anzahlen aus orte_raster() – eine kleine
+   Abfrage statt 100.000 Plätze. Suche über ganz Deutschland: orte_suchen().
+   SQL dazu: supabase-kartenausschnitt.sql.
+   -------------------------------------------------------------------------- */
+const KACHEL_LAT = 0.2, KACHEL_LON = 0.3, AUSSCHNITT_AB = 11;
+const KACHELN = new Map();      // "i:j" -> true (geladen) | "laedt"
+const ZEILEN = new Map();       // id -> Zeile wie aus der Datenbank (für den Gerätespeicher)
+let ORTE_RASTER = null, KENNZAHLEN = null, SPEICHER_START = Date.now();
+
+async function datenLadenAusschnitt(){
+  await doppeltSpaltePruefen();
+  rasterLaden();
+  kennzahlenLaden();
+  const gespeichert = await speicherLesen();
+  if (gespeichert?.kacheln && Date.now() - gespeichert.zeit < SPEICHER_ALTER_MIN * 60000) {
+    SPEICHER_START = gespeichert.zeit;
+    gespeichert.kacheln.forEach(k => KACHELN.set(k, true));
+    dazuNehmen(gespeichert.zeilen || []);
+    neueSeitSpeicher(gespeichert.zeit);
+  }
+  Z.laedtNoch = true; zeichne();
+  const okUmgebung = await umgebungKacheln(Z.position);
+  const ok = await ausschnittLaden() && okUmgebung;
+  Z.laedtNoch = false;
+  if (!ok && !DATEN.length) melde("Datenbank gerade nicht erreichbar. Bitte später noch einmal.");
+  zeichne();
+  markerZeichnen();
+}
+
+function kachelSchluessel(i, j){ return i + ":" + j; }
+function kachelnIn(sued, west, nord, ost){
+  const liste = [];
+  for (let i = Math.floor(sued / KACHEL_LAT); i <= Math.floor(nord / KACHEL_LAT); i++)
+    for (let j = Math.floor(west / KACHEL_LON); j <= Math.floor(ost / KACHEL_LON); j++)
+      if (!KACHELN.has(kachelSchluessel(i, j))) liste.push([i, j]);
+  return liste;
+}
+async function kachelLaden(i, j){
+  const k = kachelSchluessel(i, j);
+  KACHELN.set(k, "laedt");
+  const sued = +(i * KACHEL_LAT).toFixed(4), west = +(j * KACHEL_LON).toFixed(4);
+  const nord = +((i + 1) * KACHEL_LAT).toFixed(4), ost = +((j + 1) * KACHEL_LON).toFixed(4);
+  const zeilen = [];
+  for (let von = 0; von < 20000; von += 1000) {
+    const { data, error } = await orteAbfrage(LISTE_SPALTEN)
+      .gte("lat", sued).lt("lat", nord).gte("lon", west).lt("lon", ost)
+      .order("id").range(von, von + 999);
+    if (error) { KACHELN.delete(k); console.error(error); return null; }
+    zeilen.push(...data);
+    if (data.length < 1000) break;    // leere Folgeseiten sind teuer – nur weiter, wenn voll
+  }
+  KACHELN.set(k, true);
+  return zeilen;
+}
+/* Fehlende Kacheln holen, sechs gleichzeitig, und sofort zeigen. */
+async function kachelnLaden(liste){
+  let ok = true;
+  for (let n = 0; n < liste.length; n += 6) {
+    const teile = await Promise.all(liste.slice(n, n + 6).map(([i, j]) => kachelLaden(i, j)));
+    if (teile.some(t => t === null)) ok = false;
+    const zeilen = teile.flatMap(t => t || []);
+    if (zeilen.length) dazuNehmen(zeilen);
+  }
+  if (liste.length) speicherMerken();
+  return ok;
+}
+/* Umgebung des Standorts (gut 25 km), damit "Jetzt spielen", die Liste und
+   der Entfernungsfilter auch über den Kartenrand hinaus stimmen. */
+function umgebungKacheln(pos){
+  if (!ECHT || !pos) return Promise.resolve(true);
+  return kachelnLaden(kachelnIn(pos.lat - 0.23, pos.lon - 0.35, pos.lat + 0.23, pos.lon + 0.35));
+}
+function ausschnittLaden(){
+  if (!ECHT || karte.getZoom() < AUSSCHNITT_AB) return Promise.resolve(true);
+  const b = karte.getBounds().pad(0.15);
+  const liste = kachelnIn(b.getSouth(), b.getWest(), b.getNorth(), b.getEast());
+  return kachelnLaden(liste.slice(0, 30));
+}
+let ausschnittTimer = null;
+function ausschnittPlanen(){
+  clearTimeout(ausschnittTimer);
+  ausschnittTimer = setTimeout(ausschnittLaden, 250);
+}
+/* Gerätespeicher: geladene Kacheln samt Plätzen, höchstens einmal pro Sekunde schreiben. */
+let speicherTimer = null;
+function speicherMerken(){
+  clearTimeout(speicherTimer);
+  speicherTimer = setTimeout(async () => {
+    try {
+      const d = await speicherOeffnen();
+      d.transaction("daten", "readwrite").objectStore("daten").put({
+        zeit: SPEICHER_START, zeilen: [...ZEILEN.values()],
+        kacheln: [...KACHELN].filter(([, v]) => v === true).map(([k]) => k)
+      }, "orte");
+    } catch {}
+  }, 1000);
+}
+
+async function rasterLaden(){
+  const { data, error } = await db.rpc("orte_raster");
+  if (error) { console.warn("orte_raster fehlt (supabase-kartenausschnitt.sql)", error.message); return; }
+  ORTE_RASTER = data || [];
+  markerZeichnen();
+}
+async function kennzahlenLaden(){
+  const { data, error } = await db.rpc("kennzahlen");
+  if (error || !data) return;
+  KENNZAHLEN = data;
+  if (["ueber", "vereine", "partner"].includes(Z.ansicht)) zeichne();
+}
+/* Suche über ganz Deutschland: Treffer kommen zu den geladenen Plätzen dazu. */
+let suchAnfrage = 0;
+async function sucheServer(text){
+  if (!ECHT || Z.admin || text.trim().length < 3) return;
+  const nr = ++suchAnfrage;
+  const { data, error } = await db.rpc("orte_suchen", { p_text:text.trim() }).select(LISTE_SPALTEN);
+  if (error || nr !== suchAnfrage || !data?.length) return;
+  dazuNehmen(data);
+  if (Z.ansicht === "liste" && Z.suche.trim()) { ansichtListe(true); markerZeichnen(); }
+}
+
+/* Weit herausgezoomt: Kreise aus orte_raster(). Nur ohne Filter – mit
+   Filter zählen die Kreise nur die geladenen Plätze (wie bisher). */
+function rasterNutzen(){
+  return !Z.admin && ORTE_RASTER && karte.getZoom() < AUSSCHNITT_AB && !Z.suche.trim()
+    && Z.sportart === "alle" && !Z.nurFrei && !Z.nurBelegt && !Z.nurGemerkt && !Z.nurLicht && !Z.nurLos;
+}
+function rasterZeichnen(){
+  const zoom = karte.getZoom(), rahmen = karte.getBounds().pad(0.5);
+  const zellen = new Map();
+  for (const r of ORTE_RASTER) {
+    if (!rahmen.contains([r.lat, r.lon])) continue;
+    const p = karte.project([r.lat, r.lon], zoom);
+    const k = Math.floor(p.x / BUENDEL_ZELLE) + ":" + Math.floor(p.y / BUENDEL_ZELLE);
+    const g = zellen.get(k) || { n:0, x:0, y:0, rang:BUENDEL_RANG.length - 1, teile:[] };
+    g.n += r.n; g.x += p.x * r.n; g.y += p.y * r.n; g.rang = Math.min(g.rang, r.rang); g.teile.push(r);
+    zellen.set(k, g);
+  }
+  /* Wie bei den Bündeln: zusammenlegen, bis sich keine Kreise mehr berühren. */
+  let gruppen = [...zellen.values()];
+  for (let geaendert = true; geaendert; ) {
+    geaendert = false;
+    gruppen.sort((a, b) => b.n - a.n);
+    for (let i = 0; i < gruppen.length; i++) {
+      const a = gruppen[i];
+      if (!a) continue;
+      for (let j = i + 1; j < gruppen.length; j++) {
+        const b = gruppen[j];
+        if (!b) continue;
+        const abstand = Math.hypot(a.x / a.n - b.x / b.n, a.y / a.n - b.y / b.n);
+        if (abstand >= buendelGroesse(a.n) / 2 + buendelGroesse(b.n) / 2 + 6) continue;
+        a.n += b.n; a.x += b.x; a.y += b.y; a.rang = Math.min(a.rang, b.rang); a.teile.push(...b.teile);
+        gruppen[j] = null;
+        geaendert = true;
+      }
+    }
+    gruppen = gruppen.filter(Boolean);
+  }
+  for (const g of gruppen) {
+    const mitte = karte.unproject(L.point(g.x / g.n, g.y / g.n), zoom);
+    const groesse = buendelGroesse(g.n);
+    const text = g.n >= 1000 ? (g.n / 1000).toFixed(g.n >= 10000 ? 0 : 1).replace(".", ",") + "k" : g.n;
+    L.marker(mitte, {
+      icon: L.divIcon({ className:"buendel",
+        html:`<span style="--ring:${BUENDEL_RANG[g.rang] || "#8E8E93"};width:${groesse}px;height:${groesse}px">${text}</span>`,
+        iconSize:[groesse, groesse] }),
+      keyboard:false
+    })
+    .on("click", () => g.teile.length > 1
+      ? karte.flyToBounds(L.latLngBounds(g.teile.map(r => [r.lat, r.lon])).pad(0.3),
+          { maxZoom:AUSSCHNITT_AB + 1, duration:.6 })
+      : karte.flyTo(mitte, AUSSCHNITT_AB + 1, { duration:.6 }))
+    .addTo(markerEbene);
+  }
 }
 
 /* Ganz Deutschland: Supabase liefert höchstens 1000 Zeilen pro Anfrage –
@@ -4131,7 +4294,7 @@ async function neuVorschlagen(w){
       beleuchtung: w.beleuchtung === "weiß nicht" ? null : w.beleuchtung,
       umzaeunt: w.umzaeunt === "weiß nicht" ? null : w.umzaeunt };
     let { error } = await db.from("neue_orte").insert(neu);
-    // Neue Spalten fehlen noch (SQL nicht ausgeführt): alles in den Hinweis schreiben.
+    // Ältere Tabelle ohne die neuen Spalten: alles in den Hinweis schreiben.
     if (error && /column|schema cache/i.test(error.message || "")) {
       const zusatz = [zeiten && "Zeiten: " + zeiten,
         neu.quelle && "Quelle: " + neu.quelle + (neu.quelle_detail ? " (" + neu.quelle_detail + ")" : ""),
@@ -4273,7 +4436,7 @@ async function alsGepruefT(id){
     /* 23505 = dieses Gerät hat schon bestätigt (z. B. Speicher gelöscht). */
     if (error && error.code !== "23505") {
       console.error(error);
-      return melde("Konnte nicht gespeichert werden.");
+      return melde(bremseText(error) || "Konnte nicht gespeichert werden.");
     }
   }
   if (ECHT) {
@@ -4452,7 +4615,8 @@ async function meldungAbgeben(grund, id){
 
   if (ECHT) {
     const { error } = await db.from("meldungen").insert({ ort_id:o.id, grund });
-    if (error) { console.error(error); return melde("Konnte nicht gemeldet werden."); }
+    if (error?.code === "23505") return melde("Diesen Platz hast du heute schon gemeldet.");
+    if (error) { console.error(error); return melde(bremseText(error) || "Konnte nicht gemeldet werden."); }
   }
   Z.meldungen[o.id] = (Z.meldungen[o.id] || 0) + 1;
   eigeneMeldungMerken(o.id, { weggeschickt:"Ich wurde weggeschickt", abgesperrt:"Tor war zu",
@@ -4500,13 +4664,33 @@ async function bestaetigungenLaden(){
     if (b.art === "gespielt" && b.erstellt >= seit)
       zaehler[b.ort_id] = (zaehler[b.ort_id] || 0) + 1;
     if (b.art === "schild" && b.foto)
-      (schilder[b.ort_id] ||= []).push({
-        id:b.id, pfad:b.foto, freigegeben:b.freigegeben,
-        url: db.storage.from("schilder").getPublicUrl(b.foto).data.publicUrl
-      });
+      (schilder[b.ort_id] ||= []).push({ id:b.id, pfad:b.foto, freigegeben:b.freigegeben, url:"" });
   }
+  await fotoLinksHolen(zeilen.filter(b => b.art === "schild" && b.foto).map(b => b.foto));
+  for (const liste of Object.values(schilder)) for (const f of liste) f.url = fotoUrl(f.pfad);
   Z.bestaetigungen = zaehler;
   Z.schilder = schilder;
+}
+
+/* Fotos liegen privat (supabase-missbrauchsschutz.sql). Zu sehen sind sie
+   nur über Links, die nach einigen Stunden ablaufen, und die gibt die
+   Datenbank nur für freigegebene Fotos heraus (dem Admin für alle). Solange
+   der Speicher noch öffentlich ist, klappt der alte öffentliche Link. */
+const FOTO_LINKS = new Map();
+/* Server-Bremse (supabase-missbrauchsschutz.sql): verständliche Meldung. */
+function bremseText(error){
+  return /Zu viele Anfragen/.test(error?.message || "") ? "Gerade zu viele Anfragen von deinem Anschluss. Bitte später noch einmal." : "";
+}
+function fotoUrl(pfad){ return FOTO_LINKS.get(pfad) || ""; }
+async function fotoLinksHolen(pfade){
+  const fehlen = [...new Set(pfade.filter(p => p && !FOTO_LINKS.has(p)))];
+  if (!ECHT || !fehlen.length) return;
+  let data = null;
+  try { ({ data } = await db.storage.from("schilder").createSignedUrls(fehlen, 6 * 3600)); } catch {}
+  for (const p of fehlen) {
+    const d = (data || []).find(x => x.path === p && x.signedUrl);
+    FOTO_LINKS.set(p, d ? d.signedUrl : db.storage.from("schilder").getPublicUrl(p).data.publicUrl);
+  }
 }
 
 /* Handyfotos sind 4–12 MB groß. Vor dem Hochladen auf 1600 px verkleinern:
@@ -4551,9 +4735,9 @@ async function schildHochladen(datei, id){
     if (e1) { console.error(e1); return melde("Hochladen hat nicht geklappt."); }
     const { error:e2 } = await db.from("bestaetigungen")
       .insert({ ort_id:o.id, art:"schild", foto:pfad, geraet:geraetId() });
-    if (e2) { console.error(e2); return melde("Hochladen hat nicht geklappt."); }
-    eintrag = { id:null, pfad, freigegeben:false,
-                url: db.storage.from("schilder").getPublicUrl(pfad).data.publicUrl };
+    if (e2) { console.error(e2); return melde(bremseText(e2) || "Hochladen hat nicht geklappt."); }
+    /* Eigene Vorschau aus dem Gerät – das Foto selbst ist bis zur Freigabe privat. */
+    eintrag = { id:null, pfad, freigegeben:false, url: URL.createObjectURL(blob) };
   } else {
     eintrag = { id:"lokal-" + Date.now(), pfad:null, freigegeben:false,
                 url: URL.createObjectURL(blob) };
@@ -4608,9 +4792,14 @@ const ADRESSE_WARTE = [];
 const ADRESSE_VERSUCHT = new Set();
 let adresseLaeuft = false;
 
+/* Nur beim Öffnen eines Platzes und je Gerät höchstens einmal pro Platz
+   (Nominatim-Nutzungsregeln: keine Massenabfragen). */
+const ADRESSE_SCHLUESSEL = "platzfrei.adresse.versucht";
+try { JSON.parse(localStorage.getItem(ADRESSE_SCHLUESSEL) || "[]").forEach(id => ADRESSE_VERSUCHT.add(id)); } catch {}
 function adresseErgaenzen(o){
   if (!o || (o.ort && o.ort.includes(",")) || ADRESSE_VERSUCHT.has(o.id)) return;
   ADRESSE_VERSUCHT.add(o.id);
+  try { localStorage.setItem(ADRESSE_SCHLUESSEL, JSON.stringify([...ADRESSE_VERSUCHT].slice(-300))); } catch {}
   ADRESSE_WARTE.push(o);
   if (!adresseLaeuft) adresseNaechste();
 }
@@ -4645,11 +4834,16 @@ function neuerNameMitAdresse(name, altOrt, ortNeu, strasse, platzhalter){
 
 async function adresseUebernehmen(o, ortNeu, strasse){
   const nameNeu = neuerNameMitAdresse(o.name, o.ort, ortNeu, strasse, o.platzhalter);
+  if (ECHT) {
+    /* Die Datenbank antwortet mit "ok", "ok_ohne_name" oder einem Grund,
+       warum sie nichts geändert hat (z. B. Ort passt nicht). */
+    let antwort = null;
+    try { ({ data:antwort } = await db.rpc("adresse_ergaenzen", { p_id:o.id, p_ort:ortNeu, p_strasse:strasse })); } catch {}
+    if (antwort !== null && !String(antwort).startsWith("ok")) return;
+    if (antwort === "ok_ohne_name") { o.ort = ortNeu + ", " + strasse; return; }
+  }
   o.name = nameNeu;
   o.ort = ortNeu + ", " + strasse;
-  if (ECHT) {
-    try { await db.rpc("adresse_ergaenzen", { p_id:o.id, p_ort:ortNeu, p_strasse:strasse }); } catch {}
-  }
   /* Nur das Nötigste neu zeichnen, damit nichts springt. */
   if (Z.ansicht === "detail" && Z.auswahlId === o.id) {
     const n = seite.querySelector(".dname"), d = seite.querySelector(".dort");
@@ -4673,12 +4867,19 @@ async function teilen(id){
   try { await navigator.clipboard.writeText(url); melde("Link kopiert."); }
   catch { prompt("Link zum Platz:", url); }
 }
-function platzAusAdresse(){
+async function platzAusAdresse(){
   if (location.hash === "#partner") { Z.ansicht = "partner"; zeichne(); sheet.aufmachen(); return; }
+  if (/^#(impressum|datenschutz)$/.test(location.hash)) { Z.ansicht = "rechtliches"; zeichne(); sheet.aufmachen(); return; }
   const m = location.hash.match(/^#platz=(.+)$/);
   if (!m) return;
-  const o = ort(decodeURIComponent(m[1]));
+  const id = decodeURIComponent(m[1]);
   history.replaceState(history.state, "", location.pathname + location.search);
+  /* Nur der Kartenausschnitt ist geladen: den geteilten Platz einzeln holen. */
+  if (!ort(id) && ECHT) {
+    const { data } = await db.from("orte").select(LISTE_SPALTEN).eq("id", id).maybeSingle();
+    if (data) dazuNehmen([data]);
+  }
+  const o = ort(id);
   if (!o) return;
   Z.auswahlId = o.id; Z.ansicht = "detail"; zeichne();
   karte.setView([o.lat, o.lon], 16);
@@ -4705,13 +4906,7 @@ function routeOeffnen(id){
    ========================================================================== */
 
 async function anmelden(){
-  if (!ECHT) {                      // Testmodus: nur umschalten
-    Z.admin = !Z.admin;
-    Z.ansicht = "liste";
-    zeichne();
-    return melde(Z.admin ? "Testmodus: Admin an (keine echte Sicherung)."
-                         : "Testmodus: Admin aus.");
-  }
+  if (!ECHT) return melde("Keine Verbindung zur Datenbank. Bitte später noch einmal.");
 
   const f = document.getElementById("anmeldeformular");
   const email    = f.email.value.trim();
@@ -5625,6 +5820,7 @@ async function fehlerErledigt(id){
    Alle Zahlen kommen live aus den geladenen Plätzen – nichts ist geschätzt.
    -------------------------------------------------------------------------- */
 function kennzahlen(){
+  if (KENNZAHLEN) return { ...KENNZAHLEN };   // aus der Datenbank (ganz Deutschland)
   const z = { plaetze:DATEN.length, frei:0, verein:0, vereinZeiten:0, belegt:0, sportarten:new Set() };
   const gemeinden = new Set(), orte = new Set();
   for (const o of DATEN) {
@@ -5633,14 +5829,21 @@ function kennzahlen(){
     if (v && !v[1]) z.verein++;
     if (o.bestaetigtDurch === "Auskunft Verein") z.vereinZeiten++;
     if (belegt(o)) z.belegt++;
-    if (o.bestaetigtDurch === "Auskunft Gemeinde" && o.ort) gemeinden.add(o.ort);
-    if (o.ort) orte.add(o.ort);
+    /* Nur der Ort, ohne angehängte Straße ("München, Candidstraße"). */
+    const ortsname = o.ort && o.ort !== "—" ? o.ort.split(",")[0].trim() : "";
+    if (o.bestaetigtDurch === "Auskunft Gemeinde" && ortsname) gemeinden.add(ortsname);
+    if (ortsname) orte.add(ortsname);
     (o.sportarten || []).forEach(s => z.sportarten.add(s));
   }
   z.gemeinden = gemeinden.size; z.orte = orte.size; z.sportarten = z.sportarten.size;
   return z;
 }
 const zahlText = n => n.toLocaleString("de-DE");
+/* Kleine Zahlen wirken leer statt einladend: erst ab einer Mindestgröße zeigen. */
+const ZAHL_AB = { verein:300, vereinZeiten:30, gemeinden:20 };
+function kachel(n, text, klasse = "", ab = 0){
+  return n >= ab ? `<div class="zahl${klasse ? " " + klasse : ""}"><b>${zahlText(n)}</b><small>${text}</small></div>` : ``;
+}
 
 function ueberFuss(){
   return `<div class="ueber-fuss">Platzfrei · ${esc(RECHT.email)} ·
@@ -5669,8 +5872,8 @@ function ansichtUeber(){
         <div class="zahlen">
           <div class="zahl"><b>${zahlText(z.plaetze)}</b><small>Plätze in ganz Deutschland</small></div>
           <div class="zahl gruen"><b>${zahlText(z.frei)}</b><small>davon frei zugänglich</small></div>
-          <div class="zahl lila"><b>${zahlText(z.verein)}</b><small>Vereinsanlagen</small></div>
-          <div class="zahl"><b>${zahlText(z.gemeinden)}</b><small>Gemeinden haben ihre Plätze bestätigt</small></div>
+          ${kachel(z.verein, "Vereinsanlagen", "lila", ZAHL_AB.verein)}
+          ${kachel(z.gemeinden, "Gemeinden mit amtlichen Angaben", "", ZAHL_AB.gemeinden)}
         </div>
       </div>
       <div class="ueber-teil">
@@ -5744,12 +5947,12 @@ function ansichtVereine(){
           <a class="knopf zweit" href="mailto:${esc(RECHT.email)}?subject=Platzfrei%20f%C3%BCr%20Vereine">Kontakt aufnehmen</a>
         </div>
       </div>
-      <div class="ueber-teil">
+      ${z.verein >= ZAHL_AB.verein ? `<div class="ueber-teil">
         <div class="zahlen">
-          <div class="zahl lila"><b>${zahlText(z.verein)}</b><small>Vereinsanlagen auf der Karte</small></div>
-          <div class="zahl gruen"><b>${zahlText(z.vereinZeiten)}</b><small>Plätze mit Angaben direkt vom Verein</small></div>
+          ${kachel(z.verein, "Vereinsanlagen auf der Karte", "lila")}
+          ${kachel(z.vereinZeiten, "Plätze mit Angaben direkt vom Verein", "gruen", ZAHL_AB.vereinZeiten)}
         </div>
-      </div>
+      </div>` : ``}
       <div class="ueber-teil">
         <h3>Was ihr davon habt</h3>
         <div class="schritte">
@@ -5797,7 +6000,7 @@ function ansichtPartner(){
         <div class="zahlen">
           <div class="zahl"><b>${zahlText(z.plaetze)}</b><small>Plätze in ganz Deutschland</small></div>
           <div class="zahl gruen"><b>${zahlText(z.frei)}</b><small>davon frei zugänglich</small></div>
-          <div class="zahl"><b>${zahlText(z.gemeinden)}</b><small>Gemeinden haben ihre Plätze bestätigt</small></div>
+          ${kachel(z.gemeinden, "Gemeinden mit amtlichen Angaben", "", ZAHL_AB.gemeinden)}
           <div class="zahl"><b>${zahlText(z.sportarten)}</b><small>Sportarten</small></div>
         </div>
       </div>
@@ -5921,6 +6124,14 @@ function ansichtRechtliches(){
         (Supabase Inc., USA) auf Servern in Irland (EU). Supabase arbeitet für
         uns als Auftragsverarbeiter (Art. 28 DSGVO). Ein Konto mit E-Mail und
         Passwort gibt es nur für uns als Betreiber, um Beiträge zu prüfen.</p>
+        <p><b>Schutz vor Missbrauch:</b> Damit niemand die Karte mit falschen
+        Meldungen, Spielen oder Check-ins flutet, zählt die Datenbank, wie oft
+        von einem Internetanschluss aus etwas eingetragen wird. Gespeichert
+        wird dafür nicht die IP-Adresse, sondern nur ein daraus berechneter
+        Prüfwert, der jeden Tag wechselt und sich nicht zurückrechnen lässt.
+        Er wird nach zwei Tagen gelöscht. Rechtsgrundlage ist unser
+        berechtigtes Interesse an einem sicheren Betrieb (Art. 6 Abs. 1
+        lit. f DSGVO).</p>
 
         <h4>4. Die zufällige Geräte-Nummer</h4>
         <p>Für einige Funktionen legt die App beim ersten Mal eine zufällige
@@ -5962,8 +6173,9 @@ function ansichtRechtliches(){
         Vorschlag zu prüfen.</p>
         <p><b>Fotos:</b> Fotos werden vor dem Hochladen auf deinem Gerät
         verkleinert, dabei werden Ortungs- und Kameradaten aus der Datei
-        entfernt. Wir prüfen jedes Foto, bevor es öffentlich sichtbar wird,
-        und löschen Fotos mit erkennbaren Personen oder Kennzeichen.</p>
+        entfernt. Bis wir ein Foto geprüft und freigegeben haben, liegt es
+        in einem nicht öffentlichen Speicher. Fotos mit erkennbaren Personen
+        oder Kennzeichen löschen wir.</p>
         <p><b>Platzzeiten von Vereinen:</b> Trägt jemand für einen Verein
         Platzzeiten ein, speichern wir Name, Funktion und E-Mail, um bei
         Rückfragen nachzuhaken. Diese Angaben werden nicht veröffentlicht und
@@ -5993,8 +6205,9 @@ function ansichtRechtliches(){
         <h4>7. Karten, Bilder und Bibliotheken</h4>
         <p>Kartenbilder laden wir von CARTO bzw. Esri, Luftbilder von Esri,
         die Programmbibliotheken von cdnjs (Cloudflare) und jsDelivr. Öffnest du einen Platz ohne Straßenangabe, fragen wir die
-        Adresse dieses Platzes bei Nominatim (OpenStreetMap Foundation,
-        Großbritannien) ab. Dabei erfahren diese Anbieter technisch bedingt
+        Adresse dieses einen Platzes bei Nominatim (OpenStreetMap Foundation,
+        Großbritannien) ab; gibst du ohne Standort einen Ort ein, sucht
+        Nominatim diesen Ort. Dabei erfahren diese Anbieter technisch bedingt
         deine IP-Adresse. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO
         (Darstellung der Karte).</p>
         <p>Tippst du auf „Route“, öffnet sich Apple Karten oder Google Maps.
@@ -6857,7 +7070,8 @@ function standortUebernehmen(p){
   ichMarker = L.circleMarker([Z.position.lat, Z.position.lon], {
     radius:7, color:"#fff", weight:2.5, fillColor:"#2E6BE0", fillOpacity:1
   }).addTo(karte);
-  if (Z.laedtNoch) umgebungLaden(Z.position);
+  if (!Z.admin) umgebungKacheln(Z.position);
+  else if (Z.laedtNoch) umgebungLaden(Z.position);
   zeichne();
   wetterLaden();
 }
@@ -6911,10 +7125,10 @@ const StandortKnopf = L.Control.extend({
       <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none"
         stroke="currentColor" stroke-width="2" stroke-linecap="round">
         <circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></a>
-      <a href="#" role="button" class="neu-knopf" title="Platz hinzufügen" aria-label="Platz hinzufügen">
+      <a href="#" role="button" class="neu-knopf" title="Platz eintragen" aria-label="Platz eintragen">
       <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none"
         stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-      <span class="neu-blase">Platz vorschlagen</span></a>`;
+      <span class="neu-blase">Platz eintragen</span></a>`;
     L.DomEvent.disableClickPropagation(box);
     L.DomEvent.on(box.firstElementChild, "click", e => { L.DomEvent.preventDefault(e); zuMeinemStandort(); });
     L.DomEvent.on(box.lastElementChild, "click", e => {
@@ -7044,10 +7258,12 @@ karte.on("dragstart", () => sheet.klein());
 adminAdresseOeffnen();
 
 (async function start(){
-  if (location.hash !== "#partner") einfuehrungZeigen();
+  /* Wer über einen Link direkt auf eine Unterseite kommt, bekommt die
+     Einführung nicht darübergelegt. */
+  if (!/^#(partner|platz=|impressum|datenschutz|admin)/.test(location.hash)) einfuehrungZeigen();
   await adminPruefen();
   await datenLaden();
-  platzAusAdresse();
+  await platzAusAdresse();
   await Promise.all([meldungenLaden(), bestaetigungenLaden(), aktivLaden(), spieleLaden()]);
   zeichne();
   wetterLaden();          // läuft nebenher, blockiert den Start nicht
