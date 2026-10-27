@@ -401,6 +401,9 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
 .tipps-neu{margin-top:12px;padding-top:12px;border-top:1px dashed var(--kante)}
 
 /* ---------- Abzeichen ---------- */
+.mini-legende{display:flex;flex-wrap:wrap;gap:4px 14px;margin:-2px 0 10px;font-size:12.5px;color:var(--tinte-2)}
+.mini-legende span{display:inline-flex;align-items:center;gap:6px}
+.mini-legende i{width:10px;height:10px;border-radius:50%;flex:none}
 .einf-recht{background:none;border:0;font:inherit;font-size:12px;color:var(--tinte-3);text-decoration:underline;margin:10px auto 0;display:block;cursor:pointer}
 .abzeichen-gitter{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin:0 20px 12px}
 .abzeichen{background:var(--flaeche);border-radius:var(--r-karte);box-shadow:var(--schatten);
@@ -1559,14 +1562,11 @@ const FARBE = {
   "nicht öffentlich":"#FF3B30",
   "unklar":"#8E8E93"
 };
-function farbe(o){
-  // Ungeklärt, aber Vereinshinweis: eigene Farbe, damit man auf der Karte
-  // sofort sieht, wo man besser erst fragt.
-  if (o.zugang === "unklar" && vereinsMarke(o)) return "#7A5EA8";
-  /* Frei, aber ohne Beleg: hellgrün wie "vermutlich öffentlich". */
-  if (frei(o) && !belegt(o) && !nutzerBestaetigt(o)) return "#8FD9A3";
-  return FARBE[o.zugang] || "#8E8E93";
-}
+/* Seit 27.10.2026 nur noch drei Farben (plus Rot für gesperrt):
+   Grün = darfst du, Orange = vorher fragen, Grau = wissen wir nicht.
+   Wie sicher das ist, zeigt die Form des Punkts (voll / gestrichelt / hohl). */
+const AMPEL_FARBE = { gruen:"#34C759", orange:"#FF9F0A", grau:"#8E8E93", rot:"#FF3B30" };
+function farbe(o){ return AMPEL_FARBE[ampel(o)]; }
 
 /* Bei wenigen Orten wären einzelne HTML-Marker fein – bei tausenden wird der
    Browser damit zäh. Canvas zeichnet alle Punkte in eine einzige Fläche und
@@ -1586,7 +1586,7 @@ const BUENDEL_BIS_ZOOM = 13;   // bis hier bündeln, ab 14 einzelne Punkte
 const BUENDEL_ZELLE = 60;      // Bündelgröße in Bildschirmpunkten
 
 /* Welche Farbe ein Bündel bekommt: die "beste" Nachricht darin gewinnt. */
-const BUENDEL_RANG = ["#34C759", "#8FD9A3", "#FF9F0A", "#FFC978", "#7A5EA8", "#FF3B30", "#8E8E93"];
+const BUENDEL_RANG = ["#34C759", "#34C759", "#FF9F0A", "#FF9F0A", "#FF9F0A", "#FF3B30", "#8E8E93"];
 
 /* Hervorgehoben wird ein Platz nur, solange er geöffnet ist. Zurück in
    der Liste verschwindet die Markierung wieder. */
@@ -1830,14 +1830,20 @@ function frei(o){
 /* Aus der Lage geschlossen (Park, Spielplatz, Schulgelände in OSM),
    aber nicht belegt. Eigene, hellere Stufe. */
 function vermutlichFrei(o){ return o.zugang === "vermutlich öffentlich"; }
+/* Ampel: die eine Antwort auf "Darf ich hier spielen?". */
+function ampel(o){
+  if (o.zugang === "Vereinsgelände abgeschlossen" || o.zugang === "nicht öffentlich") return "rot";
+  if (frei(o) || vermutlichFrei(o)) return "gruen";
+  if (o.zugang === "unklar" && !belegt(o) && nutzerBestaetigt(o)) return "gruen";
+  if (o.zugang.includes("Absprache") || o.zugang.includes("Schulhof")) return "orange";
+  if (o.zugang === "unklar" && vereinsMarke(o)) return "orange";
+  return "grau";
+}
 function markeArt(o){
-  /* "öffentlich" ohne Beleg ist nur eine Vermutung – so zeigen wir es auch. */
-  if (frei(o)) return belegt(o) || nutzerBestaetigt(o) ? ["frei","frei zugänglich"] : ["vermutet","vermutlich frei"];
-  if (vermutlichFrei(o)) return ["vermutet","vermutlich frei"];
-  if (o.zugang === "vermutlich Schulhof") return ["absprache","vermutlich Schulhof"];
-  if (o.zugang.includes("Absprache")||o.zugang.includes("Schulhof"))
-    return ["absprache","nach Absprache"];
-  return ["unklar", o.zugang==="unklar" ? "Zugang unklar" : "nicht zugänglich"];
+  const a = ampel(o);
+  if (a === "gruen") return belegt(o) || nutzerBestaetigt(o) ? ["frei","frei zum Spielen"] : ["vermutet","vermutlich frei"];
+  if (a === "orange") return ["absprache","vorher fragen"];
+  return ["unklar", a === "rot" ? "nicht frei" : "Zugang unklar"];
 }
 
 /* Vereinsanlage: sicher, wenn der Zugang es sagt – sonst Verdacht aus dem
@@ -1878,23 +1884,31 @@ function nutzerBestaetigt(o){
    -------------------------------------------------------------------------- */
 const VERALTET_MONATE = 24;
 function zugangStufe(o){
-  const [art, text] = markeArt(o);
+  const a = ampel(o), v = vereinsMarke(o);
+  const sicher = belegt(o) && o.zugang !== "unklar";
   const nutzer = !belegt(o) && nutzerBestaetigt(o);
-  const v = vereinsMarke(o);
-  const zu = o.zugang === "Vereinsgelände abgeschlossen" || o.zugang === "nicht öffentlich";
-  if ((belegt(o) && o.zugang !== "unklar") || nutzer) return { stufe:"bestaetigt", art, icon: zu ? "✕" : "✓",
-    titel: art === "frei" ? "Frei · bestätigt" : art === "unklar" && nutzer ? "Von Nutzern bestätigt"
-         : text.charAt(0).toUpperCase() + text.slice(1) + " · bestätigt",
-    kurz: nutzer ? "Mehrere Leute haben hier gespielt"
-         : o.zugang === "nicht öffentlich" ? "Laut Gemeinde nicht öffentlich nutzbar" : "Zugang ist belegt" };
-  if (o.zugang === "unklar") return { stufe:"ungeklaert", art:"unklar", icon:"?",
-    titel: v && v[1] ? "Ungeklärt · vermutlich Verein" : "Zugang ungeklärt",
-    kurz: v && v[1] ? "Vor dem Spielen beim Verein fragen" : "Vorher klären, ob man hier darf" };
-  if (zu) return { stufe:"vermutet", art:"unklar", icon:"✕",
-    titel:"Nicht frei zugänglich", kurz: o.zugang === "nicht öffentlich" ? "Nicht öffentlich nutzbar" : "Abgeschlossen, nur für den Verein" };
-  return { stufe:"vermutet", art, icon:"≈",
-    titel: (art === "absprache" && o.zugang !== "vermutlich Schulhof" ? "Nach Absprache" : text.charAt(0).toUpperCase() + text.slice(1)) + " · ungeprüft",
-    kurz: o.bestaetigtDurch === "Lage (OSM)" ? "Aus der Lage auf der Karte geschlossen" : "Nur vermutet, nie geprüft" };
+  const laut = { "Auskunft Gemeinde":"laut Gemeinde", "Auskunft Verein":"laut Verein",
+    "Auskunft Schule":"laut Schule", "Schild vor Ort":"laut Schild vor Ort" }[o.bestaetigtDurch] || "";
+  const stufe = sicher || (nutzer && a === "gruen") ? "bestaetigt" : a === "grau" ? "ungeklaert" : "vermutet";
+  const art = a === "gruen" ? "frei" : a === "orange" ? "absprache" : "unklar";
+  const icon = a === "rot" ? "✕" : a === "orange" ? "!" : a === "grau" ? "?" : stufe === "bestaetigt" ? "✓" : "≈";
+  const titel = { gruen:"Frei zum Spielen", orange:"Vorher fragen", grau:"Wissen wir noch nicht", rot:"Nicht frei" }[a];
+  let kurz;
+  if (a === "gruen") kurz = sicher ? "Bestätigt " + laut
+    : nutzer ? "Bestätigt: mehrere Leute haben hier gespielt"
+    : "Vermutet, noch nicht bestätigt";
+  else if (a === "orange") {
+    const verein = o.zugang.startsWith("Vereinsgelände") || o.zugang === "unklar";
+    kurz = verein ? `Vereinsanlage${o.verein ? " (" + o.verein + ")" : ""}: beim Verein fragen`
+      : o.zugang === "vermutlich Schulhof" ? "Vermutlich Schulhof: vorher fragen"
+      : o.zugang.includes("Schulhof") ? "Schulhof: meist nach dem Unterricht"
+      : "Nur nach Absprache";
+    if (sicher) kurz += " · " + laut;
+  }
+  else if (a === "rot") kurz = (o.zugang === "nicht öffentlich" ? "Nicht öffentlich nutzbar" : "Abgeschlossen, nur für den Verein")
+    + (sicher ? " · " + laut : "");
+  else kurz = "Vorher klären, ob man hier darf";
+  return { stufe, art, icon, titel, kurz, ampel:a, vereinHinweis: !!(v && v[1]) };
 }
 
 /* Woher die Angabe stammt und wie alt sie ist – für Liste und Detail. */
@@ -2373,10 +2387,10 @@ function einfuehrungZeigen(immer){
         <div class="einf-bild">${s.bild}</div>
         <h2>${s.titel}</h2><p>${s.text}</p>
         ${s.legende ? `<div class="einf-legende">
-          <span><i class="z-bestaetigt" style="background:#34C759">✓</i>bestätigt frei</span>
-          <span><i class="z-vermutet" style="border-color:#34C759">≈</i>vermutet, ungeprüft</span>
-          <span><i style="background:#FF9F0A">!</i>nach Absprache</span>
-          <span><i class="z-unklar" style="background:#8E8E93">?</i>Zugang ungeklärt</span></div>` : ``}
+          <span><i class="z-bestaetigt" style="background:#34C759">✓</i>Grün: darfst du</span>
+          <span><i style="background:#FF9F0A">!</i>Orange: vorher fragen</span>
+          <span><i class="z-unklar" style="background:#8E8E93">?</i>Grau: wissen wir nicht</span>
+          <span><i style="background:#FF3B30">✕</i>Rot: nicht frei</span></div>` : ``}
         <button class="einf-recht" data-einfrecht="1">Impressum &amp; Datenschutz</button>
         <div class="einf-punkte" aria-hidden="true">${EINF_SEITEN.map((_, k) => `<i class="${k === i ? "an" : ""}"></i>`).join("")}</div>
         ${s.standort ? `<button class="knopf" data-einfstandort="1">Ja, ab meinem Standort</button>
@@ -2526,8 +2540,7 @@ function ansichtListe(nurListe){
           o.sportarten.length > 3 ? `<span class="ztag mehr">+${o.sportarten.length - 3}</span>` : ``}${
           o.untergrund && o.untergrund !== "—" ? `<span class="zbelag">${esc(o.untergrund)}</span>` : ``}</span>
         <span class="zzugang ${st.stufe} ${st.art}"><span class="zicon" aria-hidden="true">${st.icon}</span>${st.titel}</span>
-        <span class="zquelle${stand.alt && st.stufe !== "ungeklaert" ? " alt" : ""}">${st.stufe === "ungeklaert"
-          ? esc(st.kurz) : `${esc(quelleText(o))} · ${stand.alt && st.stufe === "bestaetigt" ? "⚠ " : ""}${stand.text}`}</span>${v && !(st.stufe === "ungeklaert" && v[1]) ? `
+        <span class="zquelle${o.geprueft && stand.alt ? " alt" : ""}">${esc(st.kurz)}${o.geprueft ? ` · ${stand.text}` : ``}</span>${v && !v[1] && st.ampel === "gruen" ? `
         <span class="marke verein">${v[0]}</span>` : ``}${bs ? `
         <span class="marke boden ${bs[0]}">${bs[1]}</span>` : ``}${anzMeld >= 3 ? `
         <span class="marke warnung">⚠ ${anzMeld}× gemeldet</span>` : ``}${
@@ -2614,7 +2627,10 @@ function ansichtListe(nurListe){
       </form>
       <button class="inline-knopf" data-standort="1">📍 Doch meinen Standort nutzen</button>
     </div>` : ``}` : ``;
-  const rolleInhalt = `${ohneStandort}${trefferInfo}${ohneSuche ? losLeiste("oben") + losLeiste() + abzeichenStreifen() : ``}${zeilenListe.join("")}${leer}${alleOrte.length > orte.length
+  const miniLegende = ohneSuche ? `<div class="mini-legende" aria-label="Farben">
+      <span><i style="background:#34C759"></i>darfst du</span><span><i style="background:#FF9F0A"></i>vorher fragen</span>
+      <span><i style="background:#8E8E93"></i>wissen wir nicht</span></div>` : ``;
+  const rolleInhalt = `${ohneStandort}${trefferInfo}${miniLegende}${ohneSuche ? losLeiste("oben") + losLeiste() + abzeichenStreifen() : ``}${zeilenListe.join("")}${leer}${alleOrte.length > orte.length
       ? `<div class="leer">… und ${(alleOrte.length - orte.length).toLocaleString("de-DE")} weitere.<br>
          Filter setzen, suchen oder auf der Karte zoomen.</div>` : ``}${listenende}`;
 
@@ -3023,7 +3039,7 @@ function ansichtDetail(){
       <button class="zurueck" data-gehe="liste">← Liste</button>
       <div class="dname">${esc(o.name)}</div>
       <div class="dort">${esc(o.ort)}${mitKm() ? ` · ${entfText(entfernungKm(Z.position,o))} entfernt` : ``}</div>
-      ${verein ? `<span class="marke verein">${verein[0]}</span>` : ``}
+      ${verein && !(verein[1] && st.stufe === "bestaetigt") ? `<span class="marke verein">${verein[0]}</span>` : ``}
     </div>
     <div class="rolle">
       <!-- Das Wichtigste zuerst: Darf ich hier spielen, und wann? -->
@@ -3032,7 +3048,7 @@ function ansichtDetail(){
         <span class="status-icon" aria-hidden="true">${st.icon}</span>
         <span class="status-text"><b>${st.titel}</b>
           <span>${st.kurz}${zeitenFehlen ? ` · Zeiten unbekannt` : ` · ${esc(o.zeiten)}`}</span>
-          <span class="status-quelle${stand.alt ? " alt" : ""}">Quelle: ${esc(quelleText(o))} · ${stand.text}</span></span>
+          <span class="status-quelle${o.geprueft && stand.alt ? " alt" : ""}">Quelle: ${esc(quelleText(o))}${o.geprueft ? ` · ${stand.text}` : ``}</span></span>
       </div>
       ${naechsterSchritt}${eigeneMeldungen(o.id).length ? `<div class="gemeldet" role="note">
         <b>Deine Meldung ist offen</b>
@@ -5890,7 +5906,7 @@ function ansichtUeber(){
           <div class="schritt"><span class="nr">1</span><b>Platz finden</b>
             <p>Karte öffnen, Sportart wählen. Die App zeigt die nächsten Plätze mit Untergrund, Flutlicht und Wetter.</p></div>
           <div class="schritt"><span class="nr">2</span><b>Regeln sehen</b>
-            <p>Grün heißt frei, Orange nach Absprache, Lila Vereinsanlage. Belegt durch Gemeinden, Vereine oder ein Foto vom Schild.</p></div>
+            <p>Grün heißt: darfst du. Orange: vorher fragen. Grau: wissen wir noch nicht. Belegt durch Gemeinden, Vereine oder ein Foto vom Schild.</p></div>
           <div class="schritt"><span class="nr">3</span><b>Zusammen spielen</b>
             <p>Einchecken, wenn man da ist, oder ein Spiel ansetzen. Andere sehen, wo gerade etwas los ist.</p></div>
         </div>
@@ -7193,14 +7209,12 @@ const LegendeKnopf = L.Control.extend({
     const box = L.DomUtil.create("details", "karten-legende");
     box.innerHTML = `<summary>Legende</summary>
       <ul>
-        <li><i class="lp voll" style="background:#34C759"></i>✓ Frei, bestätigt</li>
-        <li><i class="lp strich" style="background:#8FD9A3"></i>≈ Vermutlich frei, ungeprüft</li>
-        <li><i class="lp voll" style="background:#FF9F0A"></i>! Nach Absprache</li>
-        <li><i class="lp strich" style="background:#FFC978"></i>≈ Vermutlich Schulhof</li>
-        <li><i class="lp voll" style="background:#7A5EA8"></i>Vereinsanlage</li>
-        <li><i class="lp hohl" style="border-color:#8E8E93"></i>? Zugang ungeklärt</li>
+        <li><i class="lp voll" style="background:#34C759"></i>Grün: darfst du</li>
+        <li><i class="lp voll" style="background:#FF9F0A"></i>Orange: vorher fragen</li>
+        <li><i class="lp hohl" style="border-color:#8E8E93"></i>Grau: wissen wir nicht</li>
+        <li><i class="lp voll" style="background:#FF3B30"></i>Rot: nicht frei</li>
       </ul>
-      <p>Voll = bestätigt, gestrichelt = vermutet, hohl = ungeklärt.</p>`;
+      <p>Voller Punkt = bestätigt, gestrichelter Rand = nur vermutet.</p>`;
     L.DomEvent.disableClickPropagation(box);
     L.DomEvent.disableScrollPropagation(box);
     return box;
