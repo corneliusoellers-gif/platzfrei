@@ -6,6 +6,13 @@
 <title>Platzfrei – wo darf ich spielen?</title>
 <meta name="description" content="Platzfrei zeigt dir Bolzplätze, Spielplätze und Sportflächen in deiner Nähe und ob du dort spielen darfst.">
 <link rel="canonical" href="https://platzfrei.app/">
+<!-- Schutz vor Einbetten in fremde Seiten (Clickjacking). GitHub Pages kann
+     dafür keinen Header setzen, deshalb hier im Browser. -->
+<style id="einbett-schutz">html{display:none}</style>
+<script>
+  if (window.self === window.top) document.getElementById("einbett-schutz").remove();
+  else try { window.top.location = window.self.location; } catch { document.write(""); }
+</script>
 
 <!-- Vorschau beim Teilen (WhatsApp, Instagram, iMessage, LinkedIn). -->
 <meta property="og:type" content="website">
