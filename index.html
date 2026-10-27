@@ -4,12 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Platzfrei – wo darf ich spielen?</title>
+<meta name="description" content="Platzfrei zeigt dir Bolzplätze, Spielplätze und Sportflächen in deiner Nähe und ob du dort spielen darfst.">
 
 <!-- PWA: macht die Seite installierbar (Icon, Name, Vollbild). -->
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#FFFFFF">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320.0' height='420' viewBox='0 0 320 420' aria-hidden='true'%3E%3Cpath d='M160 0C71.634 0 0 70 0 158C0 244 84 348 149 414C155 420 165 420 171 414C236 348 320 244 320 158C320 70 248.366 0 160 0Z' fill='%2305B630'/%3E%3Cpath d='M124 62V100H196V62M124 282V244H196V282M70 172H250M86 62H234C244.667 62 250 67.3333 250 78V266C250 276.667 244.667 282 234 282H86C75.3333 282 70 276.667 70 266V78C70 67.3333 75.3333 62 86 62ZM187 172C187 186.912 174.912 199 160 199C145.088 199 133 186.912 133 172C133 157.088 145.088 145 160 145C174.912 145 187 157.088 187 172Z' fill='none' stroke='%23fff' stroke-width='12' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
-<link rel="apple-touch-icon" href="icon-180.png">
+<!-- Favicon: echte Bilddateien, damit Google das Logo in den Suchergebnissen zeigt. -->
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png">
+<link rel="icon" type="image/png" sizes="96x96" href="/favicon-96.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png">
 <meta name="mobile-web-app-capable" content="yes">
 
 <!-- Leaflet: die Kartenbibliothek. Kostenlos, kein Schlüssel nötig. -->
@@ -481,10 +486,10 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
 .sportwahl{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:4px}
 .form .sportwahl-punkt{display:flex;align-items:center;gap:6px;font-weight:500;font-size:14px;color:var(--tinte);margin:0}
 .form .sportwahl-punkt input,.form .zeitraster-tag input{-webkit-appearance:checkbox;appearance:auto;width:20px;height:20px;min-height:0;padding:0;margin:0;border:0;box-shadow:none;background:none;accent-color:var(--gruen);flex-shrink:0}
-.zeitraster{display:grid;grid-template-columns:auto 1fr auto 1fr;gap:8px 10px;align-items:center;margin-top:6px}
+.zeitraster{display:grid;grid-template-columns:auto minmax(0,1fr) auto minmax(0,1fr);gap:8px 10px;align-items:center;margin-top:6px}
 .form .zeitraster-tag{display:flex;align-items:center;gap:6px;margin:0;font-size:14px;color:var(--tinte)}
 .zeitraster span{font-size:13px;color:var(--tinte-2)}
-.zeitraster input[type=time]{padding:8px 10px}
+.zeitraster input[type=time]{padding:8px 10px;width:100%;min-width:0;box-sizing:border-box}
 .fotowahl{cursor:pointer}
 .inline-knopf{background:var(--gruen-zart);border:0;font-family:var(--schrift);
   font-size:13px;font-weight:600;letter-spacing:-.004em;color:var(--gruen-tief);
@@ -552,6 +557,8 @@ label.inline-knopf{display:inline-block;margin-top:10px}
 .form textarea{resize:vertical;min-height:74px;line-height:1.55}
 .gesperrt{opacity:.5}
 .hinweis{font-size:13px;color:var(--tinte-3);margin-top:14px;line-height:1.6}
+.form .form-titel{font-size:15px;font-weight:700;color:var(--tinte);margin:26px 0 -4px;padding-top:16px;border-top:1px solid var(--kante)}
+.zeitraster[hidden],#neu-schild[hidden]{display:none}
 .rechtliches-link{display:block;text-align:center;font-size:12px;color:var(--tinte-3);
   padding:4px 20px 16px;line-height:1.5}
 .rechtliches-link button{background:none;border:0;padding:0;font:inherit;
@@ -1201,7 +1208,7 @@ const AUSWAHL = {
   sportarten:["Fußball","Basketball","Tischtennis","Beachvolleyball","Laufen",
               "Calisthenics","Skaten"],
   zugang:["öffentlich","vermutlich öffentlich","vermutlich Schulhof","Vereinsgelände frei betretbar","Vereinsgelände nach Absprache",
-          "Vereinsgelände abgeschlossen","Schulhof nach Unterricht","unklar"],
+          "Vereinsgelände abgeschlossen","Schulhof nach Unterricht","nicht öffentlich","unklar"],
   bestaetigtDurch:["Schild vor Ort","Auskunft Gemeinde","Auskunft Verein",
                    "Auskunft Schule","Lage (OSM)","nur vermutet"],
   untergrund:["Kunstrasen","Naturrasen","Asche","Beton/Asphalt","Tartan","Sand","gemischt"],
@@ -1515,6 +1522,7 @@ const FARBE = {
   "Vereinsgelände nach Absprache":"#FF9F0A",
   "Schulhof nach Unterricht":"#FF9F0A",
   "Vereinsgelände abgeschlossen":"#FF3B30",
+  "nicht öffentlich":"#FF3B30",
   "unklar":"#8E8E93"
 };
 function farbe(o){
@@ -1833,16 +1841,17 @@ function zugangStufe(o){
   const [art, text] = markeArt(o);
   const nutzer = !belegt(o) && nutzerBestaetigt(o);
   const v = vereinsMarke(o);
-  const zu = o.zugang === "Vereinsgelände abgeschlossen";
+  const zu = o.zugang === "Vereinsgelände abgeschlossen" || o.zugang === "nicht öffentlich";
   if ((belegt(o) && o.zugang !== "unklar") || nutzer) return { stufe:"bestaetigt", art, icon: zu ? "✕" : "✓",
     titel: art === "frei" ? "Frei · bestätigt" : art === "unklar" && nutzer ? "Von Nutzern bestätigt"
          : text.charAt(0).toUpperCase() + text.slice(1) + " · bestätigt",
-    kurz: nutzer ? "Mehrere Leute haben hier gespielt" : "Zugang ist belegt" };
+    kurz: nutzer ? "Mehrere Leute haben hier gespielt"
+         : o.zugang === "nicht öffentlich" ? "Laut Gemeinde nicht öffentlich nutzbar" : "Zugang ist belegt" };
   if (o.zugang === "unklar") return { stufe:"ungeklaert", art:"unklar", icon:"?",
     titel: v && v[1] ? "Ungeklärt · vermutlich Verein" : "Zugang ungeklärt",
     kurz: v && v[1] ? "Vor dem Spielen beim Verein fragen" : "Vorher klären, ob man hier darf" };
   if (zu) return { stufe:"vermutet", art:"unklar", icon:"✕",
-    titel:"Nicht frei zugänglich", kurz:"Abgeschlossen, nur für den Verein" };
+    titel:"Nicht frei zugänglich", kurz: o.zugang === "nicht öffentlich" ? "Nicht öffentlich nutzbar" : "Abgeschlossen, nur für den Verein" };
   return { stufe:"vermutet", art, icon:"≈",
     titel: (art === "absprache" && o.zugang !== "vermutlich Schulhof" ? "Nach Absprache" : text.charAt(0).toUpperCase() + text.slice(1)) + " · ungeprüft",
     kurz: o.bestaetigtDurch === "Lage (OSM)" ? "Aus der Lage auf der Karte geschlossen" : "Nur vermutet, nie geprüft" };
@@ -3090,10 +3099,21 @@ function ansichtBearbeiten(){
     </div>`;
 }
 
+/* Auswahl im Formular "Ort hinzufügen". Die Quelle entspricht den Belegen
+   in AUSWAHL.bestaetigtDurch, dazu zwei Nutzer-Antworten ohne Beleg. */
+const NEU_ZEITEN = ["weiß ich nicht","rund um die Uhr","tagsüber bis Dunkelheit","feste Uhrzeiten"];
+const NEU_ALTER  = ["keine","bis 12 Jahre","bis 14 Jahre","bis 16 Jahre","bis 18 Jahre"];
+const NEU_QUELLE = ["Schild vor Ort","Auskunft Gemeinde","Auskunft Verein","Auskunft Schule",
+                    "selbst gesehen oder gespielt","weiß ich nicht"];
+const NEU_WEISSNICHT = ["weiß nicht","ja","nein"];
+
 function ansichtNeu(){
   const p = Z.neuerPunkt;
   const e = Z.neuEntwurf || {};
   const abstand = p && Z.positionEcht ? Math.round(entfernungKm(Z.position, p) * 1000) : null;
+  const zeitenArt = e.zeitenart || "weiß ich nicht";
+  const quelle = e.quelle || "weiß ich nicht";
+  const tagAn = i => e["tag-"+i] === undefined ? true : e["tag-"+i];
   seite.innerHTML = `
     <div class="dkopf">
       <button class="zurueck" data-gehe="liste">← Abbrechen</button>
@@ -3121,27 +3141,74 @@ function ansichtNeu(){
             ${(e.sportarten||"Fußball").split(",").map(x=>x.trim()).includes(sp) ? "checked" : ""}>
             ${SPORT_ICON[sp]||""} ${esc(sp)}</label>`).join("")}</div>
 
+        <h4 class="form-titel">Darf man dort spielen?</h4>
+
+        <label>Zugang${Z.admin ? "" : " (deine Einschätzung)"}</label>
+        ${auswahlFeld("zugang", AUSWAHL.zugang, e.zugang || "unklar", false)}
+
+        <label>Wann darf man spielen?</label>
+        ${auswahlFeld("zeitenart", NEU_ZEITEN, zeitenArt, false)}
+        <div class="zeitraster" id="neu-raster"${zeitenArt === "feste Uhrzeiten" ? "" : " hidden"}>${WOCHENTAGE.map((t,i) => `
+          <label class="zeitraster-tag"><input type="checkbox" name="tag-${i}"${tagAn(i) ? " checked" : ""}> ${t}</label>
+          <input type="time" name="von-${i}" value="${esc(e["von-"+i] || "08:00")}" aria-label="${t} von">
+          <span>bis</span>
+          <input type="time" name="bis-${i}" value="${esc(e["bis-"+i] || "20:00")}" aria-label="${t} bis">`).join("")}
+        </div>
+
+        <label>Altersgrenze</label>
+        ${auswahlFeld("alter", NEU_ALTER, e.alter || "keine", false)}
+
+        <label>Sonst noch Regeln? (freiwillig)</label>
+        <input name="zeitzusatz" placeholder="z. B. Mittagsruhe 13–15 Uhr, nicht während Schulbetrieb"
+               value="${esc(e.zeitzusatz||"")}">
+
+        <h4 class="form-titel">Woher weißt du das?</h4>
+
+        <label>Quelle</label>
+        ${auswahlFeld("quelle", NEU_QUELLE, quelle, false)}
+
+        <label>Wer genau, und wann? (freiwillig)</label>
+        <input name="quelledetail" placeholder="z. B. Gemeinde Gauting, Mail vom 20.10.2026"
+               value="${esc(e.quelledetail||"")}">
+
+        ${Z.admin ? `` : `
+        <div id="neu-schild"${quelle === "Schild vor Ort" ? "" : " hidden"}>
+          <label>Foto vom Schild (empfohlen)</label>
+          <label class="inline-knopf fotowahl">${Z.neuSchildFoto ? "✓ Schildfoto gewählt – ändern" : "🪧 Schild fotografieren"}
+            <input type="file" id="neu-schildfoto" accept="image/*" hidden></label>
+          <p class="hinweis">Mit einem lesbaren Foto vom Schild können wir die Zeiten
+          direkt als „Schild vor Ort“ übernehmen.</p>
+        </div>`}
+
+        <h4 class="form-titel">Mehr zum Platz</h4>
+
         <label>Untergrund</label>
         ${auswahlFeld("untergrund", AUSWAHL.untergrund, e.untergrund || "Naturrasen", false)}
+
+        <label>Größe</label>
+        ${auswahlFeld("groesse", AUSWAHL.groesse, e.groesse || "Kleinfeld", false)}
 
         <label>Ausstattung</label>
         <input name="ausstattung" placeholder="2 Tore mit Netz" value="${esc(e.ausstattung||"")}">
 
-        <label>Zugang</label>
-        ${auswahlFeld("zugang", AUSWAHL.zugang, e.zugang || "unklar", false)}
+        <label>Flutlicht / Beleuchtung</label>
+        ${auswahlFeld("beleuchtung", NEU_WEISSNICHT, e.beleuchtung || "weiß nicht", false)}
+
+        <label>Umzäunt</label>
+        ${auswahlFeld("umzaeunt", NEU_WEISSNICHT, e.umzaeunt || "weiß nicht", false)}
 
         ${Z.admin ? `` : `
         <label>Foto vom Platz (Pflicht)</label>
         <label class="inline-knopf fotowahl">${Z.neuFoto ? "✓ Foto gewählt – ändern" : "📷 Foto aufnehmen oder wählen"}
           <input type="file" id="neu-foto" accept="image/*" hidden></label>
         <p class="hinweis">Damit wir sehen, dass es den Platz wirklich gibt. Am besten mit
-        Toren oder Körben und gern mit dem Schild am Eingang. Bitte keine Personen
-        oder Autokennzeichen.</p>
+        Toren oder Körben. Bitte keine Personen oder Autokennzeichen.</p>`}
 
-        <label>Woher weißt du, dass man dort spielen darf? (freiwillig)</label>
-        <textarea name="hinweis" placeholder="z. B. Schild am Eingang, spielen dort jeden Tag">${esc(e.hinweis||"")}</textarea>`}
+        <label>${Z.admin ? "Notizen" : "Sonst noch wichtig? (freiwillig)"}</label>
+        <textarea name="hinweis" placeholder="z. B. Tore ohne Netz, oft Hunde auf der Wiese, Toilette im Park">${esc(e.hinweis||"")}</textarea>
 
-        <p class="hinweis">Neue Orte prüfen wir, bevor sie auf der Karte erscheinen.</p>
+        <p class="hinweis">${Z.admin ? "Admin-Modus: der Platz ist nach dem Anlegen sofort für alle sichtbar."
+          : "Neue Orte prüfen wir, bevor sie auf der Karte erscheinen. Zugang und Zeiten übernehmen wir nur mit Beleg."}</p>
       </form>
     </div>
     <div class="fuss">
@@ -3266,8 +3333,20 @@ function ansichtPruefen(){
         <div class="abschnitt" style="margin-top:8px">
           <h3>${esc(n.name)} · ${esc(datum(n.erstellt))}</h3>
           <p>${esc((n.sportarten||[]).join(", "))}${n.ort ? " · " + esc(n.ort) : ""} · Zugang: ${esc(n.zugang||"unklar")}</p>
+          <p>Zeiten: <b>${esc(n.zeiten || "unbekannt")}</b></p>
+          <p>Quelle laut Nutzer: ${esc(n.quelle || "keine Angabe")}${n.quelle_detail ? " – " + esc(n.quelle_detail) : ""}</p>
+          ${[n.groesse, n.beleuchtung && "Licht: " + n.beleuchtung, n.umzaeunt && "umzäunt: " + n.umzaeunt]
+              .filter(Boolean).length ? `<p>${esc([n.groesse, n.beleuchtung && "Licht: " + n.beleuchtung,
+              n.umzaeunt && "umzäunt: " + n.umzaeunt].filter(Boolean).join(" · "))}</p>` : ``}
           ${n.ausstattung ? `<p>Ausstattung: ${esc(n.ausstattung)}</p>` : ``}
           ${n.hinweis ? `<p>„${esc(n.hinweis)}“</p>` : ``}
+          ${n.schild_foto ? `<p>Foto vom Schild:</p><a href="${esc(fotoUrl(n.schild_foto))}" target="_blank" rel="noopener">
+            <img src="${esc(fotoUrl(n.schild_foto))}" alt="Foto vom Schild" style="width:100%;max-height:260px;object-fit:contain;border-radius:12px"></a>` : ``}
+          <form class="form" onsubmit="return false"><label>Beleg beim Annehmen</label>
+            ${auswahlFeld("beleg-" + n.id, AUSWAHL.bestaetigtDurch,
+              n.quelle === "Schild vor Ort" && n.schild_foto ? "Schild vor Ort" : "nur vermutet", false)}
+            <p class="hinweis" style="margin-top:6px">Eine Auskunft nur übernehmen, wenn du sie selbst gesehen hast
+            (Schildfoto, Mail). Sonst bleibt es „nur vermutet“.</p></form>
           <p>${n.abstand_m !== null && n.abstand_m !== undefined ? `Standort beim Eintragen: ${n.abstand_m} m entfernt` : `Standort nicht freigegeben`}
             · <a href="https://www.google.com/maps?q=${n.lat},${n.lon}&t=k" target="_blank" rel="noopener">Luftbild</a></p>
           <a href="${esc(fotoUrl(n.foto))}" target="_blank" rel="noopener">
@@ -3291,7 +3370,11 @@ function ansichtPruefen(){
 
 async function neuenOrtPruefen(id, annehmen){
   if (ECHT) {
-    const { data, error } = await db.rpc("neuen_ort_pruefen", { p_id:+id, p_annehmen:annehmen });
+    const beleg = document.querySelector(`select[name="beleg-${id}"]`)?.value || "nur vermutet";
+    let { data, error } = await db.rpc("neuen_ort_pruefen", { p_id:+id, p_annehmen:annehmen, p_beleg:beleg });
+    // Datenbank noch ohne p_beleg (SQL nicht ausgeführt): alte Funktion.
+    if (error && /p_beleg|function/i.test(error.message || ""))
+      ({ data, error } = await db.rpc("neuen_ort_pruefen", { p_id:+id, p_annehmen:annehmen }));
     if (error) { console.error(error); return melde("Abgelehnt: " + error.message); }
     if (annehmen && data) {
       const { data:zeile } = await db.from("orte").select("*").eq("id", data).single();
@@ -3362,6 +3445,9 @@ const SCROLL = {};                 // Scrollposition je Ansicht
 
 function zeichne(){
   if (Z.ansicht !== "bearbeiten") Z.vorgabeBeleg = null;
+  // Neu zeichnen (z. B. wenn im Hintergrund Plätze nachladen) darf das halb
+  // ausgefüllte Formular "Ort hinzufügen" nicht leeren.
+  if (Z.ansicht === "neu" && String(letzterSchluessel).startsWith("neu:")) Z.neuEntwurf = neuFormularWerte();
   if (Z.ansicht !== "detail" || String(Z.auswahlId) !== String(zeichne.letzterOrt)) {
     Z.spielFormOffen = false; Z.tippsOffen = false;
   }
@@ -3824,18 +3910,45 @@ async function speichern(){
     : "Gespeichert.");
 }
 
-/* Formular "Ort hinzufügen" lesen, Sportarten aus den Häkchen. */
+/* Formular "Ort hinzufügen" lesen, Sportarten und Wochentage aus den Häkchen. */
 function neuFormularWerte(){
   const f = document.getElementById("formular");
-  if (!f) return Z.neuEntwurf || {};
+  if (!f || Z.ansicht !== "neu") return Z.neuEntwurf || {};
   const w = formularWerte();
   const sp = [];
   for (const el of f.querySelectorAll("input[type=checkbox][name^='sp-']")) {
     if (el.checked) sp.push(el.name.slice(3));
     delete w[el.name];
   }
+  for (const el of f.querySelectorAll("input[type=checkbox][name^='tag-']")) w[el.name] = el.checked;
   w.sportarten = sp.join(", ");
   return w;
+}
+
+/* Aus Zeitart, Raster, Altersgrenze und Zusatz einen Text für orte.zeiten,
+   z. B. "Mo–So 08:00–20:00 (nur bis 14 Jahre; Mittagsruhe 13–15 Uhr)".
+   null = nichts bekannt. */
+function neuZeitenText(w){
+  const basis = w.zeitenart === "feste Uhrzeiten" ? zeitenAusRaster(w)
+              : w.zeitenart === "rund um die Uhr" || w.zeitenart === "tagsüber bis Dunkelheit" ? w.zeitenart
+              : "";
+  const extra = [w.alter && w.alter !== "keine" ? "nur " + w.alter : "", w.zeitzusatz || ""]
+                .filter(Boolean).join("; ");
+  if (!basis) return extra || null;
+  return extra ? `${basis} (${extra})` : basis;
+}
+
+/* Quelle des Nutzers als Beleg, falls sie einer der Belege ist. */
+function neuBeleg(quelle){
+  return AUSWAHL.bestaetigtDurch.includes(quelle) ? quelle : "nur vermutet";
+}
+
+async function fotoHochladen(datei){
+  const blob = await bildVerkleinern(datei);
+  const pfad = `neu/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+  const { error } = await db.storage.from("schilder").upload(pfad, blob, { contentType:"image/jpeg" });
+  if (error) throw error;
+  return pfad;
 }
 
 /* Nutzer: Vorschlag mit Pflichtfoto in "neue_orte". Erscheint erst nach
@@ -3843,25 +3956,41 @@ function neuFormularWerte(){
 async function neuVorschlagen(w){
   if (!Z.neuFoto) return melde("Bitte noch ein Foto vom Platz hinzufügen.");
   melde("Wird gesendet …");
-  let blob;
-  try { blob = await bildVerkleinern(Z.neuFoto); }
-  catch { return melde("Das Foto ließ sich nicht lesen."); }
   const p = Z.neuerPunkt;
   if (ECHT) {
-    const pfad = `neu/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
-    const { error:e1 } = await db.storage.from("schilder")
-                                 .upload(pfad, blob, { contentType:"image/jpeg" });
-    if (e1) { console.error(e1); return melde("Foto hochladen hat nicht geklappt."); }
-    const { error:e2 } = await db.from("neue_orte").insert({
+    let pfad, schildPfad = null;
+    try {
+      pfad = await fotoHochladen(Z.neuFoto);
+      if (Z.neuSchildFoto && w.quelle === "Schild vor Ort") schildPfad = await fotoHochladen(Z.neuSchildFoto);
+    } catch (e) { console.error(e); return melde("Foto hochladen hat nicht geklappt."); }
+    const basis = {
       name:w.name.slice(0,120), ort:w.ort || null, lat:p.lat, lon:p.lon,
       sportarten:w.sportarten.split(",").map(s=>s.trim()).filter(Boolean),
       zugang:w.zugang || null, untergrund:w.untergrund || null,
-      ausstattung:w.ausstattung || null, hinweis:w.hinweis || null, foto:pfad,
+      ausstattung:w.ausstattung || null, foto:pfad,
       abstand_m: Z.positionEcht ? Math.round(entfernungKm(Z.position, p) * 1000) : null,
-      geraet:geraetId() });
-    if (e2) { console.error(e2); return melde("Senden hat nicht geklappt: " + e2.message); }
+      geraet:geraetId() };
+    const zeiten = neuZeitenText(w);
+    const neu = { ...basis, hinweis:w.hinweis || null,
+      zeiten: zeiten ? zeiten.slice(0,300) : null,
+      quelle: w.quelle === "weiß ich nicht" ? null : w.quelle,
+      quelle_detail: w.quelledetail ? w.quelledetail.slice(0,300) : null,
+      schild_foto: schildPfad, groesse: w.groesse || null,
+      beleuchtung: w.beleuchtung === "weiß nicht" ? null : w.beleuchtung,
+      umzaeunt: w.umzaeunt === "weiß nicht" ? null : w.umzaeunt };
+    let { error } = await db.from("neue_orte").insert(neu);
+    // Neue Spalten fehlen noch (SQL nicht ausgeführt): alles in den Hinweis schreiben.
+    if (error && /column|schema cache/i.test(error.message || "")) {
+      const zusatz = [zeiten && "Zeiten: " + zeiten,
+        neu.quelle && "Quelle: " + neu.quelle + (neu.quelle_detail ? " (" + neu.quelle_detail + ")" : ""),
+        schildPfad && "Schildfoto: " + schildPfad,
+        "Größe: " + w.groesse, neu.beleuchtung && "Licht: " + neu.beleuchtung,
+        neu.umzaeunt && "umzäunt: " + neu.umzaeunt, w.hinweis].filter(Boolean).join(" · ");
+      ({ error } = await db.from("neue_orte").insert({ ...basis, hinweis:zusatz.slice(0,1000) || null }));
+    }
+    if (error) { console.error(error); return melde("Senden hat nicht geklappt: " + error.message); }
   }
-  Z.neuerPunkt = null; Z.neuFoto = null; Z.neuEntwurf = null;
+  Z.neuerPunkt = null; Z.neuFoto = null; Z.neuSchildFoto = null; Z.neuEntwurf = null;
   Z.ansicht = "liste";
   zeichne();
   melde("Danke! Wir prüfen den Platz und schalten ihn dann frei.");
@@ -3873,8 +4002,12 @@ async function neuSpeichern(){
   const w = neuFormularWerte();
   if (!w.name) return melde("Ein Name fehlt noch.");
   if (!w.sportarten) return melde("Bitte mindestens eine Sportart wählen.");
+  if (w.zeitenart === "feste Uhrzeiten" && !zeitenAusRaster(w))
+    return melde("Bitte mindestens einen Tag anhaken.");
   if (!Z.admin) return neuVorschlagen(w);
 
+  const notizen = [w.quelledetail && "Quelle: " + w.quelle + " (" + w.quelledetail + ")", w.hinweis]
+                  .filter(Boolean).join(". ");
   const zeile = {
     name: w.name,
     ort: w.ort || null,
@@ -3882,15 +4015,15 @@ async function neuSpeichern(){
     lon: Z.neuerPunkt.lon,
     sportarten: (w.sportarten || "Fußball").split(",").map(s=>s.trim()).filter(Boolean),
     zugang: w.zugang,
-    zeiten: "unbekannt",
-    bestaetigt_durch: "nur vermutet",
+    zeiten: neuZeitenText(w) || "unbekannt",
+    bestaetigt_durch: neuBeleg(w.quelle),
     untergrund: w.untergrund,
-    groesse: "Kleinfeld",
+    groesse: w.groesse || "Kleinfeld",
     ausstattung: w.ausstattung || null,
-    umzaeunt: "nein",
-    beleuchtung: "nein",
+    umzaeunt: w.umzaeunt === "ja" ? "ja" : "nein",
+    beleuchtung: w.beleuchtung === "ja" ? "ja" : "nein",
     zustand: 3,
-    notizen: "",
+    notizen,
     geprueft_am: heute(),
     freigegeben: true           // hier kommt nur der Admin an – er ist selbst die Prüfung
   };
@@ -3909,7 +4042,7 @@ async function neuSpeichern(){
     DATEN.push(ausDb({ ...zeile, id:"O"+String(DATEN.length+1).padStart(2,"0") }));
   }
 
-  Z.neuerPunkt = null; Z.neuEntwurf = null;
+  Z.neuerPunkt = null; Z.neuSchildFoto = null; Z.neuEntwurf = null;
   Z.ansicht = "liste";
   zeichne();
   melde("Gespeichert – der Platz ist jetzt für alle auf der Karte.");
@@ -6417,6 +6550,22 @@ document.addEventListener("change", e=>{
     Z.neuEntwurf = neuFormularWerte();
     zeichne();
     melde("Foto gewählt.");
+  }
+  if (e.target.id === "neu-schildfoto" && e.target.files?.[0]) {
+    if (!e.target.files[0].type.startsWith("image/")) return melde("Bitte ein Foto auswählen.");
+    Z.neuSchildFoto = e.target.files[0];
+    Z.neuEntwurf = neuFormularWerte();
+    zeichne();
+    melde("Schildfoto gewählt.");
+  }
+  // "Ort hinzufügen": Wochenraster und Schildfoto nur zeigen, wenn sie passen.
+  if (Z.ansicht === "neu" && e.target.name === "zeitenart") {
+    const r = document.getElementById("neu-raster");
+    if (r) r.hidden = e.target.value !== "feste Uhrzeiten";
+  }
+  if (Z.ansicht === "neu" && e.target.name === "quelle") {
+    const s = document.getElementById("neu-schild");
+    if (s) s.hidden = e.target.value !== "Schild vor Ort";
   }
 });
 
