@@ -4075,21 +4075,40 @@ async function sucheServer(text){
   if (Z.ansicht === "liste" && Z.suche.trim()) { ansichtListe(true); markerZeichnen(); }
 }
 
-/* Weit herausgezoomt: Kreise aus orte_raster(). Nur ohne Filter – mit
-   Filter zählen die Kreise nur die geladenen Plätze (wie bisher). */
+/* Weit herausgezoomt: Kreise aus orte_raster(). Die Kreise kennen je
+   Sportart, wie viele Plätze frei und wie viele bestätigt sind – damit
+   klappen Sportart- und Zugangsfilter auch über ganz Deutschland. Gemerkt,
+   Flutlicht und "hier ist was los" zählen nur die geladenen Plätze. */
 function rasterNutzen(){
-  return AUSSCHNITT && ORTE_RASTER && karte.getZoom() < AUSSCHNITT_AB && !Z.suche.trim()
-    && Z.sportart === "alle" && !Z.nurFrei && !Z.nurBelegt && !Z.nurGemerkt && !Z.nurLicht && !Z.nurLos;
+  if (!AUSSCHNITT || !ORTE_RASTER || karte.getZoom() >= AUSSCHNITT_AB || Z.suche.trim()) return false;
+  if (Z.nurGemerkt || Z.nurLicht || Z.nurLos) return false;
+  const mitFilter = Z.sportart !== "alle" || Z.nurFrei || Z.nurBelegt;
+  return !mitFilter || ORTE_RASTER.some(r => r.sport);    // alte Datenbank ohne Sportarten
+}
+/* Anzahl und Farbe eines Kreises unter den aktuellen Filtern. */
+function rasterAnzahl(r){
+  let n = r.n, frei = r.frei, sicher = r.sicher, rang = r.rang;
+  if (Z.sportart !== "alle") {
+    const s = r.sport?.[Z.sportart];
+    if (!s) return null;
+    [n, frei, sicher, rang] = s;
+  }
+  if (Z.nurBelegt) n = sicher; else if (Z.nurFrei) n = frei;
+  if (Z.nurFrei && !Z.nurBelegt) rang = Math.min(rang, 1);
+  return n > 0 ? { n, rang } : null;
 }
 function rasterZeichnen(){
   const zoom = karte.getZoom(), rahmen = karte.getBounds().pad(0.5);
   const zellen = new Map();
   for (const r of ORTE_RASTER) {
     if (!rahmen.contains([r.lat, r.lon])) continue;
+    const a = rasterAnzahl(r);
+    if (!a) continue;
     const p = karte.project([r.lat, r.lon], zoom);
     const k = Math.floor(p.x / BUENDEL_ZELLE) + ":" + Math.floor(p.y / BUENDEL_ZELLE);
     const g = zellen.get(k) || { n:0, x:0, y:0, rang:BUENDEL_RANG.length - 1, teile:[] };
-    g.n += r.n; g.x += p.x * r.n; g.y += p.y * r.n; g.rang = Math.min(g.rang, r.rang); g.teile.push(r);
+    g.n += a.n; g.x += p.x * a.n; g.y += p.y * a.n; g.rang = Math.min(g.rang, a.rang);
+    g.teile.push({ lat:r.lat, lon:r.lon, n:a.n, p });
     zellen.set(k, g);
   }
   /* Wie bei den Bündeln: zusammenlegen, bis sich keine Kreise mehr berühren. */
@@ -4113,7 +4132,13 @@ function rasterZeichnen(){
     gruppen = gruppen.filter(Boolean);
   }
   for (const g of gruppen) {
-    const mitte = karte.unproject(L.point(g.x / g.n, g.y / g.n), zoom);
+    /* Der Kreis sitzt auf dem Teil, der dem Schwerpunkt am nächsten liegt –
+       der reine Schwerpunkt rutscht an der Grenze sonst ins Ausland. */
+    const sx = g.x / g.n, sy = g.y / g.n;
+    let nah = g.teile[0];
+    for (const t of g.teile)
+      if (Math.hypot(t.p.x - sx, t.p.y - sy) < Math.hypot(nah.p.x - sx, nah.p.y - sy)) nah = t;
+    const mitte = L.latLng(nah.lat, nah.lon);
     const groesse = buendelGroesse(g.n);
     const text = g.n >= 1000 ? (g.n / 1000).toFixed(g.n >= 10000 ? 0 : 1).replace(".", ",") + "k" : g.n;
     L.marker(mitte, {
