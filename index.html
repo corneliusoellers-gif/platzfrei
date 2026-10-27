@@ -2601,7 +2601,8 @@ function ansichtListe(nurListe){
         <button class="knopf zweit" data-gehe="pruefen">Prüfen (${pruefAnzahl()})</button>
         <button class="knopf zweit" data-gehe="fehlerliste">Fehler (${FEHLERBERICHTE.length})</button>
         <button class="knopf zweit" data-export="1">Export</button>
-        <button class="knopf zweit" data-abmelden="1">Abmelden</button></div>` : ``}
+        <button class="knopf zweit" data-doppelte="1">Doppelte aufräumen</button>
+        <button class="knopf zweit" data-abmelden="1">Abmelden</button>${importLaufText()}</div>` : ``}
       <button class="abzeichen-link" data-einfuehrung="1">ⓘ Was bedeuten die Symbole?</button>
       <button class="abzeichen-link" data-gehe="abzeichen">🏅 Meine Abzeichen · ${abzeichenErreicht().length} von ${ABZEICHEN.length}</button>
       <div class="rechtliches-link">
@@ -2683,7 +2684,8 @@ function ansichtListe(nurListe){
       ${Z.admin ? `<button class="knopf zweit" data-gehe="importieren">Import</button>` : ``}
       ${Z.admin ? `<button class="knopf zweit" data-gehe="pruefen">Prüfen (${pruefAnzahl()})</button>
       <button class="knopf zweit" data-gehe="fehlerliste">Fehler (${FEHLERBERICHTE.length})</button>` : ``}
-      ${Z.admin ? `<button class="knopf zweit" data-export="1">Export</button>` : ``}
+      ${Z.admin ? `<button class="knopf zweit" data-export="1">Export</button>
+      <button class="knopf zweit" data-doppelte="1">Doppelte aufräumen</button>${importLaufText()}` : ``}
     </div>
     <div class="rechtliches-link listenfuss">Alle Angaben ohne Gewähr – vor Ort gilt das Schild.<br>
       <button data-gehe="rechtliches">Impressum &amp; Datenschutz</button> ·
@@ -3814,6 +3816,21 @@ async function ortVollLaden(o){
   if (String(Z.auswahlId) === String(o.id) && (Z.ansicht === "detail" || Z.ansicht === "bearbeiten")) zeichne();
 }
 
+/* Zusammengeführte Doppelte (Spalte doppelt_von, siehe
+   wochen-import/supabase-wochen-import.sql) bleiben in der Datenbank, werden
+   aber nie geladen. Fehlt die Spalte noch, laden wir wie bisher alles. */
+let DOPPELT_PRUEFUNG = null, DOPPELT_FILTER = false;
+function doppeltSpaltePruefen(){
+  if (!DOPPELT_PRUEFUNG) DOPPELT_PRUEFUNG = db.from("orte").select("doppelt_von").limit(1)
+    .then(({ error }) => { DOPPELT_FILTER = !error || error.code !== "42703"; });   // 42703 = Spalte fehlt
+  return DOPPELT_PRUEFUNG;
+}
+/* Vorher einmal await doppeltSpaltePruefen(). */
+function orteAbfrage(spalten, optionen){
+  const q = db.from("orte").select(spalten, optionen);
+  return DOPPELT_FILTER ? q.is("doppelt_von", null) : q;
+}
+
 /* Orte aus der Datenbank holen. Klappt das nicht, bleiben die Daten aus
    Abschnitt 1 stehen – die App ist dann trotzdem benutzbar. */
 async function datenLaden(){
@@ -3863,7 +3880,8 @@ async function datenLaden(){
    beim Start alles nach, was seit dem Speichern geprüft wurde (geprueft_am). */
 async function neueSeitSpeicher(zeit){
   const ab = new Date(zeit - 86400000).toISOString().slice(0,10);
-  const { data, error } = await db.from("orte").select(LISTE_SPALTEN)
+  await doppeltSpaltePruefen();
+  const { data, error } = await orteAbfrage(LISTE_SPALTEN)
     .gte("geprueft_am", ab).order("id").limit(2000);
   if (error) { console.error(error); return; }
   if (!data?.length) return;
@@ -3888,7 +3906,8 @@ async function umgebungLaden(pos){
   if (!ECHT) return false;
   if (UMGEBUNG_ZULETZT && entfernungKm(UMGEBUNG_ZULETZT, pos) < 5) return true;
   UMGEBUNG_ZULETZT = { lat:pos.lat, lon:pos.lon };
-  const anfrage = von => db.from("orte").select(LISTE_SPALTEN)
+  await doppeltSpaltePruefen();
+  const anfrage = von => orteAbfrage(LISTE_SPALTEN)
     .gte("lat", pos.lat - UMGEBUNG_LAT).lte("lat", pos.lat + UMGEBUNG_LAT)
     .gte("lon", pos.lon - UMGEBUNG_LON).lte("lon", pos.lon + UMGEBUNG_LON)
     .order("id").range(von, von + 999);
@@ -3920,8 +3939,8 @@ function dazuNehmen(zeilen){
 /* Ganz Deutschland: Supabase liefert höchstens 1000 Zeilen pro Anfrage –
    also erst zählen und dann viele Seiten gleichzeitig holen. */
 async function vollLaden(uebernehmen, gespeichert, fehler){
-  const { count, error: zaehlFehler } = await db.from("orte")
-    .select("id", { count:"exact", head:true });
+  await doppeltSpaltePruefen();
+  const { count, error: zaehlFehler } = await orteAbfrage("id", { count:"exact", head:true });
   if (zaehlFehler) { Z.laedtNoch = false; if (!gespeichert) fehler(zaehlFehler); zeichne(); return; }
 
   const SEITE = 1000, GLEICHZEITIG = 10;
@@ -3930,7 +3949,7 @@ async function vollLaden(uebernehmen, gespeichert, fehler){
   const alle = [];
   for (let i = 0; i < anfaenge.length; i += GLEICHZEITIG) {
     const antworten = await Promise.all(anfaenge.slice(i, i + GLEICHZEITIG).map(von =>
-      db.from("orte").select(LISTE_SPALTEN).order("id").range(von, von + SEITE - 1)));
+      orteAbfrage(LISTE_SPALTEN).order("id").range(von, von + SEITE - 1)));
     for (const { data, error } of antworten) {
       if (error) { Z.laedtNoch = false; if (!gespeichert) fehler(error); zeichne(); return; }
       alle.push(...data);
@@ -3945,7 +3964,7 @@ async function vollLaden(uebernehmen, gespeichert, fehler){
 
   speicherSchreiben(uebernehmen(alle));
   VORSCHLAEGE = [];
-  if (Z.admin) await Promise.all([vorschlaegeLaden(), fehlerLaden(), pruefungLaden()]);
+  if (Z.admin) await Promise.all([vorschlaegeLaden(), fehlerLaden(), pruefungLaden(), importLaufLaden()]);
   zeichne();
   markerZeichnen();
 }
@@ -4763,6 +4782,46 @@ async function ortLoeschen(ortId){
   Z.ansicht = "liste";
   zeichne();
   melde(`„${o.name}“ gelöscht.`);
+}
+
+/* Admin: Doppelte in der Datenbank zusammenführen. Die Funktion
+   doppelte_zusammenfuehren() blendet den schlechteren Eintrag nur aus
+   (doppelt_von) und hängt Bestätigungen, Meldungen, Tipps usw. an den
+   behaltenen Platz. Läuft auch jede Woche nach dem automatischen Import. */
+async function doppelteZusammenfuehren(knopf){
+  if (!Z.admin || !ECHT) return;
+  if (!confirm("Doppelte Plätze zusammenführen?\n\nBehalten wird jeweils der Eintrag mit Beleg bzw. echtem Namen. "
+             + "Der andere wird ausgeblendet, nicht gelöscht.")) return;
+  knopf.disabled = true; knopf.textContent = "Läuft …";
+  const { data, error } = await db.rpc("doppelte_zusammenfuehren");
+  knopf.disabled = false; knopf.textContent = "Doppelte aufräumen";
+  if (error) {
+    console.error(error);
+    return melde(/timeout/i.test(error.message)
+      ? "Zu viele auf einmal – bitte einmal im SQL Editor ausführen: select * from doppelte_zusammenfuehren();"
+      : "Abgelehnt: " + error.message, null, 8000);
+  }
+  const weg = (data || []).find(z => z.was === "Doppelte ausgeblendet")?.anzahl || 0;
+  melde(weg ? `${weg.toLocaleString("de-DE")} Doppelte ausgeblendet.` : "Keine Doppelten gefunden.");
+  if (weg) { await speicherVeraltet(); datenLaden(); }
+}
+
+/* Admin: was der wöchentliche Import zuletzt gemacht hat. */
+let IMPORTLAUF = null;
+async function importLaufLaden(){
+  const { data } = await db.from("platzfrei_importlauf").select("zeit,quelle,stand,ergebnis")
+    .order("id", { ascending:false }).limit(2);
+  IMPORTLAUF = data?.length ? data : null;
+}
+function importLaufText(){
+  if (!IMPORTLAUF) return "";
+  const imp = IMPORTLAUF.find(z => z.quelle === "overture"), dop = IMPORTLAUF.find(z => z.quelle === "doppelte");
+  const neu = imp ? Object.entries(imp.ergebnis || {}).filter(([k]) => k.startsWith("neu angelegt"))
+                      .reduce((n, [, v]) => n + v, 0) : null;
+  const zeit = new Date(IMPORTLAUF[0].zeit).toLocaleDateString("de-DE");
+  return `<div style="grid-column:1/-1;flex-basis:100%;font-size:12px;color:var(--tinte-3)">Auto-Import zuletzt ${zeit}`
+       + (neu !== null ? ` · ${neu.toLocaleString("de-DE")} neue Plätze` : "")
+       + (dop ? ` · ${(dop.ergebnis?.["Doppelte ausgeblendet"] || 0).toLocaleString("de-DE")} Doppelte` : "") + `</div>`;
 }
 
 /* Geschützte Felder gehen nie per normalem Update raus, sondern immer über
@@ -6533,7 +6592,7 @@ document.addEventListener("wheel", e => {
 document.addEventListener("click", e=>{
   const t = e.target.closest("[data-hauptsport],[data-themawahl],[data-thema],[data-sport],[data-nurfrei],[data-nurlos],[data-ort],[data-gehe],"+
                              "[data-speichern],[data-neuspeichern],[data-geprueft],"+
-                             "[data-export],[data-anmelden],[data-km],"+
+                             "[data-export],[data-doppelte],[data-anmelden],[data-km],"+
                              "[data-merken],[data-gemerkt],[data-melden],[data-route],"+
                              "[data-nurlicht],[data-belegt],[data-sortierung],[data-bereich],[data-mehr],"+
                              "[data-schildok],[data-schildweg],[data-loeschen],[data-fehlersenden],[data-fehlererledigt],"+
@@ -6655,6 +6714,7 @@ document.addEventListener("click", e=>{
   if (t.dataset.speichern)  { return speichern(); }
   if (t.dataset.neuspeichern){ return neuSpeichern(); }
   if (t.dataset.export)     { return exportieren(); }
+  if (t.dataset.doppelte)   { return doppelteZusammenfuehren(t); }
   if (t.dataset.geprueft)   { return alsGepruefT(t.dataset.geprueft); }
 });
 
