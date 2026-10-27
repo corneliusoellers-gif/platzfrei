@@ -1776,7 +1776,7 @@ karte.on("moveend", () => {
   markerZeichnen();
   /* Besucher: Plätze im neuen Ausschnitt holen. Admin: solange ganz
      Deutschland noch lädt, den neuen Ausschnitt vorziehen. */
-  if (!Z.admin) {
+  if (AUSSCHNITT) {
     ausschnittPlanen();
     if (!mitKm() && Z.ansicht === "liste" && !Z.suche.trim()) ansichtListe(true);
   }
@@ -2601,7 +2601,7 @@ function ansichtListe(nurListe){
     : Z.maxKm && mitKm() ? `${zahl} ${plaetze} bis ${Z.maxKm} km`
     : Z.laedtNoch && mitKm() ? `${zahl} ${plaetze} in der Umgebung`
     : Z.laedtNoch ? `${zahl} ${plaetze} geladen`
-    : Z.admin ? `${zahl} ${plaetze} in Deutschland`
+    : !AUSSCHNITT ? `${zahl} ${plaetze} in Deutschland`
     : `${zahl} ${plaetze} in der Gegend`;
   const filterTeile = [
     Z.sportart !== "alle" && Z.sportart,
@@ -2610,12 +2610,12 @@ function ansichtListe(nurListe){
   ].filter(Boolean);
   const gesamt = (DATEN.length - DOPPELT).toLocaleString("de-DE");
   const trefferInfo = `<div class="anzahl" role="status" aria-live="polite"><span class="anzahl-zahl">${esc(ueberschrift)}</span>${
-      Z.laedtNoch ? `<span class="anzahl-info">${Z.admin ? "Die Plätze in ganz Deutschland laden noch im Hintergrund …" : "Plätze werden geladen …"}</span>`
+      Z.laedtNoch ? `<span class="anzahl-info">${!AUSSCHNITT ? "Die Plätze in ganz Deutschland laden noch im Hintergrund …" : "Plätze werden geladen …"}</span>`
       : filterTeile.length || Z.maxKm || Z.bereich || Z.suche.trim()
-        ? `<span class="anzahl-info">von ${gesamt} ${Z.admin ? "insgesamt" : "in der Gegend"}${filterTeile.length ? " · Filter: " + esc(filterTeile.join(", ")) : ""}
+        ? `<span class="anzahl-info">von ${gesamt} ${!AUSSCHNITT ? "insgesamt" : "in der Gegend"}${filterTeile.length ? " · Filter: " + esc(filterTeile.join(", ")) : ""}
            <button class="inline-knopf" data-filterweg="1">Alle zeigen</button></span>`
       : anzahl > orte.length ? `<span class="anzahl-info">Die ${orte.length} ${mitKm() ? "nächsten" : "ersten"} stehen in der Liste, alle auf der Karte.${
-          Z.admin ? `` : ` Für andere Gegenden die Karte verschieben oder suchen.`}${
+          !AUSSCHNITT ? `` : ` Für andere Gegenden die Karte verschieben oder suchen.`}${
           DOPPELT ? ` ${DOPPELT.toLocaleString("de-DE")} doppelte Einträge sind zusammengefasst.` : ``}</span>` : ``}</div>`;
 
   const ohneSuche = !Z.suche.trim();
@@ -3570,7 +3570,7 @@ function ansichtAnmelden(){
 const ANSICHTS_TIEFE = {
   liste:0, importieren:1, anmelden:1, neu:1,
   detail:1, bearbeiten:2, melden:2, rechtliches:1, fehler:1, fehlerliste:1,
-  vereinszeiten:2, pruefen:1, abzeichen:1, einstellungen:1, ueber:1, vereine:1
+  vereinszeiten:2, pruefen:1, abzeichen:1, einstellungen:1, ueber:1, vereine:1, partner:1
 };
 let letzteTiefe = 0;
 let letzterSchluessel = "liste";
@@ -3651,7 +3651,7 @@ function zeichne(){
 
   const w = VORSCHLAEGE.length;
   document.getElementById("kopfnotiz").textContent =
-    (Z.laedtNoch ? "lädt Plätze …" : (KENNZAHLEN && !Z.admin ? KENNZAHLEN.plaetze : DATEN.length - DOPPELT).toLocaleString("de-DE") + " Plätze")
+    (Z.laedtNoch ? "lädt Plätze …" : (KENNZAHLEN && AUSSCHNITT ? KENNZAHLEN.plaetze : DATEN.length - DOPPELT).toLocaleString("de-DE") + " Plätze")
     + (Z.admin && w ? ` · ${w} ${w === 1 ? "Änderungsvorschlag" : "Änderungsvorschläge"} offen` : "")
     + (ECHT ? "" : " · keine Verbindung");
 }
@@ -3839,6 +3839,7 @@ async function datenLaden(){
   return datenLadenAlles();
 }
 async function datenLadenAlles(){
+  AUSSCHNITT = false;
 
   const fehler = error => {
     melde("Datenbank nicht erreichbar. Schon das SQL-Skript ausgeführt?");
@@ -3859,7 +3860,8 @@ async function datenLadenAlles(){
   };
 
   /* 1. Aus dem Gerätespeicher – dann ist die Karte sofort da. */
-  const gespeichert = await speicherLesen();
+  let gespeichert = await speicherLesen();
+  if (gespeichert?.kacheln) gespeichert = null;   // nur Kartenausschnitte, nicht ganz Deutschland
   if (gespeichert?.zeilen?.length) {
     uebernehmen(gespeichert.zeilen, true);
     zeichne();
@@ -3954,8 +3956,10 @@ const KACHEL_LAT = 0.2, KACHEL_LON = 0.3, AUSSCHNITT_AB = 11;
 const KACHELN = new Map();      // "i:j" -> true (geladen) | "laedt"
 const ZEILEN = new Map();       // id -> Zeile wie aus der Datenbank (für den Gerätespeicher)
 let ORTE_RASTER = null, KENNZAHLEN = null, SPEICHER_START = Date.now();
+let AUSSCHNITT = false;         // true = nur Kartenausschnitte (Besucher, oder Admin, wenn ganz Deutschland nicht klappt)
 
 async function datenLadenAusschnitt(){
+  AUSSCHNITT = true;
   await doppeltSpaltePruefen();
   rasterLaden();
   kennzahlenLaden();
@@ -3990,9 +3994,11 @@ async function kachelLaden(i, j){
   const nord = +((i + 1) * KACHEL_LAT).toFixed(4), ost = +((j + 1) * KACHEL_LON).toFixed(4);
   const zeilen = [];
   for (let von = 0; von < 20000; von += 1000) {
-    const { data, error } = await orteAbfrage(LISTE_SPALTEN)
+    const abfrage = () => orteAbfrage(LISTE_SPALTEN)
       .gte("lat", sued).lt("lat", nord).gte("lon", west).lt("lon", ost)
       .order("id").range(von, von + 999);
+    let { data, error } = await abfrage();
+    if (error) { await new Promise(r => setTimeout(r, 1000)); ({ data, error } = await abfrage()); }
     if (error) { KACHELN.delete(k); console.error(error); return null; }
     zeilen.push(...data);
     if (data.length < 1000) break;    // leere Folgeseiten sind teuer – nur weiter, wenn voll
@@ -4044,14 +4050,16 @@ function speicherMerken(){
   }, 1000);
 }
 
-async function rasterLaden(){
+async function rasterLaden(versuch = 0){
   const { data, error } = await db.rpc("orte_raster");
+  if (error && versuch < 2) return setTimeout(() => rasterLaden(versuch + 1), 1500 * (versuch + 1));
   if (error) { console.warn("orte_raster fehlt (supabase-kartenausschnitt.sql)", error.message); return; }
   ORTE_RASTER = data || [];
   markerZeichnen();
 }
-async function kennzahlenLaden(){
+async function kennzahlenLaden(versuch = 0){
   const { data, error } = await db.rpc("kennzahlen");
+  if (error && versuch < 2) return setTimeout(() => kennzahlenLaden(versuch + 1), 2000 * (versuch + 1));
   if (error || !data) return;
   KENNZAHLEN = data;
   if (["ueber", "vereine", "partner"].includes(Z.ansicht)) zeichne();
@@ -4059,7 +4067,7 @@ async function kennzahlenLaden(){
 /* Suche über ganz Deutschland: Treffer kommen zu den geladenen Plätzen dazu. */
 let suchAnfrage = 0;
 async function sucheServer(text){
-  if (!ECHT || Z.admin || text.trim().length < 3) return;
+  if (!ECHT || !AUSSCHNITT || text.trim().length < 3) return;
   const nr = ++suchAnfrage;
   const { data, error } = await db.rpc("orte_suchen", { p_text:text.trim() }).select(LISTE_SPALTEN);
   if (error || nr !== suchAnfrage || !data?.length) return;
@@ -4070,7 +4078,7 @@ async function sucheServer(text){
 /* Weit herausgezoomt: Kreise aus orte_raster(). Nur ohne Filter – mit
    Filter zählen die Kreise nur die geladenen Plätze (wie bisher). */
 function rasterNutzen(){
-  return !Z.admin && ORTE_RASTER && karte.getZoom() < AUSSCHNITT_AB && !Z.suche.trim()
+  return AUSSCHNITT && ORTE_RASTER && karte.getZoom() < AUSSCHNITT_AB && !Z.suche.trim()
     && Z.sportart === "alle" && !Z.nurFrei && !Z.nurBelegt && !Z.nurGemerkt && !Z.nurLicht && !Z.nurLos;
 }
 function rasterZeichnen(){
@@ -4126,18 +4134,43 @@ function rasterZeichnen(){
    also erst zählen und dann viele Seiten gleichzeitig holen. */
 async function vollLaden(uebernehmen, gespeichert, fehler){
   await doppeltSpaltePruefen();
-  const { count, error: zaehlFehler } = await orteAbfrage("id", { count:"exact", head:true });
-  if (zaehlFehler) { Z.laedtNoch = false; if (!gespeichert) fehler(zaehlFehler); zeichne(); return; }
+  /* Genau zählen dauert bei 100.000 Plätzen fast so lange wie die Zeitgrenze –
+     notfalls reicht die Schätzung der Datenbank (wir holen eine Seite mehr). */
+  let { count, error: zaehlFehler } = await orteAbfrage("id", { count:"exact", head:true });
+  if (zaehlFehler) ({ count, error: zaehlFehler } = await orteAbfrage("id", { count:"estimated", head:true }));
+  if (zaehlFehler) {
+    console.error("Zählen:", zaehlFehler);
+    Z.laedtNoch = false;
+    melde("Ganz Deutschland ließ sich nicht laden – zeige Kartenausschnitte.");
+    return datenLadenAusschnitt();
+  }
+  count = Math.round((count || 0) * 1.05);
 
-  const SEITE = 1000, GLEICHZEITIG = 10;
+  /* Weniger gleichzeitig und jede Seite bis zu dreimal: Die Datenbank
+     bricht bei Last einzelne Abfragen ab (Zeitgrenze). Klappt es trotzdem
+     nicht, arbeitet auch der Admin mit Kartenausschnitten weiter. */
+  const SEITE = 1000, GLEICHZEITIG = 4;
+  const seite = async von => {
+    let letzte;
+    for (let versuch = 0; versuch < 3; versuch++) {
+      letzte = await orteAbfrage(LISTE_SPALTEN).order("id").range(von, von + SEITE - 1);
+      if (!letzte.error) return letzte;
+      await new Promise(r => setTimeout(r, 800 * (versuch + 1)));
+    }
+    return letzte;
+  };
   const anfaenge = [];
   for (let von = 0; von < (count || 0) + SEITE; von += SEITE) anfaenge.push(von);
   const alle = [];
   for (let i = 0; i < anfaenge.length; i += GLEICHZEITIG) {
-    const antworten = await Promise.all(anfaenge.slice(i, i + GLEICHZEITIG).map(von =>
-      orteAbfrage(LISTE_SPALTEN).order("id").range(von, von + SEITE - 1)));
+    const antworten = await Promise.all(anfaenge.slice(i, i + GLEICHZEITIG).map(seite));
     for (const { data, error } of antworten) {
-      if (error) { Z.laedtNoch = false; if (!gespeichert) fehler(error); zeichne(); return; }
+      if (error) {
+        console.error("Ganz Deutschland laden:", error);
+        Z.laedtNoch = false;
+        melde("Ganz Deutschland ließ sich nicht laden – zeige Kartenausschnitte.");
+        return datenLadenAusschnitt();
+      }
       alle.push(...data);
     }
   }
@@ -7093,7 +7126,7 @@ function standortUebernehmen(p){
   ichMarker = L.circleMarker([Z.position.lat, Z.position.lon], {
     radius:7, color:"#fff", weight:2.5, fillColor:"#2E6BE0", fillOpacity:1
   }).addTo(karte);
-  if (!Z.admin) umgebungKacheln(Z.position);
+  if (AUSSCHNITT) umgebungKacheln(Z.position);
   else if (Z.laedtNoch) umgebungLaden(Z.position);
   zeichne();
   wetterLaden();
