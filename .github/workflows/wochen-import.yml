@@ -24,7 +24,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install pyarrow
-      - run: python import/wochen_import.py
+      - run: python wochen_import.py
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
