@@ -285,6 +285,12 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
 
 /* Listenende: nur auf dem Handy sichtbar, am Desktop gibt es die feste Leiste. */
 .listenende{display:none}
+.admin-oben{display:none}
+.einst-gruppe .admin-reihe{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.einst-links button{display:block;width:100%;text-align:left;background:none;border:0;
+  border-bottom:1px solid var(--kante);padding:12px 2px;font:inherit;font-size:15px;
+  color:var(--tinte);cursor:pointer}
+.einst-links button:last-child{border-bottom:0}
 
 /* ---------- Status oben in der Platz-Ansicht ---------- */
 .status{display:flex;gap:14px;align-items:center;margin:0 20px 12px;padding:16px 18px;
@@ -786,6 +792,9 @@ label.inline-knopf{display:inline-block;margin-top:10px}
   .admin-reihe{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
   .admin-reihe .knopf{font-size:13.5px;padding:11px 8px}
   .listenende .rechtliches-link{margin-top:18px}
+  .admin-oben{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:4px 0 12px}
+  .admin-oben .knopf{font-size:13px;padding:9px 6px}
+  .einst-gruppe .admin-reihe{margin-top:8px}
 
   /* Kompaktere Karten: mehr Plätze auf einen Blick. */
   .zeile{padding:12px 14px 12px 17px;margin-bottom:10px;gap:12px;align-items:center}
@@ -2574,13 +2583,7 @@ function ansichtListe(nurListe){
   const listenende = `<div class="listenende">
       <button class="eintragen-karte" data-gehe="neu"><span aria-hidden="true">＋</span>
         <span><b>Fehlt ein Platz?</b><br>Platz eintragen – dauert eine Minute.</span></button>
-      ${Z.admin ? `<div class="admin-reihe">
-        <button class="knopf zweit" data-gehe="importieren">Import</button>
-        <button class="knopf zweit" data-gehe="pruefen">Prüfen (${pruefAnzahl()})</button>
-        <button class="knopf zweit" data-gehe="fehlerliste">Fehler (${FEHLERBERICHTE.length})</button>
-        <button class="knopf zweit" data-export="1">Export</button>
-        <button class="knopf zweit" data-doppelte="1">Doppelte aufräumen</button>
-        <button class="knopf zweit" data-abmelden="1">Abmelden</button>${importLaufText()}</div>` : ``}
+      ${adminReihe()}
       <button class="abzeichen-link" data-einfuehrung="1">ⓘ Was bedeuten die Symbole?</button>
       <button class="abzeichen-link" data-gehe="abzeichen">🏅 Meine Abzeichen · ${abzeichenErreicht().length} von ${ABZEICHEN.length}</button>
       <div class="rechtliches-link">
@@ -2637,7 +2640,13 @@ function ansichtListe(nurListe){
   const miniLegende = ohneSuche ? `<div class="mini-legende" aria-label="Farben">
       <span><i style="background:#34C759"></i>darfst du</span><span><i style="background:#FF9F0A"></i>vorher fragen</span>
       <span><i style="background:#8E8E93"></i>wissen wir nicht</span></div>` : ``;
-  const rolleInhalt = `${ohneStandort}${trefferInfo}${miniLegende}${ohneSuche ? losLeiste("oben") + losLeiste() + abzeichenStreifen() : ``}${zeilenListe.join("")}${leer}${alleOrte.length > orte.length
+  /* Handy: Die Liste endet erst nach 150 Plätzen – deshalb stehen die
+     Admin-Knöpfe zusätzlich oben (auf dem Laptop stehen sie im Listenfuß). */
+  const adminOben = Z.admin ? `<div class="admin-oben">
+      <button class="knopf zweit" data-gehe="pruefen">Prüfen (${pruefAnzahl()})</button>
+      <button class="knopf zweit" data-gehe="fehlerliste">Fehler (${FEHLERBERICHTE.length})</button>
+      <button class="knopf zweit" data-gehe="einstellungen">Mehr …</button></div>` : ``;
+  const rolleInhalt = `${adminOben}${ohneStandort}${trefferInfo}${miniLegende}${ohneSuche ? losLeiste("oben") + losLeiste() + abzeichenStreifen() : ``}${zeilenListe.join("")}${leer}${alleOrte.length > orte.length
       ? `<div class="leer">… und ${(alleOrte.length - orte.length).toLocaleString("de-DE")} weitere.<br>
          Filter setzen, suchen oder auf der Karte zoomen.</div>` : ``}${listenende}`;
 
@@ -2656,7 +2665,7 @@ function ansichtListe(nurListe){
         placeholder="Platz, Ort oder Sportart suchen" value="${esc(Z.suche)}"
         aria-label="Platz, Ort oder Sportart suchen">
       ${Z.suche ? `<button class="suche-weg" data-suchweg="1" aria-label="Suche löschen">✕</button>` : ``}
-      <button class="suche-einst" data-gehe="einstellungen" aria-label="Einstellungen" title="Einstellungen">
+      <button class="suche-einst" data-gehe="einstellungen" aria-label="Menü und Einstellungen" title="Menü und Einstellungen">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
     </div>
     <div class="filter">
@@ -2953,6 +2962,17 @@ function ansichtAbzeichen(){
 /* --------------------------------------------------------------------------
    Einstellungen: Hauptsportart, Design, Abzeichen
    -------------------------------------------------------------------------- */
+/* Alle Admin-Knöpfe an einer Stelle (Listenende und Menü). */
+function adminReihe(){
+  return Z.admin ? `<div class="admin-reihe">
+        <button class="knopf zweit" data-gehe="importieren">Import</button>
+        <button class="knopf zweit" data-gehe="pruefen">Prüfen (${pruefAnzahl()})</button>
+        <button class="knopf zweit" data-gehe="fehlerliste">Fehler (${FEHLERBERICHTE.length})</button>
+        <button class="knopf zweit" data-export="1">Export</button>
+        <button class="knopf zweit" data-doppelte="1">Doppelte aufräumen</button>
+        <button class="knopf zweit" data-abmelden="1">Abmelden</button>${importLaufText()}</div>` : ``;
+}
+
 function ansichtEinstellungen(){
   const chip = (wert, text, an, attr) =>
     `<button ${attr}="${esc(wert)}" aria-pressed="${an}">${esc(text)}</button>`;
@@ -2963,7 +2983,18 @@ function ansichtEinstellungen(){
       <div class="dort">Gilt nur auf diesem Gerät</div>
     </div>
     <div class="rolle">
-      <div class="einst-gruppe" style="margin-top:12px">
+      ${Z.admin ? `<div class="einst-gruppe" style="margin-top:12px">
+        <h3>Admin</h3>${adminReihe()}
+      </div>` : ``}
+      <div class="einst-gruppe einst-links"${Z.admin ? `` : ` style="margin-top:12px"`}>
+        <h3>Platzfrei</h3>
+        <button data-gehe="ueber">Über Platzfrei</button>
+        <button data-gehe="vereine">Für Vereine</button>
+        <button data-gehe="partner">Für Partner</button>
+        <button data-gehe="fehler">Fehler melden</button>
+        <button data-gehe="rechtliches">Impressum &amp; Datenschutz</button>
+      </div>
+      <div class="einst-gruppe">
         <h3>Meine Hauptsportart</h3>
         <p>„Was ist los in der Nähe“ zeigt dann nur Spiele und Plätze dieser Sportart,
         und die Liste startet mit ihr. Den Filter oben kannst du trotzdem jederzeit ändern.</p>
