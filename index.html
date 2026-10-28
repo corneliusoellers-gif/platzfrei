@@ -1235,6 +1235,10 @@ const AUSWAHL = {
    Schaden an (jemand steht ungefragt auf dem Vereinsrasen). */
 const NUR_ADMIN = ["zugang","zeiten","bestaetigtDurch"];
 
+/* Freitext ist öffentlich sichtbar. Besucher können ihn nur vorschlagen,
+   der Admin schreibt ihn direkt (die Datenbank sperrt ihn ohnehin). */
+const NUR_VORSCHLAG = ["notizen"];
+
 /* ==========================================================================
    2. ZUSTAND DER APP
    ========================================================================== */
@@ -2689,7 +2693,8 @@ function ansichtListe(nurListe){
       <button class="knopf" data-gehe="neu">Platz eintragen</button>
       ${Z.admin ? `<button class="knopf zweit" data-gehe="importieren">Import</button>` : ``}
       ${Z.admin ? `<button class="knopf zweit" data-gehe="pruefen">Prüfen (${pruefAnzahl()})</button>
-      <button class="knopf zweit" data-gehe="fehlerliste">Fehler (${FEHLERBERICHTE.length})</button>` : ``}
+      <button class="knopf zweit" data-gehe="fehlerliste">Fehler (${FEHLERBERICHTE.length})</button>
+      <button class="knopf zweit" data-gehe="verlauf">Vorschläge & Verlauf (${VORSCHLAEGE.length})</button>` : ``}
       ${Z.admin ? `<button class="knopf zweit" data-export="1">Export</button>
       <button class="knopf zweit" data-doppelte="1">Doppelte aufräumen</button>${importLaufText()}` : ``}
     </div>
@@ -2968,6 +2973,7 @@ function adminReihe(){
         <button class="knopf zweit" data-gehe="importieren">Import</button>
         <button class="knopf zweit" data-gehe="pruefen">Prüfen (${pruefAnzahl()})</button>
         <button class="knopf zweit" data-gehe="fehlerliste">Fehler (${FEHLERBERICHTE.length})</button>
+        <button class="knopf zweit" data-gehe="verlauf">Vorschläge & Verlauf (${VORSCHLAEGE.length})</button>
         <button class="knopf zweit" data-export="1">Export</button>
         <button class="knopf zweit" data-doppelte="1">Doppelte aufräumen</button>
         <button class="knopf zweit" data-abmelden="1">Abmelden</button>${importLaufText()}</div>` : ``;
@@ -3600,7 +3606,7 @@ function ansichtAnmelden(){
    §7 Räumliche Konsistenz: Was nach rechts hinausging, kommt von rechts zurück. */
 const ANSICHTS_TIEFE = {
   liste:0, importieren:1, anmelden:1, neu:1,
-  detail:1, bearbeiten:2, melden:2, rechtliches:1, fehler:1, fehlerliste:1,
+  detail:1, bearbeiten:2, melden:2, rechtliches:1, fehler:1, fehlerliste:1, verlauf:1,
   vereinszeiten:2, pruefen:1, abzeichen:1, einstellungen:1, ueber:1, vereine:1, partner:1
 };
 let letzteTiefe = 0;
@@ -3646,7 +3652,7 @@ function zeichne(){
 
   ({ liste:ansichtListe, detail:ansichtDetail, bearbeiten:ansichtBearbeiten,
      neu:ansichtNeu, anmelden:ansichtAnmelden, importieren:ansichtImportieren,
-     melden:ansichtMelden, rechtliches:ansichtRechtliches, vereinszeiten:ansichtVereinszeiten, pruefen:ansichtPruefen, fehler:ansichtFehler, fehlerliste:ansichtFehlerliste, abzeichen:ansichtAbzeichen, einstellungen:ansichtEinstellungen,
+     melden:ansichtMelden, rechtliches:ansichtRechtliches, vereinszeiten:ansichtVereinszeiten, pruefen:ansichtPruefen, fehler:ansichtFehler, fehlerliste:ansichtFehlerliste, verlauf:ansichtVerlauf, abzeichen:ansichtAbzeichen, einstellungen:ansichtEinstellungen,
      ueber:ansichtUeber, vereine:ansichtVereine, partner:ansichtPartner })[Z.ansicht]();
 
   /* §11 Nur transform und opacity bewegen – beides läuft im Compositor,
@@ -3699,7 +3705,7 @@ function zeichne(){
    Namen in der App ab (Postgres mag keine Großbuchstaben). */
 const DB_SPALTE = { bestaetigtDurch:"bestaetigt_durch", geprueft:"geprueft_am" };
 const OFFENE_FELDER = ["untergrund","groesse","ausstattung","umzaeunt",
-                       "beleuchtung","zustand","drumherum","notizen"];
+                       "beleuchtung","zustand","drumherum"];
 
 /* Plätze ohne Namen heißen in der Datenbank "Tischtennis-Fläche" o. ä.
    Angezeigt wird ein lesbarer Name, mit Ort, wenn wir ihn kennen
@@ -4257,7 +4263,8 @@ async function fehlerLaden(){
 async function vorschlaegeLaden(){
   if (!ECHT) return;
   const { data } = await db.from("vorschlaege")
-                           .select("*").eq("erledigt", false);
+                           .select("*").eq("erledigt", false)
+                           .order("erstellt_am", { ascending:false });
   VORSCHLAEGE = data || [];
 }
 
@@ -4283,11 +4290,11 @@ async function speichern(){
       : wert;
     if (String(o[feld]) === String(neu)) continue;
 
-    if (NUR_ADMIN.includes(feld)) geschuetzt[feld] = neu;
-    else if (OFFENE_FELDER.includes(feld)) offen[feld] = neu;
+    if (NUR_ADMIN.includes(feld) || (NUR_VORSCHLAG.includes(feld) && !Z.admin)) geschuetzt[feld] = neu;
+    else if (OFFENE_FELDER.includes(feld) || NUR_VORSCHLAG.includes(feld)) offen[feld] = neu;
   }
 
-  let vorgeschlagen = 0;
+  let vorgeschlagen = 0, zugangVorgeschlagen = false;
 
   // ----- offene Felder: direkt schreiben -----
   if (Object.keys(offen).length) {
@@ -4326,13 +4333,19 @@ async function speichern(){
         }
         VORSCHLAEGE.push({ ort_id:o.id, feld, alter_wert:o[feld], neuer_wert:neu });
         vorgeschlagen++;
+        if (feld === "zugang") zugangVorgeschlagen = true;
       }
     }
   }
 
   Z.ansicht = "detail";
   zeichne();
-  melde(vorgeschlagen
+  /* Drei gleiche Vorschläge übernimmt die Datenbank nur bei vermutetem Zugang. */
+  const vermutet = o.bestaetigtDurch === "nur vermutet" || o.bestaetigtDurch === "Lage (OSM)";
+  melde(zugangVorgeschlagen
+    ? (vermutet ? "Danke! Sobald drei Leute dasselbe melden, wird es übernommen."
+                : "Danke! Dein Vorschlag wird geprüft.")
+    : vorgeschlagen
     ? `Gespeichert. ${vorgeschlagen} Änderung${vorgeschlagen>1?"en":""} wartet auf Freigabe.`
     : "Gespeichert.");
 }
@@ -4739,11 +4752,18 @@ async function meldungAbgeben(grund, id){
   melde("Danke – die Meldung ist angekommen.");
 }
 
-/* Anzahl offener Meldungen je Ort holen. Ein Aufruf für alle. */
+/* Anzahl offener Meldungen je Ort holen. Ein Aufruf für alle. Gezählt
+   werden nur die letzten 48 Stunden: Pro Anschluss ist nur eine Meldung
+   am Tag erlaubt, über mehrere Tage könnte sonst eine Person allein die
+   Warnung auslösen. Ohne Leserecht auf erstellt_am: alle wie bisher. */
 async function meldungenLaden(){
   if (!ECHT) return;
-  const { data, error } = await db.from("meldungen")
-                                 .select("ort_id").eq("erledigt", false);
+  const seit = new Date(Date.now() - 48 * 36e5).toISOString();
+  let { data, error } = await db.from("meldungen")
+                               .select("ort_id").eq("erledigt", false)
+                               .gte("erstellt_am", seit);
+  if (error) ({ data, error } = await db.from("meldungen")
+                                      .select("ort_id").eq("erledigt", false));
   if (error) return;
   const zaehler = {};
   for (const m of data) zaehler[m.ort_id] = (zaehler[m.ort_id] || 0) + 1;
@@ -5800,8 +5820,8 @@ function ansichtMelden(){
         mit seinem bisherigen Prüfstatus stehen, und du siehst am Platz, dass
         deine Meldung offen ist.</p>
         <p>Die Meldung ändert den Zugang nicht automatisch – das wäre zu
-        anfällig für Fehler und Scherze. Ab drei Meldungen erscheint hier
-        eine Warnung, und wir gehen der Sache nach.</p>
+        anfällig für Fehler und Scherze. Ab drei Meldungen innerhalb von zwei
+        Tagen erscheint hier eine Warnung, und ich gehe der Sache nach.</p>
       </div>
     </div>`;
 }
@@ -5923,6 +5943,129 @@ async function fehlerErledigt(id){
   FEHLERBERICHTE = FEHLERBERICHTE.filter(f => String(f.id) !== String(id));
   zeichne();
   melde("Als erledigt markiert.");
+}
+
+/* --------------------------------------------------------------------------
+   Admin: offene Vorschläge und Änderungsverlauf
+   --------------------------------------------------------------------------
+   Vorschläge (Tabelle vorschlaege) annehmen oder ablehnen. Zugang, Zeiten
+   und Beleg laufen über zugang_setzen, alles andere ist ein normales Update.
+   Der Verlauf (orte_aenderungen) zeigt die letzten 50 Änderungen; jede kann
+   über die Datenbankfunktion aenderung_zurueck zurückgedreht werden.
+   -------------------------------------------------------------------------- */
+const APP_FELD = Object.fromEntries(Object.entries(DB_SPALTE).map(([a, d]) => [d, a]));
+let AENDERUNGEN = null;            // null = noch nicht geladen
+
+async function aenderungenLaden(){
+  if (!ECHT) { AENDERUNGEN = []; return; }
+  const { data, error } = await db.from("orte_aenderungen")
+    .select("id,ort_id,zeit,wer,quelle,alt,neu")
+    .order("zeit", { ascending:false }).limit(50);
+  if (error) console.warn("Verlauf:", error.message);
+  AENDERUNGEN = data || [];
+}
+
+function zeitText(t){
+  return new Date(t).toLocaleString("de-DE",
+    { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" });
+}
+
+function platzLink(id){
+  const o = ort(String(id));
+  return o ? `<button class="inline-knopf" data-ort="${esc(o.id)}">${esc(o.name)}</button>`
+           : `Platz ${esc(String(id).slice(0, 8))}`;
+}
+
+/* Nur die Felder, die sich wirklich geändert haben. */
+function unterschiede(alt, neu){
+  if (!alt) return `<p>neu angelegt</p>`;
+  if (!neu) return `<p>gelöscht</p>`;
+  const zeilen = [];
+  for (const k of Object.keys(neu)) {
+    if (JSON.stringify(alt[k]) === JSON.stringify(neu[k])) continue;
+    const kurz = v => v == null || v === "" ? "–" : String(v).length > 80 ? String(v).slice(0, 80) + " …" : String(v);
+    zeilen.push(`<li><b>${esc(k)}</b>: ${esc(kurz(alt[k]))} → ${esc(kurz(neu[k]))}</li>`);
+  }
+  return zeilen.length ? `<ul style="margin:4px 0 0 18px;padding:0">${zeilen.join("")}</ul>` : `<p>keine sichtbare Änderung</p>`;
+}
+
+function ansichtVerlauf(){
+  if (!Z.admin) { Z.ansicht = "liste"; return ansichtListe(); }
+  if (AENDERUNGEN === null) { AENDERUNGEN = []; aenderungenLaden().then(() => Z.ansicht === "verlauf" && zeichne()); }
+  const vorschlaege = VORSCHLAEGE.filter(v => v.id);
+  seite.innerHTML = `
+    <div class="dkopf">
+      <button class="zurueck" data-gehe="liste">← Liste</button>
+      <div class="dname">Vorschläge & Verlauf</div>
+      <div class="dort">${vorschlaege.length} offen · letzte ${AENDERUNGEN.length} Änderungen</div>
+    </div>
+    <div class="rolle">
+      <div class="abschnitt" style="margin-top:8px"><h3>Offene Vorschläge</h3>
+        ${vorschlaege.length ? `` : `<p>Keine offenen Vorschläge.</p>`}</div>
+      ${vorschlaege.map(v => `
+        <div class="abschnitt" style="margin-top:8px">
+          <h3>${esc(zeitText(v.erstellt_am || v.eingang))} · ${platzLink(v.ort_id)}</h3>
+          <p><b>${esc(v.feld)}</b>: ${esc(v.alter_wert ?? "–")} → <b>${esc(v.neuer_wert ?? "–")}</b></p>
+          ${v.begruendung ? `<p style="white-space:pre-wrap">${esc(v.begruendung)}</p>` : ``}
+          <p><button class="inline-knopf" data-vorschlag="${esc(v.id)}" data-annehmen="1">Annehmen</button>
+             <button class="inline-knopf" data-vorschlag="${esc(v.id)}" data-annehmen="0">Ablehnen</button></p>
+        </div>`).join("")}
+      <div class="abschnitt" style="margin-top:16px"><h3>Letzte Änderungen</h3>
+        ${AENDERUNGEN.length ? `` : `<p>Noch keine Änderungen geladen.</p>`}</div>
+      ${AENDERUNGEN.map(a => `
+        <div class="abschnitt" style="margin-top:8px">
+          <h3>${esc(zeitText(a.zeit))} · ${platzLink(a.ort_id)}</h3>
+          <p style="font-size:13px">${esc([a.quelle, a.wer ? "von " + String(a.wer).slice(0, 10) : ""].filter(Boolean).join(" · "))}</p>
+          ${unterschiede(a.alt, a.neu)}
+          <p><button class="inline-knopf" data-zurueckdrehen="${esc(a.id)}">Zurückdrehen</button></p>
+        </div>`).join("")}
+    </div>`;
+}
+
+async function vorschlagEntscheiden(id, annehmen){
+  const v = VORSCHLAEGE.find(x => String(x.id) === String(id));
+  if (!v) return;
+  if (annehmen) {
+    const o = ort(String(v.ort_id));
+    if (!o) return melde("Der Platz ist gerade nicht geladen.");
+    const feld = APP_FELD[v.feld] || v.feld;
+    if (NUR_ADMIN.includes(feld)) {
+      const neu = { zugang:o.zugang, zeiten:o.zeiten, bestaetigtDurch:o.bestaetigtDurch, [feld]:v.neuer_wert };
+      if (!await zugangSetzen(o.id, neu.zugang, neu.zeiten, neu.bestaetigtDurch)) return;
+    } else if (ECHT) {
+      const { error } = await db.from("orte").update({ [v.feld]:v.neuer_wert, geprueft_am:heute() }).eq("id", o.id);
+      if (error) { console.error(error); return melde("Abgelehnt: " + error.message); }
+    }
+    o[feld] = feld === "zustand" ? +v.neuer_wert : v.neuer_wert;
+    o.geprueft = heute();
+    speicherVeraltet();
+  }
+  if (ECHT) {
+    const { error } = await db.from("vorschlaege").update({ erledigt:true }).eq("id", v.id);
+    if (error) { console.error(error); return melde("Abgelehnt: " + error.message); }
+  }
+  VORSCHLAEGE = VORSCHLAEGE.filter(x => x !== v);
+  AENDERUNGEN = null;
+  zeichne();
+  melde(annehmen ? "Übernommen." : "Abgelehnt.");
+}
+
+async function aenderungZurueckdrehen(id){
+  const a = (AENDERUNGEN || []).find(x => String(x.id) === String(id));
+  if (!confirm("Diese Änderung zurückdrehen? Der Platz bekommt wieder die alten Werte.")) return;
+  if (ECHT) {
+    const { data, error } = await db.rpc("aenderung_zurueck", { p_id:+id });
+    if (error) { console.error(error); return melde("Abgelehnt: " + error.message); }
+    melde(data ? String(data) : "Zurückgedreht.");
+  }
+  const o = a && ort(String(a.ort_id));
+  if (o && a.alt) {
+    for (const [k, w] of Object.entries(a.alt))
+      if (JSON.stringify(w) !== JSON.stringify(a.neu?.[k])) o[APP_FELD[k] || k] = w;
+    speicherVeraltet();
+  }
+  AENDERUNGEN = null;
+  zeichne();
 }
 
 /* --------------------------------------------------------------------------
@@ -6283,6 +6426,16 @@ function ansichtRechtliches(){
         vor und erlaubst den Standort, speichern wir zusätzlich, wie weit du
         vom eingetragenen Punkt entfernt warst. Das sehen nur wir, um den
         Vorschlag zu prüfen.</p>
+        <p><b>Vorschläge von mehreren Personen:</b> Ein Vorschlag wird erst
+        übernommen, wenn mehrere verschiedene Personen dasselbe melden. Damit
+        sich das prüfen lässt, wird zu jedem Vorschlag ein Prüfwert deines
+        Internetanschlusses gespeichert. Er wird aus der IP-Adresse berechnet
+        (gehasht, also pseudonymisiert), lässt sich nicht zurückrechnen und
+        wird nach 30 Tagen gelöscht. Die IP-Adresse selbst wird nicht
+        gespeichert.</p>
+        <p><b>Änderungsverlauf:</b> Änderungen an Plätzen werden mit Datum
+        bis zu 180 Tage aufbewahrt, damit sich Fehler und Missbrauch
+        rückgängig machen lassen. Den Verlauf sieht nur der Betreiber.</p>
         <p><b>Fotos:</b> Fotos werden vor dem Hochladen auf deinem Gerät
         verkleinert, dabei werden Ortungs- und Kameradaten aus der Datei
         entfernt. Bis wir ein Foto geprüft und freigegeben haben, liegt es
@@ -6373,6 +6526,8 @@ function ansichtRechtliches(){
         der Platz in der App ist, oder bis du sie zurücknimmst bzw. uns um
         Löschung bittest. Fehlermeldungen löschen wir, wenn der Fehler
         behoben ist, Vereinsangaben, wenn die Platzzeiten geprüft sind.
+        Prüfwerte zu Vorschlägen werden nach 30 Tagen gelöscht, der
+        Änderungsverlauf der Plätze nach 180 Tagen.
         Was auf deinem Gerät liegt, bleibt dort, bis du es löschst.</p>
 
         <h4>12. Kinder und Jugendliche</h4>
@@ -6920,7 +7075,7 @@ document.addEventListener("click", e=>{
                              "[data-export],[data-doppelte],[data-anmelden],[data-km],"+
                              "[data-merken],[data-gemerkt],[data-melden],[data-route],"+
                              "[data-nurlicht],[data-belegt],[data-sortierung],[data-bereich],[data-mehr],"+
-                             "[data-schildok],[data-schildweg],[data-loeschen],[data-fehlersenden],[data-fehlererledigt],"+
+                             "[data-schildok],[data-schildweg],[data-loeschen],[data-fehlersenden],[data-fehlererledigt],[data-vorschlag],[data-zurueckdrehen],"+
                              "[data-suchweg],[data-teilen],[data-abmelden],[data-hierpunkt],[data-vereinszeitensenden],"+
                              "[data-neuok],[data-neuweg],[data-vzok],[data-vzweg],[data-hier],[data-hierweg],[data-frage],"+
                              "[data-jetzt],[data-einfuehrung],[data-ausltag],[data-zusage],[data-spielweg],[data-spielform],[data-spielansetzen],[data-tipp],[data-tippsoffen],[data-osmladen],[data-osmstop],"+
@@ -6983,6 +7138,8 @@ document.addEventListener("click", e=>{
   if (t.dataset.loeschen)   { return ortLoeschen(t.dataset.loeschen); }
   if (t.dataset.fehlersenden) { return fehlerSenden(); }
   if (t.dataset.fehlererledigt) { return fehlerErledigt(t.dataset.fehlererledigt); }
+  if (t.dataset.vorschlag)  { return vorschlagEntscheiden(t.dataset.vorschlag, t.dataset.annehmen === "1"); }
+  if (t.dataset.zurueckdrehen) { return aenderungZurueckdrehen(t.dataset.zurueckdrehen); }
   if (t.dataset.mehr)       { Z.filterOffen = t.dataset.mehr === "1"; return zeichne(); }
   if (t.dataset.sortierung) { Z.sortierung = t.dataset.sortierung; return zeichne(); }
   if (t.dataset.bereich)    { Z.bereich = null; mitteBeimZeichnen = karte.getCenter();
