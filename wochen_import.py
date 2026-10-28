@@ -12,6 +12,9 @@ von Hand:  SUPABASE_URL=… SUPABASE_SERVICE_KEY=… python import/wochen_import
 4. In Häppchen an platzfrei_osm_import() schicken. Die Datenbank gleicht mit
    den vorhandenen Plätzen ab und legt nur Neues an.
 5. doppelte_zusammenfuehren() aufrufen und alles im Protokoll festhalten.
+6. Bei neuer Overture-Version (oder Option "namen"): Plätze, die nur
+   "Fußballplatz [Ort]" o. ä. heißen, bekommen per namen.py einen Namen nach
+   Schule/Park daneben bzw. die Straße (platzfrei_namen_setzen()).
 
 Quelle: © OpenStreetMap-Mitwirkende (ODbL), über Overture Maps.
 """
@@ -26,6 +29,9 @@ HIER = os.path.dirname(os.path.abspath(__file__))
 URL = os.environ.get("SUPABASE_URL", "").rstrip("/")
 KEY = os.environ.get("SUPABASE_SERVICE_KEY", "")
 ERZWINGEN = os.environ.get("ERZWINGEN", "") in ("1", "true", "ja")
+NAMEN = os.environ.get("NAMEN", "") in ("1", "true", "ja")
+PLATZHALTER = ["Fußballplatz", "Basketballplatz", "Tischtennisplatte", "Beachvolleyballfeld", "Laufbahn",
+               "Skatepark", "Calisthenics-Park"]
 TEIL = 1000          # Plätze pro Aufruf; bleibt sicher unter jeder Zeitgrenze
 BUCKET = "overturemaps-us-west-2"
 
@@ -238,6 +244,31 @@ def zeile(o):
     return r
 
 
+# ------------------------------------------------------------------ Namen
+def namen_auffrischen(s3, version):
+    import urllib.parse
+    import namen
+    plaetze = []
+    for pre in PLATZHALTER:
+        letzte = ""
+        while True:
+            seite = api(f"orte?select=id,name,ort,lat,lon&name=like.{urllib.parse.quote(pre)}*"
+                        f"&ort=not.like.*,*&doppelt_von=is.null&order=id&limit=1000"
+                        + (f"&id=gt.{letzte}" if letzte else "")) or []
+            plaetze += [o for o in seite if o["ort"] and o["name"] == pre + " " + o["ort"]]
+            if len(seite) < 1000: break
+            letzte = seite[-1]["id"]
+    print(f"{len(plaetze)} Plätze mit Platzhalter-Namen")
+    if not plaetze: return {}
+    gefunden = namen.berechnen(s3, version, plaetze)
+    daten = [[i, f, st] for i, (f, st) in gefunden.items()]
+    summe = collections.Counter()
+    for i in range(0, len(daten), TEIL):
+        for z in api("rpc/platzfrei_namen_setzen", {"daten": daten[i:i + TEIL]}) or []:
+            summe[z["was"]] += z["anzahl"]
+    return dict(summe)
+
+
 # ------------------------------------------------------------------ Ablauf
 def main():
     if not URL or not KEY:
@@ -265,6 +296,12 @@ def main():
     doppelte = {z["was"]: z["anzahl"] for z in api("rpc/doppelte_zusammenfuehren", {}) or []}
     api("platzfrei_importlauf", {"quelle": "doppelte", "stand": version, "ergebnis": doppelte})
 
+    namen_erg = {}
+    if ergebnis or NAMEN:
+        namen_erg = namen_auffrischen(s3, version)
+        api("platzfrei_importlauf", {"quelle": "namen", "stand": version, "ergebnis": namen_erg})
+        print("Namen:", json.dumps(namen_erg, ensure_ascii=False, indent=1))
+
     print("\nImport:", json.dumps(ergebnis, ensure_ascii=False, indent=1))
     print("Doppelte:", json.dumps(doppelte, ensure_ascii=False, indent=1))
     neu = sum(v for k, v in ergebnis.items() if k.startswith("neu angelegt"))
@@ -272,7 +309,7 @@ def main():
     if zusammenfassung:
         with open(zusammenfassung, "a") as f:
             f.write(f"## Platzfrei-Import {stand_text(version)}\n\n**{neu} neue Plätze**\n\n")
-            for k, v in sorted({**ergebnis, **doppelte}.items(), key=lambda x: -x[1]):
+            for k, v in sorted({**ergebnis, **doppelte, **namen_erg}.items(), key=lambda x: -x[1]):
                 f.write(f"- {k}: {v}\n")
 
 
