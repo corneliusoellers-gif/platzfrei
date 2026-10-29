@@ -1160,6 +1160,10 @@ header h1 .pf-marke{height:30px;width:auto}
 .oben-karten .los-karte .los-name{white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;
   -webkit-line-clamp:2;line-clamp:2;text-overflow:clip}
 .zname .zort{font-weight:500;color:var(--tinte-3)}
+/* Über Platzfrei, Für Vereine, Für Partner: am Laptop führt die Kopfleiste
+   zurück, auf dem Handy dieser Knopf. */
+.voll-zurueck{padding-bottom:0}
+@media (min-width:881px){ .voll-zurueck{display:none} }
 .rolle .daemmerung{margin:2px 0 10px}
 .rolle .abz-streifen{margin:4px 0 14px}
 .rolle .zeile + .los{margin-top:8px}
@@ -6227,6 +6231,7 @@ const FOTO_CORNELIUS = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/6xaJS
 function ansichtUeber(){
   const z = kennzahlen();
   seite.innerHTML = `
+    <div class="dkopf voll-zurueck"><button class="zurueck" data-gehe="liste">← Zurück</button></div>
     <div class="rolle">
       <div class="held">
         <div class="ueber-marke">Über Platzfrei</div>
@@ -6307,6 +6312,7 @@ function ansichtUeber(){
 function ansichtVereine(){
   const z = kennzahlen();
   seite.innerHTML = `
+    <div class="dkopf voll-zurueck"><button class="zurueck" data-gehe="liste">← Zurück</button></div>
     <div class="rolle">
       <div class="held">
         <div class="ueber-marke">Für Vereine</div>
@@ -6356,6 +6362,7 @@ function ansichtPartner(){
   const z = kennzahlen();
   const mail = `mailto:${esc(RECHT.email)}?subject=Partnerschaft%20mit%20Platzfrei`;
   seite.innerHTML = `
+    <div class="dkopf voll-zurueck"><button class="zurueck" data-gehe="liste">← Zurück</button></div>
     <div class="rolle">
       <div class="held">
         <div class="ueber-marke">Für Partner</div>
