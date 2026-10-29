@@ -650,6 +650,7 @@ label.inline-knopf{display:inline-block;margin-top:10px}
   padding:4px 20px 16px;line-height:1.5}
 .rechtliches-link button{background:none;border:0;padding:0;font:inherit;
   color:inherit;text-decoration:underline;cursor:pointer}
+.rechtliches-link a{color:inherit;text-decoration:underline}
 .abschnitt h4{font-size:14px;font-weight:600;color:var(--tinte);margin:14px 0 4px}
 .abschnitt ul{margin:6px 0 0 18px;font-size:14px;line-height:1.6;color:var(--tinte-2)}
 .abschnitt a{color:var(--gruen-tief)}
@@ -1048,6 +1049,16 @@ header h1 .pf-marke{height:30px;width:auto}
 .bezug b{color:var(--tinte)}
 .bezug small{font-size:12px;color:var(--tinte-2)}
 .bezug .inline-knopf{margin:0;flex-shrink:0}
+/* Hinweis: Platzfrei wächst mit seinen Nutzern (einmal wegklickbar) */
+.waechst{position:relative;display:flex;gap:10px;align-items:flex-start;margin:2px 0 10px;
+  padding:10px 34px 10px 12px;border-radius:12px;background:var(--gruen-zart);color:var(--tinte-2);
+  font-size:13px;line-height:1.45}
+.waechst .waechst-icon{font-size:20px;line-height:1.1;flex:none}
+.waechst b{color:var(--tinte)}
+.waechst .inline-knopf{margin-top:6px;background:var(--flaeche)}
+.waechst .waechst-weg{position:absolute;top:4px;right:4px;width:28px;height:28px;border:0;border-radius:50%;
+  background:none;color:var(--tinte-3);font-size:15px;cursor:pointer}
+.waechst .waechst-weg:hover{background:var(--flaeche)}
 .startpunkt{margin:-2px 0 12px;padding:12px;border-radius:12px;background:var(--flaeche);box-shadow:0 0 0 1px var(--kante)}
 .startpunkt > .knopf{width:100%}
 .startpunkt .hinweis{margin-top:8px}
@@ -2591,7 +2602,7 @@ function ansichtListe(nurListe){
       <button class="abzeichen-link" data-einfuehrung="1">ⓘ Was bedeuten die Symbole?</button>
       <button class="abzeichen-link" data-gehe="abzeichen">🏅 Meine Abzeichen · ${abzeichenErreicht().length} von ${ABZEICHEN.length}</button>
       <div class="rechtliches-link">
-        <button data-gehe="ueber">Über Platzfrei</button> · <button data-gehe="vereine">Für Vereine</button> · <button data-gehe="partner">Für Partner</button><br>
+        <button data-gehe="ueber">Über Platzfrei</button> · <button data-gehe="vereine">Für Vereine</button> · <button data-gehe="partner">Für Partner</button> · <a href="/bolzplaetze/">Plätze nach Stadt</a><br>
         Alle Angaben ohne Gewähr – vor Ort gilt das Schild.<br>
         <button data-gehe="rechtliches">Impressum &amp; Datenschutz</button> ·
         <button data-gehe="fehler">Fehler melden</button></div>
@@ -2650,7 +2661,18 @@ function ansichtListe(nurListe){
       <button class="knopf zweit" data-gehe="pruefen">Prüfen (${pruefAnzahl()})</button>
       <button class="knopf zweit" data-gehe="fehlerliste">Fehler (${FEHLERBERICHTE.length})</button>
       <button class="knopf zweit" data-gehe="einstellungen">Mehr …</button></div>` : ``;
-  const rolleInhalt = `${adminOben}${ohneStandort}${trefferInfo}${miniLegende}${ohneSuche ? losLeiste("oben") + losLeiste() + abzeichenStreifen() : ``}${zeilenListe.join("")}${leer}${alleOrte.length > orte.length
+  /* Damit Lücken nicht wie eine unfertige App wirken: kurz sagen, dass
+     Platzfrei mit seinen Nutzern wächst. Einmal weggeklickt, bleibt er weg. */
+  let waechstWeg = false;
+  try { waechstWeg = !!localStorage.getItem("platzfrei.waechst.weg"); } catch {}
+  const waechst = ohneSuche && !waechstWeg ? `<div class="waechst" role="note">
+      <span class="waechst-icon" aria-hidden="true">🌱</span>
+      <span><b>Platzfrei wächst mit dir.</b> Noch fehlen manche Plätze, Zeiten und Fotos.
+        Jeder neue Platz und jede Bestätigung vor Ort macht die Karte für alle besser.<br>
+        <button class="inline-knopf" data-gehe="neu">Platz eintragen</button></span>
+      <button class="waechst-weg" data-waechstweg="1" aria-label="Hinweis schließen" title="Schließen">✕</button>
+    </div>` : ``;
+  const rolleInhalt = `${adminOben}${ohneStandort}${trefferInfo}${waechst}${miniLegende}${ohneSuche ? losLeiste("oben") + losLeiste() + abzeichenStreifen() : ``}${zeilenListe.join("")}${leer}${alleOrte.length > orte.length
       ? `<div class="leer">… und ${(alleOrte.length - orte.length).toLocaleString("de-DE")} weitere.<br>
          Filter setzen, suchen oder auf der Karte zoomen.</div>` : ``}${listenende}`;
 
@@ -2699,7 +2721,7 @@ function ansichtListe(nurListe){
       <button class="knopf zweit" data-doppelte="1">Doppelte aufräumen</button>${importLaufText()}` : ``}
     </div>
     <div class="rechtliches-link listenfuss">Alle Angaben ohne Gewähr – vor Ort gilt das Schild.<br>
-      <button data-gehe="rechtliches">Impressum &amp; Datenschutz</button> ·
+      <a href="/bolzplaetze/">Plätze nach Stadt</a> · <button data-gehe="rechtliches">Impressum &amp; Datenschutz</button> ·
       <button data-gehe="fehler">Fehler melden</button></div>`;
 
   /* Laptop: Suche und Filter oben über die ganze Breite, damit die Liste
@@ -7079,7 +7101,7 @@ document.addEventListener("click", e=>{
                              "[data-suchweg],[data-teilen],[data-abmelden],[data-hierpunkt],[data-vereinszeitensenden],"+
                              "[data-neuok],[data-neuweg],[data-vzok],[data-vzweg],[data-hier],[data-hierweg],[data-frage],"+
                              "[data-jetzt],[data-einfuehrung],[data-ausltag],[data-zusage],[data-spielweg],[data-spielform],[data-spielansetzen],[data-tipp],[data-tippsoffen],[data-osmladen],[data-osmstop],"+
-                             "[data-startpunkt],[data-standort],[data-losscroll],[data-losalle],[data-filterweg],[data-korrektur],[data-modus]");
+                             "[data-startpunkt],[data-standort],[data-losscroll],[data-losalle],[data-filterweg],[data-korrektur],[data-modus],[data-waechstweg]");
   if (!t) return;
 
   if (t.dataset.startpunkt) {
@@ -7105,6 +7127,10 @@ document.addEventListener("click", e=>{
     return zeichne();
   }
   if (t.dataset.korrektur)  { return korrekturSenden(t.dataset.korrektur); }
+  if (t.dataset.waechstweg) {
+    try { localStorage.setItem("platzfrei.waechst.weg", "1"); } catch {}
+    t.closest(".waechst")?.remove(); return;
+  }
 
   if (t.dataset.thema)      { return themaUmschalten(); }
   if (t.dataset.jetzt)      { return jetztSpielen(); }
