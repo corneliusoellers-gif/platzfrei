@@ -5,7 +5,7 @@
    Anfragen an die Datenbank, Kartenbilder, Wetter und Adresssuche gehen
    immer direkt ins Netz und werden hier nicht gespeichert.
    Bei Änderungen an dieser Datei die Versionsnummer erhöhen. */
-const VERSION = "platzfrei-v1";
+const VERSION = "platzfrei-v2";
 const BIBLIOTHEKEN = [
   "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css",
   "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js",
@@ -36,8 +36,10 @@ self.addEventListener("fetch", e => {
   if (r.method !== "GET") return;
   const url = new URL(r.url);
 
-  /* Die Seite selbst: erst Netz (immer die neueste Fassung), ohne Netz die Kopie. */
-  if (r.mode === "navigate") {
+  /* Die Seite selbst: erst Netz (immer die neueste Fassung), ohne Netz die Kopie.
+     Nur die App-Startseite. Die Stadtseiten unter /bolzplaetze/ gehen normal ins Netz,
+     sonst würde eine Stadtseite die gespeicherte App überschreiben. */
+  if (r.mode === "navigate" && (url.pathname === "/" || url.pathname === "/index.html")) {
     e.respondWith((async () => {
       try {
         const antwort = await fetch(r);
