@@ -1,0 +1,35 @@
+# Platzfrei: alle 30 Minuten (ca. 6 bis 23 Uhr) schauen, ob im Admin etwas
+# Neues zu prüfen ist, und nur dann eine Mail schicken.
+# Von Hand: Actions → "Prüf-Mail" → "Run workflow" (mit Haken "Test" kommt immer eine Mail).
+name: Prüf-Mail
+
+on:
+  schedule:
+    - cron: "*/30 5-21 * * *"
+  workflow_dispatch:
+    inputs:
+      test:
+        description: "Auf jeden Fall eine Test-Mail schicken"
+        type: boolean
+        default: true
+
+concurrency: pruef-mail
+
+jobs:
+  mail:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python import/pruef_mail.py
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          MAIL_ADRESSE: ${{ secrets.MAIL_ADRESSE }}
+          MAIL_PASSWORT: ${{ secrets.MAIL_PASSWORT }}
+          MAIL_AN: platzfrei.app@outlook.com
+          MAIL_SERVER: smtp.gmail.com
+          TEST: ${{ inputs.test }}
