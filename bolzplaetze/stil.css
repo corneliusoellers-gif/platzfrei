@@ -1,0 +1,63 @@
+:root{--gruen:#0B9463;--gruen-tief:#087B51;--gruen-zart:#E7F5EE;--grund:#F6F8F6;--flaeche:#fff;
+--tinte:#0F1A15;--tinte-2:#3D4B44;--tinte-3:#5C6B63;--kante:rgba(15,26,21,.09);
+--frei:#0E7C43;--frei-bg:#E4F6EA;--absprache:#A8620B;--absprache-bg:#FDF0DC;
+--verein:#6248B8;--verein-bg:#EFEBFB;--blau:#1F6FB2;--blau-bg:#E5F0FA;
+--schrift:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI Variable','Segoe UI',system-ui,Roboto,'Helvetica Neue',sans-serif}
+@media (prefers-color-scheme:dark){:root{--gruen:#2FBF85;--gruen-tief:#4FD39C;--gruen-zart:#11281F;--grund:#0C1210;
+--flaeche:#151D1A;--tinte:#EAF1ED;--tinte-2:#BCC8C1;--tinte-3:#93A39A;--kante:rgba(234,241,237,.10);
+--frei:#5FD394;--frei-bg:#123222;--absprache:#F0B45E;--absprache-bg:#33250F;--verein:#AE9BF2;--verein-bg:#241D3D;
+--blau:#7DB8EA;--blau-bg:#14273A}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--schrift);background:var(--grund);color:var(--tinte);font-size:15px;line-height:1.55;-webkit-text-size-adjust:100%}
+a{color:var(--gruen-tief)}
+.rahmen{max-width:880px;margin:0 auto;padding:0 16px}
+header.kopf{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--grund) 88%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--kante)}
+header.kopf .rahmen{display:flex;align-items:center;justify-content:space-between;height:56px;gap:12px}
+.marke{display:flex;align-items:center;gap:9px;text-decoration:none;color:var(--tinte);font-weight:800;font-size:18px;letter-spacing:-.01em}
+.marke img{width:30px;height:30px;border-radius:8px}
+.knopf{display:inline-block;background:var(--gruen);color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:9px 16px;border-radius:999px;white-space:nowrap}
+.knopf:hover{background:var(--gruen-tief)}
+.pfad{font-size:13px;color:var(--tinte-3);margin:22px 0 6px}
+.pfad a{color:var(--tinte-3)}
+h1{font-size:clamp(26px,5vw,36px);line-height:1.15;letter-spacing:-.02em;margin-bottom:10px}
+.lead{font-size:17px;color:var(--tinte-2);max-width:62ch}
+.zahlen{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:22px 0}
+.zahl{background:var(--flaeche);border:1px solid var(--kante);border-radius:16px;padding:14px 16px}
+.zahl b{display:block;font-size:26px;letter-spacing:-.02em}
+.zahl span{font-size:13px;color:var(--tinte-3)}
+.filter{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 6px}
+.filter button{font:inherit;font-size:14px;font-weight:600;border:1px solid var(--kante);background:var(--flaeche);color:var(--tinte-2);padding:7px 13px;border-radius:999px;cursor:pointer}
+.filter button[aria-pressed=true]{background:var(--gruen);border-color:var(--gruen);color:#fff}
+section.gruppe{margin:30px 0}
+section.gruppe h2{font-size:21px;letter-spacing:-.01em;display:flex;align-items:center;gap:10px}
+.punkt{width:11px;height:11px;border-radius:50%;flex:none}
+.g-frei .punkt{background:var(--frei)}.g-vermutlich .punkt{background:var(--blau)}
+.g-schulhof .punkt{background:var(--absprache)}.g-verein .punkt{background:var(--verein)}
+.erkl{font-size:14px;color:var(--tinte-3);margin:4px 0 12px}
+ul.plaetze{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+ul.plaetze li{background:var(--flaeche);border:1px solid var(--kante);border-radius:14px}
+ul.plaetze a{display:block;padding:12px 14px;text-decoration:none;color:inherit;height:100%}
+ul.plaetze a:hover{border-color:var(--gruen)}
+ul.plaetze li:hover{border-color:var(--gruen)}
+.pn{font-weight:700;font-size:15px;line-height:1.3;overflow-wrap:anywhere}
+.pu{font-size:13px;color:var(--tinte-3);margin-top:2px;overflow-wrap:anywhere}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.tag{font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--gruen-zart);color:var(--gruen-tief)}
+.tag.grau{background:var(--grund);color:var(--tinte-3);border:1px solid var(--kante)}
+.mehr{margin-top:10px}
+.mehr summary{cursor:pointer;font-weight:600;color:var(--gruen-tief);font-size:14px;padding:6px 0}
+.hinweis{background:var(--flaeche);border:1px solid var(--kante);border-radius:16px;padding:16px 18px;margin:30px 0;color:var(--tinte-2)}
+.hinweis h2{font-size:17px;color:var(--tinte);margin-bottom:6px}
+.nachbarn{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.nachbarn a{font-size:14px;font-weight:600;text-decoration:none;background:var(--flaeche);border:1px solid var(--kante);padding:7px 12px;border-radius:999px;color:var(--tinte-2)}
+.faq h3{font-size:16px;margin:16px 0 4px}
+.faq p{color:var(--tinte-2)}
+footer{border-top:1px solid var(--kante);margin-top:40px;padding:22px 0 40px;font-size:13px;color:var(--tinte-3)}
+footer a{color:var(--tinte-3)}
+footer .rahmen{display:flex;flex-wrap:wrap;gap:8px 18px}
+.suche{width:100%;font:inherit;font-size:16px;padding:12px 14px;border-radius:12px;border:1px solid var(--kante);background:var(--flaeche);color:var(--tinte);margin:18px 0 6px}
+.land h2{font-size:19px;margin:26px 0 10px}
+.stadtliste{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.stadtliste a{display:flex;justify-content:space-between;gap:8px;background:var(--flaeche);border:1px solid var(--kante);border-radius:12px;padding:10px 12px;text-decoration:none;color:var(--tinte);font-weight:600}
+.stadtliste a span{color:var(--tinte-3);font-weight:500;font-size:13px}
+[hidden]{display:none!important}
