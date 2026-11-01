@@ -9,8 +9,8 @@ from email.utils import formataddr
 
 URL = os.environ["SUPABASE_URL"].rstrip("/")
 KEY = os.environ["SUPABASE_SERVICE_KEY"]
-ADRESSE = os.environ["MAIL_ADRESSE"]
-PASSWORT = os.environ["MAIL_PASSWORT"]
+ADRESSE = os.environ.get("MAIL_ADRESSE", "").strip()
+PASSWORT = "".join(os.environ.get("MAIL_PASSWORT", "").split())  # Leerzeichen/Zeilenumbrüche raus
 AN = os.environ.get("MAIL_AN") or ADRESSE
 SERVER = os.environ.get("MAIL_SERVER") or "smtp.gmail.com"
 PORT = int(os.environ.get("MAIL_PORT") or 587)
@@ -60,10 +60,31 @@ def main():
     mail.set_content(text)
     mail.add_alternative(html, subtype="html")
 
-    with smtplib.SMTP(SERVER, PORT, timeout=60) as s:
-        s.starttls(context=ssl.create_default_context())
-        s.login(ADRESSE, PASSWORT)
-        s.send_message(mail)
+    if "@" not in ADRESSE or not PASSWORT:
+        sys.exit("Secret MAIL_ADRESSE oder MAIL_PASSWORT fehlt bzw. ist leer.")
+    print(f"Anmelden bei {SERVER} als {ADRESSE[:3]}…{ADRESSE[ADRESSE.index('@'):]}, Passwort {len(PASSWORT)} Zeichen")
+    fehler = None
+    for port in (465, PORT):
+        try:
+            if port == 465:
+                s = smtplib.SMTP_SSL(SERVER, 465, timeout=60, context=ssl.create_default_context())
+            else:
+                s = smtplib.SMTP(SERVER, port, timeout=60)
+                s.starttls(context=ssl.create_default_context())
+            with s:
+                s.login(ADRESSE, PASSWORT)
+                s.send_message(mail)
+            fehler = None
+            break
+        except smtplib.SMTPAuthenticationError as f:
+            sys.exit(f"Gmail lehnt die Anmeldung ab ({f.smtp_code}). App-Passwort neu erstellen und in MAIL_PASSWORT eintragen.")
+        except (smtplib.SMTPException, OSError) as f:
+            fehler = f
+            print(f"Port {port}: {f!r}")
+    if fehler:
+        sys.exit("Mail-Server hat die Verbindung abgebrochen. Meist: App-Passwort falsch/alt, "
+                 "Zwei-Faktor im Gmail-Konto nicht an, oder Google hat die Anmeldung als neu/verdächtig blockiert "
+                 "(Gmail-Postfach auf Sicherheitswarnung prüfen).")
     print("Mail verschickt an", AN)
     rpc("platzfrei_pruef_gesendet", {"p_bis": stand["bis"], "p_mail": True})
 
