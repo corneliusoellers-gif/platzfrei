@@ -60,10 +60,24 @@ def main():
     mail.set_content(text)
     mail.add_alternative(html, subtype="html")
 
+    betreff = mail["Subject"]
+    grund = mail_schicken(mail)
+    if grund is None:
+        print("Mail verschickt an", AN)
+    else:
+        print("Mail ging nicht:", grund)
+        if not github_hinweis(betreff, text):
+            sys.exit("Weder Mail noch GitHub-Hinweis hat geklappt.")
+        print("Stattdessen GitHub-Hinweis angelegt (GitHub schickt dazu eine Mail).")
+    rpc("platzfrei_pruef_gesendet", {"p_bis": stand["bis"], "p_mail": True})
+
+
+def mail_schicken(mail):
+    """Gibt None zurück, wenn es geklappt hat, sonst den Grund."""
     if "@" not in ADRESSE or not PASSWORT:
-        sys.exit("Secret MAIL_ADRESSE oder MAIL_PASSWORT fehlt bzw. ist leer.")
+        return "Secret MAIL_ADRESSE oder MAIL_PASSWORT fehlt."
     print(f"Anmelden bei {SERVER} als {ADRESSE[:3]}…{ADRESSE[ADRESSE.index('@'):]}, Passwort {len(PASSWORT)} Zeichen")
-    fehler = None
+    grund = None
     for port in (465, PORT):
         try:
             if port == 465:
@@ -74,20 +88,43 @@ def main():
             with s:
                 s.login(ADRESSE, PASSWORT)
                 s.send_message(mail)
-            fehler = None
-            break
+            return None
         except smtplib.SMTPAuthenticationError as f:
-            sys.exit(f"Gmail lehnt die Anmeldung ab ({f.smtp_code}). App-Passwort neu erstellen und in MAIL_PASSWORT eintragen.")
+            return f"Gmail lehnt die Anmeldung ab ({f.smtp_code}): App-Passwort prüfen."
         except (smtplib.SMTPException, OSError) as f:
-            fehler = f
-            print(f"Port {port}: {f!r}")
-    if fehler:
-        sys.exit("Mail-Server hat die Verbindung abgebrochen. Meist: App-Passwort falsch/alt, "
-                 "Zwei-Faktor im Gmail-Konto nicht an, oder Google hat die Anmeldung als neu/verdächtig blockiert "
-                 "(Gmail-Postfach auf Sicherheitswarnung prüfen).")
-    print("Mail verschickt an", AN)
-    rpc("platzfrei_pruef_gesendet", {"p_bis": stand["bis"], "p_mail": True})
+            grund = f"Port {port}: {f!r}"
+            print(grund)
+    return grund
 
+
+def github_hinweis(betreff, text):
+    """Ersatzweg: Kommentar in einem offenen Issue "Platzfrei: zu prüfen" (oder neues Issue).
+    GitHub schickt dem Repo-Besitzer dafür eine Mail."""
+    token, repo = os.environ.get("GITHUB_TOKEN"), os.environ.get("GITHUB_REPOSITORY")
+    if not token or not repo:
+        return False
+
+    def gh(pfad, daten=None):
+        a = urllib.request.Request(
+            f"https://api.github.com/repos/{repo}/{pfad}", method="POST" if daten else "GET",
+            data=json.dumps(daten).encode() if daten else None,
+            headers={"Authorization": "Bearer " + token, "Accept": "application/vnd.github+json"})
+        with urllib.request.urlopen(a, timeout=30) as r:
+            return json.loads(r.read().decode() or "null")
+
+    try:
+        titel = "Platzfrei: Neues zu prüfen"
+        offen = [i for i in gh("issues?state=open&per_page=100")
+                 if i["title"] == titel and "pull_request" not in i]
+        inhalt = f"**{betreff}**\n\n" + text.replace("\n", "  \n")
+        if offen:
+            gh(f"issues/{offen[0]['number']}/comments", {"body": inhalt})
+        else:
+            gh("issues", {"title": titel, "body": inhalt + "\n\nSchließen, wenn erledigt. Beim nächsten Neuen kommt ein neues."})
+        return True
+    except Exception as f:
+        print("GitHub-Hinweis ging nicht:", f)
+        return False
 
 if __name__ == "__main__":
     main()
