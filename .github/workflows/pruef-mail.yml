@@ -15,6 +15,10 @@ on:
 
 concurrency: pruef-mail
 
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   mail:
     runs-on: ubuntu-latest
@@ -32,4 +36,5 @@ jobs:
           MAIL_PASSWORT: ${{ secrets.MAIL_PASSWORT }}
           MAIL_AN: platzfrei.app@outlook.com
           MAIL_SERVER: smtp.gmail.com
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TEST: ${{ inputs.test }}
