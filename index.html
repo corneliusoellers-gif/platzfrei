@@ -3392,6 +3392,14 @@ function ansichtBearbeiten(){
         ${auswahlFeld("bestaetigtDurch", AUSWAHL.bestaetigtDurch,
                       Z.vorgabeBeleg || o.bestaetigtDurch, sperr)}
 
+        ${sperr ? `
+        <label>Woher weißt du das? (Pflicht, wenn du Zugang oder Zeiten änderst)</label>
+        <textarea name="begruendung" maxlength="1000"
+          placeholder="z. B. Schild am Eingang: täglich 8–20 Uhr · Gemeinde Gauting, Mail vom 20.10."></textarea>
+        <label class="inline-knopf fotowahl"><span id="aend-schildtext">${Z.aendSchildFoto?.id === o.id
+            ? "✓ Schildfoto gewählt – ändern" : "🪧 Oder: Schild fotografieren"}</span>
+          <input type="file" id="aend-schildfoto" accept="image/*" hidden></label>` : ``}
+
         <p class="hinweis">${sperr
           ? "Änderungen an Zugang und Zeiten gehen als Vorschlag ein und werden erst nach Prüfung sichtbar. Alles andere ist sofort live."
           : "Admin-Modus: alle Felder werden direkt übernommen."}</p>
@@ -3410,12 +3418,31 @@ const NEU_QUELLE = ["Schild vor Ort","Auskunft Gemeinde","Auskunft Verein","Ausk
                     "selbst gesehen oder gespielt","weiß ich nicht"];
 const NEU_WEISSNICHT = ["weiß nicht","ja","nein"];
 
+/* Besucher müssen belegen, woher sie wissen, dass man dort spielen darf:
+   ein Foto vom Schild ODER eine Quelle mit kurzer Angabe (wer, wann, wo).
+   Die Datenbank prüft dasselbe noch einmal (supabase-pflicht-beleg.sql). */
+const BITTE_WAEHLEN = "– bitte wählen –";
+const NEU_QUELLE_BESUCHER = [BITTE_WAEHLEN, ...NEU_QUELLE.filter(q => q !== "weiß ich nicht")];
+const BELEG_MIN = 10;   // so viele Zeichen muss die Angabe ohne Foto mindestens haben
+
+/* null = Beleg reicht, sonst der Hinweis für den Nutzer. */
+function belegFehlt(quelle, detail, hatFoto){
+  if (hatFoto) return null;
+  const q = (quelle || "").trim();
+  if (!q || q === BITTE_WAEHLEN || q === "weiß ich nicht")
+    return "Bitte fotografiere das Schild oder sag uns, woher du weißt, dass man dort spielen darf.";
+  if (q === "Schild vor Ort") return "Bitte lade noch das Foto vom Schild hoch.";
+  if ((detail || "").trim().length < BELEG_MIN)
+    return "Bitte schreib kurz dazu, wer es gesagt hat oder wo es steht (z. B. „Gemeinde Gauting, Mail vom 20.10.“).";
+  return null;
+}
+
 function ansichtNeu(){
   const p = Z.neuerPunkt;
   const e = Z.neuEntwurf || {};
   const abstand = p && Z.positionEcht ? Math.round(entfernungKm(Z.position, p) * 1000) : null;
   const zeitenArt = e.zeitenart || "weiß ich nicht";
-  const quelle = e.quelle || "weiß ich nicht";
+  const quelle = e.quelle || (Z.admin ? "weiß ich nicht" : BITTE_WAEHLEN);
   const tagAn = i => e["tag-"+i] === undefined ? true : e["tag-"+i];
   seite.innerHTML = `
     <div class="dkopf">
@@ -3465,6 +3492,7 @@ function ansichtNeu(){
         <input name="zeitzusatz" placeholder="z. B. Mittagsruhe 13–15 Uhr, nicht während Schulbetrieb"
                value="${esc(e.zeitzusatz||"")}">
 
+        ${Z.admin ? `
         <h4 class="form-titel">Woher weißt du das?</h4>
 
         <label>Quelle</label>
@@ -3472,16 +3500,24 @@ function ansichtNeu(){
 
         <label>Wer genau, und wann? (freiwillig)</label>
         <input name="quelledetail" placeholder="z. B. Gemeinde Gauting, Mail vom 20.10.2026"
-               value="${esc(e.quelledetail||"")}">
+               value="${esc(e.quelledetail||"")}">` : `
+        <h4 class="form-titel">Woher weißt du, dass man dort spielen darf? (Pflicht)</h4>
+        <p class="hinweis">Fotografiere das Schild am Platz – oder sag uns, woher du es weißt.
+        Eins von beiden brauchen wir, sonst können wir den Platz nicht eintragen.</p>
 
-        ${Z.admin ? `` : `
-        <div id="neu-schild"${quelle === "Schild vor Ort" ? "" : " hidden"}>
-          <label>Foto vom Schild (empfohlen)</label>
+        <div id="neu-schild">
+          <label>Foto vom Schild</label>
           <label class="inline-knopf fotowahl">${Z.neuSchildFoto ? "✓ Schildfoto gewählt – ändern" : "🪧 Schild fotografieren"}
             <input type="file" id="neu-schildfoto" accept="image/*" hidden></label>
-          <p class="hinweis">Mit einem lesbaren Foto vom Schild können wir die Zeiten
-          direkt als „Schild vor Ort“ übernehmen.</p>
-        </div>`}
+          <p class="hinweis">Am besten so, dass man die Regeln und Zeiten lesen kann.</p>
+        </div>
+
+        <label>${Z.neuSchildFoto ? "Quelle (freiwillig)" : "Oder: Woher weißt du es?"}</label>
+        ${auswahlFeld("quelle", NEU_QUELLE_BESUCHER, quelle, false)}
+
+        <label>${Z.neuSchildFoto ? "Wer genau, und wann? (freiwillig)" : "Wer genau, und wann? (Pflicht ohne Schildfoto)"}</label>
+        <input name="quelledetail" maxlength="300" placeholder="z. B. Gemeinde Gauting, Mail vom 20.10.2026"
+               value="${esc(e.quelledetail||"")}">`}
 
         <h4 class="form-titel">Mehr zum Platz</h4>
 
@@ -3647,7 +3683,7 @@ function ansichtPruefen(){
             <img src="${esc(fotoUrl(n.schild_foto))}" alt="Foto vom Schild" style="width:100%;max-height:260px;object-fit:contain;border-radius:12px"></a>` : ``}
           <form class="form" onsubmit="return false"><label>Beleg beim Annehmen</label>
             ${auswahlFeld("beleg-" + n.id, AUSWAHL.bestaetigtDurch,
-              n.quelle === "Schild vor Ort" && n.schild_foto ? "Schild vor Ort" : "nur vermutet", false)}
+              n.schild_foto ? "Schild vor Ort" : "nur vermutet", false)}
             <p class="hinweis" style="margin-top:6px">Eine Auskunft nur übernehmen, wenn du sie selbst gesehen hast
             (Schildfoto, Mail). Sonst bleibt es „nur vermutet“.</p></form>
           <p>${n.abstand_m !== null && n.abstand_m !== undefined ? `Standort beim Eintragen: ${n.abstand_m} m entfernt` : `Standort nicht freigegeben`}
@@ -3996,7 +4032,10 @@ function doppeltSpaltePruefen(){
 }
 /* Vorher einmal await doppeltSpaltePruefen(). */
 function orteAbfrage(spalten, optionen){
-  const q = db.from("orte").select(spalten, optionen);
+  /* Ausgeblendete Plätze (freigegeben = false, z. B. Stadien und
+     Profi-Gelände) sieht auch der Admin nicht mehr auf Karte und Liste.
+     Besucher bekommen sie über die Leseregel ohnehin nicht. */
+  const q = db.from("orte").select(spalten, optionen).not("freigegeben", "is", false);
   return DOPPELT_FILTER ? q.is("doppelt_von", null) : q;
 }
 
@@ -4429,6 +4468,17 @@ async function speichern(){
 
   let vorgeschlagen = 0, zugangVorgeschlagen = false;
 
+  /* Zugang oder Zeiten ändern geht für Besucher nur mit Beleg:
+     Schildfoto oder eine kurze Angabe, woher man es weiß. */
+  const aendFoto = Z.aendSchildFoto?.id === o.id ? Z.aendSchildFoto.datei : null;
+  const begruendung = (w.begruendung || "").trim();
+  if (!Z.admin && ("zugang" in geschuetzt || "zeiten" in geschuetzt)) {
+    if (!aendFoto && begruendung.length < BELEG_MIN)
+      return melde("Bitte fotografiere das Schild oder schreib kurz, woher du weißt, dass man dort spielen darf.");
+    if (aendFoto && !(await schildHochladen(aendFoto, o.id))) return;
+  }
+  Z.aendSchildFoto = null;
+
   // ----- offene Felder: direkt schreiben -----
   if (Object.keys(offen).length) {
     if (ECHT) {
@@ -4460,7 +4510,10 @@ async function speichern(){
             ort_id: o.id,
             feld: DB_SPALTE[feld] || feld,
             alter_wert: String(o[feld]),
-            neuer_wert: String(neu)
+            neuer_wert: String(neu),
+            begruendung: NUR_ADMIN.includes(feld)
+              ? (begruendung || (aendFoto ? "Schildfoto hochgeladen (siehe Fotos beim Platz)" : "")).slice(0, 2000) || null
+              : null
           });
           if (error) { console.error(error); continue; }
         }
@@ -4527,6 +4580,8 @@ async function fotoHochladen(datei){
 /* Nutzer: Vorschlag mit Pflichtfoto in "neue_orte". Erscheint erst nach
    der Prüfung durch den Admin auf der Karte. */
 async function neuVorschlagen(w){
+  const fehlt = belegFehlt(w.quelle, w.quelledetail, !!Z.neuSchildFoto);
+  if (fehlt) return melde(fehlt);
   if (!Z.neuFoto) return melde("Bitte noch ein Foto vom Platz hinzufügen.");
   melde("Wird gesendet …");
   const p = Z.neuerPunkt;
@@ -4534,7 +4589,7 @@ async function neuVorschlagen(w){
     let pfad, schildPfad = null;
     try {
       pfad = await fotoHochladen(Z.neuFoto);
-      if (Z.neuSchildFoto && w.quelle === "Schild vor Ort") schildPfad = await fotoHochladen(Z.neuSchildFoto);
+      if (Z.neuSchildFoto) schildPfad = await fotoHochladen(Z.neuSchildFoto);
     } catch (e) { console.error(e); return melde("Foto hochladen hat nicht geklappt."); }
     const basis = {
       name:w.name.slice(0,120), ort:w.ort || null, lat:p.lat, lon:p.lon,
@@ -4546,7 +4601,8 @@ async function neuVorschlagen(w){
     const zeiten = neuZeitenText(w);
     const neu = { ...basis, hinweis:w.hinweis || null,
       zeiten: zeiten ? zeiten.slice(0,300) : null,
-      quelle: w.quelle === "weiß ich nicht" ? null : w.quelle,
+      quelle: w.quelle === "weiß ich nicht" || w.quelle === BITTE_WAEHLEN
+              ? (schildPfad ? "Schild vor Ort" : null) : w.quelle,
       quelle_detail: w.quelledetail ? w.quelledetail.slice(0,300) : null,
       schild_foto: schildPfad, groesse: w.groesse || null,
       beleuchtung: w.beleuchtung === "weiß nicht" ? null : w.beleuchtung,
@@ -5015,6 +5071,7 @@ async function schildHochladen(datei, id){
   zeichne();
   melde("Danke! Das Foto geht in die Prüfung.");
   zaehle("fotos");
+  return true;
 }
 
 /* Admin: Foto freigeben und gleich den Zugang mit "Schild vor Ort"
@@ -7417,6 +7474,13 @@ document.addEventListener("change", e=>{
     zeichne();
     melde("Foto gewählt.");
   }
+  if (e.target.id === "aend-schildfoto" && e.target.files?.[0]) {
+    if (!e.target.files[0].type.startsWith("image/")) return melde("Bitte ein Foto auswählen.");
+    Z.aendSchildFoto = { id: Z.auswahlId, datei: e.target.files[0] };
+    const t = document.getElementById("aend-schildtext");
+    if (t) t.textContent = "✓ Schildfoto gewählt – ändern";
+    melde("Schildfoto gewählt. Es wird beim Speichern mitgeschickt.");
+  }
   if (e.target.id === "neu-schildfoto" && e.target.files?.[0]) {
     if (!e.target.files[0].type.startsWith("image/")) return melde("Bitte ein Foto auswählen.");
     Z.neuSchildFoto = e.target.files[0];
@@ -7428,10 +7492,6 @@ document.addEventListener("change", e=>{
   if (Z.ansicht === "neu" && e.target.name === "zeitenart") {
     const r = document.getElementById("neu-raster");
     if (r) r.hidden = e.target.value !== "feste Uhrzeiten";
-  }
-  if (Z.ansicht === "neu" && e.target.name === "quelle") {
-    const s = document.getElementById("neu-schild");
-    if (s) s.hidden = e.target.value !== "Schild vor Ort";
   }
 });
 
