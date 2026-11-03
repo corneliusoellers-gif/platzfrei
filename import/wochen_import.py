@@ -124,11 +124,17 @@ VEREIN_SPORT = {"tennis", "equestrian", "shooting", "golf", "archery", "ice_stoc
                 "american_football", "padel", "miniature_golf", "paintball", "horse_racing"}
 OEFF_NAME = re.compile(r"bolz|streetball|basketballplatz|basketballfeld|skate|pumptrack|dirt ?park|calisthenics|street ?workout|fitness ?park|trimm|freizeit(anlage|gelände|platz|fläche)|jugendplatz|aktivpark|mehrgenerationen|spielplatz|spielwiese|bürgerpark|stadtpark", re.I)
 VEREIN_TXT = re.compile(r"\b(e\.? ?v\.?|verein|tsv|sv|fc|sc|tus|vfb|vfl|tsg|sg|spvgg|djk|fsv|ssv|tv|asv|sportfreunde|turnverein|sportclub|sportverein)\b", re.I)
+STADION = re.compile(r"stadion|arena|stadium|kampfbahn", re.I)
+STADION_STRASSE = re.compile(r"(am|zum|beim|im) stadion|stadion(straße|str\.|weg|ring|platz|allee|gasse)", re.I)
+PROFI = re.compile(r"leistungszentrum|(?<!kampf)sportschule|säbener", re.I)
 AMT = re.compile(r"\b(stadt|gemeinde|markt|bezirksamt|landeshauptstadt)\b", re.I)
 
 
 def meter(a, b, c, d): return math.hypot((a - c) * 111320, (b - d) * 111320 * math.cos(math.radians(a)))
 def tags(r): return dict(r["source_tags"] or [])
+def kapazitaet(tg):
+    try: return int(re.sub(r"\D", "", tg.get("capacity") or "") or 0)
+    except ValueError: return 0
 def mitte(b): return ((b["ymin"] + b["ymax"]) / 2, (b["xmin"] + b["xmax"]) / 2)
 
 
@@ -143,7 +149,9 @@ def einstufen(t):
         b = r["bbox"]
         if b["ymax"] - b["ymin"] > 0.05 or b["xmax"] - b["xmin"] > 0.07: continue
         nm = (r["names"] or {}).get("primary") or ""
-        e = (art, b, nm, k == "playground")
+        # Großes Stadion bzw. Profi-Gelände: Stadion/Arena im Namen oder >= 2.000 Plätze
+        gross = art == "stadion" and bool(STADION.search(nm) or kapazitaet(tags(r)) >= 2000)
+        e = (art, b, nm, k == "playground" or gross)
         for a in range(math.floor(b["ymin"] / Z), math.floor(b["ymax"] / Z) + 1):
             for c in range(math.floor(b["xmin"] / Z), math.floor(b["xmax"] / Z) + 1):
                 umg[(a, c)].append(e)
@@ -197,6 +205,11 @@ def einstufen(t):
                 elif "skateboard" in roh or "bmx" in roh: grund = ("skate", "")
                 elif tg.get("fee") == "no": grund = ("gratis", "")
                 if grund: zug = "vermutlich öffentlich"
+        # Stadien und Profi-Gelände gar nicht erst anlegen (wie stadien-ausblenden.sql)
+        if not grund and not set(sp) <= {"Skaten", "Calisthenics", "Tischtennis"} and not OEFF_NAME.search(nm) and (
+                any(u[0] == "stadion" and u[3] for u in hier)
+                or (STADION.search(nm) and not STADION_STRASSE.search(nm)) or PROFI.search(nm)):
+            continue
         out.append(dict(name=nm or sp[0] + "-Fläche", lat=round(la, 6), lon=round(lo, 6), sp=sp,
                         belag=OSM_BELAG.get((tg.get("surface") or "").lower()), licht=tg.get("lit") == "yes",
                         zug=zug, grund=grund, verein=bool(verein) and zug is None))
