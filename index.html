@@ -4032,10 +4032,7 @@ function doppeltSpaltePruefen(){
 }
 /* Vorher einmal await doppeltSpaltePruefen(). */
 function orteAbfrage(spalten, optionen){
-  /* Ausgeblendete Plätze (freigegeben = false, z. B. Stadien und
-     Profi-Gelände) sieht auch der Admin nicht mehr auf Karte und Liste.
-     Besucher bekommen sie über die Leseregel ohnehin nicht. */
-  const q = db.from("orte").select(spalten, optionen).not("freigegeben", "is", false);
+  const q = db.from("orte").select(spalten, optionen);
   return DOPPELT_FILTER ? q.is("doppelt_von", null) : q;
 }
 
