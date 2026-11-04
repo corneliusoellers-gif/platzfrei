@@ -450,6 +450,53 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
 }
 :root[data-theme="dark"] .abz-streifen{background:linear-gradient(140deg,#3A3114,#2B240E);color:#F5EBD0}
 :root[data-theme="dark"] .abz-streifen small,:root[data-theme="dark"] .abz-streifen .abz-pfeil{color:#D9C68E}
+
+/* ---------- Meine Saison & Ranglisten ---------- */
+.saison-gitter{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:8px 0 12px}
+.saison-kachel{background:var(--flaeche);border-radius:var(--r-karte);box-shadow:var(--schatten);padding:14px 16px;
+  border-top:4px solid var(--k)}
+.saison-kachel b{display:block;font-size:30px;line-height:1.1;color:var(--tinte);font-variant-numeric:tabular-nums}
+.saison-kachel small{display:block;font-size:13px;color:var(--tinte-3);margin-top:2px}
+.saison-h{font-size:15px;margin:0 0 8px;color:var(--tinte)}
+.saison-block .rang-liste + .saison-h{margin-top:18px}
+.saison-monate{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;height:90px;align-items:end;margin-bottom:14px}
+.saison-monat{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+.saison-monat span{display:block;width:100%;max-width:22px;min-height:3px;border-radius:4px 4px 2px 2px;background:var(--gruen);opacity:.35}
+.saison-monat.jetzt span{opacity:1}
+.saison-monat.jetzt span{background:var(--gruen)}
+.saison-monat small{font-size:11px;color:var(--tinte-3);margin-top:4px}
+.saison-fakten{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.saison-fakten > *{display:flex;flex-direction:column;gap:2px;text-align:left;font:inherit;border:0;
+  background:var(--hintergrund, rgba(127,127,127,.08));border-radius:12px;padding:10px 12px;color:var(--tinte);min-width:0}
+.saison-fakten button{cursor:pointer}
+.saison-fakten span{font-size:12px;color:var(--tinte-3)}
+.saison-fakten b{font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.saison-fakten small{font-size:12px;color:var(--tinte-3)}
+.saison-wettbewerb{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.saison-wettbewerb .saison-h{margin:0}
+.saison-zeit button{padding:6px 12px;font-size:13px}
+.saison-erkl{font-size:13px;color:var(--tinte-3);line-height:1.45;margin:8px 0 10px}
+.rang-liste{display:flex;flex-direction:column}
+.rang-zeile{display:flex;align-items:center;gap:12px;padding:10px 4px;border:0;border-bottom:1px solid var(--kante);
+  background:none;font:inherit;color:var(--tinte);text-align:left;width:100%}
+button.rang-zeile{cursor:pointer}
+.rang-zeile:last-child{border-bottom:0}
+.rang-zeile.meine{background:var(--gruen-zart);border-radius:10px;border-bottom-color:transparent;padding-left:8px;padding-right:8px}
+.rang-nr{width:28px;text-align:center;font-weight:700;font-size:15px;color:var(--tinte-3);flex:none}
+.rang-name{flex:1;min-width:0;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rang-name em{font-style:normal;font-size:11.5px;font-weight:700;color:var(--gruen-tief);margin-left:4px}
+.rang-wert{font-weight:700;font-variant-numeric:tabular-nums;flex:none}
+.rang-wert small{font-weight:500;font-size:12px;color:var(--tinte-3)}
+.rang-leer{font-size:13.5px;color:var(--tinte-3);margin:4px 0}
+.rang-luecke{text-align:center;color:var(--tinte-3);padding:2px 0}
+.saison-streifen{display:flex;align-items:center;gap:12px;width:100%;margin:-6px 0 14px;padding:10px 14px;
+  font:inherit;text-align:left;color:var(--tinte);cursor:pointer;border:0;border-radius:var(--r-karte);
+  background:var(--flaeche);box-shadow:var(--schatten)}
+.saison-streifen > span:first-child{font-size:26px;line-height:1;flex:none}
+.saison-streifen > span:nth-child(2){flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.saison-streifen b{font-size:14.5px}
+.saison-streifen small{font-size:12.5px;color:var(--tinte-3)}
+.saison-streifen .abz-pfeil{color:var(--tinte-3)}
 .kopfnav .nav-zahl{font-size:12px;font-weight:700;color:var(--tinte-3);margin-left:4px}
 #meldung[data-gehe]{cursor:pointer}
 .abzeichen-link{display:block;margin:0 auto 12px;font-family:var(--schrift);font-size:14px;font-weight:600;
@@ -1471,8 +1518,10 @@ const TIPPS = {
 /* --------------------------------------------------------------------------
    Abzeichen
    --------------------------------------------------------------------------
-   Nur auf diesem Gerät gezählt. Keine Rangliste, kein Vergleich mit
-   anderen – es soll Spaß machen mitzuhelfen, nicht Druck erzeugen.
+   Nur auf diesem Gerät gezählt. Keine Rangliste von Personen, kein
+   Vergleich mit anderen – es soll Spaß machen mitzuhelfen, nicht Druck
+   erzeugen. Wettbewerb gibt es nur zwischen Städten und Plätzen (siehe
+   "Meine Saison" weiter unten).
    -------------------------------------------------------------------------- */
 const STAT_SCHLUESSEL = "platzfrei.statistik";
 function statistik(){
@@ -1530,10 +1579,227 @@ function zaehle(art, ortId){
   if (art) s[art] = (s[art] || 0) + 1;
   if (art === "checkins" && ortId != null && !s.checkinOrte.includes(String(ortId)))
     s.checkinOrte.push(String(ortId));
+  if (art === "checkins" && ortId != null) saisonMerken(s, ortId);
   try { localStorage.setItem(STAT_SCHLUESSEL, JSON.stringify(s)); } catch {}
   const neu = abzeichenErreicht(s).find(a => !vorher.has(a.name));
   if (neu) setTimeout(() => melde(`${neu.icon} Neues Abzeichen: ${neu.name}! Antippen zum Ansehen`, "abzeichen", 5000), 1600);
   abzeichenNav();
+}
+
+
+/* --------------------------------------------------------------------------
+   Meine Saison & Ranglisten
+   --------------------------------------------------------------------------
+   "Meine Saison": eigene Zahlen, nur auf diesem Gerät (localStorage,
+   Schlüssel platzfrei.statistik → verlauf). Kein Konto, nichts geht an den
+   Server, was nicht ohnehin beim Check-in passiert.
+   Ranglisten: nur Städte und Plätze, nie Personen. Grundlage sind die
+   anonymen Besuche (RPC rangliste_staedte / rangliste_plaetze, siehe
+   saison-ranglisten/supabase-ranglisten.sql). Erst ab 3 Geräten sichtbar,
+   ein Gerät zählt pro Tag höchstens einmal.
+   -------------------------------------------------------------------------- */
+const SAISON_MAX = 1000;
+/* Stadt aus dem Feld "ort" – gleiche Regel wie stadt_aus_ort() in SQL. */
+function stadtVon(o){
+  const s = String(o?.ort || "").replace(/^\d{5}\s+/, "").split(",")[0].split("(")[0].trim();
+  return s && s !== "—" ? s : "";
+}
+function tagHeute(d = new Date()){
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+function saisonMerken(s, ortId){
+  const o = ort(ortId) || ort(+ortId);
+  s.verlauf = Array.isArray(s.verlauf) ? s.verlauf : [];
+  s.verlauf.push({ d: tagHeute(), o: String(ortId),
+    n: String(o?.name || "").slice(0, 80), s: stadtVon(o).slice(0, 60),
+    sp: o?.sportarten?.[0] || "" });
+  if (s.verlauf.length > SAISON_MAX) s.verlauf.splice(0, s.verlauf.length - SAISON_MAX);
+}
+/* Montag der Woche als "JJJJ-MM-TT" – Wochen zählen für die Serie. */
+function wocheVon(tag){
+  const d = new Date(tag + "T12:00:00");
+  d.setDate(d.getDate() - (d.getDay() + 6) % 7);
+  return tagHeute(d);
+}
+function saisonZahlen(s = statistik()){
+  const jahr = new Date().getFullYear();
+  const alle = Array.isArray(s.verlauf) ? s.verlauf : [];
+  const v = alle.filter(e => e.d && e.d.startsWith(String(jahr)));
+  const tage = new Set(v.map(e => e.d));
+  const plaetze = new Set(v.map(e => e.o));
+  const staedte = new Set(v.map(e => e.s).filter(Boolean));
+  /* Serie: Wochen hintereinander mit mindestens einem Spieltag. Die
+     laufende Woche bricht die Serie noch nicht ab. */
+  const wochen = new Set(alle.map(e => wocheVon(e.d)));
+  const zurueck = (w, n) => { const d = new Date(w + "T12:00:00"); d.setDate(d.getDate() - 7 * n); return tagHeute(d); };
+  const dieseWoche = wocheVon(tagHeute());
+  let serie = 0, w = wochen.has(dieseWoche) ? dieseWoche : zurueck(dieseWoche, 1);
+  while (wochen.has(w)) { serie++; w = zurueck(w, 1); }
+  let laengste = 0, lauf = 0, vorher = null;
+  for (const x of [...wochen].sort()) {
+    lauf = vorher && zurueck(x, 1) === vorher ? lauf + 1 : 1;
+    laengste = Math.max(laengste, lauf); vorher = x;
+  }
+  /* Lieblingsplatz: wo du an den meisten Tagen warst */
+  const jePlatz = {};
+  for (const e of v) (jePlatz[e.o] ||= { n: e.n, tage: new Set() }).tage.add(e.d);
+  const lieblings = Object.entries(jePlatz).sort((a, b) => b[1].tage.size - a[1].tage.size)[0];
+  const monate = Array(12).fill(0);
+  for (const t of tage) monate[+t.slice(5, 7) - 1]++;
+  const jeSport = {};
+  for (const e of v) if (e.sp) jeSport[e.sp] = (jeSport[e.sp] || 0) + 1;
+  const sport = Object.entries(jeSport).sort((a, b) => b[1] - a[1])[0]?.[0] || "";
+  return { jahr, spieltage: tage.size, checkins: v.length, plaetze: plaetze.size,
+    staedte: staedte.size, serie, laengste, monate, sport,
+    lieblings: lieblings && { id: lieblings[0], name: lieblings[1].n, tage: lieblings[1].tage.size },
+    gesamt: s.checkins || 0 };
+}
+/* Für welche Stadt zählst du? Wo du in den letzten 60 Tagen am häufigsten
+   warst, sonst die Stadt des nächsten Platzes. */
+function meineStadt(){
+  const grenze = tagHeute(new Date(Date.now() - 60 * 864e5));
+  const z = {};
+  for (const e of statistik().verlauf || []) if (e.s && e.d >= grenze) z[e.s] = (z[e.s] || 0) + 1;
+  const best = Object.entries(z).sort((a, b) => b[1] - a[1])[0];
+  if (best) return best[0];
+  if (!Z.positionEcht) return "";
+  let naechster = null, km = 15;
+  for (const o of DATEN) {
+    if (Math.abs(o.lat - Z.position.lat) > 0.15 || Math.abs(o.lon - Z.position.lon) > 0.22) continue;
+    const k = entfernungKm(Z.position, o);
+    if (k < km && stadtVon(o)) { km = k; naechster = o; }
+  }
+  return naechster ? stadtVon(naechster) : "";
+}
+
+const RANG = { zeitraum: "woche", staedte: {}, plaetze: {}, fehlt: false };
+async function ranglisteLaden(zeitraum = RANG.zeitraum, neu = false){
+  if (!ECHT || RANG.fehlt) return false;
+  const alt = RANG.staedte[zeitraum];
+  if (alt && !neu && Date.now() - alt.zeit < 10 * 60e3) return false;
+  const { data, error } = await db.rpc("rangliste_staedte", { p_zeitraum: zeitraum });
+  if (error) {
+    console.warn("Rangliste:", error.message);
+    if (/rangliste_staedte|function|schema cache/i.test(error.message || "")) RANG.fehlt = true;
+    return false;
+  }
+  RANG.staedte[zeitraum] = { zeit: Date.now(), liste: data || [] };
+  return true;
+}
+async function ranglistePlaetzeLaden(stadt, zeitraum = RANG.zeitraum){
+  if (!ECHT || RANG.fehlt || !stadt) return false;
+  const k = zeitraum + "|" + stadt, alt = RANG.plaetze[k];
+  if (alt && Date.now() - alt.zeit < 10 * 60e3) return false;
+  const { data, error } = await db.rpc("rangliste_plaetze", { p_stadt: stadt, p_zeitraum: zeitraum });
+  if (error) { console.warn("Platz-Rangliste:", error.message); return false; }
+  RANG.plaetze[k] = { zeit: Date.now(), liste: data || [] };
+  return true;
+}
+/* Platz der eigenen Stadt in der Wochen-Rangliste (für den Streifen). */
+function stadtRang(stadt = meineStadt(), zeitraum = "woche"){
+  const l = RANG.staedte[zeitraum]?.liste;
+  if (!stadt || !l) return null;
+  const i = l.findIndex(r => r.stadt === stadt);
+  return i < 0 ? null : { ...l[i], von: l.length };
+}
+/* Kleiner Streifen unter den Abzeichen – nur wenn deine Stadt in der
+   Wochen-Rangliste steht. */
+function saisonStreifen(){
+  const r = stadtRang();
+  if (!r) return ``;
+  return `<button class="saison-streifen" data-gehe="saison">
+      <span aria-hidden="true">🏆</span>
+      <span><b>${esc(r.stadt)} ist diese Woche auf Platz ${r.platz}</b>
+      <small>von ${r.von} Städten · Jeder Check-in zählt mit, anonym</small></span>
+      <span class="abz-pfeil" aria-hidden="true">›</span></button>`;
+}
+
+function ansichtSaison(){
+  const s = statistik(), z = saisonZahlen(s);
+  const stadt = meineStadt();
+  const zr = RANG.zeitraum;
+  const staedte = RANG.staedte[zr];
+  const plaetze = RANG.plaetze[zr + "|" + stadt];
+  if (!staedte) ranglisteLaden(zr).then(n => n && Z.ansicht === "saison" && zeichne());
+  if (stadt && !plaetze) ranglistePlaetzeLaden(stadt, zr).then(n => n && Z.ansicht === "saison" && zeichne());
+
+  const kachel = (zahl, text, farbe) =>
+    `<div class="saison-kachel" style="--k:${farbe}"><b>${zahl}</b><small>${text}</small></div>`;
+  const max = Math.max(1, ...z.monate);
+  const mon = ["J","F","M","A","M","J","J","A","S","O","N","D"];
+  const jetztM = new Date().getMonth();
+  const balken = z.monate.map((n, i) => `<div class="saison-monat${i === jetztM ? " jetzt" : ""}"
+      title="${n} Spieltage"><span style="height:${Math.round(n / max * 100)}%"></span><small>${mon[i]}</small></div>`).join("");
+
+  const zeile = (r, an, attr = "") => `<${attr ? "button" : "div"} class="rang-zeile${an ? " meine" : ""}"${attr}>
+      <span class="rang-nr">${r.platz <= 3 ? ["🥇","🥈","🥉"][r.platz - 1] : r.platz}</span>
+      <span class="rang-name">${esc(r.stadt || r.name || "")}</span>
+      <span class="rang-wert">${r.spieltage} <small>${an ? "Spieltage · deine Stadt" : "Spieltage"}</small></span></${attr ? "button" : "div"}>`;
+  let staedteHtml;
+  if (RANG.fehlt) staedteHtml = `<p class="rang-leer">Ranglisten sind noch nicht eingerichtet.</p>`;
+  else if (!staedte) staedteHtml = `<p class="rang-leer">Lädt …</p>`;
+  else if (!staedte.liste.length) staedteHtml = `<p class="rang-leer">Noch keine Stadt mit genug Check-ins.
+      Eine Stadt erscheint, sobald dort mindestens 3 verschiedene Leute eingecheckt haben.</p>`;
+  else {
+    const top = staedte.liste.slice(0, 10);
+    const ich = staedte.liste.find(r => r.stadt === stadt);
+    staedteHtml = top.map(r => zeile(r, r.stadt === stadt)).join("") +
+      (ich && !top.includes(ich) ? `<div class="rang-luecke">…</div>${zeile(ich, true)}` : ``);
+  }
+  let plaetzeHtml = ``;
+  if (stadt && !RANG.fehlt) {
+    const l = plaetze?.liste;
+    plaetzeHtml = `<h3 class="saison-h">Beliebteste Plätze in ${esc(stadt)}</h3>
+      <div class="rang-liste">${!plaetze ? `<p class="rang-leer">Lädt …</p>`
+        : !l.length ? `<p class="rang-leer">Noch kein Platz in ${esc(stadt)} mit genug Check-ins. Check ein, wenn du spielst!</p>`
+        : l.map(r => zeile(r, false, ` data-ort="${esc(r.ort_id)}"`)).join("")}</div>`;
+  }
+
+  seite.innerHTML = `
+    <div class="dkopf">
+      <button class="zurueck" data-gehe="liste">← Liste</button>
+      <div class="dname">Meine Saison ${z.jahr}</div>
+      <div class="dort">Deine Zahlen bleiben auf diesem Gerät</div>
+    </div>
+    <div class="rolle">
+      ${z.checkins ? `` : `<div class="abschnitt saison-leer" style="margin-top:8px"><p><b>Deine Saison startet mit dem ersten Check-in.</b>
+        Tipp am Platz auf „Ich bin gerade hier“. Dann zählt die App deine Spieltage, Plätze und Wochen in Folge.
+        ${z.gesamt ? `Check-ins von vor dieser Funktion (${z.gesamt}) zählen schon für deine Abzeichen.` : ``}</p></div>`}
+      <div class="saison-gitter">
+        ${kachel(z.spieltage, z.spieltage === 1 ? "Spieltag" : "Spieltage", "#34C759")}
+        ${kachel(z.plaetze, z.plaetze === 1 ? "Platz" : "Plätze", "#0A84FF")}
+        ${kachel(z.staedte, z.staedte === 1 ? "Stadt" : "Städte", "#AF52DE")}
+        ${kachel(z.serie, (z.serie === 1 ? "Woche in Folge" : "Wochen in Folge") + (z.serie >= 2 ? " 🔥" : ""), "#FF9500")}
+      </div>
+      <div class="abschnitt saison-block">
+        <h3 class="saison-h">Spieltage pro Monat</h3>
+        <div class="saison-monate">${balken}</div>
+        <div class="saison-fakten">
+          ${z.lieblings ? `<button data-ort="${esc(z.lieblings.id)}"><span>⭐ Lieblingsplatz</span><b>${esc(z.lieblings.name || "Platz")}</b><small>${z.lieblings.tage} ${z.lieblings.tage === 1 ? "Tag" : "Tage"}</small></button>` : ``}
+          ${z.sport ? `<div><span>⚽ Meist gespielt</span><b>${esc(z.sport)}</b></div>` : ``}
+          <div><span>📈 Längste Serie</span><b>${z.laengste} ${z.laengste === 1 ? "Woche" : "Wochen"}</b></div>
+          <div><span>📅 Spiele angesetzt · zugesagt</span><b>${s.spiele || 0} · ${s.zusagen || 0}</b></div>
+          <div><span>✅ Plätze bestätigt</span><b>${BESTAETIGT.size}</b></div>
+          <button data-gehe="abzeichen"><span>🏅 Abzeichen</span><b>${abzeichenErreicht(s).length} von ${ABZEICHEN.length}</b></button>
+        </div>
+      </div>
+
+      <div class="abschnitt saison-block">
+        <div class="saison-wettbewerb">
+          <h3 class="saison-h">Städte-Wettbewerb</h3>
+          <div class="einst-chips saison-zeit">
+            <button data-rangzeit="woche" aria-pressed="${zr === "woche"}">Diese Woche</button>
+            <button data-rangzeit="monat" aria-pressed="${zr === "monat"}">30 Tage</button>
+          </div>
+        </div>
+        <p class="saison-erkl">Welche Stadt spielt am meisten? Gezählt werden Spieltage aus Check-ins:
+          jedes Gerät höchstens einmal pro Tag. Es gibt keine Rangliste von Personen.${stadt ? ` Deine Check-ins zählen für <b>${esc(stadt)}</b>.` : ``}</p>
+        <div class="rang-liste">${staedteHtml}</div>
+        ${plaetzeHtml}
+      </div>
+
+      ${z.checkins ? `<button class="abzeichen-link" data-saisonweg="1">Meine Saison-Daten auf diesem Gerät löschen</button>` : ``}
+    </div>`;
 }
 
 /* ==========================================================================
@@ -2704,6 +2970,7 @@ function ansichtListe(nurListe){
       ${adminReihe()}
       <button class="abzeichen-link" data-einfuehrung="1">ⓘ Was bedeuten die Symbole?</button>
       <button class="abzeichen-link" data-gehe="abzeichen">🏅 Meine Abzeichen · ${abzeichenErreicht().length} von ${ABZEICHEN.length}</button>
+      <button class="abzeichen-link" data-gehe="saison">🏆 Meine Saison & Ranglisten</button>
       <div class="rechtliches-link">
         <button data-gehe="ueber">Über Platzfrei</button> · <button data-gehe="vereine">Für Vereine</button> · <button data-gehe="partner">Für Partner</button> · <a href="/bolzplaetze/">Plätze nach Stadt</a><br>
         Alle Angaben ohne Gewähr – vor Ort gilt das Schild.<br>
@@ -2785,7 +3052,7 @@ function ansichtListe(nurListe){
   const zeilen = zeilenListe.slice();
   if (ohneSuche && zeilen.length) {
     if (los && !losOben) zeilen.splice(Math.min(4, zeilen.length), 0, los);
-    zeilen.splice(Math.min(10 + (los && !losOben ? 1 : 0), zeilen.length), 0, abzeichenStreifen());
+    zeilen.splice(Math.min(10 + (los && !losOben ? 1 : 0), zeilen.length), 0, abzeichenStreifen() + saisonStreifen());
   } else if (los && !losOben) zeilen.push(los);
   const rolleInhalt = `${adminOben}${trefferInfo}${hinweis}${ohneSuche ? losLeiste("oben") : ``}${losOben ? los : ``}${zeilen.join("")}${leer}${alleOrte.length > orte.length
       ? `<div class="leer">… und ${(alleOrte.length - orte.length).toLocaleString("de-DE")} weitere.<br>
@@ -3084,7 +3351,8 @@ function ansichtAbzeichen(){
       <div class="abschnitt" style="margin-top:8px">
         <p>Für jedes Mithelfen gibt es Abzeichen: einchecken, Plätze bestätigen,
         Spiele ansetzen, Tipps geben. Sie werden nur auf diesem Gerät gezählt.
-        Es gibt kein Konto und keine Rangliste.</p>
+        Es gibt kein Konto und keine Rangliste von Personen.</p>
+        <button class="inline-knopf" data-gehe="saison">🏆 Meine Saison & Städte-Wettbewerb</button>
       </div>
       <div class="abzeichen-gitter">${ABZEICHEN.map(a => {
         const w = Math.min(a.wert(s), a.ziel);
@@ -3128,6 +3396,7 @@ function ansichtEinstellungen(){
       </div>` : ``}
       <div class="einst-gruppe einst-links"${Z.admin ? `` : ` style="margin-top:12px"`}>
         <h3>Platzfrei</h3>
+        <button data-gehe="saison">🏆 Meine Saison & Ranglisten</button>
         <a href="/bolzplaetze/">Plätze nach Stadt</a>
         <button data-gehe="ueber">Über Platzfrei</button>
         <button data-gehe="vereine">Für Vereine</button>
@@ -3776,7 +4045,7 @@ function ansichtAnmelden(){
 const ANSICHTS_TIEFE = {
   liste:0, importieren:1, anmelden:1, neu:1,
   detail:1, bearbeiten:2, melden:2, rechtliches:1, fehler:1, fehlerliste:1, verlauf:1,
-  vereinszeiten:2, pruefen:1, abzeichen:1, einstellungen:1, ueber:1, vereine:1, partner:1
+  vereinszeiten:2, pruefen:1, abzeichen:1, saison:1, einstellungen:1, ueber:1, vereine:1, partner:1
 };
 let letzteTiefe = 0;
 let letzterSchluessel = "liste";
@@ -3821,7 +4090,7 @@ function zeichne(){
 
   ({ liste:ansichtListe, detail:ansichtDetail, bearbeiten:ansichtBearbeiten,
      neu:ansichtNeu, anmelden:ansichtAnmelden, importieren:ansichtImportieren,
-     melden:ansichtMelden, rechtliches:ansichtRechtliches, vereinszeiten:ansichtVereinszeiten, pruefen:ansichtPruefen, fehler:ansichtFehler, fehlerliste:ansichtFehlerliste, verlauf:ansichtVerlauf, abzeichen:ansichtAbzeichen, einstellungen:ansichtEinstellungen,
+     melden:ansichtMelden, rechtliches:ansichtRechtliches, vereinszeiten:ansichtVereinszeiten, pruefen:ansichtPruefen, fehler:ansichtFehler, fehlerliste:ansichtFehlerliste, verlauf:ansichtVerlauf, abzeichen:ansichtAbzeichen, saison:ansichtSaison, einstellungen:ansichtEinstellungen,
      ueber:ansichtUeber, vereine:ansichtVereine, partner:ansichtPartner })[Z.ansicht]();
 
   /* §11 Nur transform und opacity bewegen – beides läuft im Compositor,
@@ -4032,7 +4301,10 @@ function doppeltSpaltePruefen(){
 }
 /* Vorher einmal await doppeltSpaltePruefen(). */
 function orteAbfrage(spalten, optionen){
-  const q = db.from("orte").select(spalten, optionen);
+  /* Ausgeblendete Plätze (freigegeben = false, z. B. Stadien und
+     Profi-Gelände) sieht auch der Admin nicht mehr auf Karte und Liste.
+     Besucher bekommen sie über die Leseregel ohnehin nicht. */
+  const q = db.from("orte").select(spalten, optionen).not("freigegeben", "is", false);
   return DOPPELT_FILTER ? q.is("doppelt_von", null) : q;
 }
 
@@ -6604,6 +6876,13 @@ function ansichtRechtliches(){
         sind nur Prozentwerte je Wochentag und Stunde, und erst wenn an
         mindestens fünf Tagen von drei Geräten eingecheckt wurde. Nach acht
         Wochen löschen wir die Einträge.</p>
+        <p><b>Ranglisten für Städte und Plätze:</b> Aus denselben anonymen
+        Besuchen zählt die App, in welchen Städten und auf welchen Plätzen am
+        meisten gespielt wird. Dafür wird nichts zusätzlich gespeichert. Es
+        gibt keine Rangliste von Personen, keine Namen und kein Konto. Ein
+        Gerät zählt pro Tag höchstens einmal, und eine Stadt oder ein Platz
+        erscheint erst, wenn dort mindestens drei verschiedene Geräte
+        eingecheckt haben.</p>
         <p><b>Mitspieler gesucht:</b> Wenn du ein Spiel ansetzt oder zusagst,
         speichern wir Platz, Zeit, Sportart, die gewünschte Anzahl und die
         Geräte-Nummer. Öffentlich sichtbar sind nur Zeit, Sportart und wie
@@ -6701,7 +6980,8 @@ function ansichtRechtliches(){
 
         <h4>10. Auf deinem Gerät</h4>
         <p>Merkliste, Geräte-Nummer, eigene Bestätigungen, Zusagen und Tipps,
-        dein aktueller Check-in, deine Abzeichen und deine Einstellungen (Hauptsportart, Design) speichert die App im
+        dein aktueller Check-in, deine Abzeichen, deine Saison-Zahlen (an welchem Tag du an welchem Platz eingecheckt hast,
+        unter „Meine Saison“ jederzeit löschbar) und deine Einstellungen (Hauptsportart, Design) speichert die App im
         Speicher deines Browsers (localStorage). Damit die App auch ohne Netz
         startet, legt sie außerdem eine Kopie ihrer Dateien und der Platzliste
         im Browser ab (Cache und IndexedDB); die Platzliste enthält keine
@@ -7280,7 +7560,7 @@ document.addEventListener("click", e=>{
                              "[data-suchweg],[data-teilen],[data-abmelden],[data-hierpunkt],[data-vereinszeitensenden],"+
                              "[data-neuok],[data-neuweg],[data-vzok],[data-vzweg],[data-hier],[data-hierweg],[data-frage],"+
                              "[data-jetzt],[data-einfuehrung],[data-ausltag],[data-zusage],[data-spielweg],[data-spielform],[data-spielansetzen],[data-tipp],[data-tippsoffen],[data-osmladen],[data-osmstop],"+
-                             "[data-startpunkt],[data-standort],[data-losscroll],[data-losalle],[data-filterweg],[data-korrektur],[data-modus],[data-waechstweg]");
+                             "[data-startpunkt],[data-standort],[data-losscroll],[data-losalle],[data-filterweg],[data-korrektur],[data-modus],[data-waechstweg],[data-rangzeit],[data-saisonweg]");
   if (!t) return;
 
   if (t.dataset.startpunkt) {
@@ -7383,6 +7663,15 @@ document.addEventListener("click", e=>{
     if (o) karte.flyTo([o.lat, o.lon], Math.max(karte.getZoom(), 16), { duration:.6 });
     sheet.aufmachen();
     return;
+  }
+  if (t.dataset.rangzeit) {
+    RANG.zeitraum = t.dataset.rangzeit; zeichne(); return;
+  }
+  if (t.dataset.saisonweg) {
+    if (!confirm("Deine Saison-Zahlen (Spieltage, Plätze, Serie) auf diesem Gerät löschen? Abzeichen bleiben.")) return;
+    const s = statistik(); delete s.verlauf;
+    try { localStorage.setItem(STAT_SCHLUESSEL, JSON.stringify(s)); } catch {}
+    melde("Saison-Daten gelöscht."); zeichne(); return;
   }
   if (t.dataset.gehe)       {
     Z.ansicht=t.dataset.gehe; zeichne();
@@ -7743,6 +8032,7 @@ adminAdresseOeffnen();
   await Promise.all([meldungenLaden(), bestaetigungenLaden(), aktivLaden(), spieleLaden()]);
   zeichne();
   wetterLaden();          // läuft nebenher, blockiert den Start nicht
+  ranglisteLaden("woche").then(n => n && Z.ansicht === "liste" && stadtRang() && ansichtListe(true));
 })();
 
 /* Service Worker: sorgt dafür, dass die App nach dem ersten Besuch auch mit
