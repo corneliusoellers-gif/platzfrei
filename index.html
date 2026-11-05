@@ -1354,7 +1354,7 @@ header h1 .pf-marke{height:30px;width:auto}
     bottom:calc(var(--blatt-sichtbar, 90vh) - 32px);padding:5px 12px;font-size:13px;
     background:var(--gruen);color:#fff;box-shadow:0 1px 4px rgba(15,26,21,.2)}
 }
-@media (min-width:881px){ body.nurliste #zur-karte{display:flex;bottom:150px} }
+/* Laptop: kein schwebender Knopf mehr (lag über "Spiel ansetzen"), "Karte zeigen" sitzt oben in der Leiste. */
 .rolle .los{margin:2px 0 12px}
 .rolle .los .los-titel{margin:0 0 8px}
 .los-zeilen{margin-bottom:0}
@@ -1431,6 +1431,55 @@ header h1 .pf-marke{height:30px;width:auto}
   .detailfuss .knopf{min-height:48px}
   .detailfuss .knopf:not(.zweit){flex:1.4}
 }
+/* ===========================================================================
+   Review 5.11.2026: Laptop Karte+Liste, gröbere Bündel, Logo am Handy
+   =========================================================================== */
+.leiste-rechts{display:flex;gap:8px;flex:none;margin-left:auto}
+.leiste-knopf{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 16px;border:0;border-radius:var(--r-pille);
+  font:inherit;font-size:14px;font-weight:650;cursor:pointer;white-space:nowrap;
+  background:var(--flaeche);color:var(--tinte);box-shadow:inset 0 0 0 1.5px var(--kante)}
+.leiste-knopf:hover{color:var(--gruen-tief);box-shadow:inset 0 0 0 1.5px var(--gruen)}
+.leiste-knopf.haupt{background:var(--gruen);color:#fff;box-shadow:none}
+.leiste-knopf.haupt:hover{background:var(--gruen-tief);color:#fff}
+.leiste-knopf:focus-visible{outline:2px solid var(--gruen);outline-offset:2px}
+@media (min-width:881px) and (max-width:1180px){ .leiste-knopf.haupt{font-size:0;padding:0;width:40px;justify-content:center}
+  .leiste-knopf.haupt span{font-size:20px} }
+@media (min-width:881px){ .leaflet-top.leaflet-left .karten-kopf{margin-top:14px} }
+.karten-kopf{display:flex;align-items:center;gap:8px}
+.karten-marke{display:none}
+.buendel span{font-size:13px}
+@media (max-width:880px){
+  .karten-marke{display:flex;align-items:center;gap:6px;height:44px;padding:0 14px 0 12px;border:0;cursor:pointer;
+    border-radius:var(--r-pille);background:var(--flaeche);color:var(--tinte);
+    box-shadow:0 0 0 1px var(--kante),var(--schatten);font-size:21px}
+  .karten-marke .pf-marke{width:17px;height:22px}
+  .karten-marke .pf-wort{height:.95em;margin-top:3px}
+  .leaflet-top.leaflet-left .karten-kopf{margin-top:10px}
+  .leaflet-top.leaflet-left .karten-kopf .modus-knopf{margin-top:0}
+  .modus-knopf button{padding:8px 12px}
+  /* Standort und Plus sitzen jetzt rechts oben – blenden aus, bevor das Blatt sie erreicht. */
+  .leaflet-top.leaflet-right .standort-knopf{margin-top:8px}
+  .blatt-mittel .leaflet-top.leaflet-right .standort-knopf{opacity:0;pointer-events:none}
+  .blatt-mittel .leaflet-top.leaflet-right .standort-knopf *{pointer-events:none!important}
+  .leaflet-right .neu-blase{left:auto;right:calc(100% + 14px);transform:translate(10px,-50%) scale(.9);transform-origin:right center}
+  .leaflet-right .neu-blase::after{left:auto;right:-5px}
+  .leaflet-right .neu-knopf.nah .neu-blase,.leaflet-right .neu-knopf:focus-visible .neu-blase{transform:translate(0,-50%) scale(1)}
+  /* Filter: deutlicher Verlauf rechts, solange noch Filter folgen */
+  .filter{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 56px),transparent);
+    mask-image:linear-gradient(90deg,#000 calc(100% - 56px),transparent)}
+  .filter.am-ende{-webkit-mask-image:none;mask-image:none}
+  .filter .wahl select.chip{padding:10px 30px 10px 14px}
+  /* Medaillen-Knopf kompakt, damit das Suchfeld seinen Text behält */
+  .suche-abz{width:44px;padding:0;justify-content:center}
+  .suche-abz b{position:absolute;right:-4px;bottom:-4px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;
+    display:grid;place-items:center;font-size:10.5px;line-height:1;background:#B98300;color:#fff;box-shadow:0 0 0 2px var(--flaeche)}
+  .suche:has(.suche-abz) .suche-weg{right:110px}
+  /* Gegen leere Liste beim schnellen Wischen: Zeilen einzeln malen lassen */
+  .rolle{background:var(--grund);will-change:scroll-position}
+  .rolle .zeile{contain:layout paint style}
+}
+@media (max-width:359px){ .karten-marke .pf-wort{display:none} .karten-marke{padding:0 13px} }
+
 </style>
 <!-- Besucherzähler GoatCounter: ohne Cookies, ohne personenbezogene Daten -->
 <script data-goatcounter="https://platzfrei.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
@@ -2463,7 +2512,11 @@ const BUENDEL_BIS_ZOOM = 13;   // bis hier bündeln, ab 14 einzelne Punkte
 /* Auf kleinen Bildschirmen größere Bündel, sonst wirkt die Karte wie ein
    Teppich aus Zahlen. */
 const KLEIN_SCHIRM = window.matchMedia("(max-width:880px)").matches;
-const BUENDEL_ZELLE = KLEIN_SCHIRM ? 92 : 60;   // Bündelgröße in Bildschirmpunkten
+/* Review 5.11.: gröber bündeln, weit draußen noch gröber – lieber wenige
+   große Kreise als ein Raster aus gleich großen Zahlen. */
+function buendelZelle(zoom){
+  return (KLEIN_SCHIRM ? 118 : 104) + (zoom <= 11 ? 26 : zoom <= 12 ? 12 : 0);
+}
 
 /* Welche Farbe ein Bündel bekommt: die "beste" Nachricht darin gewinnt. */
 const BUENDEL_RANG = ["#34C759", "#34C759", "#FF9F0A", "#FF9F0A", "#FF9F0A", "#FF3B30", "#8E8E93"];
@@ -2517,7 +2570,8 @@ function buendelZeichnen(gruppe, mitte){
     const r = BUENDEL_RANG.indexOf(farbe(o));
     if (r >= 0 && r < rang) rang = r;
   }
-  const groesse = buendelGroesse(n);
+  const max = buendelZeichnen.max || n;
+  const groesse = Math.round(Math.max(28, Math.min(buendelGroesse(n) + 10, 26 + 40 * Math.sqrt(n / max))));
   const text = n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(".", ",") + "k" : n;
   L.marker(mitte ? karte.unproject(mitte, karte.getZoom()) : [lat / n, lon / n], {
     icon: L.divIcon({
@@ -2535,7 +2589,8 @@ function buendelZeichnen(gruppe, mitte){
   .addTo(markerEbene);
 }
 
-function buendelGroesse(n){ return Math.round(Math.min(48, 26 + Math.log10(n) * 9)); }
+/* Kreisgröße wächst deutlich mit der Anzahl: 2 → 30 px, 10 → 40, 100 → 56, 1000+ → 70. */
+function buendelGroesse(n){ return Math.round(Math.min(70, 24 + Math.log10(n) * 16)); }
 
 function bildMitte(orte, zoom){
   let x = 0, y = 0;
@@ -2560,11 +2615,11 @@ function markerZeichnen(){
 
   /* Bündeln über ein Raster in Bildschirmpunkten – schnell genug für
      zehntausende Orte und ohne zusätzliche Bibliothek. */
-  const zoom = karte.getZoom();
+  const zoom = karte.getZoom(), zelle = buendelZelle(zoom);
   const zellen = new Map();
   for (const o of imBild) {
     const p = karte.project([o.lat, o.lon], zoom);
-    const schluessel = Math.floor(p.x / BUENDEL_ZELLE) + ":" + Math.floor(p.y / BUENDEL_ZELLE);
+    const schluessel = Math.floor(p.x / zelle) + ":" + Math.floor(p.y / zelle);
     if (!zellen.has(schluessel)) zellen.set(schluessel, []);
     zellen.get(schluessel).push(o);
   }
@@ -2573,7 +2628,7 @@ function markerZeichnen(){
      überlappen. Deshalb so lange zusammenlegen, bis keine zwei Kreise sich
      mehr berühren. Die neue Mitte ist nach Anzahl gewichtet. */
   let gruppen = [...zellen.values()].map(orte => ({ orte, mitte: bildMitte(orte, zoom) }));
-  const ABSTAND = KLEIN_SCHIRM ? 16 : 6;    // Mindestlücke zwischen zwei Kreisen in Punkten
+  const ABSTAND = KLEIN_SCHIRM ? 18 : 12;    // Mindestlücke zwischen zwei Kreisen in Punkten
   for (let geaendert = true; geaendert; ) {
     geaendert = false;
     gruppen.sort((a, b) => b.orte.length - a.orte.length);
@@ -2597,6 +2652,9 @@ function markerZeichnen(){
     gruppen = gruppen.filter(Boolean);
   }
   const einzelne = [];
+  /* Größe auch im Verhältnis zum größten Bündel im Bild – so sieht man auf
+     einen Blick, wo viel ist, selbst wenn alle Zahlen ähnlich groß sind. */
+  buendelZeichnen.max = Math.max(2, ...gruppen.map(g => g.orte.length));
   for (const { orte: gruppe, mitte } of gruppen) {
     const offen = gruppe.find(istOffen);
     const rest = offen ? gruppe.filter(o => o !== offen) : gruppe;
@@ -3552,9 +3610,12 @@ function ansichtListe(nurListe){
   const losOben = los && losAktiv();
   const zeilen = zeilenListe.slice();
   if (ohneSuche && zeilen.length) {
+    /* Review 5.11.: Abzeichen nicht über dem Suchergebnis, sondern nach den
+       ersten sechs Plätzen. Der Medaillen-Knopf neben der Suche bleibt. */
+    zeilen.splice(Math.min(6, zeilen.length), 0, abzeichenStreifen() + saisonStreifen());
     if (los && !losOben) zeilen.splice(Math.min(4, zeilen.length), 0, los);
   } else if (los && !losOben) zeilen.push(los);
-  const rolleInhalt = `${adminOben}${trefferInfo}${hinweis}${ohneSuche ? losLeiste("oben") : ``}${losOben ? los : ``}${ohneSuche ? abzeichenStreifen() + saisonStreifen() : ``}${zeilen.join("")}${leer}${alleOrte.length > orte.length
+  const rolleInhalt = `${adminOben}${trefferInfo}${hinweis}${ohneSuche ? losLeiste("oben") : ``}${losOben ? los : ``}${zeilen.join("")}${leer}${alleOrte.length > orte.length
       ? `<div class="leer">… und ${(alleOrte.length - orte.length).toLocaleString("de-DE")} weitere.<br>
          Filter setzen, suchen oder auf der Karte zoomen.</div>` : ``}${listenende}`;
 
@@ -3562,9 +3623,10 @@ function ansichtListe(nurListe){
      neu gebaut und die Tastatur ginge zu. */
   if (nurListe) {
     const r = seite.querySelector(".rolle");
-    if (r) { r.innerHTML = rolleInhalt; r.scrollTop = 0; }
+    if (r && r._inhalt !== rolleInhalt) { r.innerHTML = rolleInhalt; r._inhalt = rolleInhalt; r.scrollTop = 0; }
     return;
   }
+  const alteRolle = seite.querySelector(".rolle");
 
   seite.innerHTML = `
     <div class="suche">
@@ -3579,9 +3641,9 @@ function ansichtListe(nurListe){
     </div>
     <div class="filter">
       ${auswahl("sport", "Sportart", Z.sportart,
-        ["alle", ...AUSWAHL.sportarten].map(sp => [sp, sp === "alle" ? "Alle Sportarten" : sp]))}
+        ["alle", ...AUSWAHL.sportarten].map(sp => [sp, sp === "alle" ? (breit.matches ? "Alle Sportarten" : "Sportart") : sp]))}
       ${auswahl("zugang", "Zugang", Z.nurBelegt ? "sicher" : Z.nurFrei ? "frei" : "alle",
-        [["alle","Jeder Zugang"],["frei","Nur frei zugänglich"],["sicher","Nur wo ich sicher darf"]])}
+        [["alle",breit.matches ? "Jeder Zugang" : "Zugang"],["frei","Nur frei zugänglich"],["sicher","Nur wo ich sicher darf"]])}
       ${mitKm() ? auswahl("umkreis", "Entfernung", String(Z.maxKm || 0),
         [["0","Jede Entfernung"],["2","bis 2 km"],["5","bis 5 km"],["10","bis 10 km"],["25","bis 25 km"]]) : ``}
       ${auswahl("zeigen", "Anzeigen", Z.nurLos ? "los" : Z.nurGemerkt ? "gemerkt" : "alle",
@@ -3591,23 +3653,38 @@ function ansichtListe(nurListe){
         [["entfernung", mitKm() ? "Nächste zuerst" : "Nahe Kartenmitte"],["zustand","Bester Zustand"],["geprueft","Zuletzt geprüft"]])}
     </div>
     <div class="rolle">${rolleInhalt}</div>
-    <div class="fuss listenfuss">
-      <button class="knopf" data-gehe="neu">Platz eintragen</button>
+    ${Z.admin ? `<div class="fuss listenfuss">
       ${Z.admin ? `<button class="knopf zweit" data-gehe="importieren">Import</button>` : ``}
       ${Z.admin ? `<button class="knopf zweit" data-gehe="pruefen">Prüfen (${pruefAnzahl()})</button>
       <button class="knopf zweit" data-gehe="fehlerliste">Fehler (${FEHLERBERICHTE.length})</button>
       <button class="knopf zweit" data-gehe="verlauf">Vorschläge & Verlauf (${VORSCHLAEGE.length})</button>` : ``}
       ${Z.admin ? `<button class="knopf zweit" data-export="1">Export</button>
       <button class="knopf zweit" data-doppelte="1">Doppelte aufräumen</button>${importLaufText()}` : ``}
-    </div>
+    </div>` : ``}
     <div class="rechtliches-link listenfuss">Alle Angaben ohne Gewähr – vor Ort gilt das Schild.<br>
       <a href="/bolzplaetze/">Plätze nach Stadt</a> · <button data-gehe="rechtliches">Impressum &amp; Datenschutz</button> ·
       <button data-gehe="fehler">Fehler melden</button></div>`;
 
+  /* Gleicher Inhalt: die alte Liste behalten. Neu gebaute Zeilen muss der
+     Browser erst wieder malen – beim schnellen Wischen war die Liste dann
+     kurz leer. */
+  const neueRolle = seite.querySelector(".rolle");
+  if (alteRolle && alteRolle._inhalt === rolleInhalt) neueRolle.replaceWith(alteRolle);
+  else neueRolle._inhalt = rolleInhalt;
+
   /* Laptop: Suche und Filter oben über die ganze Breite, damit die Liste
      darunter mehr Höhe bekommt. Die Klicks laufen über document, deshalb
      funktionieren sie dort genauso. */
-  if (breit.matches) leiste.append(seite.querySelector(".suche"), seite.querySelector(".filter"));
+  if (breit.matches) {
+    const rechts = document.createElement("div");
+    rechts.className = "leiste-rechts";
+    rechts.innerHTML = `${Z.nurListe ? `<button class="leiste-knopf" data-modus="karte">🗺 Karte zeigen</button>` : ``}
+      <button class="leiste-knopf haupt" data-gehe="neu"><span aria-hidden="true">＋</span> Platz eintragen</button>`;
+    leiste.append(seite.querySelector(".suche"), seite.querySelector(".filter"), rechts);
+  }
+  /* Schmale Suchzeile (Zwischenbreite): lieber kurzer Text als "Platz oder Ort su…". */
+  const sf = document.getElementById("suchfeld");
+  if (sf && sf.clientWidth && sf.clientWidth < 215) sf.placeholder = "Platz oder Ort";
 }
 
 /* Tastatur: Beschriftungen, die wie Knöpfe aussehen (Schild-Foto), mit
@@ -4621,8 +4698,7 @@ function zeichne(){
   document.body.classList.toggle("vollseite", VOLLSEITEN.includes(Z.ansicht)
     || (Z.nurListe && breit.matches));
   document.body.classList.toggle("nurliste", !!Z.nurListe && breit.matches);
-  document.querySelectorAll("[data-modus]").forEach(b =>
-    b.setAttribute("aria-pressed", String((b.dataset.modus === "liste") === !!Z.nurListe)));
+  modusAnzeigen();
   document.querySelectorAll("[data-nav]").forEach(b =>
     b.toggleAttribute("aria-current", b.dataset.nav === (VOLLSEITEN.includes(Z.ansicht) ? Z.ansicht : "liste")));
   if (document.body.className !== klasseVorher) setTimeout(() => karte.invalidateSize(), 0);
@@ -4957,8 +5033,22 @@ function dazuNehmen(zeilen){
   }
   if (!neu) return;
   doppelteMarkieren();
+  if (Z.ansicht === "liste" && Date.now() - zuletztGescrollt < 700) {
+    markerZeichnen();
+    clearTimeout(dazuNehmen.timer);
+    dazuNehmen.timer = setTimeout(function warten(){
+      if (Date.now() - zuletztGescrollt < 700) dazuNehmen.timer = setTimeout(warten, 300);
+      else zeichne();
+    }, 300);
+    return;
+  }
   zeichne();
 }
+/* Wann zuletzt in der Liste gescrollt wurde (gegen leere Liste beim Wischen). */
+var zuletztGescrollt = 0;
+document.addEventListener("scroll", e => {
+  if (e.target.classList?.contains("rolle")) zuletztGescrollt = Date.now();
+}, { capture:true, passive:true });
 
 /* --------------------------------------------------------------------------
    Nur laden, was man sieht (seit 27.10.2026)
@@ -5116,14 +5206,14 @@ function rasterAnzahl(r){
   return n > 0 ? { n, rang } : null;
 }
 function rasterZeichnen(){
-  const zoom = karte.getZoom(), rahmen = karte.getBounds().pad(0.5);
+  const zoom = karte.getZoom(), rahmen = karte.getBounds().pad(0.5), zelle = buendelZelle(zoom);
   const zellen = new Map();
   for (const r of ORTE_RASTER) {
     if (!rahmen.contains([r.lat, r.lon])) continue;
     const a = rasterAnzahl(r);
     if (!a) continue;
     const p = karte.project([r.lat, r.lon], zoom);
-    const k = Math.floor(p.x / BUENDEL_ZELLE) + ":" + Math.floor(p.y / BUENDEL_ZELLE);
+    const k = Math.floor(p.x / zelle) + ":" + Math.floor(p.y / zelle);
     const g = zellen.get(k) || { n:0, x:0, y:0, rang:BUENDEL_RANG.length - 1, teile:[] };
     g.n += a.n; g.x += p.x * a.n; g.y += p.y * a.n; g.rang = Math.min(g.rang, a.rang);
     g.teile.push({ lat:r.lat, lon:r.lon, n:a.n, p });
@@ -5141,7 +5231,7 @@ function rasterZeichnen(){
         const b = gruppen[j];
         if (!b) continue;
         const abstand = Math.hypot(a.x / a.n - b.x / b.n, a.y / a.n - b.y / b.n);
-        if (abstand >= buendelGroesse(a.n) / 2 + buendelGroesse(b.n) / 2 + (KLEIN_SCHIRM ? 16 : 6)) continue;
+        if (abstand >= buendelGroesse(a.n) / 2 + buendelGroesse(b.n) / 2 + (KLEIN_SCHIRM ? 18 : 12)) continue;
         a.n += b.n; a.x += b.x; a.y += b.y; a.rang = Math.min(a.rang, b.rang); a.teile.push(...b.teile);
         gruppen[j] = null;
         geaendert = true;
@@ -7879,6 +7969,11 @@ const sheet = (function(){
     const blattOben = vh() - (HOEHE * vh() - y);
     document.documentElement.classList.toggle("blatt-hoch", blattOben < 165 + sicherOben);
     document.documentElement.classList.toggle("blatt-mittel", blattOben < 225 + sicherOben);
+    const liste = mobil.matches && (HOEHE * vh() - y) > vh() * 0.5;
+    if (liste !== document.documentElement.classList.contains("blatt-liste")) {
+      document.documentElement.classList.toggle("blatt-liste", liste);
+      if (typeof modusAnzeigen === "function") modusAnzeigen();
+    }
   }
 
   /* §9 Je weiter über den Rand, desto weniger folgt das Sheet. */
@@ -8082,6 +8177,14 @@ const sheet = (function(){
 /* ==========================================================================
    10. KLICKS
    ========================================================================== */
+
+/* Filterzeile: der Verlauf rechts zeigt "da kommt noch mehr" – am Ende fällt er weg. */
+function filterRand(f){ if (f) f.classList.toggle("am-ende", f.scrollLeft + f.clientWidth >= f.scrollWidth - 4); }
+document.addEventListener("scroll", e => {
+  if (e.target.classList?.contains("filter")) filterRand(e.target);
+}, { capture:true, passive:true });
+new MutationObserver(() => filterRand(document.querySelector(".filter")))
+  .observe(document.getElementById("seite"), { childList:true });
 
 /* Mausrad über der Filterzeile schiebt sie seitlich (Laptop ohne Trackpad). */
 document.addEventListener("wheel", e => {
@@ -8434,7 +8537,8 @@ function zuMeinemStandort(){
 }
 
 const StandortKnopf = L.Control.extend({
-  options:{ position:"bottomleft" },
+  /* Handy: rechts oben unter dem Ebenen-Knopf – unten links lag er über Bündeln. */
+  options:{ position: KLEIN_SCHIRM ? "topright" : "bottomleft" },
   onAdd(){
     const box = L.DomUtil.create("div", "leaflet-bar standort-knopf");
     box.innerHTML = `<a href="#" role="button" title="Zu meinem Standort" aria-label="Zu meinem Standort">
@@ -8470,6 +8574,15 @@ const ThemaKnopf = L.Control.extend({
 });
 /* Hell/Dunkel wird jetzt nur noch in den Einstellungen gewählt. */
 
+/* Welcher Teil des Umschalters grün ist. Laptop: gewählte Ansicht. Handy:
+   was man gerade sieht – ist das Blatt mehr als halb offen, ist es die Liste
+   (vorher stand dort "Liste", obwohl man die Karte sah). */
+function modusAnzeigen(){
+  const liste = breit.matches ? !!Z.nurListe : document.documentElement.classList.contains("blatt-liste");
+  document.querySelectorAll(".modus-knopf [data-modus]").forEach(b =>
+    b.setAttribute("aria-pressed", String((b.dataset.modus === "liste") === liste)));
+}
+
 /* Karte oder Liste: Wer die Karte nicht gut bedienen kann (oder einfach
    lieber liest), bekommt die Plätze als reine Liste. Laptop: Karte weg,
    Liste über die ganze Breite. Handy: Liste ganz auf bzw. Karte groß. */
@@ -8480,15 +8593,33 @@ function ansichtModus(modus){
     if (Z.nurListe) sheet.aufmachen(); else sheet.karteGross();
   }
   zeichne();
+  if (!breit.matches) {   // Anzeige sofort, nicht erst wenn das Blatt angekommen ist
+    document.documentElement.classList.toggle("blatt-liste", Z.nurListe);
+    modusAnzeigen();
+  }
   if (!Z.nurListe) setTimeout(() => karte.invalidateSize(), 0);
   /* Keine Meldung "Listenansicht": Der Wechsel ist ja zu sehen, und die
      Meldung lag auf dem Handy genau über dem Griff des Blatts. */
 }
-try { Z.nurListe = localStorage.getItem("platzfrei.nurliste") === "1"; } catch {}
+/* Review 5.11.: Platzfrei ist eine Karten-App. Am Laptop startet sie deshalb
+   immer mit Karte und Liste nebeneinander, auch wenn man vorher "Liste"
+   gewählt hatte. Auf dem Handy bleibt die eigene Wahl erhalten. */
+Z.nurListe = false;
+if (!breit.matches) try { Z.nurListe = localStorage.getItem("platzfrei.nurliste") === "1"; } catch {}
 const ModusKnopf = L.Control.extend({
   options:{ position:"topleft" },
   onAdd(){
-    const box = L.DomUtil.create("div", "modus-knopf");
+    const kopf = L.DomUtil.create("div", "karten-kopf");
+    /* Handy: Logo oben links, damit man über einen Link weiß, wo man ist. */
+    const marke = L.DomUtil.create("button", "karten-marke", kopf);
+    marke.type = "button";
+    marke.setAttribute("aria-label", "Platzfrei – über die App");
+    const pin = document.querySelector("header .pf-marke"), wort = document.querySelector("header .pf-wort");
+    if (pin) marke.appendChild(pin.cloneNode(true));
+    if (wort) { const w = wort.cloneNode(true); w.removeAttribute("role"); w.setAttribute("aria-hidden", "true"); marke.appendChild(w); }
+    L.DomEvent.disableClickPropagation(kopf);
+    marke.addEventListener("click", () => { Z.ansicht = "ueber"; zeichne(); sheet.aufmachen(); });
+    const box = L.DomUtil.create("div", "modus-knopf", kopf);
     box.setAttribute("role", "group");
     box.setAttribute("aria-label", "Ansicht wählen");
     box.innerHTML = `<button type="button" data-modus="karte" aria-pressed="true">🗺 Karte</button>
@@ -8498,7 +8629,7 @@ const ModusKnopf = L.Control.extend({
       const b = e.target.closest("[data-modus]");
       if (b) ansichtModus(b.dataset.modus);
     });
-    return box;
+    return kopf;
   }
 });
 new ModusKnopf().addTo(karte);
