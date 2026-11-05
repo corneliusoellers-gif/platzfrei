@@ -272,6 +272,7 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
   box-shadow:inset 0 0 0 1.5px var(--kante)}
 .suche-einst:hover{color:var(--gruen-tief)}
 .suche:has(.suche-einst) .suche-weg{right:60px}
+.suche:has(.suche-abz) .suche-weg{right:112px}
 .los-sport{margin-left:auto;font:inherit;font-size:12.5px;font-weight:600;border:0;cursor:pointer;
   background:var(--gruen-zart);color:var(--gruen-tief);border-radius:var(--r-pille);padding:4px 10px;white-space:nowrap}
 .los-titel small + .los-sport{margin-left:8px}
@@ -526,6 +527,30 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
 .abz-ziel-rest small{font-weight:500;font-size:11px}
 .abz-streifen .medaille{--g:40px;filter:none}
 .abz-streifen .medaille .m-sterne{display:none}
+
+/* Abzeichen überall sichtbar */
+.suche-abz{position:relative;flex:none;margin-left:8px;height:44px;padding:0 10px 0 6px;border:0;border-radius:14px;cursor:pointer;
+  display:flex;align-items:center;gap:4px;font:inherit;font-size:13px;font-weight:800;color:#6B5310;
+  background:linear-gradient(140deg,#FFF6D9,#FFE9B0);box-shadow:inset 0 0 0 1.5px rgba(224,161,0,.35)}
+.suche-abz .medaille{--g:30px;filter:none}
+.suche-abz .medaille .m-sterne{display:none}
+.suche-abz-leer{font-size:22px;line-height:1}
+.suche-abz b{font-variant-numeric:tabular-nums}
+.suche-abz i{position:absolute;top:-3px;right:-3px;width:12px;height:12px;border-radius:50%;background:#E5484D;
+  box-shadow:0 0 0 2px var(--flaeche)}
+.suche-abz.neu .medaille{animation:neuHuepf 1.6s var(--feder) infinite}
+.nav-abz{background:linear-gradient(140deg,#FFF6D9,#FFE9B0)!important;color:#6B5310!important}
+.abz-hinweis{display:flex;align-items:center;gap:10px;flex:1 1 100%;margin-top:4px;padding:8px 10px;border:0;border-radius:12px;
+  font:inherit;text-align:left;cursor:pointer;color:var(--tinte);background:color-mix(in srgb,var(--flaeche) 70%,transparent)}
+.abz-hinweis .medaille{--g:34px;filter:none}
+.abz-hinweis .medaille .m-sterne{display:none}
+.abz-hinweis span{display:flex;flex-direction:column;min-width:0}
+.abz-hinweis b{font-size:13px;line-height:1.3}
+.abz-hinweis small{font-size:12px;color:var(--tinte-3)}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .suche-abz,:root:not([data-theme="light"]) .nav-abz{background:linear-gradient(140deg,#3A3114,#2B240E)!important;color:#F5EBD0!important}
+}
+:root[data-theme="dark"] .suche-abz,:root[data-theme="dark"] .nav-abz{background:linear-gradient(140deg,#3A3114,#2B240E)!important;color:#F5EBD0!important}
 
 /* Freischalt-Moment */
 .abz-feier{position:fixed;inset:0;z-index:3000;display:grid;place-items:center;padding:16px;
@@ -1423,6 +1448,7 @@ header h1 .pf-marke{height:30px;width:auto}
     <button data-gehe="ueber" data-nav="ueber">Über Platzfrei</button>
     <button data-gehe="vereine" data-nav="vereine">Für Vereine</button>
     <button data-gehe="partner" data-nav="partner">Für Partner</button>
+    <button data-gehe="abzeichen" data-nav="abzeichen" id="nav-abzeichen" class="nav-abz">🏅 Abzeichen</button>
   </nav>
   <span class="kopfnotiz" id="kopfnotiz"></span>
   <button class="adminknopf" id="adminknopf" hidden>Abmelden</button>
@@ -1825,6 +1851,8 @@ function medaille(a, st, { gross = false, anteil = 0, neu = false } = {}){
 function abzeichenNav(){
   const b = document.getElementById("nav-abzeichen");
   if (b) b.innerHTML = `🏅 Abzeichen<span class="nav-zahl">${abzStand().erreicht}/${ABZ_ALLE}</span>`;
+  const k = document.querySelector(".suche-abz");
+  if (k) k.outerHTML = abzKnopf();
 }
 /* Wie viele Stufen schon auf der Abzeichen-Seite angeschaut wurden –
    für den roten "Neu"-Hinweis im Streifen. Dazu je Abzeichen die zuletzt
@@ -1871,8 +1899,46 @@ function zaehle(art, ortId){
     clearTimeout(w.t);
     w.t = setTimeout(() => { zaehle.warte = null;
       abzFeiern(w.liste.sort((p, q) => abzFarbe(q.a, q.stufe).punkte - abzFarbe(p.a, p.stufe).punkte), w.vorher, w.nachher); }, 1400);
-  }
+  } else if (art !== undefined) abzFortschrittMelden(art, nachher);
   abzeichenNav();
+}
+
+/* Welche Abzeichen eine Aktion voranbringt. */
+const ABZ_JE_AKTION = { checkins:["stammgast","entdecker","auswaerts","dauerbrenner","allrounder"],
+  spiele:["organisator"], zusagen:["teamplayer"], tipps:["tippgeber"], fotos:["fotograf"],
+  neueOrte:["kartograf"], null:["pruefer"] };
+/* Keine neue Stufe? Dann kurz zeigen, wie nah die nächste ist. */
+function abzFortschrittMelden(art, st){
+  const ids = ABZ_JE_AKTION[art];
+  if (!ids) return;
+  const n = abzNaechste(st, 99).find(x => ids.includes(x.a.id));
+  if (!n) return;
+  setTimeout(() => melde(`${n.a.icon} ${n.a.name} ${STUFEN[n.stufe - 1].name}: ${abzNochText(n)} · Antippen`, "abzeichen", 4500), 2600);
+}
+/* Kleiner Medaillen-Knopf neben dem Zahnrad – immer zu sehen. */
+function abzKnopf(){
+  const st = abzStand();
+  const neu = st.erreicht > abzeichenGesehen();
+  const best = ABZEICHEN.filter(a => st.stufe[a.id])
+    .sort((p, q) => abzFarbe(q, st.stufe[q.id]).punkte - abzFarbe(p, st.stufe[p.id]).punkte)[0];
+  return `<button class="suche-abz${neu ? " neu" : ""}" data-gehe="abzeichen"
+      aria-label="Meine Abzeichen: ${esc(st.liga.name)}, ${st.punkte} Punkte${neu ? ", neues Abzeichen" : ""}" title="Meine Abzeichen">
+      ${best ? medaille(best, st.stufe[best.id]) : `<span class="suche-abz-leer" aria-hidden="true">🏅</span>`}
+      <b>${st.punkte}</b>${neu ? `<i aria-hidden="true"></i>` : ``}</button>`;
+}
+/* Im Platz-Detail: was dir Einchecken hier bringt. */
+function abzCheckinHinweis(o){
+  const st = abzStand();
+  const neuerPlatz = !statistik().checkinOrte.includes(String(o.id));
+  const kand = abzNaechste(st, 99).filter(x => ["stammgast","dauerbrenner"].includes(x.a.id)
+    || (neuerPlatz && x.a.id === "entdecker"));
+  const n = kand.sort((p, q) => (p.ziel - p.x) - (q.ziel - q.x))[0];
+  if (!n) return ``;
+  const rest = n.ziel - n.x;
+  return `<button class="abz-hinweis" data-abz="${n.a.id}">${medaille(n.a, n.stufe - 1, { anteil: n.anteil })}
+      <span>${rest === 1 ? `<b>Einchecken holt dir ${esc(n.a.name)} ${STUFEN[n.stufe - 1].name}!</b>`
+        : `<b>Einchecken bringt dich näher an ${esc(n.a.name)} ${STUFEN[n.stufe - 1].name}</b>`}
+      <small>${esc(abzNochText(n))}${neuerPlatz && n.a.id !== "entdecker" ? ` · neuer Platz für dich` : ``}</small></span></button>`;
 }
 
 /* Der Freischalt-Moment: Medaille dreht sich herein, Strahlen, Konfetti,
@@ -3427,9 +3493,8 @@ function ansichtListe(nurListe){
   const zeilen = zeilenListe.slice();
   if (ohneSuche && zeilen.length) {
     if (los && !losOben) zeilen.splice(Math.min(4, zeilen.length), 0, los);
-    zeilen.splice(Math.min(10 + (los && !losOben ? 1 : 0), zeilen.length), 0, abzeichenStreifen() + saisonStreifen());
   } else if (los && !losOben) zeilen.push(los);
-  const rolleInhalt = `${adminOben}${trefferInfo}${hinweis}${ohneSuche ? losLeiste("oben") : ``}${losOben ? los : ``}${zeilen.join("")}${leer}${alleOrte.length > orte.length
+  const rolleInhalt = `${adminOben}${trefferInfo}${hinweis}${ohneSuche ? losLeiste("oben") : ``}${losOben ? los : ``}${ohneSuche ? abzeichenStreifen() + saisonStreifen() : ``}${zeilen.join("")}${leer}${alleOrte.length > orte.length
       ? `<div class="leer">… und ${(alleOrte.length - orte.length).toLocaleString("de-DE")} weitere.<br>
          Filter setzen, suchen oder auf der Karte zoomen.</div>` : ``}${listenende}`;
 
@@ -3448,6 +3513,7 @@ function ansichtListe(nurListe){
         placeholder="Platz oder Ort suchen" value="${esc(Z.suche)}"
         aria-label="Platz, Ort oder Sportart suchen">
       ${Z.suche ? `<button class="suche-weg" data-suchweg="1" aria-label="Suche löschen">✕</button>` : ``}
+      ${abzKnopf()}
       <button class="suche-einst" data-gehe="einstellungen" aria-label="Menü und Einstellungen" title="Menü und Einstellungen">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
     </div>
@@ -3852,6 +3918,7 @@ function liveBlock(o){
       <span class="live-text">${n >= 2 || ich ? `<span class="puls" aria-hidden="true"></span>` : ``}${text}</span>
       ${ich ? `${!belegt(o) && !BESTAETIGT.has(o.id) ? `<button class="inline-knopf" data-frage="${o.id}">Darf man hier spielen?</button>` : ``}<button class="inline-knopf" data-hierweg="1">Wieder weg</button>`
             : `<button class="inline-knopf" data-hier="${o.id}">${n >= 2 ? "Ich bin auch hier" : "Ich bin gerade hier"}</button>`}
+      ${ich ? `` : abzCheckinHinweis(o)}
     </div>`;
 }
 
