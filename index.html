@@ -1721,7 +1721,7 @@ function demoStatistik(){
   v.sort((a, b) => a.d.localeCompare(b.d));
   const orte = [...new Set(v.map(e => e.o))];
   const erg = { checkins: v.length, checkinOrte: orte, spiele: 23, zusagen: 41, tipps: 48,
-    fotos: 14, neueOrte: 9, demoBestaetigt: 37, verlauf: v };
+    fotos: 14, neueOrte: 9, demoBestaetigt: 37, demo: true, verlauf: v };
   if (echte.length) demoStatistik.s = erg;   // erst merken, wenn echte Plätze da sind
   return erg;
 }
@@ -1849,7 +1849,8 @@ function abzStand(s = statistik()){
   for (const a of ABZEICHEN) {
     const x = a.wert(s, w) || 0;
     /* Einmal erreicht bleibt erreicht – auch wenn Saison-Daten gelöscht werden. */
-    const st = Math.max(a.stufen.filter(z => x >= z).length, Math.min(+s.abz?.[a.id] || 0, a.stufen.length));
+    const st = a.geheim && s.demo ? 0   // Demo verrät die geheimen nicht
+      : Math.max(a.stufen.filter(z => x >= z).length, Math.min(+s.abz?.[a.id] || 0, a.stufen.length));
     stufe[a.id] = st; wert[a.id] = x; erreicht += st;
     for (let i = 1; i <= st; i++) punkte += abzFarbe(a, i).punkte;
   }
