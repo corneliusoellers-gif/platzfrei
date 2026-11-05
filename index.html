@@ -1682,7 +1682,51 @@ const TIPPS = {
    "Meine Saison" weiter unten).
    -------------------------------------------------------------------------- */
 const STAT_SCHLUESSEL = "platzfrei.statistik";
+/* Demo für Admins: zeigt Abzeichen und "Meine Saison" so, als hätte man
+   Platzfrei ein Jahr lang viel genutzt (für Screenshots). Nur in diesem
+   Tab (sessionStorage), nur angemeldet als Admin, es wird nichts gespeichert. */
+const DEMO_SCHLUESSEL = "platzfrei.demo";
+function demoAn(){ try { return !!Z.admin && sessionStorage.getItem(DEMO_SCHLUESSEL) === "1"; } catch { return false; } }
+function demoStatistik(){
+  if (demoStatistik.s) return demoStatistik.s;
+  /* Feste Zufallsfolge, damit die Zahlen bei jedem Öffnen gleich sind. */
+  let z = 7; const zuf = () => (z = (z * 16807) % 2147483647) / 2147483647;
+  const staedte = ["München","München","München","München","Garching","Unterföhring","Ismaning","Freising","Starnberg","Dachau","Augsburg","Ottobrunn"];
+  const sport = ["Fußball","Fußball","Fußball","Basketball","Tischtennis","Beachvolleyball","Calisthenics"];
+  const echte = (typeof DATEN !== "undefined" ? DATEN : []).filter(o => stadtVon(o) === "München").slice(0, 60);
+  const plaetze = Array.from({ length: 44 }, (_, i) => {
+    const o = echte[i * 3 % Math.max(1, echte.length)];
+    const st = i < 26 ? "München" : staedte[i % staedte.length];
+    return o && st === "München" ? { o: String(o.id), n: String(o.name || "").slice(0, 80), s: "München", sp: o.sportarten?.[0] || "Fußball" }
+      : { o: "demo-" + i, n: `Bolzplatz ${["Am Park","Schulweg","Seeufer","Nordring","Am Bach","Lindenhof","Sportpark"][i % 7]}`, s: st, sp: sport[i % sport.length] };
+  });
+  const v = [], heute = new Date(); heute.setHours(12, 0, 0, 0);
+  const tag = n => tagHeute(new Date(heute.getTime() - n * 864e5));
+  const add = (n, p, h) => v.push({ d: tag(n), ...plaetze[p], h });
+  /* Letzte 33 Wochen jede Woche 2–4 Spieltage, davor lockerer mit einer
+     Pause von 5 Wochen (für "Comeback"). */
+  for (let n = 300; n >= 0; n--) {
+    if (n > 260 && n < 300 && zuf() < .82) continue;
+    if (n >= 232 && n <= 268) continue;
+    if (n > 232 && zuf() < .7) continue;
+    if (n <= 232 && zuf() < .55 && (n % 7 !== 2)) continue;
+    const p = zuf() < .45 ? 0 : Math.floor(zuf() * plaetze.length);
+    const h = [7, 10, 15, 16, 17, 17, 18, 18, 19, 20, 21][Math.floor(zuf() * 11)];
+    add(n, p, h);
+    if (zuf() < .06) add(n, (p + 5) % plaetze.length, Math.min(22, h + 2));
+  }
+  /* Silvester und ein langes Wochenende mitnehmen */
+  const silv = new Date(heute.getFullYear() - 1, 11, 31, 12);
+  if (heute - silv < 330 * 864e5) v.push({ d: tagHeute(silv), ...plaetze[1], h: 14 });
+  v.sort((a, b) => a.d.localeCompare(b.d));
+  const orte = [...new Set(v.map(e => e.o))];
+  const erg = { checkins: v.length, checkinOrte: orte, spiele: 23, zusagen: 41, tipps: 48,
+    fotos: 14, neueOrte: 9, demoBestaetigt: 37, verlauf: v };
+  if (echte.length) demoStatistik.s = erg;   // erst merken, wenn echte Plätze da sind
+  return erg;
+}
 function statistik(){
+  if (demoAn()) return demoStatistik();
   try { return { checkinOrte:[], ...JSON.parse(localStorage.getItem(STAT_SCHLUESSEL) || "{}") }; }
   catch { return { checkinOrte:[] }; }
 }
@@ -1757,7 +1801,7 @@ const ABZEICHEN = [
     wert:(s, w) => w.sportarten, stufen:[2, 3, 4, 5] },
   { id:"pruefer",     icon:"✅", name:"Platzprüfer",    e:["Bestätigung","Bestätigungen"],
     text:z => z === 1 ? "Einen Platz mit „Hier gespielt“ bestätigt" : `${z} Plätze mit „Hier gespielt“ bestätigt`,
-    wert:() => BESTAETIGT.size, stufen:[1, 10, 25, 50] },
+    wert:s => s.demoBestaetigt ?? BESTAETIGT.size, stufen:[1, 10, 25, 50] },
   { id:"organisator", icon:"📣", name:"Organisator",    e:["Spiel","Spiele"],
     text:z => z === 1 ? "Ein Spiel angesetzt" : `${z} Spiele angesetzt`,
     wert:s => s.spiele || 0, stufen:[1, 5, 15, 30] },
@@ -1880,6 +1924,7 @@ function abzeichenStreifen(){
 
 /* Zählt eine Aktion und feiert jede neu erreichte Stufe. */
 function zaehle(art, ortId){
+  if (demoAn()) return;   // Demo zählt nichts
   const s = statistik();
   const vorher = abzStand(s);
   if (art) s[art] = (s[art] || 0) + 1;
@@ -2095,6 +2140,19 @@ function saisonZahlen(s = statistik()){
     lieblings: lieblings && { id: lieblings[0], name: lieblings[1].n, tage: lieblings[1].tage.size },
     gesamt: s.checkins || 0 };
 }
+/* Erfundene Ranglisten nur für den Admin-Demo-Modus. */
+function demoRang(zr, stadt, s){
+  const f = zr === "woche" ? 1 : 4;
+  const staedte = [["Berlin",412],["Hamburg",355],["München",341],["Köln",288],["Frankfurt am Main",201],["Stuttgart",176],
+    ["Leipzig",158],["Düsseldorf",149],["Nürnberg",131],["Dortmund",122],["Augsburg",74],["Freising",31]]
+    .map(([n, w]) => [n, Math.round(w * f * (zr === "woche" ? 1 : 1.07))]);
+  const jePlatz = {};
+  for (const e of s.verlauf || []) if (e.s === stadt) (jePlatz[e.o] ||= { n: e.n, t: 0 }).t++;
+  const pl = Object.entries(jePlatz).sort((a, b) => b[1].t - a[1].t).slice(0, 5)
+    .map(([id, x], i) => ({ platz: i + 1, ort_id: id, name: x.n, spieltage: Math.round((68 - i * 11) * f) }));
+  return { staedte: { liste: staedte.map(([n, w], i) => ({ platz: i + 1, stadt: n, spieltage: w })) },
+           plaetze: { liste: pl } };
+}
 /* Für welche Stadt zählst du? Wo du in den letzten 60 Tagen am häufigsten
    warst, sonst die Stadt des nächsten Platzes. */
 function meineStadt(){
@@ -2159,8 +2217,9 @@ function ansichtSaison(){
   const s = statistik(), z = saisonZahlen(s);
   const stadt = meineStadt();
   const zr = RANG.zeitraum;
-  const staedte = RANG.staedte[zr];
-  const plaetze = RANG.plaetze[zr + "|" + stadt];
+  const demo = demoAn() && demoRang(zr, stadt, s);
+  const staedte = demo ? demo.staedte : RANG.staedte[zr];
+  const plaetze = demo ? demo.plaetze : RANG.plaetze[zr + "|" + stadt];
   if (!staedte) ranglisteLaden(zr).then(n => n && Z.ansicht === "saison" && zeichne());
   if (stadt && !plaetze) ranglistePlaetzeLaden(stadt, zr).then(n => n && Z.ansicht === "saison" && zeichne());
 
@@ -2177,7 +2236,7 @@ function ansichtSaison(){
       <span class="rang-name">${esc(r.stadt || r.name || "")}</span>
       <span class="rang-wert">${r.spieltage} <small>${an ? "Spieltage · deine Stadt" : "Spieltage"}</small></span></${attr ? "button" : "div"}>`;
   let staedteHtml;
-  if (RANG.fehlt) staedteHtml = `<p class="rang-leer">Ranglisten sind noch nicht eingerichtet.</p>`;
+  if (RANG.fehlt && !demo) staedteHtml = `<p class="rang-leer">Ranglisten sind noch nicht eingerichtet.</p>`;
   else if (!staedte) staedteHtml = `<p class="rang-leer">Lädt …</p>`;
   else if (!staedte.liste.length) staedteHtml = `<p class="rang-leer">Noch keine Stadt mit genug Check-ins.
       Eine Stadt erscheint, sobald dort mindestens 3 verschiedene Leute eingecheckt haben.</p>`;
@@ -2188,7 +2247,7 @@ function ansichtSaison(){
       (ich && !top.includes(ich) ? `<div class="rang-luecke">…</div>${zeile(ich, true)}` : ``);
   }
   let plaetzeHtml = ``;
-  if (stadt && !RANG.fehlt) {
+  if (stadt && (!RANG.fehlt || demo)) {
     const l = plaetze?.liste;
     plaetzeHtml = `<h3 class="saison-h">Beliebteste Plätze in ${esc(stadt)}</h3>
       <div class="rang-liste">${!plaetze ? `<p class="rang-leer">Lädt …</p>`
@@ -2220,7 +2279,7 @@ function ansichtSaison(){
           ${z.sport ? `<div><span>⚽ Meist gespielt</span><b>${esc(z.sport)}</b></div>` : ``}
           <div><span>📈 Längste Serie</span><b>${z.laengste} ${z.laengste === 1 ? "Woche" : "Wochen"}</b></div>
           <div><span>📅 Spiele angesetzt · zugesagt</span><b>${s.spiele || 0} · ${s.zusagen || 0}</b></div>
-          <div><span>✅ Plätze bestätigt</span><b>${BESTAETIGT.size}</b></div>
+          <div><span>✅ Plätze bestätigt</span><b>${s.demoBestaetigt ?? BESTAETIGT.size}</b></div>
           <button data-gehe="abzeichen"><span>🏅 Abzeichen</span><b>${abzStand(s).erreicht} von ${ABZ_ALLE}</b></button>
         </div>
       </div>
@@ -3780,7 +3839,7 @@ async function tippUmschalten(k){
 function ansichtAbzeichen(){
   const st = abzStand();
   const gesehen = abzGesehenJe();
-  try {
+  if (!demoAn()) try {
     localStorage.setItem(ABZ_GESEHEN, String(st.erreicht));
     localStorage.setItem(ABZ_GESEHEN_JE, JSON.stringify(st.stufe));
   } catch {}
@@ -3856,6 +3915,7 @@ function adminReihe(){
         <button class="knopf zweit" data-gehe="verlauf">Vorschläge & Verlauf (${VORSCHLAEGE.length})</button>
         <button class="knopf zweit" data-export="1">Export</button>
         <button class="knopf zweit" data-doppelte="1">Doppelte aufräumen</button>
+        <button class="knopf zweit" data-demo="1">${demoAn() ? "✓ Demo-Abzeichen an" : "Demo-Abzeichen & Saison"}</button>
         <button class="knopf zweit" data-abmelden="1">Abmelden</button>${importLaufText()}</div>` : ``;
 }
 
@@ -8039,9 +8099,15 @@ document.addEventListener("click", e=>{
                              "[data-suchweg],[data-teilen],[data-abmelden],[data-hierpunkt],[data-vereinszeitensenden],"+
                              "[data-neuok],[data-neuweg],[data-vzok],[data-vzweg],[data-hier],[data-hierweg],[data-frage],"+
                              "[data-jetzt],[data-einfuehrung],[data-ausltag],[data-zusage],[data-spielweg],[data-spielform],[data-spielansetzen],[data-tipp],[data-tippsoffen],[data-osmladen],[data-osmstop],"+
-                             "[data-startpunkt],[data-standort],[data-losscroll],[data-losalle],[data-filterweg],[data-korrektur],[data-modus],[data-waechstweg],[data-rangzeit],[data-saisonweg],[data-abz],[data-abzzu]");
+                             "[data-startpunkt],[data-standort],[data-losscroll],[data-losalle],[data-filterweg],[data-korrektur],[data-modus],[data-waechstweg],[data-rangzeit],[data-saisonweg],[data-abz],[data-abzzu],[data-demo]");
   if (!t) return;
 
+  if (t.dataset.demo)       {
+    const an = !demoAn();
+    try { an ? sessionStorage.setItem(DEMO_SCHLUESSEL, "1") : sessionStorage.removeItem(DEMO_SCHLUESSEL); } catch {}
+    demoStatistik.s = null; abzeichenNav(); zeichne();
+    return melde(an ? "Demo an: Abzeichen und Saison zeigen Beispielzahlen. Nichts wird gespeichert." : "Demo aus: wieder deine echten Zahlen.", an ? "abzeichen" : null, 4500);
+  }
   if (t.dataset.abzzu)      { return abzSchliessen(t.dataset.abzzu); }
   if (t.dataset.abz)        { return abzDetail(t.dataset.abz); }
 
@@ -8149,6 +8215,7 @@ document.addEventListener("click", e=>{
   if (t.dataset.rangzeit) {
     RANG.zeitraum = t.dataset.rangzeit; zeichne(); return;
   }
+  if (t.dataset.saisonweg && demoAn()) return melde("Im Demo-Modus wird nichts gelöscht.");
   if (t.dataset.saisonweg) {
     if (!confirm("Deine Saison-Zahlen (Spieltage, Plätze, Serie) auf diesem Gerät löschen? Abzeichen bleiben.")) return;
     const s = statistik(); s.abz = abzStand(s).stufe; delete s.verlauf;
