@@ -1490,6 +1490,102 @@ header h1 .pf-marke{height:30px;width:auto}
 }
 @media (max-width:359px){ .karten-marke .pf-wort{display:none} .karten-marke{padding:0 13px} }
 
+
+/* ===========================================================================
+   Review 6.11.2026: verständlicher und moderner
+   =========================================================================== */
+/* Linien-Icons */
+.ic{flex-shrink:0;display:inline-block;vertical-align:-3px}
+.modus-knopf button,.leiste-knopf,.abzeichen-link,.los-art,.nav-abz{display:inline-flex;align-items:center;gap:6px}
+#zur-karte{align-items:center;gap:6px}
+.abzeichen-link{display:flex;justify-content:center}
+.nav-abz[hidden]{display:none!important}
+.waechst-icon{color:var(--gruen)}
+.eintragen-karte > span[aria-hidden]{color:var(--gruen);display:inline-flex}
+
+/* Bündel als Ring mit Anteilen (grün / orange / grau / rot) */
+.buendel span{border:0;background:radial-gradient(closest-side,rgba(255,255,255,.97) calc(100% - 5px),transparent calc(100% - 4.5px)),var(--donut,#8E8E93);
+  box-shadow:0 2px 8px rgba(15,26,21,.22)}
+@media (prefers-color-scheme:dark){
+  .buendel span{background:radial-gradient(closest-side,rgba(24,33,29,.96) calc(100% - 5px),transparent calc(100% - 4.5px)),var(--donut,#8E8E93)}
+}
+
+/* Listenzeilen: flach, mit Abstand statt Kasten */
+.zeile.neu{background:transparent;box-shadow:none;border-radius:12px;margin:0;padding:12px 8px;gap:12px;
+  align-items:center;border:0;transform:none}
+.zeile.neu::after{content:"";position:absolute;left:62px;right:8px;bottom:0;height:1px;background:var(--kante)}
+.zeile.neu:hover{background:var(--flaeche);box-shadow:none}
+.zeile.neu > .platzbild{width:44px;height:44px;border-radius:12px}
+.zeile.neu .zt .zname{font-size:15.5px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.zeile.neu .zort{color:var(--tinte-3);font-weight:500}
+.zzusatz{display:block;font-size:12.5px;line-height:1.35;color:var(--tinte-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.zstatus{display:flex;align-items:center;gap:8px;margin-top:5px;white-space:nowrap;overflow:hidden}
+.zb{display:inline-flex;align-items:center;gap:5px;padding:2px 9px 2px 3px;border-radius:999px;font-size:12px;font-weight:650;line-height:1.35;flex-shrink:0}
+.zb.gruen{background:var(--frei-bg);color:var(--frei)}
+.zb.orange{background:var(--absprache-bg);color:var(--absprache)}
+.zb.grau{background:var(--unklar-bg);color:var(--tinte-2)}
+.zb.grau .zicon{background:var(--unklar)}
+.zb.rot{background:var(--zu-bg);color:var(--zu)}
+.zkm{font-size:13px;font-weight:650;color:var(--tinte);font-variant-numeric:tabular-nums}
+.zhinweis{font-size:12px;color:var(--tinte-3);overflow:hidden;text-overflow:ellipsis}
+.zsport{display:flex;align-items:center;flex-wrap:wrap;gap:2px 6px;margin-top:4px;font-size:14px;line-height:1.2}
+.zsport .marke{margin:0;font-size:11px;padding:2px 8px;gap:4px}
+.zeile.neu .zrechts{align-self:center}
+.zeile.neu .stern svg{display:block;fill:none}
+.zeile.neu .stern.an svg{fill:currentColor}
+.zeile.neu.stufe-ungeklaert > .platzbild{filter:saturate(.25);opacity:.75}
+/* Überschrift, wo eine neue Stufe beginnt ("Sicher zuerst") */
+.zgruppe{grid-column:1/-1;display:flex;align-items:center;gap:8px;margin:16px 8px 2px;font-size:13px;font-weight:700;color:var(--tinte)}
+.zgruppe::before{content:"";width:9px;height:9px;border-radius:50%;background:#34C759}
+.zgruppe.orange::before{background:#FF9F0A}
+.zgruppe.grau::before{background:#8E8E93}
+.zgruppe.rot::before{background:#FF3B30}
+.zgruppe small{font-size:12px;font-weight:600;color:var(--tinte-3)}
+.rolle > .zgruppe:first-child,.anzahl + .zgruppe{margin-top:4px}
+
+/* Standort als erste Aktion */
+.standort-gross{grid-column:1/-1;width:100%;display:flex;align-items:center;gap:12px;margin:4px 0 12px;padding:13px 16px;
+  border:0;border-radius:16px;background:var(--gruen);color:#fff;font:inherit;text-align:left;cursor:pointer;
+  box-shadow:0 4px 14px -4px rgba(11,148,99,.55)}
+.standort-gross:hover{background:var(--gruen-tief)}
+.standort-gross:focus-visible{outline:2px solid var(--gruen);outline-offset:3px}
+.standort-gross b{display:block;font-size:16px;font-weight:700;letter-spacing:-.01em}
+.standort-gross small{display:block;font-size:12.5px;opacity:.88}
+.standort-gross-icon{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.18);display:grid;place-items:center;flex-shrink:0}
+
+/* Weniger Rahmen: Hinweise als ruhige Zeilen */
+.rolle .daemmerung{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:transparent;border:0;box-shadow:none;padding:4px 8px;margin:0 0 8px;color:var(--tinte-2)}
+.rolle .daemmerung .ic{color:var(--absprache)}
+.rolle .daemmerung .inline-knopf{margin:0 0 0 6px}
+.rolle .daemmerung > span{flex:1;min-width:0}
+/* Handy: Name darf zwei Zeilen haben (Wunsch 29.10.) */
+@media (max-width:880px){
+  .zeile.neu .zt .zname{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+}
+.waechst{box-shadow:none}
+
+/* Admin-Bereich (Review 6.11.) */
+.admin-gruppe{font-size:13px;font-weight:700;color:var(--tinte-3);text-transform:uppercase;letter-spacing:.04em;margin:18px 4px 6px}
+.admin-liste{display:flex;flex-direction:column;background:var(--flaeche);border-radius:16px;overflow:hidden}
+.admin-punkt{display:flex;align-items:center;gap:12px;width:100%;padding:13px 14px;border:0;background:none;font:inherit;text-align:left;
+  color:var(--tinte);cursor:pointer;border-bottom:1px solid var(--kante)}
+.admin-punkt:last-child{border-bottom:0}
+.admin-punkt:hover{background:var(--grund)}
+.admin-icon{width:38px;height:38px;border-radius:11px;background:var(--gruen-zart);color:var(--gruen);display:grid;place-items:center;flex-shrink:0}
+.admin-text{flex:1;min-width:0}
+.admin-text b{display:block;font-size:15px}
+.admin-text small{display:block;font-size:12.5px;line-height:1.4;color:var(--tinte-3)}
+.admin-zahl{min-width:28px;padding:2px 9px;border-radius:999px;background:var(--unklar-bg);color:var(--tinte-2);font-size:13px;font-weight:700;text-align:center}
+.admin-zahl.dringend{background:#FF3B30;color:#fff}
+.admin-pfeil{color:var(--tinte-3);display:inline-flex}
+.admin-ab{margin-top:20px;width:100%}
+.admin-reihe .knopf{width:100%}
+.bestand-balken{display:flex;height:12px;border-radius:999px;overflow:hidden;margin:6px 0 10px;background:var(--unklar-bg)}
+.bestand-tab th small{display:block;font-size:11.5px;font-weight:500;color:var(--tinte-3)}
+
+.kontakt-falle{position:absolute!important;left:-9999px;width:1px;height:1px;opacity:0}
+.link-knopf{border:0;background:none;padding:0;font:inherit;color:var(--gruen);text-decoration:underline;cursor:pointer}
+button.team-mail{border:0;background:none;padding:0;font:inherit;cursor:pointer}
 </style>
 <!-- Besucherzähler GoatCounter: ohne Cookies, ohne personenbezogene Daten -->
 <script data-goatcounter="https://platzfrei.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
@@ -1507,7 +1603,7 @@ header h1 .pf-marke{height:30px;width:auto}
     <button data-gehe="ueber" data-nav="ueber">Über Platzfrei</button>
     <button data-gehe="vereine" data-nav="vereine">Für Vereine</button>
     <button data-gehe="partner" data-nav="partner">Für Partner</button>
-    <button data-gehe="abzeichen" data-nav="abzeichen" id="nav-abzeichen" class="nav-abz">🏅 Abzeichen</button>
+    <button data-gehe="abzeichen" data-nav="abzeichen" id="nav-abzeichen" class="nav-abz" hidden>Abzeichen</button>
   </nav>
   <span class="kopfnotiz" id="kopfnotiz"></span>
   <button class="adminknopf" id="adminknopf" hidden>Abmelden</button>
@@ -1524,7 +1620,7 @@ header h1 .pf-marke{height:30px;width:auto}
 </main>
 
 <div id="meldung" role="status" aria-live="polite"></div>
-<button id="zur-karte" type="button" data-modus="karte">🗺 Karte</button>
+<button id="zur-karte" type="button" data-modus="karte"><svg class="ic" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/></svg> Karte</button>
 
 <script>
 const VOLLSEITEN = ["ueber", "vereine", "partner"];
@@ -1615,7 +1711,7 @@ let Z = {
   nurGemerkt:false,
   nurLicht:false,
   nurBelegt:false,          // nur Plätze mit belegter Zugangsangabe
-  sortierung:"entfernung",  // "entfernung" | "zustand" | "geprueft"
+  sortierung:"sicher",      // "sicher" | "entfernung" | "zustand" | "geprueft"
   bereich:null,             // Kartenausschnitt, wenn "hier suchen" aktiv ist
   suche:"",                 // Text aus dem Suchfeld (Name, Ort, Sportart)
   filterOffen:false,        // erweiterte Filter eingeblendet?
@@ -2008,9 +2104,11 @@ function medaille(a, st, { gross = false, anteil = 0, neu = false } = {}){
 /* Zahl hinter "🏅 Abzeichen" oben in der Kopfleiste (Laptop) */
 function abzeichenNav(){
   const b = document.getElementById("nav-abzeichen");
-  if (b) b.innerHTML = `🏅 Abzeichen<span class="nav-zahl">${abzStand().erreicht}/${ABZ_ALLE}</span>`;
+  const dabei = schonDabei();
+  if (b) { b.hidden = !dabei; b.innerHTML = `${ic("medaille", 16)} Abzeichen<span class="nav-zahl">${abzStand().erreicht}/${ABZ_ALLE}</span>`; }
   const k = document.querySelector(".suche-abz");
   if (k) k.outerHTML = abzKnopf();
+  else if (dabei) document.querySelector(".suche-einst")?.insertAdjacentHTML("beforebegin", abzKnopf());
 }
 /* Wie viele Stufen schon auf der Abzeichen-Seite angeschaut wurden –
    für den roten "Neu"-Hinweis im Streifen. Dazu je Abzeichen die zuletzt
@@ -2074,8 +2172,20 @@ function abzFortschrittMelden(art, st){
   if (!n) return;
   setTimeout(() => melde(`${n.a.icon} ${n.a.name} ${STUFEN[n.stufe - 1].name}: ${abzNochText(n)} · Antippen`, "abzeichen", 4500), 2600);
 }
-/* Kleiner Medaillen-Knopf neben dem Zahnrad – immer zu sehen. */
+/* Review 6.11. (Progressive Disclosure): Abzeichen, Saison, Ranglisten und
+   "Spiel ansetzen" erscheinen erst, wenn man selbst mitgemacht hat
+   (eingecheckt, "Hier gespielt", Spiel, Tipp, Foto, Platz eingetragen).
+   Beim ersten Besuch: nur Karte, Suche und Plätze. */
+function schonDabei(){
+  if (Z.admin || demoAn()) return true;
+  const s = statistik();
+  if (["checkins","spiele","zusagen","tipps","fotos","neueOrte"].some(k => (s[k] || 0) > 0)) return true;
+  if (s.abz && Object.values(s.abz).some(Boolean)) return true;
+  try { return JSON.parse(localStorage.getItem(BESTAETIGT_SCHLUESSEL) || "[]").length > 0; } catch { return false; }
+}
+/* Kleiner Medaillen-Knopf neben dem Zahnrad – sobald man mitmacht. */
 function abzKnopf(){
+  if (!schonDabei()) return ``;
   const st = abzStand();
   const neu = st.erreicht > abzeichenGesehen();
   const best = ABZEICHEN.filter(a => st.stufe[a.id])
@@ -2509,7 +2619,60 @@ function cartoEbene(dunkelModus){
     attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>'
   });
 }
-const strassenKarte = d => CARTO_SCHLUESSEL ? cartoEbene(d) : grauEbene(d);
+/* Review 6.11.: Die CARTO-Kacheln schreiben Städte auf Englisch ("MUNICH").
+   Deshalb zeichnet jetzt eine Vektorkarte von OpenFreeMap (frei, ohne
+   Schlüssel, Daten von OpenStreetMap) mit deutschen Namen (name:de).
+   Sie lädt im Hintergrund; ohne WebGL oder wenn sie nicht kommt, bleibt
+   es bei den CARTO- bzw. Esri-Kacheln. Feste Versionen mit Prüfsumme. */
+const VEKTOR_JS = ["https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js",
+  "sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj"];
+const VEKTOR_LEAFLET = ["https://cdn.jsdelivr.net/npm/@maplibre/maplibre-gl-leaflet@0.0.22/leaflet-maplibre-gl.js",
+  "sha384-4CB9Vtol9LN6lGgBCvmPLbUEZwilrqIvPieSRurgAXAB7FVJaLS9n8WyAIA5wjQ+"];
+const VEKTOR_STIL = { hell:"https://tiles.openfreemap.org/styles/liberty", dunkel:"https://tiles.openfreemap.org/styles/dark" };
+function skriptLaden([src, sri]){
+  return new Promise((ok, fehler) => {
+    const el = document.createElement("script");
+    el.src = src; el.integrity = sri; el.crossOrigin = "anonymous";
+    el.onload = ok; el.onerror = fehler;
+    document.head.appendChild(el);
+  });
+}
+let vektorBereit = null;
+function vektorLaden(){
+  if (vektorBereit) return vektorBereit;
+  let webgl = false;
+  try { const c = document.createElement("canvas"); webgl = !!(c.getContext("webgl2") || c.getContext("webgl")); } catch {}
+  return vektorBereit = webgl ? skriptLaden(VEKTOR_JS).then(() => skriptLaden(VEKTOR_LEAFLET))
+                              : Promise.reject(new Error("kein WebGL"));
+}
+const VEKTOR_STILE = {};
+function vektorStil(dunkelModus){
+  const url = VEKTOR_STIL[dunkelModus ? "dunkel" : "hell"];
+  return VEKTOR_STILE[url] ||= fetch(url).then(r => r.json()).then(stil => {
+    /* Ruhiger: keine Geschäfte, Haltestellen und Ähnliches als Symbole. */
+    stil.layers = stil.layers.filter(l => !/^(poi|airport)/.test(l.id));
+    /* Überall den deutschen Namen nehmen, sonst den örtlichen. */
+    for (const l of stil.layers) {
+      const tf = l.layout && l.layout["text-field"];
+      if (tf && JSON.stringify(tf).includes("name"))
+        l.layout["text-field"] = ["coalesce", ["get", "name:de"], ["get", "name"]];
+    }
+    return stil;
+  });
+}
+const vektorAttribution = '<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> &copy; <a href="https://www.openmaptiles.org/" target="_blank" rel="noopener">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>';
+function strassenKarte(d){
+  const gruppe = L.layerGroup();
+  const raster = () => { if (!gruppe.getLayers().length) gruppe.addLayer(CARTO_SCHLUESSEL ? cartoEbene(d) : grauEbene(d)); };
+  const frist = setTimeout(raster, 6000);
+  vektorLaden().then(() => vektorStil(d)).then(stil => {
+    clearTimeout(frist);
+    const v = L.maplibreGL({ style: stil, attribution: vektorAttribution, interactive: false });
+    gruppe.clearLayers();
+    gruppe.addLayer(v);
+  }).catch(() => { clearTimeout(frist); raster(); });
+  return gruppe;
+}
 
 let strassenEbene = strassenKarte(dunkelAktiv()).addTo(karte);
 
@@ -2557,6 +2720,8 @@ const FARBE = {
    Wie sicher das ist, zeigt die Form des Punkts (voll / gestrichelt / hohl). */
 const AMPEL_FARBE = { gruen:"#34C759", orange:"#FF9F0A", grau:"#8E8E93", rot:"#FF3B30" };
 function farbe(o){ return AMPEL_FARBE[ampel(o)]; }
+const AMPEL_RANG = { gruen:0, orange:1, grau:2, rot:3 };
+const AMPEL_GRUPPE = { gruen:"Frei zum Spielen", orange:"Vorher fragen", grau:"Wissen wir noch nicht", rot:"Nicht frei" };
 
 /* Bei wenigen Orten wären einzelne HTML-Marker fein – bei tausenden wird der
    Browser damit zäh. Canvas zeichnet alle Punkte in eine einzige Fläche und
@@ -2617,7 +2782,7 @@ function punktZeichnen(o){
     dashArray: !gewaehlt && stufe === "vermutet" ? "2 2" : null,
     fillColor: farbe(o), fillOpacity: gewaehlt ? 1 : stufe === "ungeklaert" ? .25 : 1
   })
-  .bindTooltip(`${o.name} · ${zugangStufe(o).titel}`, { direction:"top", offset:[0,-6] })
+  .bindTooltip(`${esc(kurzName(o))} · ${zugangStufe(o).titel}${zugangStufe(o).hinweis ? " (" + zugangStufe(o).hinweis + ")" : ""}`, { direction:"top", offset:[0,-6] })
   .on("click", () => {
     Z.auswahlId=o.id; Z.ansicht="detail"; zeichne();
     sheet.mitte();
@@ -2626,13 +2791,29 @@ function punktZeichnen(o){
   .addTo(markerEbene);
 }
 
+/* Review 6.11.: Der Ring eines Bündels zeigt die Anteile – grün (frei),
+   orange (fragen), grau (wissen wir nicht), rot (nicht frei). So sieht man
+   auf der Karte, wo viele sichere Plätze liegen, ohne die Liste zu öffnen. */
+function ringStil(t){
+  const n = t.gruen + t.orange + t.grau + t.rot || 1;
+  let bis = 0;
+  const teil = (farbe, x) => { const von = bis; bis += x / n * 100; return x ? `${farbe} ${von.toFixed(1)}% ${bis.toFixed(1)}%` : null; };
+  const stuecke = [teil(AMPEL_FARBE.gruen, t.gruen), teil(AMPEL_FARBE.orange, t.orange),
+                   teil(AMPEL_FARBE.grau, t.grau), teil(AMPEL_FARBE.rot, t.rot)].filter(Boolean);
+  return `--donut:conic-gradient(${stuecke.join(",")})`;
+}
+function ringText(t){
+  const z = n => n.toLocaleString("de-DE");
+  return [t.gruen && `${z(t.gruen)} frei`, t.orange && `${z(t.orange)} vorher fragen`,
+          t.grau && `${z(t.grau)} unbekannt`, t.rot && `${z(t.rot)} nicht frei`].filter(Boolean).join(" · ");
+}
 function buendelZeichnen(gruppe, mitte){
   const n = gruppe.length;
-  let lat = 0, lon = 0, rang = BUENDEL_RANG.length - 1;
+  let lat = 0, lon = 0;
+  const anteile = { gruen:0, orange:0, grau:0, rot:0 };
   for (const o of gruppe) {
     lat += o.lat; lon += o.lon;
-    const r = BUENDEL_RANG.indexOf(farbe(o));
-    if (r >= 0 && r < rang) rang = r;
+    anteile[ampel(o)]++;
   }
   const max = buendelZeichnen.max || n;
   const groesse = Math.round(Math.max(28, Math.min(buendelGroesse(n) + 10, 26 + 40 * Math.sqrt(n / max))));
@@ -2640,7 +2821,7 @@ function buendelZeichnen(gruppe, mitte){
   L.marker(mitte ? karte.unproject(mitte, karte.getZoom()) : [lat / n, lon / n], {
     icon: L.divIcon({
       className: "buendel",
-      html: `<span style="--ring:${BUENDEL_RANG[rang]};width:${groesse}px;height:${groesse}px">${text}</span>${
+      html: `<span title="${ringText(anteile)}" style="${ringStil(anteile)};width:${groesse}px;height:${groesse}px">${text}</span>${
         gruppe.some(o => (Z.aktiv[o.id] || 0) >= 2) ? `<i title="Hier wird gerade gespielt"></i>` : ``}`,
       iconSize: [groesse, groesse]
     }),
@@ -2893,7 +3074,10 @@ function zugangStufe(o){
     "Auskunft Schule":"laut Schule", "Schild vor Ort":"laut Schild vor Ort" }[o.bestaetigtDurch] || "";
   const stufe = sicher || (nutzer && a === "gruen") ? "bestaetigt" : a === "grau" ? "ungeklaert" : "vermutet";
   const art = a === "gruen" ? "frei" : a === "orange" ? "absprache" : "unklar";
-  const icon = a === "rot" ? "✕" : a === "orange" ? "!" : a === "grau" ? "?" : stufe === "bestaetigt" ? "✓" : "≈";
+  /* Review 6.11.: Drei Stufen, die man auseinanderhält. "Vermutet" ist
+     keine eigene Stufe mehr, sondern ein kleiner Hinweis darunter. */
+  const icon = a === "rot" ? "✕" : a === "orange" ? "!" : a === "grau" ? "?" : "✓";
+  const hinweis = stufe === "vermutet" ? "noch nicht bestätigt" : "";
   const titel = { gruen:"Frei zum Spielen", orange:"Vorher fragen", grau:"Wissen wir noch nicht", rot:"Nicht frei" }[a];
   let kurz;
   if (a === "gruen") kurz = sicher ? "Bestätigt " + laut
@@ -2910,7 +3094,7 @@ function zugangStufe(o){
   else if (a === "rot") kurz = (o.zugang === "nicht öffentlich" ? "Nicht öffentlich nutzbar" : "Abgeschlossen, nur für den Verein")
     + (sicher ? " · " + laut : "");
   else kurz = "Vorher klären, ob man hier darf";
-  return { stufe, art, icon, titel, kurz, ampel:a, vereinHinweis: !!(v && v[1]) };
+  return { stufe, art, icon, titel, kurz, hinweis, ampel:a, vereinHinweis: !!(v && v[1]) };
 }
 
 /* Woher die Angabe stammt und wie alt sie ist – für Liste und Detail. */
@@ -2949,7 +3133,7 @@ function sichtbareOrte(){
     .filter(o => !o._doppelt)
     .filter(o => !sucht || passtZurSuche(o))
     .filter(o => Z.sportart==="alle" || o.sportarten.includes(Z.sportart))
-    .filter(o => !Z.nurFrei || frei(o) || vermutlichFrei(o))
+    .filter(o => !Z.nurFrei || ampel(o) === "gruen")
     .filter(o => !Z.nurBelegt || belegt(o) || nutzerBestaetigt(o))
     .filter(o => !Z.nurGemerkt || GEMERKT.has(o.id))
     .filter(o => !Z.nurLicht || o.beleuchtung === "ja")
@@ -2967,6 +3151,12 @@ function sichtbareOrte(){
 
   const nachEntfernung = (a,b) => entfernungKm(bezug,a) - entfernungKm(bezug,b);
 
+  /* Review 6.11.: Standard "Sicher zuerst": erst frei, dann fragen, dann
+     unbekannt, innerhalb jeder Stufe nach Nähe. */
+  if (Z.sortierung === "sicher") {
+    const rang = new Map(gefiltert.map(o => [o, AMPEL_RANG[ampel(o)]]));
+    return gefiltert.sort((a,b) => rang.get(a) - rang.get(b) || nachEntfernung(a,b));
+  }
   if (Z.sortierung === "zustand")
     return gefiltert.sort((a,b) => (b.zustand||0) - (a.zustand||0) || nachEntfernung(a,b));
 
@@ -3129,6 +3319,32 @@ function platzBild(o){
     SPORT_ICON[sport] ? `<i>${SPORT_ICON[sport]}</i>` : ``}</span>`;
 }
 
+/* Review 6.11.: Für die Bedienung einheitliche Linien-Icons (Lucide, ISC-Lizenz)
+   statt Emojis, die auf jedem Gerät anders aussehen. Sportarten bleiben Emojis. */
+const ICON_PFADE = {
+  karte:'<path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/>',
+  liste:'<path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/>',
+  pin:'<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
+  ortung:'<polygon points="3 11 22 2 13 21 11 13 3 11"/>',
+  plus:'<path d="M5 12h14"/><path d="M12 5v14"/>',
+  medaille:'<path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526"/><circle cx="12" cy="8" r="6"/>',
+  pokal:'<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>',
+  stern:'<path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>',
+  kalender:'<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>',
+  blitz:'<path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>',
+  info:'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+  stadt:'<path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>',
+  spross:'<path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"/><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/>',
+  leute:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  daemmerung:'<path d="M12 10V2"/><path d="m4.93 10.93 1.41 1.41"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="m19.07 10.93-1.41 1.41"/><path d="M22 22H2"/><path d="m16 6-4 4-4-4"/><path d="M16 18a4 4 0 0 0-8 0"/>',
+  einstellungen:'<path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/>',
+  warnung:'<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+  pfeil:'<path d="m9 18 6-6-6-6"/>'
+};
+function ic(name, groesse = 16){
+  return `<svg class="ic" viewBox="0 0 24 24" width="${groesse}" height="${groesse}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON_PFADE[name] || ""}</svg>`;
+}
+
 const SPORT_ICON = { "Fußball":"⚽", "Basketball":"🏀", "Tischtennis":"🏓",
   "Beachvolleyball":"🏐", "Laufen":"🏃", "Calisthenics":"💪", "Skaten":"🛹" };
 
@@ -3155,7 +3371,7 @@ function losLeiste(teil = "leiste"){
     const bis = new Date(ich.bis).toLocaleTimeString("de-DE", { hour:"2-digit", minute:"2-digit" });
     karten.push(`<div class="los-karte hier" data-ort="${meinOrt.id}" role="button" tabindex="0">
       <span class="los-art"><span class="puls" aria-hidden="true"></span>Du bist eingecheckt</span>
-      <span class="los-name">${esc(meinOrt.name)}</span><small>bis ${bis} Uhr</small>
+      <span class="los-name">${esc(kurzName(meinOrt))}</span><small>bis ${bis} Uhr</small>
       <button class="inline-knopf" data-hierweg="1">Wieder weg</button></div>`);
   } else if (Z.positionEcht) {
     let naechster = null, best = 0.3;
@@ -3165,8 +3381,8 @@ function losLeiste(teil = "leiste"){
       if (km <= best) { best = km; naechster = o; }
     }
     if (naechster) karten.push(`<div class="los-karte hier" data-ort="${naechster.id}" role="button" tabindex="0">
-      <span class="los-art">📍 Du bist ganz nah</span>
-      <span class="los-name">${esc(naechster.name)}</span><small>Zeig anderen, dass hier gespielt wird</small>
+      <span class="los-art">${ic("pin", 14)} Du bist ganz nah</span>
+      <span class="los-name">${esc(kurzName(naechster))}</span><small>Zeig anderen, dass hier gespielt wird</small>
       <button class="inline-knopf" data-hier="${naechster.id}">Ich bin gerade hier</button></div>`);
   }
 
@@ -3184,7 +3400,7 @@ function losLeiste(teil = "leiste"){
     .sort((a, b) => a.km - b.km).slice(0, 6);
   for (const { o, n, km } of live) karten.push(`<button class="los-karte live" data-ort="${o.id}">
       <span class="los-art"><span class="puls" aria-hidden="true"></span>${n} spielen gerade</span>
-      <span class="los-name">${esc(o.name)}</span><small>${esc(o.sportarten.join(" · "))}${mitKm() ? " · " + kmText(km) : ""}</small></button>`);
+      <span class="los-name">${esc(kurzName(o))}</span><small>${esc(o.sportarten.join(" · "))}${mitKm() ? " · " + kmText(km) : ""}</small></button>`);
 
   /* Kommende Spiele in der Nähe */
   const jetzt = new Date();
@@ -3194,18 +3410,19 @@ function losLeiste(teil = "leiste"){
     .map(x => ({ ...x, km: entfernungKm(Z.position, x.o) })).filter(x => x.km <= LOS_RADIUS_KM)
     .sort((a, b) => new Date(a.sp.beginn) - new Date(b.sp.beginn)).slice(0, 8);
   for (const { sp, o, km } of spiele) karten.push(`<button class="los-karte spiel" data-ort="${o.id}">
-      <span class="los-art">📅 ${esc(spielZeit(sp.beginn))}</span>
-      <span class="los-name">${esc(sp.sportart)} · ${esc(o.name)}</span>
+      <span class="los-art">${ic("kalender", 14)} ${esc(spielZeit(sp.beginn))}</span>
+      <span class="los-name">${esc(sp.sportart)} · ${esc(kurzName(o))}</span>
       <small>${sp.dabei} von ${sp.brauchen} dabei${mitKm() ? " · " + kmText(km) : ""}</small></button>`);
 
   /* Immer ein Knopf zum Spiel ansetzen – am nächsten passenden Platz. */
   const ziel = sichtbareOrte().find(o => passtHauptsport(o.sportarten));
-  if (ziel) karten.push(`<button class="los-karte ansetzen" data-ort="${ziel.id}" data-spielauf="1">
-      <span class="los-art">＋ Mitspieler suchen</span>
+  const dabei = schonDabei();
+  if (ziel && dabei) karten.push(`<button class="los-karte ansetzen" data-ort="${ziel.id}" data-spielauf="1">
+      <span class="los-art">${ic("leute", 14)} Mitspieler suchen</span>
       <span class="los-name">Spiel ansetzen</span>
-      <small>${!live.length && !spiele.length ? "Noch nichts los. Mach den Anfang" : "Selbst eins starten"} · ${esc(ziel.name)}</small></button>`);
-  else if (!live.length && !spiele.length) karten.push(`<div class="los-karte leer">
-      <span class="los-art">👥 Noch nichts los</span>
+      <small>${!live.length && !spiele.length ? "Noch nichts los. Mach den Anfang" : "Selbst eins starten"} · ${esc(kurzName(ziel))}</small></button>`);
+  else if (dabei && !live.length && !spiele.length) karten.push(`<div class="los-karte leer">
+      <span class="los-art">${ic("leute", 14)} Noch nichts los</span>
       <small>Öffne einen Platz und setz ein Spiel an. Dann sehen andere hier, wann sie dazukommen können.</small></div>`);
 
   const zahl = live.length + spiele.length;
@@ -3259,8 +3476,8 @@ function jetztVorschlag(){
 }
 
 function jetztGrund(v){
-  const o = v.o, teile = mitKm() ? [entfText(v.km)] : [];
-  teile.push(belegt(o) ? "✓ frei, bestätigt" : nutzerBestaetigt(o) ? "✓ von Nutzern bestätigt" : "≈ vermutlich frei, ungeprüft");
+  const o = v.o, teile = mitKm() ? [kmKurz(v.km)] : [];
+  teile.push(belegt(o) ? "✓ frei, bestätigt" : nutzerBestaetigt(o) ? "✓ von Nutzern bestätigt" : "✓ frei, noch nicht bestätigt");
   const bs = bespielbarkeit(o);
   if (Z.wetter) teile.push(Z.wetter.regnetGleich ? "gleich Regen" : bs ? bs[1] : "trocken");
   if (v.lichtNoetig) teile.push("mit Flutlicht");
@@ -3275,8 +3492,8 @@ function jetztKarte(){
   const v = jetztVorschlag();
   if (!v) return null;
   return `<button class="los-karte jetzt" data-jetzt="1">
-      <span class="los-art">⚡ Jetzt spielen</span>
-      <span class="los-name">${esc(v.o.name)}</span>
+      <span class="los-art">${ic("blitz", 14)} Jetzt spielen</span>
+      <span class="los-name">${esc(kurzName(v.o))}</span>
       <small>${esc(jetztGrund(v))}</small></button>`;
 }
 
@@ -3525,6 +3742,86 @@ function nameOrtHinten(o){
   return `${esc(rest)}<span class="zort"> · ${esc(stadt)}</span>`;
 }
 
+/* --------------------------------------------------------------------------
+   Review 6.11.: Lesbare Platznamen (nur Anzeige, die Daten bleiben gleich)
+   --------------------------------------------------------------------------
+   Aus OpenStreetMap kommen Namen wie „Fußballplatz München“ oder
+   „Eduard-Schmid-Straße, rechts der Reichenbachbrücke, gegenüber
+   Hausnummer 11“. Daraus wird:
+     titel  „Fußballplatz Hellabrunner Straße“ / „Bolzplatz Eduard-Schmid-Straße“
+     viertel „Isarvorstadt“ (bei großen Städten der Stadtteil, sonst der Ort)
+     zusatz „rechts der Reichenbachbrücke, gegenüber Hausnummer 11“
+   -------------------------------------------------------------------------- */
+const GROSSSTADT = new Set(["Berlin","Hamburg","München","Köln","Frankfurt am Main","Stuttgart","Düsseldorf",
+  "Leipzig","Dortmund","Essen","Bremen","Dresden","Hannover","Nürnberg","Duisburg","Bochum","Wuppertal",
+  "Bielefeld","Bonn","Münster","Mannheim","Karlsruhe","Augsburg","Wiesbaden","Mönchengladbach","Gelsenkirchen",
+  "Aachen","Braunschweig","Kiel","Chemnitz","Halle (Saale)","Magdeburg","Freiburg im Breisgau","Krefeld",
+  "Mainz","Lübeck","Erfurt","Oberhausen","Rostock","Kassel","Hagen","Potsdam","Saarbrücken","Hamm",
+  "Ludwigshafen am Rhein","Oldenburg","Mülheim an der Ruhr","Osnabrück","Leverkusen","Darmstadt",
+  "Heidelberg","Solingen","Regensburg","Herne","Paderborn","Neuss","Ingolstadt","Offenbach am Main",
+  "Fürth","Würzburg","Ulm","Heilbronn","Pforzheim","Wolfsburg","Göttingen","Bottrop","Reutlingen",
+  "Koblenz","Bremerhaven","Erlangen","Bergisch Gladbach","Trier","Jena","Remscheid","Moers","Salzgitter",
+  "Siegen","Gütersloh","Hildesheim","Hanau","Cottbus","Kaiserslautern"]);
+const PLATZ_TYP = /^(Fußballplatz|Bolzplatz|Sportplatz|Basketballplatz|Basketballfeld|Tischtennisplatte|Tischtennisplatten|Beachvolleyballfeld|Volleyballfeld|Skatepark|Skateanlage|Calisthenics-Park|Laufbahn|Bolz- und Spielplatz)(?=\s|,|$)/i;
+const NUR_STRASSE = /(straße|strasse|weg|allee|ring|gasse|damm|ufer|steig|chaussee)$/i;
+const SPORT_NOMEN = { "Fußball":"Bolzplatz", "Basketball":"Basketballplatz", "Tischtennis":"Tischtennisplatte",
+  "Beachvolleyball":"Beachvolleyballfeld", "Laufen":"Laufbahn", "Calisthenics":"Calisthenics-Park", "Skaten":"Skatepark" };
+function ausschreiben(t){
+  return t.replace(/(\p{L})str\.(?=\s|,|$)/gu, "$1straße").replace(/\bStr\.(?=\s|,|$)/g, "Straße")
+          .replace(/\bggü\.\s*/g, "gegenüber ").replace(/\s+/g, " ").trim();
+}
+function anzeigeName(o){
+  const schluessel = o.name + "|" + o.ort;
+  if (o._anz && o._anz.k === schluessel) return o._anz;
+  const stadtVoll = stadtVon(o);                                // "München-Isarvorstadt"
+  const strasse = ausschreiben((String(o.ort || "").split(",")[1] || "").trim());
+  let stadt = stadtVoll, viertel = stadtVoll;
+  const m = /^([^-]+)-(.+)$/.exec(stadtVoll);
+  if (m && GROSSSTADT.has(m[1])) { stadt = m[1]; viertel = m[2]; }
+  let name = ausschreiben(String(o.name || ""));
+  let zusatz = "";
+  const typ = PLATZ_TYP.exec(name);
+  if (typ) {
+    let rest = name.slice(typ[0].length).trim();
+    for (const s of [stadtVoll, stadt]) {
+      if (s && rest.toLocaleLowerCase("de-DE").startsWith(s.toLocaleLowerCase("de-DE"))) { rest = rest.slice(s.length); break; }
+    }
+    rest = rest.replace(/^\s*[,–:-]\s*/, "").trim();
+    if (!rest || rest.length < 3) rest = strasse;               // "Fußballplatz München" → Straße aus dem Ort
+    name = rest ? typ[0] + " " + rest : typ[0];
+  } else if (stadt) {
+    /* "München, Bolzplatz am Weiher" → "Bolzplatz am Weiher" */
+    const k = name.toLocaleLowerCase("de-DE"), pos = k.indexOf(stadt.toLocaleLowerCase("de-DE"));
+    if (pos === 0) {
+      const rest = name.slice(stadt.length).replace(/^\s*[,:–-]?\s*/, "").trim();
+      if (rest.length >= 3) name = rest;
+    }
+  }
+  /* Lange Beschreibungen: erster Teil als Name, Rest in die zweite Zeile. */
+  if (name.length > 30 && name.includes(",")) {
+    const i = name.indexOf(",");
+    zusatz = name.slice(i + 1).trim();
+    name = name.slice(0, i).trim();
+  }
+  /* Nur eine Straße? Dann sagen, was dort ist. */
+  const woerter = name.split(/\s+/);
+  if (!typ && NUR_STRASSE.test(name) && woerter.length <= 3 && woerter.every(w => /^[\p{Lu}0-9]/u.test(w))) name = (SPORT_NOMEN[o.sportarten?.[0]] || "Platz") + " " + name;
+  if (viertel && name.toLocaleLowerCase("de-DE").includes(viertel.toLocaleLowerCase("de-DE"))) viertel = viertel === stadt ? "" : viertel;
+  return o._anz = { k: schluessel, titel: name || o.name, viertel, zusatz };
+}
+/* Ein Name als HTML: Titel, dahinter leiser der Stadtteil. */
+function nameHtml(o){
+  const a = anzeigeName(o);
+  return `${esc(a.titel)}${a.viertel ? `<span class="zort"> · ${esc(a.viertel)}</span>` : ``}`;
+}
+function kurzName(o){ return anzeigeName(o).titel; }
+/* Entfernung kurz: unter 1 km in Metern ("350 m"). */
+function kmKurz(km){
+  if (km < 0.05) return "hier";
+  if (km < 1) return Math.round(km * 1000 / 10) * 10 + " m";
+  return (km < 10 ? km.toFixed(1).replace(".", ",") : Math.round(km)) + " km";
+}
+
 /* Ist in der Nähe wirklich etwas los (Leute auf dem Platz, Spiele)? */
 function losAktiv(){ return (losLeiste.zahl || 0) > 0; }   // von losLeiste() gesetzt
 
@@ -3552,32 +3849,42 @@ function ansichtListe(nurListe){
     const anzMeld = Z.meldungen[o.id] || 0;
     const km = entfernungKm(Z.position,o);
     const st = zugangStufe(o), stand = standText(o);
-    return `<button class="zeile stufe-${st.stufe}" data-ort="${o.id}" style="--streifen:${farbe(o)}">
+    /* Review 6.11.: schlank – Name, Status + Entfernung, Sport-Icons. Untergrund,
+       Quelle und Stand stehen im Detail. */
+    const anz = anzeigeName(o);
+    const sportTitel = o.sportarten.join(", ");
+    return `<button class="zeile neu stufe-${st.stufe}" data-ort="${o.id}" style="--streifen:${farbe(o)}">
       ${platzBild(o)}
       <span class="zt">
-        <span class="zname">${nameOrtHinten(o)}</span>
-        <span class="ztags">${o.sportarten.slice(0, 3).map(sp =>
-          `<span class="ztag">${SPORT_ICON[sp] ? `<span aria-hidden="true">${SPORT_ICON[sp]}</span>` : ``}${esc(sp)}</span>`).join("")}${
-          o.sportarten.length > 3 ? `<span class="ztag mehr">+${o.sportarten.length - 3}</span>` : ``}${
-          o.untergrund && o.untergrund !== "—" ? `<span class="zbelag">${esc(o.untergrund)}</span>` : ``}</span>
-        <span class="zzugang ${st.stufe} ${st.art}"><span class="zicon" aria-hidden="true">${st.icon}</span>${st.titel}</span>
-        <span class="zquelle${o.geprueft && stand.alt ? " alt" : ""}">${esc(st.kurz)}${o.geprueft ? ` · ${stand.text}` : ``}</span>${v && !v[1] && st.ampel === "gruen" ? `
-        <span class="marke verein">${v[0]}</span>` : ``}${bs ? `
-        <span class="marke boden ${bs[0]}">${bs[1]}</span>` : ``}${anzMeld >= 3 ? `
-        <span class="marke warnung">⚠ ${anzMeld}× gemeldet</span>` : ``}${
+        <span class="zname">${nameHtml(o)}</span>${anz.zusatz ? `
+        <span class="zzusatz">${esc(anz.zusatz)}</span>` : ``}
+        <span class="zstatus"><span class="zb ${st.ampel}"><span class="zicon" aria-hidden="true">${st.icon}</span>${st.titel}</span>${
+          mitKm() ? `<span class="zkm">${kmKurz(km)}</span>` : ``}${st.hinweis ? `<span class="zhinweis">${st.hinweis}</span>` : ``}</span>
+        <span class="zsport" title="${esc(sportTitel)}" aria-label="${esc(sportTitel)}">${o.sportarten.slice(0, 5).map(sp =>
+          `<span aria-hidden="true">${SPORT_ICON[sp] || "•"}</span>`).join("")}${bs && bs[0] === "schlecht" ? `
+          <span class="marke boden ${bs[0]}">${bs[1]}</span>` : ``}${anzMeld >= 3 ? `
+          <span class="marke warnung">${ic("warnung", 12)} ${anzMeld}× gemeldet</span>` : ``}${
           naechstesSpiel(o.id) ? `
-        <span class="marke spiel-marke">📅 Spiel ${spielZeit(naechstesSpiel(o.id).beginn)}</span>` : ``}${
+          <span class="marke spiel-marke">${ic("kalender", 12)} Spiel ${spielZeit(naechstesSpiel(o.id).beginn)}</span>` : ``}${
           (Z.aktiv[o.id] || 0) >= 2 ? `
-        <span class="marke live"><span class="puls" aria-hidden="true"></span>${Z.aktiv[o.id]} spielen gerade</span>` : ``}
+          <span class="marke live"><span class="puls" aria-hidden="true"></span>${Z.aktiv[o.id]} spielen gerade</span>` : ``}</span>
       </span>
       <span class="zrechts">
-        ${mitKm() ? `<span class="zdist">${km < 0.1 ? "0" : (km < 10 ? km.toFixed(1).replace(".",",") : Math.round(km))}<small>${km < 0.1 ? "hier" : "km"}</small></span>` : ``}
         <span class="stern${GEMERKT.has(o.id) ? " an" : ""}" data-merken="${o.id}"
               role="button" tabindex="0"
-              aria-label="${GEMERKT.has(o.id) ? "Aus Merkliste entfernen" : "Merken"}">★</span>
+              aria-label="${GEMERKT.has(o.id) ? "Aus Merkliste entfernen" : "Merken"}">${ic("stern", 18)}</span>
       </span>
     </button>`;
   });
+  /* "Sicher zuerst": kleine Überschrift, wo eine neue Stufe beginnt. */
+  if (Z.sortierung === "sicher" && orte.length) {
+    const zahlen = {};
+    for (const o of alleOrte) { const a = ampel(o); zahlen[a] = (zahlen[a] || 0) + 1; }
+    for (let i = orte.length - 1; i >= 0; i--) {
+      const a = ampel(orte[i]), davor = i ? ampel(orte[i - 1]) : null;
+      if (a !== davor) zeilenListe.splice(i, 0, `<div class="zgruppe ${a}"><span>${AMPEL_GRUPPE[a]}</span><small>${zahlen[a].toLocaleString("de-DE")}</small></div>`);
+    }
+  }
   const leer = orte.length ? `` : Z.suche.trim() ? `<div class="leer"><b>Nichts gefunden für „${esc(Z.suche.trim())}“.</b><br>
       Anders schreiben, Filter lockern – oder den Platz selbst eintragen.</div>`
     : `<div class="leer"><b>Kein Platz passt zu den Filtern.</b><br>
@@ -3586,14 +3893,14 @@ function ansichtListe(nurListe){
   /* Ende der Liste: Auf dem Handy stehen "Ort eintragen" und die Links hier
      statt in einer festen Leiste – so bleibt mehr Platz für die Plätze. */
   const listenende = `<div class="listenende">
-      <a class="eintragen-karte stadt-karte" href="/bolzplaetze/"><span aria-hidden="true">🏙️</span>
+      <a class="eintragen-karte stadt-karte" href="/bolzplaetze/"><span aria-hidden="true">${ic("stadt", 20)}</span>
         <span><b>Plätze nach Stadt</b><br>Alle Bolzplätze deiner Stadt auf einen Blick.</span></a>
-      <button class="eintragen-karte" data-gehe="neu"><span aria-hidden="true">＋</span>
+      <button class="eintragen-karte" data-gehe="neu"><span aria-hidden="true">${ic("plus", 20)}</span>
         <span><b>Fehlt ein Platz?</b><br>Platz eintragen – dauert eine Minute.</span></button>
       ${adminReihe()}
-      <button class="abzeichen-link" data-einfuehrung="1">ⓘ Was bedeuten die Symbole?</button>
-      <button class="abzeichen-link" data-gehe="abzeichen">🏅 Meine Abzeichen · ${abzStand().liga.name} · ${abzStand().punkte} Punkte</button>
-      <button class="abzeichen-link" data-gehe="saison">🏆 Meine Saison & Ranglisten</button>
+      <button class="abzeichen-link" data-einfuehrung="1">${ic("info")} Was bedeuten die Farben?</button>${schonDabei() ? `
+      <button class="abzeichen-link" data-gehe="abzeichen">${ic("medaille")} Meine Abzeichen · ${abzStand().liga.name} · ${abzStand().punkte} Punkte</button>
+      <button class="abzeichen-link" data-gehe="saison">${ic("pokal")} Meine Saison & Ranglisten</button>` : ``}
       <div class="rechtliches-link">
         <button data-gehe="ueber">Über Platzfrei</button> · <button data-gehe="vereine">Für Vereine</button> · <button data-gehe="partner">Für Partner</button> · <a href="/bolzplaetze/">Plätze nach Stadt</a><br>
         Alle Angaben ohne Gewähr – vor Ort gilt das Schild.<br>
@@ -3616,7 +3923,7 @@ function ansichtListe(nurListe){
     : `${zahl} ${plaetze} in der Gegend`;
   const filterTeile = [
     Z.sportart !== "alle" && Z.sportart,
-    Z.nurBelegt && "nur bestätigt", Z.nurFrei && !Z.nurBelegt && "frei oder vermutlich frei",
+    Z.nurBelegt && "nur bestätigt", Z.nurFrei && !Z.nurBelegt && "nur frei zum Spielen",
     Z.nurLos && "hier ist was los", Z.nurGemerkt && "nur gemerkte", Z.nurLicht && "mit Flutlicht"
   ].filter(Boolean);
   const gesamt = (DATEN.length - DOPPELT).toLocaleString("de-DE");
@@ -3629,34 +3936,22 @@ function ansichtListe(nurListe){
            <button class="inline-knopf" data-filterweg="1">Alle zeigen</button></span>`
       : ``}</div>`;
 
-  const ohneStandort = !mitKm() && ohneSuche ? `<div class="bezug">
-      <span class="bezug-text"><span aria-hidden="true">📍</span> <b>Ohne Standort:</b> Ort eingeben, dann stehen die Plätze dort oben.</span>
-      <button class="inline-knopf" data-startpunkt="${Z.startpunktOffen ? "zu" : "auf"}"
-        aria-expanded="${!!Z.startpunktOffen}">${Z.startpunktOffen ? "Schließen" : "Ort eingeben"}</button>
-    </div>${Z.startpunktOffen ? `<div class="startpunkt">
-      <form class="startpunkt-form" data-startpunktform="1">
-        <label for="startpunkt-feld">Ort</label>
-        <div class="startpunkt-reihe">
-          <input id="startpunkt-feld" type="search" enterkeyhint="search" autocomplete="off"
-            placeholder="Stadt, Stadtteil oder Adresse" value="">
-          <button class="knopf zweit" type="submit">Übernehmen</button>
-        </div>
-      </form>
-      <button class="inline-knopf" data-standort="1">📍 Doch meinen Standort nutzen</button>
-    </div>` : ``}` : ``;
+  /* Review 6.11.: Ohne Standort ist die erste Aktion ein großer, freundlicher
+     Knopf. Er fragt die Freigabe ab; wer ablehnt, landet in der Suche. */
+  const ohneStandort = !mitKm() && ohneSuche ? `<button class="standort-gross" data-standort="gross">
+      <span class="standort-gross-icon">${ic("ortung", 20)}</span>
+      <span><b>Plätze in meiner Nähe zeigen</b><small>Oder oben einen Ort suchen</small></span></button>` : ``;
   /* Handy: Die Liste endet erst nach 150 Plätzen – deshalb stehen die
      Admin-Knöpfe zusätzlich oben (auf dem Laptop stehen sie im Listenfuß). */
   const adminOben = Z.admin ? `<div class="admin-oben">
-      <button class="knopf zweit" data-gehe="nutzung">Nutzung</button>
-      <button class="knopf zweit" data-gehe="pruefen">Prüfen (${pruefAnzahl()})</button>
-      <button class="knopf zweit" data-gehe="fehlerliste">Fehler (${FEHLERBERICHTE.length})</button>
-      <button class="knopf zweit" data-gehe="einstellungen">Mehr …</button></div>` : ``;
+      <button class="knopf zweit" data-gehe="admin">Admin-Bereich${adminOffen() ? ` · ${adminOffen()} offen` : ``}</button>${
+      pruefAnzahl() ? `<button class="knopf zweit" data-gehe="pruefen">Prüfen (${pruefAnzahl()})</button>` : ``}</div>` : ``;
   /* Damit Lücken nicht wie eine unfertige App wirken: kurz sagen, dass
      Platzfrei mit seinen Nutzern wächst. Einmal weggeklickt, bleibt er weg. */
   let waechstWeg = false;
   try { waechstWeg = !!localStorage.getItem("platzfrei.waechst.weg"); } catch {}
   const waechst = ohneSuche && !waechstWeg ? `<div class="waechst" role="note">
-      <span class="waechst-icon" aria-hidden="true">🌱</span>
+      <span class="waechst-icon" aria-hidden="true">${ic("spross", 20)}</span>
       <span><b>Platzfrei wächst mit dir.</b> Noch fehlen manche Plätze, Zeiten und Fotos.
         Jeder neue Platz und jede Bestätigung vor Ort macht die Karte für alle besser.<br>
         <button class="inline-knopf" data-gehe="neu">Platz eintragen</button></span>
@@ -3664,8 +3959,8 @@ function ansichtListe(nurListe){
     </div>` : ``;
   /* Vor den Plätzen höchstens EIN Hinweis: Dämmerung vor "Ohne Standort"
      vor "Platzfrei wächst mit dir". Er scrollt mit der Liste mit. */
-  const hinweis = daemmerung ? `<div class="daemmerung">${daemmerung}</div>`
-    : ohneStandort || waechst;
+  const hinweis = daemmerung ? `<div class="daemmerung">${ic("daemmerung", 16)}<span>${daemmerung}</span></div>`
+    : mitKm() ? waechst : ``;
   /* "Was ist los" bleibt oben, wenn wirklich etwas los ist. Ist nichts los
      (nur "Spiel ansetzen"), kommt die Leiste nach den ersten Plätzen, die
      Abzeichen nach den ersten zehn (gerade Zahlen, damit am Laptop in
@@ -3677,10 +3972,10 @@ function ansichtListe(nurListe){
   if (ohneSuche && zeilen.length) {
     /* Review 5.11.: Abzeichen nicht über dem Suchergebnis, sondern nach den
        ersten sechs Plätzen. Der Medaillen-Knopf neben der Suche bleibt. */
-    zeilen.splice(Math.min(6, zeilen.length), 0, abzeichenStreifen() + saisonStreifen());
+    if (schonDabei()) zeilen.splice(Math.min(6, zeilen.length), 0, abzeichenStreifen() + saisonStreifen());
     if (los && !losOben) zeilen.splice(Math.min(4, zeilen.length), 0, los);
   } else if (los && !losOben) zeilen.push(los);
-  const rolleInhalt = `${adminOben}${trefferInfo}${hinweis}${ohneSuche ? losLeiste("oben") : ``}${losOben ? los : ``}${zeilen.join("")}${leer}${alleOrte.length > orte.length
+  const rolleInhalt = `${ohneStandort}${adminOben}${trefferInfo}${hinweis}${ohneSuche ? losLeiste("oben") : ``}${losOben ? los : ``}${zeilen.join("")}${leer}${alleOrte.length > orte.length
       ? `<div class="leer">… und ${(alleOrte.length - orte.length).toLocaleString("de-DE")} weitere.<br>
          Filter setzen, suchen oder auf der Karte zoomen.</div>` : ``}${listenende}`;
 
@@ -3707,25 +4002,19 @@ function ansichtListe(nurListe){
     <div class="filter">
       ${auswahl("sport", "Sportart", Z.sportart,
         ["alle", ...AUSWAHL.sportarten].map(sp => [sp, sp === "alle" ? (breit.matches ? "Alle Sportarten" : "Sportart") : sp]))}
-      ${auswahl("zugang", "Zugang", Z.nurBelegt ? "sicher" : Z.nurFrei ? "frei" : "alle",
-        [["alle",breit.matches ? "Jeder Zugang" : "Zugang"],["frei","Nur frei zugänglich"],["sicher","Nur wo ich sicher darf"]])}
+      ${auswahl("zugang", "Zugang", Z.nurFrei ? "frei" : "alle",
+        [["alle",breit.matches ? "Jeder Zugang" : "Zugang"],["frei","Nur frei zum Spielen"]])}
       ${mitKm() ? auswahl("umkreis", "Entfernung", String(Z.maxKm || 0),
         [["0","Jede Entfernung"],["2","bis 2 km"],["5","bis 5 km"],["10","bis 10 km"],["25","bis 25 km"]]) : ``}
       ${auswahl("zeigen", "Anzeigen", Z.nurLos ? "los" : Z.nurGemerkt ? "gemerkt" : "alle",
         [["alle","Alle Plätze"],["los","Hier ist was los"],
          ...(GEMERKT.size || Z.nurGemerkt ? [["gemerkt",`Nur gemerkte (${GEMERKT.size})`]] : [])])}
       ${auswahl("sort", "Sortieren", Z.sortierung,
-        [["entfernung", mitKm() ? "Nächste zuerst" : "Nahe Kartenmitte"],["zustand","Bester Zustand"],["geprueft","Zuletzt geprüft"]])}
+        [["sicher","Sicher zuerst"],["entfernung", mitKm() ? "Nächste zuerst" : "Nahe Kartenmitte"],["zustand","Bester Zustand"],["geprueft","Zuletzt geprüft"]])}
     </div>
     <div class="rolle">${rolleInhalt}</div>
     ${Z.admin ? `<div class="fuss listenfuss">
-      ${Z.admin ? `<button class="knopf zweit" data-gehe="nutzung">Nutzung</button>
-      <button class="knopf zweit" data-gehe="importieren">Import</button>` : ``}
-      ${Z.admin ? `<button class="knopf zweit" data-gehe="pruefen">Prüfen (${pruefAnzahl()})</button>
-      <button class="knopf zweit" data-gehe="fehlerliste">Fehler (${FEHLERBERICHTE.length})</button>
-      <button class="knopf zweit" data-gehe="verlauf">Vorschläge & Verlauf (${VORSCHLAEGE.length})</button>` : ``}
-      ${Z.admin ? `<button class="knopf zweit" data-export="1">Export</button>
-      <button class="knopf zweit" data-doppelte="1">Doppelte aufräumen</button>${importLaufText()}` : ``}
+      <button class="knopf zweit" data-gehe="admin">Admin-Bereich${adminOffen() ? ` · ${adminOffen()} offen` : ``}</button>${importLaufText()}
     </div>` : ``}
     <div class="rechtliches-link listenfuss">Alle Angaben ohne Gewähr – vor Ort gilt das Schild.<br>
       <a href="/bolzplaetze/">Plätze nach Stadt</a> · <button data-gehe="rechtliches">Impressum &amp; Datenschutz</button> ·
@@ -3744,8 +4033,8 @@ function ansichtListe(nurListe){
   if (breit.matches) {
     const rechts = document.createElement("div");
     rechts.className = "leiste-rechts";
-    rechts.innerHTML = `${Z.nurListe ? `<button class="leiste-knopf" data-modus="karte">🗺 Karte zeigen</button>` : ``}
-      <button class="leiste-knopf haupt" data-gehe="neu"><span aria-hidden="true">＋</span> Platz eintragen</button>`;
+    rechts.innerHTML = `${Z.nurListe ? `<button class="leiste-knopf" data-modus="karte">${ic("karte")} Karte zeigen</button>` : ``}
+      <button class="leiste-knopf haupt" data-gehe="neu">${ic("plus")} <span>Platz eintragen</span></button>`;
     leiste.append(seite.querySelector(".suche"), seite.querySelector(".filter"), rechts);
   }
   /* Schmale Suchzeile (Zwischenbreite): lieber kurzer Text als "Platz oder Ort su…". */
@@ -4051,17 +4340,52 @@ function ansichtAbzeichen(){
    Einstellungen: Hauptsportart, Design, Abzeichen
    -------------------------------------------------------------------------- */
 /* Alle Admin-Knöpfe an einer Stelle (Listenende und Menü). */
+/* Review 6.11.: Statt einer Reihe aus neun Knöpfen ein Einstieg in den
+   Admin-Bereich. Dort ist alles nach "Zu erledigen", "Überblick" und
+   "Werkzeuge" sortiert und mit einem Satz erklärt. */
+function adminOffen(){ return pruefAnzahl() + VORSCHLAEGE.length + FEHLERBERICHTE.length; }
 function adminReihe(){
-  return Z.admin ? `<div class="admin-reihe">
-        <button class="knopf zweit" data-gehe="nutzung">Nutzung</button>
-        <button class="knopf zweit" data-gehe="importieren">Import</button>
-        <button class="knopf zweit" data-gehe="pruefen">Prüfen (${pruefAnzahl()})</button>
-        <button class="knopf zweit" data-gehe="fehlerliste">Fehler (${FEHLERBERICHTE.length})</button>
-        <button class="knopf zweit" data-gehe="verlauf">Vorschläge & Verlauf (${VORSCHLAEGE.length})</button>
-        <button class="knopf zweit" data-export="1">Export</button>
-        <button class="knopf zweit" data-doppelte="1">Doppelte aufräumen</button>
-        <button class="knopf zweit" data-demo="1">${demoAn() ? "✓ Demo-Abzeichen an" : "Demo-Abzeichen & Saison"}</button>
-        <button class="knopf zweit" data-abmelden="1">Abmelden</button>${importLaufText()}</div>` : ``;
+  if (!Z.admin) return ``;
+  const offen = adminOffen();
+  return `<div class="admin-reihe">
+      <button class="knopf" data-gehe="admin">Admin-Bereich${offen ? ` · ${offen} offen` : ``}</button>${importLaufText()}</div>`;
+}
+
+function ansichtAdmin(){
+  if (!Z.admin) { Z.ansicht = "liste"; return ansichtListe(); }
+  const eintrag = (icon, titel, text, attr, zahl, dringend) => `<button class="admin-punkt" ${attr}>
+      <span class="admin-icon" aria-hidden="true">${ic(icon, 20)}</span>
+      <span class="admin-text"><b>${titel}</b><small>${text}</small></span>
+      ${zahl !== undefined ? `<span class="admin-zahl${dringend && zahl ? " dringend" : ""}">${Number(zahl).toLocaleString("de-DE")}</span>` : ``}
+      <span class="admin-pfeil" aria-hidden="true">${ic("pfeil", 16)}</span></button>`;
+  const offen = adminOffen();
+  seite.innerHTML = `
+    <div class="dkopf">
+      <button class="zurueck" data-gehe="liste">← Liste</button>
+      <div class="dname">Admin-Bereich</div>
+      <div class="dort">${offen ? `${offen.toLocaleString("de-DE")} Dinge warten auf dich` : `Alles erledigt`}</div>
+    </div>
+    <div class="rolle">
+      <h3 class="admin-gruppe">Zu erledigen</h3>
+      <div class="admin-liste">
+        ${eintrag("pin", "Neue Plätze & Vereinszeiten", "Von Nutzern eingetragen. Prüfen und freischalten oder ablehnen.", `data-gehe="pruefen"`, pruefAnzahl(), true)}
+        ${eintrag("liste", "Änderungsvorschläge", "Nutzer wollen Angaben an Plätzen ändern. Annehmen oder ablehnen, alte Änderungen zurückdrehen.", `data-gehe="verlauf"`, VORSCHLAEGE.length, true)}
+        ${eintrag("warnung", "Nachrichten & Fehlermeldungen", "Nachrichten aus dem Kontaktformular und Fehlerberichte aus der App.", `data-gehe="fehlerliste"`, FEHLERBERICHTE.length, true)}
+      </div>
+      <h3 class="admin-gruppe">Überblick</h3>
+      <div class="admin-liste">
+        ${eintrag("pokal", "Nutzung & Datenbestand", "Wie viele Leute die App nutzen, und wie viele Plätze bestätigt sind. Nur Summen.", `data-gehe="nutzung"`)}
+      </div>
+      <h3 class="admin-gruppe">Werkzeuge</h3>
+      <div class="admin-liste">
+        ${eintrag("plus", "Plätze importieren", "Viele Plätze auf einmal aus einer Datei oder OpenStreetMap übernehmen.", `data-gehe="importieren"`)}
+        ${eintrag("stadt", "Alle Plätze exportieren", "Lädt die Plätze als Datei herunter (zur Sicherung).", `data-export="1"`)}
+        ${eintrag("leute", "Doppelte aufräumen", "Blendet doppelt eingetragene Plätze aus. Gelöscht wird nichts.", `data-doppelte="1"`)}
+        ${eintrag("medaille", demoAn() ? "Demo-Abzeichen ausschalten" : "Demo-Abzeichen & Saison", "Zeigt erfundene Abzeichen und Ranglisten für Screenshots. Speichert nichts.", `data-demo="1"`)}
+      </div>
+      ${importLaufText()}
+      <button class="knopf zweit admin-ab" data-abmelden="1">Abmelden</button>
+    </div>`;
 }
 
 function ansichtEinstellungen(){
@@ -4079,7 +4403,7 @@ function ansichtEinstellungen(){
       </div>` : ``}
       <div class="einst-gruppe einst-links"${Z.admin ? `` : ` style="margin-top:12px"`}>
         <h3>Platzfrei</h3>
-        <button data-gehe="saison">🏆 Meine Saison & Ranglisten</button>
+        ${schonDabei() ? `<button data-gehe="saison">Meine Saison & Ranglisten</button>` : ``}
         <a href="/bolzplaetze/">Plätze nach Stadt</a>
         <button data-gehe="ueber">Über Platzfrei</button>
         <button data-gehe="vereine">Für Vereine</button>
@@ -4099,10 +4423,10 @@ function ansichtEinstellungen(){
         <div class="einst-chips">${[["auto","Wie das Gerät"],["hell","Hell"],["dunkel","Dunkel"]]
           .map(([w, t]) => chip(w, t, THEMA === w, "data-themawahl")).join("")}</div>
       </div>
-      <div class="einst-gruppe">
+      ${schonDabei() ? `<div class="einst-gruppe">
         <h3>Abzeichen</h3>
         ${abzeichenStreifen()}
-      </div>
+      </div>` : ``}
       <div class="einst-gruppe">
         <button class="abzeichen-link" style="margin:0" data-einfuehrung="1">ⓘ Einführung noch mal ansehen</button>
       </div>
@@ -4171,14 +4495,14 @@ function ansichtDetail(){
   seite.innerHTML = `
     <div class="dkopf">
       <button class="zurueck" data-gehe="liste">← Liste</button>
-      <div class="dname">${esc(o.name)}</div>
-      <div class="dort">${esc(o.ort)}${mitKm() ? ` · ${entfText(entfernungKm(Z.position,o))} entfernt` : ``}</div>
+      <div class="dname">${esc(anzeigeName(o).titel)}</div>
+      <div class="dort">${anzeigeName(o).zusatz ? `${esc(anzeigeName(o).zusatz)}<br>` : ``}${esc(o.ort)}${mitKm() ? ` · ${kmKurz(entfernungKm(Z.position,o))} entfernt` : ``}</div>
       ${verein && !(verein[1] && st.stufe === "bestaetigt") ? `<span class="marke verein">${verein[0]}</span>` : ``}
     </div>
     <div class="rolle">
       <!-- Das Wichtigste zuerst: Darf ich hier spielen, und wann? -->
       <input type="file" id="schild-datei" accept="image/*" hidden>
-      <div class="status ${st.stufe === "bestaetigt" ? statusArt : st.stufe === "ungeklaert" ? "unklar" : "vermutet " + statusArt}">
+      <div class="status ${{ gruen:"frei", orange:"absprache", grau:"unklar", rot:"zu" }[st.ampel]}">
         <span class="status-icon" aria-hidden="true">${st.icon}</span>
         <span class="status-text"><b>${st.titel}</b>
           <span>${st.kurz}${zeitenFehlen ? ` · Zeiten unbekannt` : ` · ${esc(o.zeiten)}`}</span>
@@ -4616,7 +4940,7 @@ function ansichtPruefen(){
     { day:"2-digit", month:"2-digit", hour:"2-digit", minute:"2-digit" });
   seite.innerHTML = `
     <div class="dkopf">
-      <button class="zurueck" data-gehe="liste">← Liste</button>
+      <button class="zurueck" data-gehe="admin">← Admin</button>
       <div class="dname">Prüfen</div>
       <div class="dort">${pruefAnzahl()} offen</div>
     </div>
@@ -4728,9 +5052,9 @@ function ansichtAnmelden(){
    "vorwärts" (von rechts herein) oder "zurück" (von links herein) ist.
    §7 Räumliche Konsistenz: Was nach rechts hinausging, kommt von rechts zurück. */
 const ANSICHTS_TIEFE = {
-  liste:0, importieren:1, anmelden:1, neu:1,
-  detail:1, bearbeiten:2, melden:2, rechtliches:1, fehler:1, fehlerliste:1, verlauf:1,
-  vereinszeiten:2, pruefen:1, nutzung:1, abzeichen:1, saison:1, einstellungen:1, ueber:1, vereine:1, partner:1
+  liste:0, anmelden:1, neu:1,
+  detail:1, bearbeiten:2, melden:2, rechtliches:1, fehler:1, kontakt:1,
+  vereinszeiten:2, admin:1, pruefen:2, nutzung:2, fehlerliste:2, verlauf:2, importieren:2, abzeichen:1, saison:1, einstellungen:1, ueber:1, vereine:1, partner:1
 };
 let letzteTiefe = 0;
 let letzterSchluessel = "liste";
@@ -4774,7 +5098,7 @@ function zeichne(){
 
   ({ liste:ansichtListe, detail:ansichtDetail, bearbeiten:ansichtBearbeiten,
      neu:ansichtNeu, anmelden:ansichtAnmelden, importieren:ansichtImportieren,
-     melden:ansichtMelden, rechtliches:ansichtRechtliches, vereinszeiten:ansichtVereinszeiten, pruefen:ansichtPruefen, fehler:ansichtFehler, fehlerliste:ansichtFehlerliste, verlauf:ansichtVerlauf, nutzung:ansichtNutzung, abzeichen:ansichtAbzeichen, saison:ansichtSaison, einstellungen:ansichtEinstellungen,
+     melden:ansichtMelden, rechtliches:ansichtRechtliches, vereinszeiten:ansichtVereinszeiten, pruefen:ansichtPruefen, fehler:ansichtFehler, fehlerliste:ansichtFehlerliste, verlauf:ansichtVerlauf, nutzung:ansichtNutzung, admin:ansichtAdmin, kontakt:ansichtKontakt, abzeichen:ansichtAbzeichen, saison:ansichtSaison, einstellungen:ansichtEinstellungen,
      ueber:ansichtUeber, vereine:ansichtVereine, partner:ansichtPartner })[Z.ansicht]();
 
   /* §11 Nur transform und opacity bewegen – beides läuft im Compositor,
@@ -5271,7 +5595,7 @@ function rasterAnzahl(r){
   }
   if (Z.nurBelegt) n = sicher; else if (Z.nurFrei) n = frei;
   if (Z.nurFrei && !Z.nurBelegt) rang = Math.min(rang, 1);
-  return n > 0 ? { n, rang } : null;
+  return n > 0 ? { n, rang, frei: Math.min(n, frei || 0) } : null;
 }
 function rasterZeichnen(){
   const zoom = karte.getZoom(), rahmen = karte.getBounds().pad(0.5), zelle = buendelZelle(zoom);
@@ -5282,8 +5606,8 @@ function rasterZeichnen(){
     if (!a) continue;
     const p = karte.project([r.lat, r.lon], zoom);
     const k = Math.floor(p.x / zelle) + ":" + Math.floor(p.y / zelle);
-    const g = zellen.get(k) || { n:0, x:0, y:0, rang:BUENDEL_RANG.length - 1, teile:[] };
-    g.n += a.n; g.x += p.x * a.n; g.y += p.y * a.n; g.rang = Math.min(g.rang, a.rang);
+    const g = zellen.get(k) || { n:0, frei:0, x:0, y:0, rang:BUENDEL_RANG.length - 1, teile:[] };
+    g.frei += a.frei; g.n += a.n; g.x += p.x * a.n; g.y += p.y * a.n; g.rang = Math.min(g.rang, a.rang);
     g.teile.push({ lat:r.lat, lon:r.lon, n:a.n, p });
     zellen.set(k, g);
   }
@@ -5300,7 +5624,7 @@ function rasterZeichnen(){
         if (!b) continue;
         const abstand = Math.hypot(a.x / a.n - b.x / b.n, a.y / a.n - b.y / b.n);
         if (abstand >= buendelGroesse(a.n) / 2 + buendelGroesse(b.n) / 2 + (KLEIN_SCHIRM ? 18 : 12)) continue;
-        a.n += b.n; a.x += b.x; a.y += b.y; a.rang = Math.min(a.rang, b.rang); a.teile.push(...b.teile);
+        a.n += b.n; a.frei += b.frei; a.x += b.x; a.y += b.y; a.rang = Math.min(a.rang, b.rang); a.teile.push(...b.teile);
         gruppen[j] = null;
         geaendert = true;
       }
@@ -5319,7 +5643,8 @@ function rasterZeichnen(){
     const text = g.n >= 1000 ? (g.n / 1000).toFixed(g.n >= 10000 ? 0 : 1).replace(".", ",") + "k" : g.n;
     L.marker(mitte, {
       icon: L.divIcon({ className:"buendel",
-        html:`<span style="--ring:${BUENDEL_RANG[g.rang] || "#8E8E93"};width:${groesse}px;height:${groesse}px">${text}</span>`,
+        /* Weit draußen kennt die Übersicht nur "frei" und den Rest. */
+        html:`<span title="${g.frei.toLocaleString("de-DE")} frei von ${g.n.toLocaleString("de-DE")}" style="${ringStil({ gruen:g.frei, orange:0, grau:g.n - g.frei, rot:0 })};width:${groesse}px;height:${groesse}px">${text}</span>`,
         iconSize:[groesse, groesse] }),
       keyboard:false
     })
@@ -5958,6 +6283,8 @@ async function bestaetigungenLaden(){
   for (const liste of Object.values(schilder)) for (const f of liste) f.url = fotoUrl(f.pfad);
   Z.bestaetigungen = zaehler;
   Z.schilder = schilder;
+  /* Für den Admin-Überblick: wann "Hier gespielt" gedrückt wurde (nur Datum). */
+  Z.gespieltZeiten = zeilen.filter(b => b.art === "gespielt").map(b => String(b.erstellt || "").slice(0, 10));
 }
 
 /* Fotos liegen privat (supabase-missbrauchsschutz.sql). Zu sehen sind sie
@@ -7007,6 +7334,65 @@ function rechtFeld(w){
    Angaben (Gerät, Ansicht, gewählter Platz) hängen automatisch dran, damit
    sich der Fehler nachstellen lässt. Klappt das Speichern nicht, bietet die
    App als Notlösung eine Mail an RECHT.email an. */
+/* --------------------------------------------------------------------------
+   Review 6.11.: Kontaktformular statt Mail-Link
+   --------------------------------------------------------------------------
+   Nachrichten landen in derselben Tabelle wie die Fehlermeldungen
+   (fehlerberichte, nur Einfügen erlaubt, mit IP-Bremse). So braucht es kein
+   neues SQL, die Prüf-Mail meldet neue Nachrichten, und im Admin-Bereich
+   stehen sie unter "Nachrichten & Fehlermeldungen".
+   -------------------------------------------------------------------------- */
+const KONTAKT_THEMEN = [["allgemein","Allgemeine Frage"],["verein","Verein"],["gemeinde","Gemeinde oder Schule"],
+  ["partner","Partnerschaft"],["presse","Presse"],["platz","Ein Platz stimmt nicht"]];
+function ansichtKontakt(){
+  const thema = Z.kontaktThema || "allgemein";
+  seite.innerHTML = `
+    <div class="dkopf">
+      <button class="zurueck" data-gehe="liste">← Liste</button>
+      <div class="dname">Kontakt</div>
+      <div class="dort">Cornelius liest jede Nachricht selbst</div>
+    </div>
+    <div class="rolle">
+      <form class="form kontakt-form" data-kontaktform="1" novalidate>
+        <label for="kontakt-thema">Worum geht es?</label>
+        <select id="kontakt-thema">${KONTAKT_THEMEN.map(([w, t]) => `<option value="${w}"${w === thema ? " selected" : ""}>${t}</option>`).join("")}</select>
+        <label for="kontakt-name">Dein Name${thema === "partner" || thema === "verein" || thema === "gemeinde" ? " und Organisation" : ""} (freiwillig)</label>
+        <input id="kontakt-name" type="text" maxlength="120" autocomplete="name">
+        <label for="kontakt-mail">Deine Mail, damit wir antworten können</label>
+        <input id="kontakt-mail" type="email" maxlength="200" autocomplete="email" required>
+        <label for="kontakt-text">Nachricht</label>
+        <textarea id="kontakt-text" maxlength="4000" style="min-height:150px" required
+          placeholder="${thema === "partner" ? "Wer seid ihr, und wie wollt ihr Platzfrei unterstützen?" : thema === "verein" ? "Welcher Verein, und wann ist euer Platz frei?" : "Was möchtest du uns sagen?"}"></textarea>
+        <input id="kontakt-web" type="text" tabindex="-1" autocomplete="off" aria-hidden="true" class="kontakt-falle">
+        <p class="hinweis">Wir nutzen deine Angaben nur, um dir zu antworten. Mehr dazu im
+          <button type="button" class="link-knopf" data-gehe="rechtliches">Datenschutz</button>.</p>
+      </form>
+      <div class="fuss">
+        <button class="knopf" data-kontaktsenden="1">Nachricht senden</button>
+      </div>
+    </div>`;
+}
+async function kontaktSenden(){
+  const wert = id => (document.getElementById(id)?.value || "").trim();
+  const thema = wert("kontakt-thema"), name = wert("kontakt-name"), mail = wert("kontakt-mail"), text = wert("kontakt-text");
+  if (wert("kontakt-web")) return;                           // Falle für Spam-Programme
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)) return melde("Bitte eine gültige Mailadresse angeben.");
+  if (text.length < 5) return melde("Bitte schreib kurz, worum es geht.");
+  const themaText = (KONTAKT_THEMEN.find(([w]) => w === thema) || [, "Kontakt"])[1];
+  const zeilen = `[Kontakt · ${themaText}]${name ? " von " + name : ""}\n\n${text}`;
+  if (ECHT) {
+    const { error } = await db.from("fehlerberichte")
+      .insert({ text: zeilen.slice(0, 4000), kontakt: mail, technik: "Kontaktformular · " + location.href });
+    if (!error) {
+      Z.kontaktThema = null; Z.ansicht = "liste"; zeichne();
+      return melde("Danke! Deine Nachricht ist angekommen. Wir melden uns per Mail.", null, 5000);
+    }
+    console.error(error);
+    return melde(/bremse|zu viele/i.test(error.message) ? "Gerade zu viele Nachrichten. Bitte später noch mal." : "Senden ging gerade nicht. Bitte später noch mal versuchen.");
+  }
+  melde("Senden geht gerade nicht (keine Verbindung).");
+}
+
 function ansichtFehler(){
   seite.innerHTML = `
     <div class="dkopf">
@@ -7075,8 +7461,8 @@ function ansichtFehlerliste(){
     { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" });
   seite.innerHTML = `
     <div class="dkopf">
-      <button class="zurueck" data-gehe="liste">← Liste</button>
-      <div class="dname">Fehlermeldungen</div>
+      <button class="zurueck" data-gehe="admin">← Admin</button>
+      <div class="dname">Nachrichten & Fehler</div>
       <div class="dort">${FEHLERBERICHTE.length} offen</div>
     </div>
     <div class="rolle">
@@ -7153,7 +7539,7 @@ function ansichtVerlauf(){
   const vorschlaege = VORSCHLAEGE.filter(v => v.id);
   seite.innerHTML = `
     <div class="dkopf">
-      <button class="zurueck" data-gehe="liste">← Liste</button>
+      <button class="zurueck" data-gehe="admin">← Admin</button>
       <div class="dname">Vorschläge & Verlauf</div>
       <div class="dort">${vorschlaege.length} offen · letzte ${AENDERUNGEN.length} Änderungen</div>
     </div>
@@ -7199,6 +7585,89 @@ async function nutzungLaden(){
   NUTZUNG = { ...data, geladen:Date.now() };
 }
 
+/* Review 6.11.: Datenbestand – wie viele Plätze wie sicher sind. Wird aus
+   den geladenen Plätzen gezählt (der Admin lädt ganz Deutschland), also
+   ohne neue Datenbankabfrage und ohne Personendaten. */
+function datenbestandBlock(){
+  const zahl = n => Number(n || 0).toLocaleString("de-DE");
+  const pro = (n, g) => g ? Math.round(n / g * 100) : 0;
+  const orte = DATEN.filter(o => !o._doppelt);
+  const g = orte.length;
+  const amp = { gruen:0, orange:0, grau:0, rot:0 };
+  const quelle = {};
+  let beleg = 0, nutzer = 0, gespieltEinmal = 0, schild = 0, zeiten = 0, licht = 0, untergrund = 0, vermutetFrei = 0;
+  const sport = {}, stadtBest = {};
+  for (const o of orte) {
+    const a = ampel(o); amp[a]++;
+    quelle[o.bestaetigtDurch || "ohne Angabe"] = (quelle[o.bestaetigtDurch || "ohne Angabe"] || 0) + 1;
+    const b = belegt(o), n = !b && nutzerBestaetigt(o);
+    if (b) beleg++;
+    if (n) nutzer++;
+    if ((Z.bestaetigungen[o.id] || 0) > 0) gespieltEinmal++;
+    if ((Z.schilder[o.id] || []).length) schild++;
+    if (o.zeiten && o.zeiten !== "unbekannt") zeiten++;
+    if (o.beleuchtung === "ja") licht++;
+    if (o.untergrund && o.untergrund !== "—") untergrund++;
+    if (a === "gruen" && !b && !n) vermutetFrei++;
+    for (const sp of o.sportarten) sport[sp] = (sport[sp] || 0) + 1;
+    if (b || n) { const st = stadtVon(o).split("-")[0]; if (st) stadtBest[st] = (stadtBest[st] || 0) + 1; }
+  }
+  const gespielt = Z.gespieltZeiten || [];
+  const vor = t => new Date(Date.now() - t * 864e5).toISOString().slice(0, 10);
+  const gespielt7 = gespielt.filter(d => d >= vor(7)).length, gespielt30 = gespielt.filter(d => d >= vor(30)).length;
+  const balken = `<div class="bestand-balken" role="img" aria-label="${zahl(amp.gruen)} frei, ${zahl(amp.orange)} vorher fragen, ${zahl(amp.grau)} unbekannt, ${zahl(amp.rot)} nicht frei">${
+    [["gruen","#34C759"],["orange","#FF9F0A"],["grau","#8E8E93"],["rot","#FF3B30"]].map(([k, f]) =>
+      amp[k] ? `<span style="flex:${amp[k]};background:${f}"></span>` : ``).join("")}</div>`;
+  const zeile = (name, n, von, erkl) => `<tr><th>${name}${erkl ? `<small>${erkl}</small>` : ``}</th><td>${zahl(n)}</td><td>${von ? pro(n, von) + " %" : ""}</td></tr>`;
+  const QUELLE_TEXT = { "Auskunft Gemeinde":"Auskunft der Gemeinde", "Auskunft Verein":"Auskunft des Vereins",
+    "Auskunft Schule":"Auskunft der Schule", "Schild vor Ort":"Schild vor Ort", "Lage (OSM)":"aus der Kartenlage (OSM)", "nur vermutet":"nur vermutet" };
+  const topStaedte = Object.entries(stadtBest).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  return `<div class="abschnitt saison-block">
+      <h3 class="saison-h">Datenbestand</h3>
+      ${Z.laedtNoch ? `<p class="saison-erkl">Die Plätze laden noch, die Zahlen sind noch nicht vollständig.</p>` : ``}
+      <div class="saison-gitter bestand-kacheln">
+        <div class="saison-kachel" style="--k:#0B9463"><b>${zahl(g)}</b><small>Plätze sichtbar</small></div>
+        <div class="saison-kachel" style="--k:#34C759"><b>${zahl(beleg + nutzer)}</b><small>sicher bestätigt (${pro(beleg + nutzer, g)} %)</small></div>
+        <div class="saison-kachel" style="--k:#0A84FF"><b>${zahl(nutzer)}</b><small>von Nutzern bestätigt</small></div>
+        <div class="saison-kachel" style="--k:#FF9500"><b>${zahl(gespielt30)}</b><small>„Hier gespielt“ in 30 Tagen</small></div>
+      </div>
+      <h3 class="saison-h" style="margin-top:14px">Darf man dort spielen?</h3>
+      ${balken}
+      <table class="nutz-tab bestand-tab">
+        <tr><th></th><td>Plätze</td><td>Anteil</td></tr>
+        ${zeile("Frei zum Spielen", amp.gruen, g, `davon ${zahl(vermutetFrei)} noch nicht bestätigt`)}
+        ${zeile("Vorher fragen", amp.orange, g)}
+        ${zeile("Wissen wir noch nicht", amp.grau, g)}
+        ${zeile("Nicht frei", amp.rot, g)}
+      </table>
+      <h3 class="saison-h" style="margin-top:14px">Wie sicher sind die Angaben?</h3>
+      <table class="nutz-tab bestand-tab">
+        <tr><th></th><td>Plätze</td><td>Anteil</td></tr>
+        ${zeile("Mit Beleg", beleg, g, "Gemeinde, Verein, Schule oder Schild")}
+        ${zeile("Von Nutzern bestätigt", nutzer, g, `mind. ${NUTZER_SCHWELLE} Geräte „Hier gespielt“, mehr als Meldungen`)}
+        ${zeile("Mind. 1× „Hier gespielt“", gespieltEinmal, g, "im letzten Jahr")}
+        ${zeile("Mit Schildfoto", schild, g)}
+        ${zeile("Erlaubte Zeiten bekannt", zeiten, g)}
+        ${zeile("Untergrund bekannt", untergrund, g)}
+        ${zeile("Mit Flutlicht", licht, g)}
+      </table>
+      <p class="saison-erkl">„Hier gespielt“ gedrückt: ${zahl(gespielt7)} in 7 Tagen, ${zahl(gespielt30)} in 30 Tagen, ${zahl(gespielt.length)} insgesamt.</p>
+      <h3 class="saison-h" style="margin-top:14px">Woher die Zugangsangabe stammt</h3>
+      <table class="nutz-tab bestand-tab">
+        <tr><th></th><td>Plätze</td><td>Anteil</td></tr>
+        ${Object.entries(quelle).sort((a, b) => b[1] - a[1]).map(([q, n]) => zeile(esc(QUELLE_TEXT[q] || q), n, g)).join("")}
+      </table>
+      <h3 class="saison-h" style="margin-top:14px">Sportarten</h3>
+      <table class="nutz-tab bestand-tab">
+        <tr><th></th><td>Plätze</td><td>Anteil</td></tr>
+        ${Object.entries(sport).sort((a, b) => b[1] - a[1]).map(([sp, n]) => zeile(`${SPORT_ICON[sp] || ""} ${esc(sp)}`, n, g)).join("")}
+      </table>
+      ${topStaedte.length ? `<h3 class="saison-h" style="margin-top:14px">Städte mit den meisten bestätigten Plätzen</h3>
+      <table class="nutz-tab bestand-tab">${topStaedte.map(([st, n]) => `<tr><th>${esc(st)}</th><td>${zahl(n)}</td><td></td></tr>`).join("")}</table>` : ``}
+      <p class="saison-erkl">Doppelt eingetragene Plätze (${zahl(DOPPELT)}) sind nicht mitgezählt.</p>
+    </div>`;
+}
+
 function ansichtNutzung(){
   if (!Z.admin) { Z.ansicht = "liste"; return ansichtListe(); }
   if (NUTZUNG === null || (NUTZUNG.geladen && Date.now() - NUTZUNG.geladen > 5 * 60e3)) {
@@ -7207,8 +7676,8 @@ function ansichtNutzung(){
   }
   const N = NUTZUNG;
   const kopf = `<div class="dkopf">
-      <button class="zurueck" data-gehe="liste">← Liste</button>
-      <div class="dname">Nutzung</div>
+      <button class="zurueck" data-gehe="admin">← Admin</button>
+      <div class="dname">Nutzung & Datenbestand</div>
       <div class="dort">Nur Summen, keine Personen · letzte 30 Tage</div>
     </div>`;
   const goat = `<p class="saison-erkl">Seitenaufrufe, Herkunft und Länder zeigt
@@ -7279,6 +7748,7 @@ function ansichtNutzung(){
           <span class="rang-name">${esc(r.name || "Platz")}${r.ort ? ` <small style="font-weight:500;color:var(--tinte-3)">${esc(r.ort)}</small>` : ``}</span>
           <span class="rang-wert">${zahl(r.checkins)} <small>von ${zahl(r.geraete)} ${r.geraete == 1 ? "Gerät" : "Geräten"}</small></span></button>`).join("")}</div>
       </div>` : ``}
+      ${datenbestandBlock()}
       <div class="abschnitt saison-block">
         <p class="saison-erkl" style="margin-top:0">Gezählt wird jedes Gerät einmal am Tag, ohne Geräte-Nummer.
           Nicht dabei sind dein Admin-Gerät und Browser mit „Nicht verfolgen“.
@@ -7447,7 +7917,7 @@ function ansichtUeber(){
             eigenem Training und Trainerjob gebaut, heute mit über 95.000 Plätzen in ganz
             Deutschland. Inzwischen studiert er Sportökonomie.</p>
             <blockquote>„Kein Kind soll am Zaun stehen und nicht wissen, ob es reindarf.“</blockquote>
-            <a class="team-mail" href="mailto:${esc(RECHT.email)}">${esc(RECHT.email)}</a>
+            <button class="team-mail" data-kontakt="allgemein">Nachricht an Cornelius</button>
           </div>
         </div>
       </div>
@@ -7468,7 +7938,7 @@ function ansichtVereine(){
         und bringt euch den Nachwuchs von nebenan.</p>
         <div class="reihe">
           <button class="knopf" data-gehe="liste" data-vereinsuche="1">Euren Platz finden</button>
-          <a class="knopf zweit" href="mailto:${esc(RECHT.email)}?subject=Platzfrei%20f%C3%BCr%20Vereine">Kontakt aufnehmen</a>
+          <button class="knopf zweit" data-kontakt="verein">Kontakt aufnehmen</button>
         </div>
       </div>
       ${z.verein >= ZAHL_AB.verein ? `<div class="ueber-teil">
@@ -7506,7 +7976,7 @@ function ansichtVereine(){
 
 function ansichtPartner(){
   const z = kennzahlen();
-  const mail = `mailto:${esc(RECHT.email)}?subject=Partnerschaft%20mit%20Platzfrei`;
+  /* Review 6.11.: Kontaktformular statt Mailprogramm. */
   seite.innerHTML = `
     <div class="dkopf voll-zurueck"><button class="zurueck" data-gehe="liste">← Zurück</button></div>
     <div class="rolle">
@@ -7517,7 +7987,7 @@ function ansichtPartner(){
         Platzfrei zeigt ihnen, wo sie frei spielen dürfen und wann. Damit das überall
         klappt, suchen wir Partner aus Sport, Jugendarbeit, Förderung und Handel.</p>
         <div class="reihe">
-          <a class="knopf" href="${mail}">Partner werden</a>
+          <button class="knopf" data-kontakt="partner">Partner werden</button>
           <button class="knopf zweit" data-gehe="liste">App ansehen</button>
         </div>
       </div>
@@ -7561,8 +8031,9 @@ function ansichtPartner(){
       </div>
       <div class="ueber-teil">
         <h3>Kontakt</h3>
-        <p>Schreib mir an <a href="${mail}">${esc(RECHT.email)}</a>. Ein kurzer Satz reicht,
+        <p>Schreib mir über das Kontaktformular. Ein kurzer Satz reicht,
         ich melde mich schnell zurück.</p>
+        <button class="knopf" data-kontakt="partner">Nachricht schreiben</button>
       </div>
       ${ueberFuss()}
     </div>`;
@@ -7722,6 +8193,10 @@ function ansichtRechtliches(){
         Platzzeiten ein, speichern wir Name, Funktion und E-Mail, um bei
         Rückfragen nachzuhaken. Diese Angaben werden nicht veröffentlicht und
         nach der Prüfung nicht weiter genutzt.</p>
+        <p><b>Kontaktformular:</b> Wir speichern dein Thema, deine Nachricht,
+        deine Mailadresse und freiwillig deinen Namen, um dir zu antworten.
+        Das sehen nur wir. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO
+        (deine Anfrage beantworten).</p>
         <p><b>Fehler melden:</b> Wir speichern deine Beschreibung, freiwillig
         deine Mailadresse und technische Angaben (Browser und Gerätetyp,
         Bildschirmgröße, aufgerufene Seite, zuletzt geöffneter Platz), damit
@@ -7745,7 +8220,7 @@ function ansichtRechtliches(){
         widerrufen. Das berührt nicht, was vorher erlaubt war.</p>
 
         <h4>7. Karten, Bilder und Bibliotheken</h4>
-        <p>Kartenbilder laden wir von CARTO bzw. Esri, Luftbilder von Esri,
+        <p>Die Karte laden wir von OpenFreeMap (ersatzweise CARTO bzw. Esri), Luftbilder von Esri,
         die Programmbibliotheken von cdnjs (Cloudflare) und jsDelivr. Öffnest du einen Platz ohne Straßenangabe, fragen wir die
         Adresse dieses einen Platzes bei Nominatim (OpenStreetMap Foundation,
         Großbritannien) ab; gibst du ohne Standort einen Ort ein, sucht
@@ -7761,7 +8236,7 @@ function ansichtRechtliches(){
         nötig sind:</p>
         <p>GitHub Inc. (USA), Hosting · Netlify Inc. (USA), Domain und DNS ·
         Supabase Inc. (USA, Server in Irland), Datenbank und Fotos ·
-        CARTO (CartoDB Inc., USA) und Esri Inc. (USA), Kartenbilder ·
+        OpenFreeMap (openfreemap.org), CARTO (CartoDB Inc., USA) und Esri Inc. (USA), Kartenbilder ·
         Cloudflare Inc. (USA), cdnjs · Prospect One (Polen), jsDelivr ·
         OpenStreetMap Foundation (Großbritannien), Adresssuche ·
         Open-Meteo (Schweiz), Wetter · GoatCounter (Niederlande),
@@ -7853,7 +8328,7 @@ function ansichtRechtliches(){
       <div class="abschnitt">
         <h3>Quellen</h3>
         <p>Kartendaten © OpenStreetMap-Mitwirkende (ODbL) ·
-        Kartenbilder © CARTO, © Esri, Maxar und Partner · Offene Daten der Landeshauptstadt
+        Karte © OpenFreeMap, © OpenMapTiles, © CARTO, © Esri, Maxar und Partner · Offene Daten der Landeshauptstadt
         München · Angaben der Gemeinde Gauting · Wetter: Open-Meteo.com
         (CC BY 4.0)</p>
       </div>
@@ -8023,7 +8498,7 @@ out center tags;`;
 
   seite.innerHTML = `
     <div class="dkopf">
-      <button class="zurueck" data-gehe="liste">← Liste</button>
+      <button class="zurueck" data-gehe="admin">← Admin</button>
       <div class="dname">Import</div>
       <div class="dort">Einmalig befüllen, danach pflegen</div>
     </div>
@@ -8119,9 +8594,12 @@ const sheet = (function(){
      Gemessen wird, wo die Liste beginnt. */
   const untersteRaste = () => {
     const rolle = aside.querySelector(":scope > #seite > .suche ~ .rolle");
-    const kopf = rolle ? rolle.getBoundingClientRect().top - aside.getBoundingClientRect().top : 0;
-    const hoehe = kopf > 60 && kopf < 260 ? kopf + 4 : 150;
-    RASTEN[0] = Math.min(0.28, (hoehe + sicherUnten) / window.innerHeight);
+    let kopf = rolle ? rolle.getBoundingClientRect().top - aside.getBoundingClientRect().top : 0;
+    /* Ohne Standort schaut auch der Knopf "Plätze in meiner Nähe" heraus. */
+    const sg = rolle && rolle.querySelector(":scope > .standort-gross");
+    if (sg && kopf > 60) kopf += sg.offsetHeight + 12;
+    const hoehe = kopf > 60 && kopf < 340 ? kopf + 4 : 150;
+    RASTEN[0] = Math.min(sg ? 0.36 : 0.28, (hoehe + sicherUnten) / window.innerHeight);
   };
   untersteRaste();
   const HOEHE  = 0.94;              // muss zur CSS-Höhe passen
@@ -8352,6 +8830,13 @@ const sheet = (function(){
     },
     /* Beim Öffnen eines Platzes soll die Liste Platz machen. */
     aufmachen(){ if (mobil.matches) federZu(yFuer(RASTEN[3])); },
+    /* Kopf hat sich geändert (z. B. Standort-Knopf weg): unterste Stufe neu messen. */
+    neuMessen(){
+      if (!mobil.matches || zieht) return;
+      const unten = Math.abs(y - yFuer(RASTEN[0])) < 3;
+      untersteRaste();
+      if (unten) setzen(yFuer(RASTEN[0]));
+    },
     /* Mindestens halb offen, damit man die Angaben eines Platzes sieht. */
     mitte(){ if (mobil.matches && y > yFuer(RASTEN[2]) + 1) federZu(yFuer(RASTEN[2])); },
     /* Wer die Karte verschiebt, will die Karte sehen. */
@@ -8387,7 +8872,7 @@ document.addEventListener("click", e=>{
                              "[data-export],[data-doppelte],[data-anmelden],[data-km],"+
                              "[data-merken],[data-gemerkt],[data-melden],[data-route],"+
                              "[data-nurlicht],[data-belegt],[data-sortierung],[data-bereich],[data-mehr],"+
-                             "[data-schildok],[data-schildweg],[data-loeschen],[data-fehlersenden],[data-fehlererledigt],[data-vorschlag],[data-zurueckdrehen],"+
+                             "[data-schildok],[data-schildweg],[data-loeschen],[data-fehlersenden],[data-kontaktsenden],[data-kontakt],[data-fehlererledigt],[data-vorschlag],[data-zurueckdrehen],"+
                              "[data-suchweg],[data-teilen],[data-abmelden],[data-hierpunkt],[data-vereinszeitensenden],"+
                              "[data-neuok],[data-neuweg],[data-vzok],[data-vzweg],[data-hier],[data-hierweg],[data-frage],"+
                              "[data-jetzt],[data-einfuehrung],[data-ausltag],[data-zusage],[data-spielweg],[data-spielform],[data-spielansetzen],[data-tipp],[data-tippsoffen],[data-osmladen],[data-osmstop],"+
@@ -8412,7 +8897,7 @@ document.addEventListener("click", e=>{
     if (Z.startpunktOffen) { sheet.aufmachen(); if (breit.matches) document.getElementById("startpunkt-feld")?.focus(); }
     return;
   }
-  if (t.dataset.standort)   { return zuMeinemStandort(); }
+  if (t.dataset.standort)   { return zuMeinemStandort(t.dataset.standort === "gross"); }
   if (t.dataset.modus)      { return ansichtModus(t.dataset.modus); }
   if (t.dataset.losalle)    { Z.losAlle = t.dataset.losalle === "1"; return zeichne(); }
   if (t.dataset.losscroll)  {
@@ -8462,6 +8947,8 @@ document.addEventListener("click", e=>{
   if (t.dataset.schildweg)  { return schildPruefen(t.dataset.schildweg, false); }
   if (t.dataset.loeschen)   { return ortLoeschen(t.dataset.loeschen); }
   if (t.dataset.fehlersenden) { return fehlerSenden(); }
+  if (t.dataset.kontaktsenden) { return kontaktSenden(); }
+  if (t.dataset.kontakt)    { Z.kontaktThema = t.dataset.kontakt; Z.ansicht = "kontakt"; zeichne(); sheet.aufmachen(); return; }
   if (t.dataset.fehlererledigt) { return fehlerErledigt(t.dataset.fehlererledigt); }
   if (t.dataset.vorschlag)  { return vorschlagEntscheiden(t.dataset.vorschlag, t.dataset.annehmen === "1"); }
   if (t.dataset.zurueckdrehen) { return aenderungZurueckdrehen(t.dataset.zurueckdrehen); }
@@ -8581,7 +9068,7 @@ function auswahl(name, titel, wert, optionen){
 document.addEventListener("change", e => {
   const w = e.target.closest?.("[data-filterwahl]");
   if (!w) return;
-  if (w.dataset.filterwahl === "zugang") { Z.nurFrei = w.value === "frei"; Z.nurBelegt = w.value === "sicher"; }
+  if (w.dataset.filterwahl === "zugang") { Z.nurFrei = w.value === "frei"; Z.nurBelegt = false; }
   if (w.dataset.filterwahl === "umkreis") Z.maxKm = +w.value || null;
   if (w.dataset.filterwahl === "sort") Z.sortierung = w.value;
   if (w.dataset.filterwahl === "sport") Z.sportart = w.value;
@@ -8681,6 +9168,7 @@ function standortUebernehmen(p){
   else if (Z.laedtNoch) umgebungLaden(Z.position);
   zeichne();
   wetterLaden();
+  requestAnimationFrame(() => sheet.neuMessen?.());
 }
 
 /* Gibt jemand den Standort frei – egal über welchen Dialog –, übernehmen
@@ -8708,8 +9196,15 @@ function standortHolen(erzwingen){
 
 /* Knopf unten links: springt zum eigenen Standort. Fragt beim ersten Mal
    nach der Freigabe, falls das beim Start noch nicht passiert ist. */
-function zuMeinemStandort(){
-  if (!navigator.geolocation) return melde("Dein Browser kann keinen Standort bestimmen.");
+function zuMeinemStandort(sucheSonst){
+  const zurSuche = text => {
+    melde(text, null, 5000);
+    if (!sucheSonst) return;
+    sheet.mitte();
+    const f = document.getElementById("suchfeld");
+    if (f) { f.focus(); f.placeholder = "Ort eingeben, z. B. Köln"; }
+  };
+  if (!navigator.geolocation) return zurSuche("Dein Browser kann keinen Standort bestimmen. Tipp einfach einen Ort ein.");
   if (!Z.positionEcht) melde("Standort wird gesucht …");
   standortEinmal(
     p => {
@@ -8718,8 +9213,8 @@ function zuMeinemStandort(){
       karte.flyTo([Z.position.lat, Z.position.lon], Math.max(karte.getZoom(), 15), { duration:.6 });
       if (neu) melde("Entfernungen jetzt ab deinem Standort.");
     },
-    e => melde(e.code === 1
-      ? "Standort nicht freigegeben. Erlaube ihn in den Einstellungen deines Browsers oder Handys."
+    e => zurSuche(e.code === 1
+      ? (sucheSonst ? "Kein Problem: Tipp oben einen Ort ein, dann zeigen wir die Plätze dort." : "Standort nicht freigegeben. Erlaube ihn in den Einstellungen deines Browsers oder Handys.")
       : "Standort gerade nicht gefunden. Versuch es gleich noch einmal.")
   );
 }
@@ -8810,8 +9305,8 @@ const ModusKnopf = L.Control.extend({
     const box = L.DomUtil.create("div", "modus-knopf", kopf);
     box.setAttribute("role", "group");
     box.setAttribute("aria-label", "Ansicht wählen");
-    box.innerHTML = `<button type="button" data-modus="karte" aria-pressed="true">🗺 Karte</button>
-      <button type="button" data-modus="liste" aria-pressed="false">☰ Liste</button>`;
+    box.innerHTML = `<button type="button" data-modus="karte" aria-pressed="true">${ic("karte")} Karte</button>
+      <button type="button" data-modus="liste" aria-pressed="false">${ic("liste")} Liste</button>`;
     L.DomEvent.disableClickPropagation(box);
     box.addEventListener("click", e => {
       const b = e.target.closest("[data-modus]");
@@ -8834,7 +9329,7 @@ const LegendeKnopf = L.Control.extend({
         <li><i class="lp hohl" style="border-color:#8E8E93"></i>Grau: wissen wir nicht</li>
         <li><i class="lp voll" style="background:#FF3B30"></i>Rot: nicht frei</li>
       </ul>
-      <p>Voller Punkt = bestätigt, gestrichelter Rand = nur vermutet.</p>`;
+      <p>Gestrichelter Rand = noch nicht bestätigt. Kreise mit Zahl: der Ring zeigt die Anteile.</p>`;
     L.DomEvent.disableClickPropagation(box);
     L.DomEvent.disableScrollPropagation(box);
     return box;

@@ -94,12 +94,19 @@ LAENDER = {"DE-BW":"Baden-Württemberg","DE-BY":"Bayern","DE-BE":"Berlin","DE-BB
   "DE-NI":"Niedersachsen","DE-NW":"Nordrhein-Westfalen","DE-RP":"Rheinland-Pfalz","DE-SL":"Saarland",
   "DE-SN":"Sachsen","DE-ST":"Sachsen-Anhalt","DE-SH":"Schleswig-Holstein","DE-TH":"Thüringen"}
 
-GRUPPEN = [  # (Schlüssel, Überschrift, Erklärung)
-  ("frei", "Öffentlich – bestätigt", "Die Gemeinde oder ein Schild vor Ort sagt: hier darf jeder spielen."),
-  ("vermutlich", "Vermutlich öffentlich", "Liegt in einem Park, auf einem Spielplatz oder gehört der Stadt. Noch nicht bestätigt."),
-  ("schulhof", "Schulhöfe", "Oft nach Schulschluss, am Wochenende und in den Ferien offen. Schilder vor Ort beachten."),
-  ("verein", "Vereinsgelände", "Gehört einem Verein. Nur nach Absprache oder zu bestimmten Zeiten."),
+GRUPPEN = [  # (Schlüssel, Überschrift, Erklärung) – gleiche Wörter und Farben wie in der App
+  ("frei", "Frei zum Spielen", "Bestätigt: Die Gemeinde oder ein Schild vor Ort sagt, hier darf jeder spielen."),
+  ("vermutlich", "Frei zum Spielen, noch nicht bestätigt", "Liegt in einem Park, auf einem Spielplatz oder gehört der Stadt."),
+  ("schulhof", "Vorher fragen: Schulhöfe", "Oft nach Schulschluss, am Wochenende und in den Ferien offen. Schilder vor Ort beachten."),
+  ("verein", "Vorher fragen: Vereinsgelände", "Gehört einem Verein. Nur nach Absprache oder zu bestimmten Zeiten."),
 ]
+SPORT_ICON = {"Fußball":"⚽","Basketball":"🏀","Tischtennis":"🏓","Beachvolleyball":"🏐","Laufen":"🏃","Calisthenics":"💪","Skaten":"🛹"}
+
+def lesbar(name):
+    """Abkürzungen ausschreiben wie in der App ("Lothringerstr." -> "Lothringerstraße")."""
+    name = re.sub(r"(\w)str\.(?=\s|,|$)", r"\1straße", name or "")
+    name = re.sub(r"\bStr\.(?=\s|,|$)", "Straße", name)
+    return re.sub(r"\bggü\.\s*", "gegenüber ", name).strip()
 
 def gruppe(o):
     z = o["zugang"] or ""
@@ -158,68 +165,106 @@ for s in staedte:  # gleicher Name: die größere Stadt bekommt den kurzen Link
 # ---------- Gemeinsame Teile ----------
 CSS = """
 :root{--gruen:#0B9463;--gruen-tief:#087B51;--gruen-zart:#E7F5EE;--grund:#F6F8F6;--flaeche:#fff;
---tinte:#0F1A15;--tinte-2:#3D4B44;--tinte-3:#5C6B63;--kante:rgba(15,26,21,.09);
+--tinte:#0F1A15;--tinte-2:#3D4B44;--tinte-3:#5C6B63;--kante:rgba(15,26,21,.08);
 --frei:#0E7C43;--frei-bg:#E4F6EA;--absprache:#A8620B;--absprache-bg:#FDF0DC;
---verein:#6248B8;--verein-bg:#EFEBFB;--blau:#1F6FB2;--blau-bg:#E5F0FA;
---schrift:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI Variable','Segoe UI',system-ui,Roboto,'Helvetica Neue',sans-serif}
+--p-gruen:#34C759;--p-orange:#FF9F0A;--p-grau:#8E8E93;
+--schrift:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Segoe UI Variable','Segoe UI',system-ui,Roboto,'Helvetica Neue',sans-serif}
 @media (prefers-color-scheme:dark){:root{--gruen:#2FBF85;--gruen-tief:#4FD39C;--gruen-zart:#11281F;--grund:#0C1210;
 --flaeche:#151D1A;--tinte:#EAF1ED;--tinte-2:#BCC8C1;--tinte-3:#93A39A;--kante:rgba(234,241,237,.10);
---frei:#5FD394;--frei-bg:#123222;--absprache:#F0B45E;--absprache-bg:#33250F;--verein:#AE9BF2;--verein-bg:#241D3D;
---blau:#7DB8EA;--blau-bg:#14273A}}
+--frei:#5FD394;--frei-bg:#123222;--absprache:#F0B45E;--absprache-bg:#33250F}}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--schrift);background:var(--grund);color:var(--tinte);font-size:15px;line-height:1.55;-webkit-text-size-adjust:100%}
+html{scroll-padding-top:120px}
+body{font-family:var(--schrift);background:var(--grund);color:var(--tinte);font-size:15px;line-height:1.55;-webkit-text-size-adjust:100%;-webkit-font-smoothing:antialiased}
 a{color:var(--gruen-tief)}
-.rahmen{max-width:880px;margin:0 auto;padding:0 16px}
-header.kopf{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--grund) 88%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--kante)}
-header.kopf .rahmen{display:flex;align-items:center;justify-content:space-between;height:56px;gap:12px}
-.marke{display:flex;align-items:center;gap:9px;text-decoration:none;color:var(--tinte);font-weight:800;font-size:18px;letter-spacing:-.01em}
+.rahmen{max-width:960px;margin:0 auto;padding:0 16px}
+header.kopf{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--grund) 85%,transparent);backdrop-filter:saturate(180%) blur(14px);-webkit-backdrop-filter:saturate(180%) blur(14px);border-bottom:1px solid var(--kante)}
+header.kopf .rahmen{display:flex;align-items:center;justify-content:space-between;height:58px;gap:12px}
+.marke{display:flex;align-items:center;gap:9px;text-decoration:none;color:var(--tinte);font-weight:800;font-size:18px;letter-spacing:-.02em}
 .marke img{width:30px;height:30px;border-radius:8px}
-.knopf{display:inline-block;background:var(--gruen);color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:9px 16px;border-radius:999px;white-space:nowrap}
+.knopf{display:inline-flex;align-items:center;gap:6px;background:var(--gruen);color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:10px 18px;border-radius:999px;white-space:nowrap}
 .knopf:hover{background:var(--gruen-tief)}
-.pfad{font-size:13px;color:var(--tinte-3);margin:22px 0 6px}
-.pfad a{color:var(--tinte-3)}
-h1{font-size:clamp(26px,5vw,36px);line-height:1.15;letter-spacing:-.02em;margin-bottom:10px}
-.lead{font-size:17px;color:var(--tinte-2);max-width:62ch}
-.zahlen{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:22px 0}
-.zahl{background:var(--flaeche);border:1px solid var(--kante);border-radius:16px;padding:14px 16px}
-.zahl b{display:block;font-size:26px;letter-spacing:-.02em}
-.zahl span{font-size:13px;color:var(--tinte-3)}
-.filter{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 6px}
-.filter button{font:inherit;font-size:14px;font-weight:600;border:1px solid var(--kante);background:var(--flaeche);color:var(--tinte-2);padding:7px 13px;border-radius:999px;cursor:pointer}
-.filter button[aria-pressed=true]{background:var(--gruen);border-color:var(--gruen);color:#fff}
-section.gruppe{margin:30px 0}
-section.gruppe h2{font-size:21px;letter-spacing:-.01em;display:flex;align-items:center;gap:10px}
-.punkt{width:11px;height:11px;border-radius:50%;flex:none}
-.g-frei .punkt{background:var(--frei)}.g-vermutlich .punkt{background:var(--blau)}
-.g-schulhof .punkt{background:var(--absprache)}.g-verein .punkt{background:var(--verein)}
-.erkl{font-size:14px;color:var(--tinte-3);margin:4px 0 12px}
-ul.plaetze{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-ul.plaetze li{background:var(--flaeche);border:1px solid var(--kante);border-radius:14px}
-ul.plaetze a{display:block;padding:12px 14px;text-decoration:none;color:inherit;height:100%}
-ul.plaetze a:hover{border-color:var(--gruen)}
-ul.plaetze li:hover{border-color:var(--gruen)}
-.pn{font-weight:700;font-size:15px;line-height:1.3;overflow-wrap:anywhere}
-.pu{font-size:13px;color:var(--tinte-3);margin-top:2px;overflow-wrap:anywhere}
-.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
-.tag{font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--gruen-zart);color:var(--gruen-tief)}
-.tag.grau{background:var(--grund);color:var(--tinte-3);border:1px solid var(--kante)}
+.knopf.hell{background:#fff;color:#08573A}
+.knopf.hell:hover{background:#F0FAF5}
+.held{margin:20px 0 8px;padding:28px 24px 26px;border-radius:24px;color:#fff;
+  background:radial-gradient(120% 140% at 100% 0%,#18B47A 0%,#0B9463 45%,#06603F 100%);box-shadow:0 18px 40px -22px rgba(6,96,63,.7)}
+.pfad{font-size:13px;opacity:.85;margin-bottom:10px}
+.pfad a{color:#fff}
+h1{font-size:clamp(27px,5vw,40px);line-height:1.1;letter-spacing:-.025em;margin-bottom:10px}
+.lead{font-size:17px;opacity:.92;max-width:62ch}
+.held .suche{width:100%;font:inherit;font-size:16px;padding:14px 16px;border-radius:14px;border:0;background:#fff;color:#0F1A15;margin-top:18px;box-shadow:0 6px 18px -8px rgba(0,0,0,.35)}
+.held-zahlen{display:flex;flex-wrap:wrap;gap:8px 26px;margin-top:18px}
+.held-zahlen div b{display:block;font-size:26px;letter-spacing:-.02em;line-height:1.1}
+.held-zahlen div span{font-size:13px;opacity:.85}
+.held .knopf{margin-top:18px}
+.zahlen{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:18px 0}
+.zahl{background:var(--flaeche);border-radius:18px;padding:16px 18px;box-shadow:0 1px 2px rgba(15,26,21,.04),0 6px 18px -10px rgba(15,26,21,.12)}
+.zahl b{display:flex;align-items:center;gap:8px;font-size:28px;letter-spacing:-.02em;line-height:1.15}
+.zahl b i{width:10px;height:10px;border-radius:50%;background:var(--p-gruen)}
+.zahl.orange b i{background:var(--p-orange)}.zahl.hell b i{background:transparent;box-shadow:inset 0 0 0 2px var(--p-gruen)}
+.zahl span{display:block;font-size:13px;line-height:1.35;color:var(--tinte-3)}
+.filter{position:sticky;top:58px;z-index:4;display:flex;gap:8px;overflow-x:auto;padding:10px 16px;margin:0 -16px;scrollbar-width:none;
+  background:color-mix(in srgb,var(--grund) 88%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.filter::-webkit-scrollbar{display:none}
+.filter button{flex:none;font:inherit;font-size:14px;font-weight:600;border:0;background:var(--flaeche);color:var(--tinte-2);padding:8px 14px;border-radius:999px;cursor:pointer;box-shadow:0 0 0 1px var(--kante)}
+.filter button[aria-pressed=true]{background:var(--tinte);color:var(--grund);box-shadow:none}
+section.gruppe{margin:26px 0}
+section.gruppe h2{font-size:20px;letter-spacing:-.015em;display:flex;align-items:center;gap:10px}
+section.gruppe h2 small{color:var(--tinte-3);font-weight:600;font-size:15px}
+.punkt{width:11px;height:11px;border-radius:50%;flex:none;background:var(--p-gruen)}
+.g-vermutlich .punkt{background:transparent;box-shadow:inset 0 0 0 2.5px var(--p-gruen)}
+.g-schulhof .punkt,.g-verein .punkt{background:var(--p-orange)}
+.erkl{font-size:14px;color:var(--tinte-3);margin:2px 0 10px}
+ul.plaetze{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:0 18px;background:var(--flaeche);border-radius:18px;padding:4px 16px;
+  box-shadow:0 1px 2px rgba(15,26,21,.04),0 6px 18px -10px rgba(15,26,21,.12)}
+ul.plaetze li{border-bottom:1px solid var(--kante)}
+ul.plaetze a{display:flex;align-items:center;gap:12px;padding:12px 0;text-decoration:none;color:inherit;height:100%}
+ul.plaetze a:hover .pn{color:var(--gruen-tief)}
+.pi{width:38px;height:38px;border-radius:11px;flex:none;display:grid;place-items:center;font-size:18px;background:var(--frei-bg)}
+.g-schulhof .pi,.g-verein .pi{background:var(--absprache-bg)}
+.pt{min-width:0;flex:1}
+.pn{display:block;font-weight:650;font-size:15px;line-height:1.3;overflow-wrap:anywhere}
+.pu{display:block;font-size:13px;color:var(--tinte-3);margin-top:1px;overflow-wrap:anywhere}
+.tags{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin-top:3px;font-size:12.5px;color:var(--tinte-3)}
+.tags .sp{font-size:14px;letter-spacing:1px}
+.tag{font-size:12px;font-weight:600;padding:1px 8px;border-radius:999px;background:var(--grund);color:var(--tinte-3)}
 .mehr{margin-top:10px}
-.mehr summary{cursor:pointer;font-weight:600;color:var(--gruen-tief);font-size:14px;padding:6px 0}
-.hinweis{background:var(--flaeche);border:1px solid var(--kante);border-radius:16px;padding:16px 18px;margin:30px 0;color:var(--tinte-2)}
-.hinweis h2{font-size:17px;color:var(--tinte);margin-bottom:6px}
+.mehr summary{cursor:pointer;font-weight:650;color:var(--gruen-tief);font-size:14px;padding:8px 2px;list-style:none}
+.mehr summary::-webkit-details-marker{display:none}
+.hinweis{background:var(--flaeche);border-radius:18px;padding:18px 20px;margin:26px 0;color:var(--tinte-2);box-shadow:0 1px 2px rgba(15,26,21,.04),0 6px 18px -10px rgba(15,26,21,.12)}
+.hinweis h2{font-size:18px;color:var(--tinte);margin-bottom:6px;letter-spacing:-.01em}
 .nachbarn{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-.nachbarn a{font-size:14px;font-weight:600;text-decoration:none;background:var(--flaeche);border:1px solid var(--kante);padding:7px 12px;border-radius:999px;color:var(--tinte-2)}
-.faq h3{font-size:16px;margin:16px 0 4px}
-.faq p{color:var(--tinte-2)}
+.nachbarn a{font-size:14px;font-weight:600;text-decoration:none;background:var(--grund);padding:8px 13px;border-radius:999px;color:var(--tinte-2)}
+.nachbarn a:hover{color:var(--gruen-tief)}
+.faq details{border-top:1px solid var(--kante);padding:12px 0}
+.faq details:first-of-type{border-top:0}
+.faq summary{cursor:pointer;font-weight:650;color:var(--tinte);font-size:15.5px;list-style:none;display:flex;justify-content:space-between;gap:12px}
+.faq summary::after{content:"+";color:var(--tinte-3);font-weight:500}
+.faq details[open] summary::after{content:"–"}
+.faq p{color:var(--tinte-2);margin-top:6px}
 footer{border-top:1px solid var(--kante);margin-top:40px;padding:22px 0 40px;font-size:13px;color:var(--tinte-3)}
 footer a{color:var(--tinte-3)}
 footer .rahmen{display:flex;flex-wrap:wrap;gap:8px 18px}
-.suche{width:100%;font:inherit;font-size:16px;padding:12px 14px;border-radius:12px;border:1px solid var(--kante);background:var(--flaeche);color:var(--tinte);margin:18px 0 6px}
-.land h2{font-size:19px;margin:26px 0 10px}
-.stadtliste{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
-.stadtliste a{display:flex;justify-content:space-between;gap:8px;background:var(--flaeche);border:1px solid var(--kante);border-radius:12px;padding:10px 12px;text-decoration:none;color:var(--tinte);font-weight:600}
-.stadtliste a span{color:var(--tinte-3);font-weight:500;font-size:13px}
+h2.abschnitt{font-size:20px;letter-spacing:-.015em;margin:30px 0 12px}
+.gross{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.gross a{display:block;text-decoration:none;color:var(--tinte);background:var(--flaeche);border-radius:18px;padding:16px 16px 14px;
+  box-shadow:0 1px 2px rgba(15,26,21,.04),0 6px 18px -10px rgba(15,26,21,.12);transition:transform .18s}
+.gross a:hover{transform:translateY(-2px)}
+.gross b{display:block;font-size:17px;letter-spacing:-.01em}
+.gross span{display:block;font-size:13px;color:var(--tinte-3)}
+.gross em{display:block;font-style:normal;font-size:26px;font-weight:750;letter-spacing:-.02em;color:var(--gruen-tief);margin-top:6px}
+.laender{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 4px}
+.laender a{font-size:13.5px;font-weight:600;text-decoration:none;background:var(--flaeche);color:var(--tinte-2);padding:7px 12px;border-radius:999px;box-shadow:0 0 0 1px var(--kante)}
+.laender a:hover{color:var(--gruen-tief)}
+.land h2{font-size:19px;margin:28px 0 8px;letter-spacing:-.01em}
+.stadtliste{list-style:none;columns:220px auto;column-gap:22px;background:var(--flaeche);border-radius:18px;padding:8px 18px;
+  box-shadow:0 1px 2px rgba(15,26,21,.04),0 6px 18px -10px rgba(15,26,21,.12)}
+.stadtliste li{break-inside:avoid;border-bottom:1px solid var(--kante)}
+.stadtliste a{display:flex;justify-content:space-between;gap:8px;padding:9px 0;text-decoration:none;color:var(--tinte);font-weight:600}
+.stadtliste a:hover{color:var(--gruen-tief)}
+.stadtliste a span{color:var(--tinte-3);font-weight:500;font-size:13px;font-variant-numeric:tabular-nums}
+.leer-suche{padding:16px 2px;color:var(--tinte-3)}
 [hidden]{display:none!important}
+@media (max-width:600px){.held{padding:22px 18px;border-radius:20px;margin-top:14px}.lead{font-size:16px}}
 """
 
 def kopf(titel, beschreibung, url, jsonld):
@@ -248,7 +293,7 @@ def kopf(titel, beschreibung, url, jsonld):
 <body>
 <header class="kopf"><div class="rahmen">
 <a class="marke" href="/"><img src="/icon-192.png" alt="" width="30" height="30">Platzfrei</a>
-<a class="knopf" href="/">Karte öffnen</a>
+<a class="knopf" href="/">Karte öffnen →</a>
 </div></header>
 <main class="rahmen">
 """
@@ -276,16 +321,18 @@ g.hidden=!g.querySelector('ul.plaetze li:not([hidden])')})});})();
 
 def karte(o, stadt):
     sp = o["sportarten"] or []
-    tags = "".join(f'<span class="tag">{e(s)}</span>' for s in sp)
-    if o["untergrund"]: tags += f'<span class="tag grau">{e(o["untergrund"])}</span>'
-    if o["beleuchtung"] == "ja": tags += '<span class="tag grau">Flutlicht</span>'
-    if o["zeiten"] and o["zeiten"] != "unbekannt": tags += f'<span class="tag grau">{e(o["zeiten"])}</span>'
+    icons = "".join(SPORT_ICON.get(x, "") for x in sp)
+    zusatz = []
+    if o["beleuchtung"] == "ja": zusatz.append('<span class="tag">Flutlicht</span>')
+    if o["zeiten"] and o["zeiten"] != "unbekannt": zusatz.append(f'<span class="tag">{e(o["zeiten"])}</span>')
+    if o["untergrund"]: zusatz.append(f'<span>{e(o["untergrund"])}</span>')
     u = unterzeile(o, stadt)
-    sportdaten = " ".join(slug(s) for s in sp)
+    sportdaten = " ".join(slug(x) for x in sp)
     return (f'<li data-sport="{sportdaten}"><a href="/#platz={e(o["id"])}">'
-            f'<div class="pn">{e(o["name"] or "Platz ohne Namen")}</div>'
-            + (f'<div class="pu">{e(u)}</div>' if u else "")
-            + f'<div class="tags">{tags}</div></a></li>')
+            f'<span class="pi" aria-hidden="true">{SPORT_ICON.get(sp[0], "⚽") if sp else "⚽"}</span><span class="pt">'
+            f'<span class="pn">{e(lesbar(o["name"]) or "Platz ohne Namen")}</span>'
+            + (f'<span class="pu">{e(lesbar(u))}</span>' if u else "")
+            + f'<span class="tags"><span class="sp" title="{e(", ".join(sp))}">{icons}</span>{"".join(zusatz)}</span></span></a></li>')
 
 def sortkey(o, stadt):
     return (unterzeile(o, stadt).lower(), (o["name"] or "").lower())
@@ -325,14 +372,20 @@ for s in staedte:
         {"@type":"ListItem","position":3,"name":name,"item":url}]},
       {"@type":"FAQPage","mainEntity":[{"@type":"Question","name":f,"acceptedAnswer":{"@type":"Answer","text":a}} for f, a in faq]}]}
     t = [kopf(titel, beschr, url, jsonld)]
+    t.append('<div class="held">')
     t.append(f'<nav class="pfad"><a href="/">Platzfrei</a> › <a href="/bolzplaetze/">Städte</a> › {e(name)}</nav>')
     t.append(f"<h1>Bolzplätze und Sportplätze in {e(name)}</h1>")
-    t.append(f'<p class="lead">Hier findest du {ZAHL(len(s["gut"]))} Plätze in {e(name)}{" (" + e(land) + ")" if land and land != name else ""}, '
-             f"auf denen du Fußball, Basketball, Tischtennis und mehr spielen kannst. Platzfrei zeigt dir bei jedem Platz, ob du dort spielen darfst.</p>")
+    t.append(f'<p class="lead">{ZAHL(len(s["gut"]))} Plätze in {e(name)}{" (" + e(land) + ")" if land and land != name else ""}, '
+             f"auf denen du Fußball, Basketball, Tischtennis und mehr spielen kannst. Bei jedem Platz steht, ob du dort spielen darfst.</p>")
+    t.append('<a class="knopf hell" href="/">Auf der Karte ansehen →</a>')
+    t.append("</div>")
     t.append('<div class="zahlen">')
-    for k, txt in (("frei", "bestätigt öffentlich"), ("vermutlich", "vermutlich öffentlich"), ("schulhof", "Schulhöfe")):
-        t.append(f'<div class="zahl"><b>{ZAHL(len(gruppen[k]))}</b><span>{txt}</span></div>')
-    if fb: t.append(f'<div class="zahl"><b>{ZAHL(fb)}</b><span>zum Fußballspielen</span></div>')
+    vorher = len(gruppen["schulhof"]) + len(gruppen["verein"])
+    for k, n, txt in (("", len(gruppen["frei"]), "frei zum Spielen, bestätigt"),
+                      ("hell", len(gruppen["vermutlich"]), "frei, noch nicht bestätigt"),
+                      ("orange", vorher, "vorher fragen (Schule, Verein)")):
+        t.append(f'<div class="zahl {k}"><b><i></i>{ZAHL(n)}</b><span>{txt}</span></div>')
+    if fb: t.append(f'<div class="zahl"><b>⚽ {ZAHL(fb)}</b><span>zum Fußballspielen</span></div>')
     t.append("</div>")
     if len(sport) > 1:
         t.append('<div class="filter" hidden><button aria-pressed="true" data-sport="">Alle</button>')
@@ -342,12 +395,12 @@ for s in staedte:
     for k, ueber, erkl in GRUPPEN:
         liste = sorted(gruppen[k], key=lambda o: sortkey(o, stadt))
         if not liste: continue
-        t.append(f'<section class="gruppe g-{k}"><h2><span class="punkt"></span>{ueber} <span style="color:var(--tinte-3);font-weight:600">{len(liste)}</span></h2>')
+        t.append(f'<section class="gruppe g-{k}"><h2><span class="punkt"></span>{ueber} <small>{len(liste)}</small></h2>')
         t.append(f'<p class="erkl">{erkl}</p><ul class="plaetze">')
         t += [karte(o, stadt) for o in liste[:60]]
         t.append("</ul>")
         if len(liste) > 60:
-            t.append(f'<details class="mehr"><summary>Alle {len(liste)} anzeigen</summary><ul class="plaetze" style="margin-top:10px">')
+            t.append(f'<details class="mehr"><summary>Alle {len(liste)} anzeigen ↓</summary><ul class="plaetze" style="margin-top:10px">')
             t += [karte(o, stadt) for o in liste[60:]]
             t.append("</ul></details>")
         t.append("</section>")
@@ -356,7 +409,7 @@ for s in staedte:
                  f"Bei {ZAHL(unklar)} weiteren Plätzen in {e(name)} ist noch nicht klar, ob du dort spielen darfst. "
                  f'Du findest sie auf der <a href="/">Karte in Platzfrei</a>. Wenn du einen kennst, kannst du ihn dort bestätigen.</div>')
     t.append('<div class="hinweis faq"><h2>Häufige Fragen</h2>')
-    for f, a in faq: t.append(f"<h3>{e(f)}</h3><p>{e(a)}</p>")
+    for f, a in faq: t.append(f"<details><summary>{e(f)}</summary><p>{e(a)}</p></details>")
     t.append("</div>")
     t.append('<div class="hinweis"><h2>Städte in der Nähe</h2><div class="nachbarn">')
     t += [f'<a href="/bolzplaetze/{x["slug"]}/">{e(x["name"])}</a>' for x in nachbarn]
@@ -373,22 +426,35 @@ summe = sum(len(s["gut"]) for s in staedte)
 t = [kopf("Bolzplätze & Sportplätze nach Stadt | Platzfrei",
           f"Öffentliche Bolzplätze, Sportplätze und Schulhöfe in {len(staedte)} deutschen Städten und Gemeinden – und ob du dort spielen darfst.",
           url, {"@context":"https://schema.org","@type":"CollectionPage","name":"Bolzplätze nach Stadt","url":url})]
+laender_da = [(c, l) for c, l in sorted(LAENDER.items(), key=lambda x: x[1]) if any(s["land"] == c for s in staedte)]
+t.append('<div class="held">')
 t.append('<nav class="pfad"><a href="/">Platzfrei</a> › Städte</nav>')
 t.append("<h1>Bolzplätze und Sportplätze nach Stadt</h1>")
-t.append(f'<p class="lead">{ZAHL(summe)} Plätze in {len(staedte)} Städten und Gemeinden, bei denen Platzfrei weiß oder vermutet, dass du dort spielen darfst.</p>')
-t.append('<input class="suche" type="search" placeholder="Stadt suchen …" aria-label="Stadt suchen" hidden>')
+t.append(f'<p class="lead">Finde Plätze in deiner Stadt, auf denen du spielen darfst, und sieh auf einen Blick, wo du vorher fragen solltest.</p>')
+t.append(f'<div class="held-zahlen"><div><b>{ZAHL(summe)}</b><span>Plätze</span></div><div><b>{len(staedte)}</b><span>Städte und Gemeinden</span></div>'
+         f'<div><b>{len(laender_da)}</b><span>Bundesländer</span></div></div>')
+t.append('<input class="suche" type="search" placeholder="Stadt suchen, z. B. Köln" aria-label="Stadt suchen" hidden>')
+t.append("</div>")
+t.append('<div class="vorne"><h2 class="abschnitt">Die meisten Plätze</h2><ul class="gross">')
+t += [f'<li><a href="/bolzplaetze/{s["slug"]}/"><b>{e(s["name"])}</b><span>{e(LAENDER.get(s["land"], ""))}</span><em>{ZAHL(len(s["gut"]))}</em></a></li>' for s in staedte[:8]]
+t.append("</ul>")
+t.append('<h2 class="abschnitt">Nach Bundesland</h2><nav class="laender">')
+t += [f'<a href="#{slug(l)}">{e(l)}</a>' for c, l in laender_da]
+t.append("</nav></div>")
+t.append('<p class="leer-suche" hidden>Keine Stadt gefunden. Auf der <a href="/">Karte</a> findest du alle Plätze.</p>')
 for code, land in sorted(LAENDER.items(), key=lambda x: x[1]):
     liste = sorted((s for s in staedte if s["land"] == code), key=lambda s: s["name"])
     if not liste: continue
-    t.append(f'<section class="land"><h2>{e(land)}</h2><ul class="stadtliste">')
+    t.append(f'<section class="land" id="{slug(land)}"><h2>{e(land)}</h2><ul class="stadtliste">')
     t += [f'<li data-name="{e(s["name"].lower())}"><a href="/bolzplaetze/{s["slug"]}/">{e(s["name"])}<span>{len(s["gut"])}</span></a></li>' for s in liste]
     t.append("</ul></section>")
 t.append(FUSS)
 t.append("""<script>
 (function(){var i=document.querySelector('.suche');i.hidden=false;i.addEventListener('input',function(){
 var q=i.value.trim().toLowerCase();document.querySelectorAll('.stadtliste li').forEach(function(li){
-li.hidden=q&&li.dataset.name.indexOf(q)<0});document.querySelectorAll('section.land').forEach(function(s){
-s.hidden=!s.querySelector('li:not([hidden])')})})})();
+li.hidden=q&&li.dataset.name.indexOf(q)<0});var n=0;document.querySelectorAll('section.land').forEach(function(s){
+s.hidden=!s.querySelector('li:not([hidden])');if(!s.hidden)n++});document.querySelector('.vorne').hidden=!!q;
+document.querySelector('.leer-suche').hidden=!q||n>0})})();
 </script>
 </body>
 </html>
