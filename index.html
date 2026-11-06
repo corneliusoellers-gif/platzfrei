@@ -646,6 +646,16 @@ button.rang-zeile{cursor:pointer}
 .rang-wert small{font-weight:500;font-size:12px;color:var(--tinte-3)}
 .rang-leer{font-size:13.5px;color:var(--tinte-3);margin:4px 0}
 .rang-luecke{text-align:center;color:var(--tinte-3);padding:2px 0}
+.nutz-tage{display:grid;grid-template-columns:repeat(30,1fr);gap:2px;height:80px;align-items:end}
+.nutz-tag{display:flex;align-items:flex-end;height:100%}
+.nutz-tag span{display:block;width:100%;min-height:2px;border-radius:3px 3px 1px 1px;background:var(--b);opacity:.45}
+.nutz-tag.jetzt span{opacity:1}
+.nutz-achse{display:flex;justify-content:space-between;font-size:11px;color:var(--tinte-3);margin:4px 0 6px}
+.nutz-tab{width:100%;border-collapse:collapse;font-size:14px}
+.nutz-tab th{text-align:left;font-weight:500;color:var(--tinte);padding:7px 4px 7px 0}
+.nutz-tab td{text-align:right;font-weight:650;font-variant-numeric:tabular-nums;padding:7px 0 7px 8px;white-space:nowrap}
+.nutz-tab tr:first-child td{font-weight:500;font-size:12px;color:var(--tinte-3)}
+.nutz-tab tr + tr th,.nutz-tab tr + tr td{border-top:1px solid var(--kante)}
 .saison-streifen{display:flex;align-items:center;gap:12px;width:100%;margin:-6px 0 14px;padding:10px 14px;
   font:inherit;text-align:left;color:var(--tinte);cursor:pointer;border:0;border-radius:var(--r-karte);
   background:var(--flaeche);box-shadow:var(--schatten)}
@@ -1005,7 +1015,7 @@ label.inline-knopf{display:inline-block;margin-top:10px}
   .admin-reihe{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
   .admin-reihe .knopf{font-size:13.5px;padding:11px 8px}
   .listenende .rechtliches-link{margin-top:18px}
-  .admin-oben{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:4px 0 12px}
+  .admin-oben{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:4px 0 12px}
   .admin-oben .knopf{font-size:13px;padding:9px 6px}
   .einst-gruppe .admin-reihe{margin-top:8px}
 
@@ -1670,6 +1680,60 @@ function geraetId(){
     try { localStorage.setItem(GERAET_SCHLUESSEL, id); } catch {}
   }
   return (geraetId.wert = id);
+}
+
+/* --------------------------------------------------------------------------
+   Nutzung zählen (für den Admin)
+   --------------------------------------------------------------------------
+   Die Datenbank speichert nur Tageszahlen ("heute 37 Geräte im Web").
+   Es geht keine Geräte-Nummer und kein Platz mit. Ob dieses Gerät heute
+   schon gezählt wurde, merkt sich nur das Gerät selbst. Nicht gezählt
+   werden: das Admin-Gerät, die Demo, Browser mit "Nicht verfolgen" und
+   automatische Browser.
+   -------------------------------------------------------------------------- */
+const NUTZUNG_SCHLUESSEL = "platzfrei.nutzung";
+const NUTZUNG_AUS = "platzfrei.nutzung.aus";
+/* Beim Laden: Hat Platzfrei auf diesem Gerät schon irgendetwas gespeichert? */
+const NUTZUNG_ERSTMALS = (() => {
+  try {
+    for (let i = 0; i < localStorage.length; i++)
+      if (String(localStorage.key(i)).startsWith("platzfrei.")) return false;
+    return true;
+  } catch { return false; }
+})();
+function berlinTag(){
+  try { return new Intl.DateTimeFormat("sv-SE", { timeZone:"Europe/Berlin" }).format(new Date()); }
+  catch { return heute(); }
+}
+function nutzungAus(){
+  if (!ECHT || Z.admin || navigator.webdriver) return true;
+  if (navigator.doNotTrack === "1" || navigator.globalPrivacyControl) return true;
+  try { return localStorage.getItem(NUTZUNG_AUS) === "1"; } catch { return true; }
+}
+function nutzungZaehlen(art){
+  if (nutzungAus()) return;
+  const quelle = /PlatzfreiApp\//.test(navigator.userAgent) ? "app" : "web";
+  db.rpc("nutzung_zaehlen", { p_art:art, p_quelle:quelle }).then(() => {}, () => {});
+}
+/* Einmal pro Tag und Gerät: "heute geöffnet", beim allerersten Mal auch "neu". */
+function nutzungStart(){
+  if (Z.admin) { try { localStorage.setItem(NUTZUNG_AUS, "1"); } catch {} return; }
+  if (nutzungAus()) return;
+  let s = null;
+  try { s = JSON.parse(localStorage.getItem(NUTZUNG_SCHLUESSEL) || "null"); } catch { return; }
+  const tag = berlinTag();
+  if (s?.tag === tag) return;
+  const neu = !s && NUTZUNG_ERSTMALS;
+  try { localStorage.setItem(NUTZUNG_SCHLUESSEL, JSON.stringify({ tag })); } catch { return; }
+  nutzungZaehlen("geraet");
+  if (neu) nutzungZaehlen("neu");
+}
+/* Platz angesehen: je Platz einmal pro Sitzung, höchstens 30 pro Sitzung. */
+const NUTZUNG_PLAETZE = new Set();
+function nutzungPlatz(id){
+  if (NUTZUNG_PLAETZE.has(String(id)) || NUTZUNG_PLAETZE.size >= 30) return;
+  NUTZUNG_PLAETZE.add(String(id));
+  nutzungZaehlen("platz");
 }
 
 function bestaetigteLaden(){
@@ -3583,6 +3647,7 @@ function ansichtListe(nurListe){
   /* Handy: Die Liste endet erst nach 150 Plätzen – deshalb stehen die
      Admin-Knöpfe zusätzlich oben (auf dem Laptop stehen sie im Listenfuß). */
   const adminOben = Z.admin ? `<div class="admin-oben">
+      <button class="knopf zweit" data-gehe="nutzung">Nutzung</button>
       <button class="knopf zweit" data-gehe="pruefen">Prüfen (${pruefAnzahl()})</button>
       <button class="knopf zweit" data-gehe="fehlerliste">Fehler (${FEHLERBERICHTE.length})</button>
       <button class="knopf zweit" data-gehe="einstellungen">Mehr …</button></div>` : ``;
@@ -3654,7 +3719,8 @@ function ansichtListe(nurListe){
     </div>
     <div class="rolle">${rolleInhalt}</div>
     ${Z.admin ? `<div class="fuss listenfuss">
-      ${Z.admin ? `<button class="knopf zweit" data-gehe="importieren">Import</button>` : ``}
+      ${Z.admin ? `<button class="knopf zweit" data-gehe="nutzung">Nutzung</button>
+      <button class="knopf zweit" data-gehe="importieren">Import</button>` : ``}
       ${Z.admin ? `<button class="knopf zweit" data-gehe="pruefen">Prüfen (${pruefAnzahl()})</button>
       <button class="knopf zweit" data-gehe="fehlerliste">Fehler (${FEHLERBERICHTE.length})</button>
       <button class="knopf zweit" data-gehe="verlauf">Vorschläge & Verlauf (${VORSCHLAEGE.length})</button>` : ``}
@@ -3987,6 +4053,7 @@ function ansichtAbzeichen(){
 /* Alle Admin-Knöpfe an einer Stelle (Listenende und Menü). */
 function adminReihe(){
   return Z.admin ? `<div class="admin-reihe">
+        <button class="knopf zweit" data-gehe="nutzung">Nutzung</button>
         <button class="knopf zweit" data-gehe="importieren">Import</button>
         <button class="knopf zweit" data-gehe="pruefen">Prüfen (${pruefAnzahl()})</button>
         <button class="knopf zweit" data-gehe="fehlerliste">Fehler (${FEHLERBERICHTE.length})</button>
@@ -4064,6 +4131,7 @@ function ansichtDetail(){
   const o = ort(Z.auswahlId);
   if (!o) { Z.ansicht="liste"; return ansichtListe(); }
   if (!o._voll) ortVollLaden(o);
+  nutzungPlatz(o.id);
 
   const vermutet = o.bestaetigtDurch==="nur vermutet" || o.bestaetigtDurch==="Lage (OSM)";
   const gepruefttext = o.geprueft
@@ -4662,7 +4730,7 @@ function ansichtAnmelden(){
 const ANSICHTS_TIEFE = {
   liste:0, importieren:1, anmelden:1, neu:1,
   detail:1, bearbeiten:2, melden:2, rechtliches:1, fehler:1, fehlerliste:1, verlauf:1,
-  vereinszeiten:2, pruefen:1, abzeichen:1, saison:1, einstellungen:1, ueber:1, vereine:1, partner:1
+  vereinszeiten:2, pruefen:1, nutzung:1, abzeichen:1, saison:1, einstellungen:1, ueber:1, vereine:1, partner:1
 };
 let letzteTiefe = 0;
 let letzterSchluessel = "liste";
@@ -4706,7 +4774,7 @@ function zeichne(){
 
   ({ liste:ansichtListe, detail:ansichtDetail, bearbeiten:ansichtBearbeiten,
      neu:ansichtNeu, anmelden:ansichtAnmelden, importieren:ansichtImportieren,
-     melden:ansichtMelden, rechtliches:ansichtRechtliches, vereinszeiten:ansichtVereinszeiten, pruefen:ansichtPruefen, fehler:ansichtFehler, fehlerliste:ansichtFehlerliste, verlauf:ansichtVerlauf, abzeichen:ansichtAbzeichen, saison:ansichtSaison, einstellungen:ansichtEinstellungen,
+     melden:ansichtMelden, rechtliches:ansichtRechtliches, vereinszeiten:ansichtVereinszeiten, pruefen:ansichtPruefen, fehler:ansichtFehler, fehlerliste:ansichtFehlerliste, verlauf:ansichtVerlauf, nutzung:ansichtNutzung, abzeichen:ansichtAbzeichen, saison:ansichtSaison, einstellungen:ansichtEinstellungen,
      ueber:ansichtUeber, vereine:ansichtVereine, partner:ansichtPartner })[Z.ansicht]();
 
   /* §11 Nur transform und opacity bewegen – beides läuft im Compositor,
@@ -6176,6 +6244,7 @@ async function adminPruefen(){
   Z.email = sitzung.session.user.email;
   const { data, error } = await db.rpc("ist_admin");
   Z.admin = !error && data === true;
+  if (Z.admin) try { localStorage.setItem(NUTZUNG_AUS, "1"); } catch {}   // eigenes Gerät nie mitzählen
 }
 
 /* Admin: Platz endgültig löschen. Läuft über die Datenbankfunktion
@@ -7111,6 +7180,114 @@ function ansichtVerlauf(){
     </div>`;
 }
 
+/* --------------------------------------------------------------------------
+   Admin: Nutzung. Zahlen kommen aus der Datenbankfunktion platzfrei_nutzung()
+   (nur Admin): Tageszahlen aus "nutzung", Check-ins aus "besuche" und
+   Beiträge aus den vorhandenen Tabellen. Keine Personen, nur Summen.
+   -------------------------------------------------------------------------- */
+let NUTZUNG = null;                // null = noch nicht geladen, { fehlt:true } = SQL fehlt
+
+async function nutzungLaden(){
+  if (!ECHT) { NUTZUNG = { fehler:"Keine Datenbank verbunden." }; return; }
+  const { data, error } = await db.rpc("platzfrei_nutzung");
+  if (error) {
+    console.warn("Nutzung:", error.message);
+    NUTZUNG = /PGRST202|42883|Could not find the function/.test((error.code || "") + " " + error.message)
+      ? { fehlt:true } : { fehler:error.message };
+    return;
+  }
+  NUTZUNG = { ...data, geladen:Date.now() };
+}
+
+function ansichtNutzung(){
+  if (!Z.admin) { Z.ansicht = "liste"; return ansichtListe(); }
+  if (NUTZUNG === null || (NUTZUNG.geladen && Date.now() - NUTZUNG.geladen > 5 * 60e3)) {
+    if (NUTZUNG === null) NUTZUNG = { laedt:true };
+    nutzungLaden().then(() => Z.ansicht === "nutzung" && zeichne());
+  }
+  const N = NUTZUNG;
+  const kopf = `<div class="dkopf">
+      <button class="zurueck" data-gehe="liste">← Liste</button>
+      <div class="dname">Nutzung</div>
+      <div class="dort">Nur Summen, keine Personen · letzte 30 Tage</div>
+    </div>`;
+  const goat = `<p class="saison-erkl">Seitenaufrufe, Herkunft und Länder zeigt
+      <a href="https://platzfrei.goatcounter.com" target="_blank" rel="noopener">GoatCounter</a>.</p>`;
+  if (N.laedt || N.fehlt || N.fehler) {
+    seite.innerHTML = kopf + `<div class="rolle"><div class="abschnitt" style="margin-top:8px">
+      ${N.laedt ? `<p>Lädt …</p>`
+        : N.fehlt ? `<p><b>Noch nicht eingerichtet.</b> Einmal das Skript <code>supabase-nutzung.sql</code>
+            im Supabase SQL Editor ausführen, dann erscheinen hier die Zahlen.</p>`
+        : `<p>Konnte die Zahlen nicht laden: ${esc(N.fehler)}</p>`}${goat}</div></div>`;
+    return;
+  }
+
+  const tage = N.tage || [];
+  const zahl = n => Number(n || 0).toLocaleString("de-DE");
+  const summe = (feld, n) => tage.slice(-n).reduce((a, t) => a + (t[feld] || 0), 0);
+  const heuteT = tage[tage.length - 1] || {};
+  const schnitt7 = Math.round(summe("geraete", 7) / 7);
+  const kachel = (z, text, farbe) =>
+    `<div class="saison-kachel" style="--k:${farbe}"><b>${z}</b><small>${text}</small></div>`;
+
+  const datum = t => new Date(t + "T12:00").toLocaleDateString("de-DE", { weekday:"short", day:"numeric", month:"numeric" });
+  const balken = (feld, farbe) => {
+    const max = Math.max(1, ...tage.map(t => t[feld] || 0));
+    return `<div class="nutz-tage" style="--b:${farbe}">${tage.map((t, i) => `<div class="nutz-tag${i === tage.length - 1 ? " jetzt" : ""}"
+        title="${esc(datum(t.tag))}: ${zahl(t[feld])}"><span style="height:${Math.round((t[feld] || 0) / max * 100)}%"></span></div>`).join("")}</div>
+      <div class="nutz-achse"><span>${esc(datum(tage[0]?.tag || ""))}</span><span>höchstens ${zahl(max)} am Tag</span><span>heute</span></div>`;
+  };
+
+  const ci = N.checkins || {};
+  const reihe = (name, w) => `<tr><th>${name}</th><td>${zahl(w?.[0])}</td><td>${zahl(w?.[1])}</td><td>${zahl(w?.[2])}</td></tr>`;
+  const b = N.beitraege || {};
+  const BEITRAG = [["neue_orte","Plätze eingetragen"],["vorschlaege","Änderungen vorgeschlagen"],
+    ["gespielt","„Hier gespielt“"],["schilder","Schildfotos"],["meldungen","Meldungen (voll, kaputt …)"],
+    ["spiele","Mitspieler gesucht"],["tipps","Platz-Tipps"],["vereinszeiten","Vereinszeiten"],["fehler","Fehlerberichte"]];
+  const top = N.top || [];
+
+  seite.innerHTML = kopf + `
+    <div class="rolle">
+      <div class="saison-gitter">
+        ${kachel(zahl(heuteT.geraete), "Geräte heute", "#34C759")}
+        ${kachel(zahl(schnitt7), "Geräte pro Tag (Ø 7 Tage)", "#0A84FF")}
+        ${kachel(zahl(summe("neu", 30)), "neue Geräte in 30 Tagen", "#AF52DE")}
+        ${kachel(zahl(N.jetzt), "gerade auf einem Platz", "#FF9500")}
+      </div>
+      <div class="abschnitt saison-block">
+        <h3 class="saison-h">Geräte pro Tag</h3>
+        ${balken("geraete", "var(--gruen)")}
+        <p class="saison-erkl">Heute ${zahl(heuteT.geraete)} Geräte, davon ${zahl(heuteT.app)} in der iPhone-App.
+          ${zahl(summe("platz", 7))} Plätze angesehen in 7 Tagen.</p>
+        <h3 class="saison-h" style="margin-top:16px">Check-ins pro Tag</h3>
+        ${balken("checkins", "#FF9500")}
+      </div>
+      <div class="abschnitt saison-block">
+        <h3 class="saison-h">Was Leute tun</h3>
+        <table class="nutz-tab">
+          <tr><th></th><td>heute</td><td>7 Tage</td><td>30 Tage</td></tr>
+          ${reihe("Check-ins", [ci.heute?.[0], ci.woche?.[0], ci.monat?.[0]])}
+          ${reihe("… von Geräten", [ci.heute?.[1], ci.woche?.[1], ci.monat?.[1]])}
+          ${reihe("… an Plätzen", [ci.heute?.[2], ci.woche?.[2], ci.monat?.[2]])}
+          ${BEITRAG.map(([k, n]) => reihe(n, b[k])).join("")}
+        </table>
+      </div>
+      ${top.length ? `<div class="abschnitt saison-block">
+        <h3 class="saison-h">Meiste Check-ins (30 Tage)</h3>
+        <div class="rang-liste">${top.map((r, i) => `<button class="rang-zeile" data-ort="${esc(r.ort_id)}">
+          <span class="rang-nr">${i + 1}</span>
+          <span class="rang-name">${esc(r.name || "Platz")}${r.ort ? ` <small style="font-weight:500;color:var(--tinte-3)">${esc(r.ort)}</small>` : ``}</span>
+          <span class="rang-wert">${zahl(r.checkins)} <small>von ${zahl(r.geraete)} ${r.geraete == 1 ? "Gerät" : "Geräten"}</small></span></button>`).join("")}</div>
+      </div>` : ``}
+      <div class="abschnitt saison-block">
+        <p class="saison-erkl" style="margin-top:0">Gezählt wird jedes Gerät einmal am Tag, ohne Geräte-Nummer.
+          Nicht dabei sind dein Admin-Gerät und Browser mit „Nicht verfolgen“.
+          Die Zählung läuft seit dem 6.11.2026, Check-ins werden nach 8 Wochen gelöscht.</p>
+        ${goat}
+      </div>
+    </div>`;
+}
+
 async function vorschlagEntscheiden(id, annehmen){
   const v = VORSCHLAEGE.find(x => String(x.id) === String(id));
   if (!v) return;
@@ -7607,6 +7784,17 @@ function ansichtRechtliches(){
         IP-Adressen und bildet keine Nutzerprofile, die Daten sind anonym.
         Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (Verbesserung des
         Angebots).</p>
+        <p>Zusätzlich zählt die App in der eigenen Datenbank (Supabase) nur
+        Tagessummen: wie viele Geräte Platzfrei an einem Tag geöffnet haben
+        (Web oder iPhone-App), wie viele davon zum ersten Mal, und wie oft
+        Plätze angesehen wurden. Dabei wird weder eine Geräte-Nummer noch
+        ein Platz noch eine IP-Adresse gespeichert. Ob dein Gerät heute schon
+        gezählt wurde, merkt sich nur dein Gerät (localStorage). Gegen
+        Missbrauch wird die Anfrage wie in Abschnitt 3 beschrieben kurz mit
+        einem gehashten Prüfwert deines Anschlusses gebremst. Hat dein Browser
+        „Nicht verfolgen“ (Do Not Track oder Global Privacy Control)
+        eingeschaltet, wird nichts gezählt. Rechtsgrundlage ist ebenfalls
+        Art. 6 Abs. 1 lit. f DSGVO.</p>
 
         <h4>10. Auf deinem Gerät</h4>
         <p>Merkliste, Geräte-Nummer, eigene Bestätigungen, Zusagen und Tipps,
@@ -8712,6 +8900,7 @@ adminAdresseOeffnen();
   await platzAusAdresse();
   await Promise.all([meldungenLaden(), bestaetigungenLaden(), aktivLaden(), spieleLaden()]);
   zeichne();
+  nutzungStart();         // zählt dieses Gerät einmal pro Tag (nur Tageszahl)
   wetterLaden();          // läuft nebenher, blockiert den Start nicht
   ranglisteLaden("woche").then(n => n && Z.ansicht === "liste" && stadtRang() && ansichtListe(true));
 })();
