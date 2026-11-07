@@ -1586,6 +1586,73 @@ header h1 .pf-marke{height:30px;width:auto}
 .kontakt-falle{position:absolute!important;left:-9999px;width:1px;height:1px;opacity:0}
 .link-knopf{border:0;background:none;padding:0;font:inherit;color:var(--gruen);text-decoration:underline;cursor:pointer}
 button.team-mail{border:0;background:none;padding:0;font:inherit;cursor:pointer}
+/* ---------- Infoseiten neu (7.11.): Reiter, Vorteile, Kontakt-Karte ---------- */
+.info-kopf{flex-shrink:0;padding:14px 20px 10px;background:var(--grund);border-bottom:1px solid var(--kante)}
+.info-zurueck{margin:0 0 8px!important}
+.info-tabs{display:flex;gap:4px;padding:4px;background:var(--flaeche);border-radius:var(--r-pille);
+  box-shadow:0 1px 2px rgba(15,26,21,.06);width:max-content;max-width:100%}
+.info-tabs button{font:inherit;font-size:14px;font-weight:600;border:0;background:none;color:var(--tinte-2);
+  padding:9px 16px;border-radius:var(--r-pille);cursor:pointer;white-space:nowrap}
+.info-tabs button:hover{color:var(--tinte)}
+.info-tabs button[aria-current]{background:var(--tinte);color:var(--flaeche)}
+.info-tabs .kurz{display:none}
+@media (min-width:881px){
+  .info-zurueck{display:none}
+  .info-kopf{padding:16px 22px 14px}
+  body.vollseite .info-kopf{display:flex;justify-content:center}
+  body.vollseite .info-tabs{width:100%;max-width:936px;background:none;box-shadow:none;padding:0}
+}
+@media (max-width:880px){
+  .info-kopf{padding:4px 16px 10px}
+  .info-tabs{width:100%}
+  .info-tabs button{flex:1;min-height:40px;padding:8px 6px}
+  .info-tabs .lang{display:none} .info-tabs .kurz{display:inline}
+  .held{padding-top:22px}
+}
+.vorteil .vico{display:inline-flex;width:38px;height:38px;border-radius:12px;align-items:center;justify-content:center;
+  background:var(--gruen-zart);color:var(--gruen-tief);margin-bottom:10px}
+.merkmale{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 2px}
+.merkmale span{display:inline-flex;align-items:center;gap:8px;background:var(--flaeche);box-shadow:var(--schatten);
+  border-radius:var(--r-pille);padding:9px 14px 9px 11px;font-size:14px;font-weight:600;color:var(--tinte)}
+.merkmale .ic{color:var(--gruen)}
+.zwei-spalten{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;margin-top:10px}
+@media (max-width:700px){ .zwei-spalten{grid-template-columns:1fr} }
+.anleitung{list-style:none;counter-reset:a;margin:0;padding:0;display:grid;gap:10px}
+.anleitung li{counter-increment:a;position:relative;background:var(--flaeche);box-shadow:var(--schatten);
+  border-radius:var(--r-karte);padding:14px 16px 14px 52px;font-size:14.5px;line-height:1.5;color:var(--tinte-2)}
+.anleitung li b{color:var(--tinte)}
+.anleitung li::before{content:counter(a);position:absolute;left:14px;top:13px;width:26px;height:26px;border-radius:50%;
+  background:var(--gruen-zart);color:var(--gruen-tief);font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center}
+.raster-vorschau{background:var(--flaeche);box-shadow:var(--schatten);border-radius:var(--r-karte);padding:16px 18px}
+.rv-titel{font-size:12.5px;font-weight:700;color:var(--tinte-3);margin-bottom:10px}
+.rv-zeile{display:flex;align-items:center;gap:10px;margin:5px 0}
+.rv-zeile > span{width:22px;font-size:12.5px;font-weight:700;color:var(--tinte-2)}
+.rv-balken{position:relative;flex:1;height:14px;border-radius:7px;background:var(--frei-bg);overflow:hidden;
+  box-shadow:inset 0 0 0 1px rgba(14,124,67,.18)}
+.rv-balken i{position:absolute;top:0;bottom:0;background:var(--verein);border-radius:7px}
+.rv-achse{display:flex;justify-content:space-between;margin:4px 0 0 32px;font-size:11px;color:var(--tinte-3)}
+.rv-legende{display:flex;gap:14px;margin-top:10px;font-size:12.5px;color:var(--tinte-2)}
+.rv-legende span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.rv-legende .f::before{background:var(--frei-bg);box-shadow:inset 0 0 0 1px rgba(14,124,67,.35)}
+.rv-legende .v::before{background:var(--verein)}
+.hakenliste{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:8px;max-width:680px}
+.hakenliste li{position:relative;padding-left:30px;font-size:15px;line-height:1.5;color:var(--tinte-2)}
+.hakenliste li::before{content:"";position:absolute;left:0;top:2px;width:20px;height:20px;border-radius:50%;
+  background:var(--gruen-zart) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230E7C43' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center/12px no-repeat}
+.kontakt-karte{display:flex;gap:18px;align-items:center;background:var(--flaeche);box-shadow:var(--schatten);
+  border-radius:var(--r-karte);padding:20px 22px;max-width:820px;margin-top:6px}
+.kontakt-karte img{width:72px;height:72px;border-radius:50%;object-fit:cover;flex:0 0 auto;box-shadow:0 0 0 3px var(--gruen-zart)}
+.kontakt-karte b{display:block;font-size:17px;letter-spacing:-.01em}
+.kontakt-karte p{font-size:14.5px;line-height:1.5;color:var(--tinte-2);margin:3px 0 12px}
+.kontakt-karte .knopf{flex:0 0 auto;padding-left:20px;padding-right:20px;width:auto}
+@media (max-width:560px){ .kontakt-karte{align-items:flex-start;padding:18px} .kontakt-karte img{width:56px;height:56px} }
+/* Handy: Infoseiten am Listenende als drei Kacheln statt kleiner Links */
+.info-kacheln{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0 4px}
+.info-kacheln button{display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;border:0;cursor:pointer;
+  background:var(--flaeche);box-shadow:var(--schatten);border-radius:16px;padding:12px;font:inherit;color:var(--tinte)}
+.info-kacheln .ic{color:var(--gruen-tief)}
+.info-kacheln b{font-size:13.5px;line-height:1.2}
+.info-kacheln small{font-size:11.5px;color:var(--tinte-3);line-height:1.3}
 </style>
 <!-- Besucherzähler GoatCounter: ohne Cookies, ohne personenbezogene Daten -->
 <script data-goatcounter="https://platzfrei.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
@@ -1602,7 +1669,6 @@ button.team-mail{border:0;background:none;padding:0;font:inherit;cursor:pointer}
     <a href="/bolzplaetze/">Plätze nach Stadt</a>
     <button data-gehe="ueber" data-nav="ueber">Über Platzfrei</button>
     <button data-gehe="vereine" data-nav="vereine">Für Vereine</button>
-    <button data-gehe="partner" data-nav="partner">Für Partner</button>
     <button data-gehe="abzeichen" data-nav="abzeichen" id="nav-abzeichen" class="nav-abz" hidden>Abzeichen</button>
   </nav>
   <span class="kopfnotiz" id="kopfnotiz"></span>
@@ -1624,6 +1690,7 @@ button.team-mail{border:0;background:none;padding:0;font:inherit;cursor:pointer}
 
 <script>
 const VOLLSEITEN = ["ueber", "vereine", "partner"];
+let infoAdresse = false;   // steht gerade #ueber/#vereine/#partner in der Adresse?
 /* ==========================================================================
    0. KONFIGURATION
    --------------------------------------------------------------------------
@@ -3339,7 +3406,12 @@ const ICON_PFADE = {
   daemmerung:'<path d="M12 10V2"/><path d="m4.93 10.93 1.41 1.41"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="m19.07 10.93-1.41 1.41"/><path d="M22 22H2"/><path d="m16 6-4 4-4-4"/><path d="M16 18a4 4 0 0 0-8 0"/>',
   einstellungen:'<path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/>',
   warnung:'<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
-  pfeil:'<path d="m9 18 6-6-6-6"/>'
+  pfeil:'<path d="m9 18 6-6-6-6"/>',
+  schild:'<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>',
+  haken:'<path d="M20 6 9 17l-5-5"/>',
+  herz:'<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
+  tasche:'<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>',
+  hut:'<path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>'
 };
 function ic(name, groesse = 16){
   return `<svg class="ic" viewBox="0 0 24 24" width="${groesse}" height="${groesse}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON_PFADE[name] || ""}</svg>`;
@@ -3901,8 +3973,12 @@ function ansichtListe(nurListe){
       <button class="abzeichen-link" data-einfuehrung="1">${ic("info")} Was bedeuten die Farben?</button>${schonDabei() ? `
       <button class="abzeichen-link" data-gehe="abzeichen">${ic("medaille")} Meine Abzeichen · ${abzStand().liga.name} · ${abzStand().punkte} Punkte</button>
       <button class="abzeichen-link" data-gehe="saison">${ic("pokal")} Meine Saison & Ranglisten</button>` : ``}
+      <div class="info-kacheln">
+        <button data-gehe="ueber">${ic("info", 20)}<b>Über Platzfrei</b><small>Wer dahinter steckt</small></button>
+        <button data-gehe="vereine">${ic("kalender", 20)}<b>Für Vereine</b><small>Zeiten eintragen</small></button>
+        <button data-gehe="partner">${ic("herz", 20)}<b>Für Partner</b><small>Zusammen­arbeiten</small></button>
+      </div>
       <div class="rechtliches-link">
-        <button data-gehe="ueber">Über Platzfrei</button> · <button data-gehe="vereine">Für Vereine</button> · <button data-gehe="partner">Für Partner</button> · <a href="/bolzplaetze/">Plätze nach Stadt</a><br>
         Alle Angaben ohne Gewähr – vor Ort gilt das Schild.<br>
         <button data-gehe="rechtliches">Impressum &amp; Datenschutz</button> ·
         <button data-gehe="fehler">Fehler melden</button></div>
@@ -5092,7 +5168,7 @@ function zeichne(){
   document.body.classList.toggle("nurliste", !!Z.nurListe && breit.matches);
   modusAnzeigen();
   document.querySelectorAll("[data-nav]").forEach(b =>
-    b.toggleAttribute("aria-current", b.dataset.nav === (VOLLSEITEN.includes(Z.ansicht) ? Z.ansicht : "liste")));
+    b.toggleAttribute("aria-current", b.dataset.nav === (Z.ansicht === "vereine" ? "vereine" : VOLLSEITEN.includes(Z.ansicht) ? "ueber" : "liste")));
   if (document.body.className !== klasseVorher) setTimeout(() => karte.invalidateSize(), 0);
   abzeichenNav();
 
@@ -5123,6 +5199,10 @@ function zeichne(){
      die App zu verlassen. */
   if (tiefe > 0 && !history.state?.platzfrei) history.pushState({ platzfrei:1 }, "");
   if (tiefe === 0 && history.state?.platzfrei) history.back();
+  /* Infoseiten haben eine eigene Adresse (#ueber, #vereine, #partner) zum Teilen. */
+  if (VOLLSEITEN.includes(Z.ansicht)) { if (location.hash !== "#" + Z.ansicht) history.replaceState(history.state, "", "#" + Z.ansicht); infoAdresse = true; }
+  else if (infoAdresse) { infoAdresse = false;
+    if (/^#(ueber|vereine|partner)$/.test(location.hash)) history.replaceState(history.state, "", location.pathname + location.search); }
 
   const k = document.getElementById("adminknopf");
   /* Der Knopf erscheint nur, wenn man als Admin angemeldet ist.
@@ -6484,7 +6564,9 @@ async function teilen(id){
   catch { prompt("Link zum Platz:", url); }
 }
 async function platzAusAdresse(){
-  if (location.hash === "#partner") { Z.ansicht = "partner"; zeichne(); sheet.aufmachen(); return; }
+  const voll = location.hash.match(/^#(ueber|vereine|partner)$/);
+  if (voll) { history.replaceState(history.state, "", location.pathname + location.search);
+    Z.ansicht = voll[1]; zeichne(); sheet.aufmachen(); return; }
   if (/^#(impressum|datenschutz)$/.test(location.hash)) { Z.ansicht = "rechtliches"; zeichne(); sheet.aufmachen(); return; }
   const m = location.hash.match(/^#platz=(.+)$/);
   if (!m) return;
@@ -7864,21 +7946,56 @@ function ueberFuss(){
 
 const FOTO_CORNELIUS = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/6xaJSlACEQAAAAEAABZ/anVtYgAAAB5qdW1kYzJwYQARABCAAACqADibcQNjMnBhAAAAFllqdW1iAAAAR2p1bWRjMm1hABEAEIAAAKoAOJtxA3VybjpjMnBhOmUwMTFjZmIxLWNkNDItNGZlMy05MzYyLWM4NjA5NGE3NTZmYwAAAAOUanVtYgAAAClqdW1kYzJhcwARABCAAACqADibcQNjMnBhLmFzc2VydGlvbnMAAAAAuWp1bWIAAABEanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5pbmdyZWRpZW50LnYzAAAAABhjMnNo0vpSAXKfJuSPDWzbT/abqgAAAG1jYm9yo2lkYzpmb3JtYXRqaW1hZ2UvanBlZ2ppbnN0YW5jZUlEeCx4bXA6aWlkOjEwODY1ZGQwLWUyZjQtNDE3Ni1hM2NiLWI4ZTYxNTIwNGM1OGxyZWxhdGlvbnNoaXBocGFyZW50T2YAAAHianVtYgAAAEFqdW1kY2JvcgARABCAAACqADibcRNjMnBhLmFjdGlvbnMudjIAAAAAGGMyc2ixb3Iuc3MZNXSt9/hbIV7gAAABmWNib3KiZ2FjdGlvbnOComZhY3Rpb25rYzJwYS5vcGVuZWRqcGFyYW1ldGVyc6FraW5ncmVkaWVudHOBomN1cmx4LXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaW5ncmVkaWVudC52M2RoYXNoWCByMgtYWA2HhhJpI0LNzr6rcQhII7hn8+w3aR291/9116RmYWN0aW9ueB1jb20uYW50aHJvcGljLmNsYXVkZS5wcm92aWRlZGpwYXJhbWV0ZXJzoXgfY29tLmFudGhyb3BpYy5vcmlnaW4tY29uZmlkZW5jZWd1bmtub3dua2Rlc2NyaXB0aW9ueGZDbGF1ZGUgcHJvdmlkZWQgdGhpcyBmaWxlIGF0IHRoZSByZXF1ZXN0IG9mIGEgdXNlciBhbmQgbWF5IGhhdmUgY3JlYXRlZCBvciBtb2RpZmllZCB0aGUgZmlsZSBjb250ZW50cy5tc29mdHdhcmVBZ2VudKFkbmFtZWZDbGF1ZGVyYWxsQWN0aW9uc0luY2x1ZGVk9QAAAMhqdW1iAAAAQGp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuaGFzaC5kYXRhAAAAABhjMnNoZAW9/ALbA4UC5PU4XnYm3wAAAIBjYm9ypWNhbGdmc2hhMjU2Y3BhZE4AAAAAAAAAAAAAAAAAAGRoYXNoWCA3U1ce/lQn3V+vwAykaZRvU7TvUNDmh+vB1s0khk2AbGRuYW1lbmp1bWJmIG1hbmlmZXN0amV4Y2x1c2lvbnOBomVzdGFydBRmbGVuZ3RoGRaLAAACPmp1bWIAAAAnanVtZGMyY2wAEQAQgAAAqgA4m3EDYzJwYS5jbGFpbS52MgAAAAIPY2JvcqVjYWxnZnNoYTI1NmlzaWduYXR1cmV4TXNlbGYjanVtYmY9L2MycGEvdXJuOmMycGE6ZTAxMWNmYjEtY2Q0Mi00ZmUzLTkzNjItYzg2MDk0YTc1NmZjL2MycGEuc2lnbmF0dXJlamluc3RhbmNlSUR4LHhtcDppaWQ6NDNiNjA4MDctYjYzZi00NDkxLTk0NDgtMzBkMjc5NDljN2I0cmNyZWF0ZWRfYXNzZXJ0aW9uc4OiY3VybHgtc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5pbmdyZWRpZW50LnYzZGhhc2hYIHIyC1hYDYeGEmkjQs3OvqtxCEgjuGfz7DdpHb3X/3XXomN1cmx4KnNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuYWN0aW9ucy52MmRoYXNoWCB5xoTj4DZjq4xD5g0avop9oXEZDB/HT71R1ZWxRDZoT6JjdXJseClzZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmhhc2guZGF0YWRoYXNoWCBO2XBZm+wIYNRVtW1A/stUultUOLfPMUmfvC0NKGgRTXRjbGFpbV9nZW5lcmF0b3JfaW5mb6NkbmFtZW9BbnRocm9waWMgRmlsZXNndmVyc2lvbmUxLjAuMGtzcGVjVmVyc2lvbmUyLjQuMAAAEDhqdW1iAAAAKGp1bWRjMmNzABEAEIAAAKoAOJtxA2MycGEuc2lnbmF0dXJlAAAAEAhjYm9y0oRZAhKiASYYIVkCCjCCAgYwggGNoAMCAQICFEDloAruwjnQvriD+gZCBT1nVRMAMAoGCCqGSM49BAMDMEkxFzAVBgNVBAoTDkFudGhyb3BpYywgUEJDMS4wLAYDVQQDEyVBbnRocm9waWMgQ29udGVudCBDcmVkZW50aWFscyBSb290IENBMB4XDTI2MDgwNzE4NDM1NloXDTI4MDgwNjE5NDM1NlowRDEXMBUGA1UEChMOQW50aHJvcGljLCBQQkMxKTAnBgNVBAMTIEFudGhyb3BpYyBDbGF1ZGUgQ29udGVudCBTaWduaW5nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEmHoKa8tQGAUU1TS9QqU5W0Tp2N3XsvlK7BfQt6YWKwEzd2R3/dzKPEUDdCjlLjp9fT+KFjRVnuZ9v0oXvTe3k6NYMFYwDgYDVR0PAQH/BAQDAgeAMBUGA1UdJQQOMAwGCisGAQQBg+heAgEwDAYDVR0TAQH/BAIwADAfBgNVHSMEGDAWgBTOUeIEgU5kWyP448TPmj6cwddcwjAKBggqhkjOPQQDAwNnADBkAjAxcx0UngF60stVjs5G4T2eiptsBk5mf9oCtfJPAUBl8qs/PEXa8+gk1/X5QJ2DVcYCMHBfXN31YapiSqYvlIWrDVDJKOvXMl+kkz37Wt0PBI8sw486Mq6JeOhT+lRR4b1HCaFjcGFkWQ2eAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA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9wjxCsDzHmo7bkGsIcWM0SyaaQIQmvAqaiOs59tbPvzWXo+8Et5GkUy3AIN82jyVf06cRiSphwC4VnlcjXlPCEOBFgwktFhP+7qf5zWx/kfxHgsTgquIx7QeZlxO4/kitWWQ355il8GkpshcDX+j+3FVyjGKKzgHCuCoY4Xo/tX+vNV3h7KMXlWVwDXMZ0cVZ/quEWIUJlvBJEb0jDgZjp+LwIsVDlZcymO7qh9LmHwCudKbvorh/9oADAMBAAIAAwAAABDzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzX3zTzzzzzzzzzzzzzzzzzzzzzy/d/LNSzrzzzzzzzzzzzzzzzzzzz9H1cSVOWjzzzzzzzzzzzzzzzzzzgfE/2trbGHfzzzzzzzzzzzzzzzzzsg3cL2lWzH/zzzzzzzzzzzzzzzzz8JApMif2Fv7zzzzzzzzzzzzzzzzzythixAL3QTXzzzzzzzzzzzzzzzzzzzvfcZQajxzzzzzzzzzzzzzzzzzzz9aAztK9z/wA8888888888888888888IRx2j5vI88888888888888888888s7aJyV48888888888888888888888X3rEz28888888888888888888884NEPngla88888888888888888840QXXnjkeUj6+88888888888882ThQEtXrLADJOCu5Y88888888869D2tY0zAlqzA1ueyml9T888888srymwQkA+/Bnpuxuqaq+6g888888oOySoIQwPNA8LKJO+22Ga2288888yGeyqisgozhj+rqmCWS6SKC88888owC228oI/i738HKOeWy+M6o8888sC8wYewU68Wfau1ayeCKkAku0888saKAg4QMOQo3C7V2aqe2o8oC28884gYS8MYIgsMza31KWA4UiuoE08888scQOM84Ac+DZPuiEcUU6igQs888YussCwckgQvKdjzGgYQkqYwkY888S6QQOUwwMEfH4zsAYQ8GYIU0I888A+ecceAg8C/wDg3nvHIHHAvAgnPP/EACERAQACAwEBAAIDAQAAAAAAAAEAESExQBBBIGEwUFHw/9oACAEDAQE/EP6gCyIb6bGA3GG25Rz5JVwlcgXKY2xdpguY7YhuLRCS+QgXEz5QTEXxysZa6gW5lyuI3mBRGfCBggwVgl8usvLxgW+f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";
 
+/* Gemeinsamer Kopf der drei Infoseiten: am Handy "← Karte" plus Reiter,
+   am Laptop nur die Reiter (zurück geht über die Kopfleiste). */
+function infoKopf(aktiv){
+  const reiter = [["ueber","Über Platzfrei","Über"],["vereine","Für Vereine","Vereine"],["partner","Für Partner","Partner"]];
+  return `<div class="info-kopf">
+      <button class="zurueck info-zurueck" data-gehe="liste">← Karte</button>
+      <nav class="info-tabs" aria-label="Infoseiten">${reiter.map(([id, lang, kurz]) =>
+        `<button data-gehe="${id}"${id === aktiv ? ` aria-current="page"` : ``}><span class="lang">${lang}</span><span class="kurz">${kurz}</span></button>`).join("")}</nav>
+    </div>`;
+}
+/* Abschluss jeder Seite: ein Gesicht und ein Knopf statt E-Mail-Adresse. */
+function kontaktKarte(thema, titel, text){
+  return `<div class="ueber-teil"><div class="kontakt-karte">
+      <img src="${FOTO_CORNELIUS}" alt="Cornelius Oellers" width="72" height="72">
+      <div><b>${titel}</b><p>${text}</p>
+        <button class="knopf" data-kontakt="${thema}">Nachricht an Cornelius</button></div>
+    </div></div>`;
+}
+function vorteil(icon, titel, text){
+  return `<div class="schritt vorteil"><span class="vico" aria-hidden="true">${ic(icon, 20)}</span><b>${titel}</b><p>${text}</p></div>`;
+}
+const MERKMALE_KIND = [["schild","Kein Chat, keine Profile"],["leute","Spieler nur als Anzahl, ab zwei"],["haken","Keine Werbung, kostenlos"]];
+function merkmale(liste = MERKMALE_KIND){
+  return `<div class="merkmale">${liste.map(([i, t]) => `<span>${ic(i, 18)}${t}</span>`).join("")}</div>`;
+}
+/* Vorschau, wie eingetragene Vereinszeiten in der App aussehen (Beispiel). */
+function rasterVorschau(){
+  const tage = [["Mo",[[17,19.5]]],["Di",[[16,20]]],["Mi",[[17,19.5]]],["Do",[[16,20]]],["Fr",[[15,18]]],["Sa",[[9,14]]],["So",[]]];
+  const von = 8, bis = 22, pos = h => ((h - von) / (bis - von) * 100).toFixed(1) + "%";
+  return `<div class="raster-vorschau" aria-hidden="true">
+      <div class="rv-titel">Beispiel: so sehen Kinder eure Zeiten</div>
+      ${tage.map(([t, b]) => `<div class="rv-zeile"><span>${t}</span><div class="rv-balken">${b.map(([a, e]) =>
+        `<i style="left:${pos(a)};width:calc(${pos(e)} - ${pos(a)})"></i>`).join("")}</div></div>`).join("")}
+      <div class="rv-achse"><span>8</span><span>12</span><span>16</span><span>20 Uhr</span></div>
+      <div class="rv-legende"><span class="f">frei zum Spielen</span><span class="v">Training</span></div>
+    </div>`;
+}
+
 function ansichtUeber(){
   const z = kennzahlen();
   seite.innerHTML = `
-    <div class="dkopf voll-zurueck"><button class="zurueck" data-gehe="liste">← Zurück</button></div>
+    ${infoKopf("ueber")}
     <div class="rolle">
       <div class="held">
-        <div class="ueber-marke">Über Platzfrei</div>
         <h2>Wo darf ich <em>spielen?</em></h2>
         <p>Platzfrei zeigt Kindern und Jugendlichen, auf welchen Bolz-, Basketball- und
         Sportplätzen sie frei spielen dürfen – und wann. Ohne Ärger mit dem Platzwart,
         ohne Rätselraten am Zaun.</p>
         <div class="reihe">
           <button class="knopf" data-gehe="liste">Plätze in deiner Nähe</button>
-          <a class="knopf zweit" href="/bolzplaetze/" style="text-decoration:none;text-align:center">Plätze nach Stadt</a>
-          <button class="knopf zweit" data-gehe="vereine">Für Vereine</button>
           <button class="knopf zweit" data-einfuehrung="1">Einführung ansehen</button>
         </div>
       </div>
@@ -7886,7 +8003,6 @@ function ansichtUeber(){
         <div class="zahlen">
           <div class="zahl"><b>${zahlText(z.plaetze)}</b><small>Plätze in ganz Deutschland</small></div>
           <div class="zahl gruen"><b>${zahlText(z.frei)}</b><small>davon frei zugänglich</small></div>
-          ${kachel(z.verein, "Vereinsanlagen", "lila", ZAHL_AB.verein)}
           ${kachel(z.gemeinden, "Gemeinden mit amtlichen Angaben", "", ZAHL_AB.gemeinden)}
         </div>
       </div>
@@ -7904,7 +8020,7 @@ function ansichtUeber(){
           <div class="schritt"><span class="nr">1</span><b>Platz finden</b>
             <p>Karte öffnen, Sportart wählen. Die App zeigt die nächsten Plätze mit Untergrund, Flutlicht und Wetter.</p></div>
           <div class="schritt"><span class="nr">2</span><b>Regeln sehen</b>
-            <p>Grün heißt: darfst du. Orange: vorher fragen. Grau: wissen wir noch nicht. Belegt durch Gemeinden, Vereine oder ein Foto vom Schild.</p></div>
+            <p>Grün heißt: darfst du. Orange: vorher fragen. Grau: noch unbekannt. Belegt durch Gemeinden, Vereine oder ein Foto vom Schild.</p></div>
           <div class="schritt"><span class="nr">3</span><b>Zusammen spielen</b>
             <p>Einchecken, wenn man da ist, oder ein Spiel ansetzen. Andere sehen, wo gerade etwas los ist.</p></div>
         </div>
@@ -7913,17 +8029,11 @@ function ansichtUeber(){
         <h3>Woher die Daten kommen</h3>
         <p>Platzfrei fragt Gemeinden direkt an und übernimmt ihre Antworten, nutzt offene
         Daten der Städte und OpenStreetMap. Nutzer bestätigen vor Ort und fotografieren
-        die Schilder. Was nicht belegt ist, steht ehrlich als „vermutet“ in der App.</p>
-        <div class="zahlen">
-          <div class="zahl"><b>${zahlText(z.belegt)}</b><small>Plätze mit belegtem Zugang</small></div>
-          <div class="zahl"><b>${zahlText(z.orte)}</b><small>Orte mit Plätzen</small></div>
-          <div class="zahl"><b>${zahlText(z.sportarten)}</b><small>Sportarten</small></div>
-        </div>
+        die Schilder. Was nicht belegt ist, steht ehrlich als „noch nicht bestätigt“ in der App.</p>
       </div>
       <div class="ueber-teil">
         <h3>Sicher für Kinder</h3>
-        <p>Kein Chat, keine Profile, keine Direktnachrichten. Wer gerade spielt, sieht
-        man nur als Anzahl, und erst ab zwei Personen. Keine Werbung und keine Werbe-Cookies.</p>
+        ${merkmale()}
       </div>
       <div class="ueber-teil">
         <h3>Hinter Platzfrei</h3>
@@ -7949,17 +8059,16 @@ function ansichtUeber(){
 function ansichtVereine(){
   const z = kennzahlen();
   seite.innerHTML = `
-    <div class="dkopf voll-zurueck"><button class="zurueck" data-gehe="liste">← Zurück</button></div>
+    ${infoKopf("vereine")}
     <div class="rolle">
       <div class="held">
-        <div class="ueber-marke">Für Vereine</div>
         <h2>Euer Platz. <em>Eure Zeiten.</em></h2>
-        <p>Kinder wollen kicken – oft genau auf eurem Platz. Mit Platzfrei seht ihr,
-        dass klar ist, wann trainiert wird und wann der Platz frei ist. Das spart Ärger
+        <p>Kinder wollen kicken – oft genau auf eurem Platz. Stehen eure Trainingszeiten
+        in Platzfrei, sehen sie, wann der Platz frei ist und wann nicht. Das spart Ärger
         und bringt euch den Nachwuchs von nebenan.</p>
         <div class="reihe">
           <button class="knopf" data-gehe="liste" data-vereinsuche="1">Euren Platz finden</button>
-          <button class="knopf zweit" data-kontakt="verein">Kontakt aufnehmen</button>
+          <button class="knopf zweit" data-kontakt="verein">Frage stellen</button>
         </div>
       </div>
       ${z.verein >= ZAHL_AB.verein ? `<div class="ueber-teil">
@@ -7971,42 +8080,44 @@ function ansichtVereine(){
       <div class="ueber-teil">
         <h3>Was ihr davon habt</h3>
         <div class="schritte">
-          <div class="schritt"><span class="nr">1</span><b>Klare Zeiten</b>
-            <p>Tragt ein, wann Training ist. Die App zeigt dann genau, wann der Platz für alle offen ist und wann nicht.</p></div>
-          <div class="schritt"><span class="nr">2</span><b>Weniger Ärger</b>
-            <p>Wer nachschaut, weiß Bescheid. Platzwart und Trainer müssen niemanden mehr wegschicken.</p></div>
-          <div class="schritt"><span class="nr">3</span><b>Nachwuchs gewinnen</b>
-            <p>Die Kinder, die auf eurem Platz bolzen, sind eure Spieler von morgen. Platzfrei zeigt ihnen, wer der Verein ist.</p></div>
+          ${vorteil("kalender", "Klare Zeiten", "Tragt ein, wann Training ist. Die App zeigt dann genau, wann der Platz für alle offen ist und wann nicht.")}
+          ${vorteil("schild", "Weniger Ärger", "Wer nachschaut, weiß Bescheid. Platzwart und Trainer müssen niemanden mehr wegschicken.")}
+          ${vorteil("spross", "Nachwuchs gewinnen", "Die Kinder, die auf eurem Platz bolzen, sind eure Spieler von morgen. Platzfrei zeigt ihnen, wer der Verein ist.")}
         </div>
       </div>
       <div class="ueber-teil">
         <h3>So tragt ihr eure Zeiten ein</h3>
-        <div class="abschnitt"><p>1. Euren Platz suchen und öffnen.<br>
-          2. „Bist du vom Verein? Platzzeiten eintragen“ antippen.<br>
-          3. Trainingszeiten im Wochenraster markieren und absenden.</p>
-          <p>Wir prüfen jede Angabe, bevor sie erscheint. Kostenlos, ohne Konto.</p></div>
+        <div class="zwei-spalten">
+          <ol class="anleitung">
+            <li><b>Platz suchen und öffnen.</b> Über die Suche oben oder auf der Karte.</li>
+            <li><b>„Bist du vom Verein? Platzzeiten eintragen“</b> antippen.</li>
+            <li><b>Trainingszeiten im Wochenraster markieren</b> und absenden.</li>
+          </ol>
+          ${rasterVorschau()}
+        </div>
+        <p class="hinweis">Jede Angabe wird geprüft, bevor sie erscheint. Kostenlos, ohne Konto.</p>
       </div>
       <div class="ueber-teil">
         <h3>Für Verbände und Gemeinden</h3>
-        <p>Wir arbeiten gern mit Verbänden und Gemeinden zusammen, um Plätze und Zeiten
-        verlässlich einzutragen. Schreibt uns an ${esc(RECHT.email)}.</p>
+        <p>Platzfrei arbeitet gern mit Verbänden und Gemeinden zusammen, um Plätze und
+        Zeiten für eine ganze Region verlässlich einzutragen, zum Beispiel per Liste
+        oder offener Datei.</p>
       </div>
+      ${kontaktKarte("verein", "Fragen zum Eintragen?", "Ich helfe gern, auch bei mehreren Plätzen oder einer ganzen Vereinsanlage.")}
       ${ueberFuss()}
     </div>`;
 }
 
 function ansichtPartner(){
   const z = kennzahlen();
-  /* Review 6.11.: Kontaktformular statt Mailprogramm. */
   seite.innerHTML = `
-    <div class="dkopf voll-zurueck"><button class="zurueck" data-gehe="liste">← Zurück</button></div>
+    ${infoKopf("partner")}
     <div class="rolle">
       <div class="held">
-        <div class="ueber-marke">Für Partner</div>
         <h2>Mehr Kinder auf den Platz. <em>Gemeinsam.</em></h2>
         <p>Viele Kinder werden vom Platz geschickt und hören irgendwann auf zu suchen.
         Platzfrei zeigt ihnen, wo sie frei spielen dürfen und wann. Damit das überall
-        klappt, suchen wir Partner aus Sport, Jugendarbeit, Förderung und Handel.</p>
+        klappt, sucht Platzfrei Partner aus Sport, Jugendarbeit, Förderung und Handel.</p>
         <div class="reihe">
           <button class="knopf" data-kontakt="partner">Partner werden</button>
           <button class="knopf zweit" data-gehe="liste">App ansehen</button>
@@ -8019,43 +8130,28 @@ function ansichtPartner(){
           ${kachel(z.gemeinden, "Gemeinden mit amtlichen Angaben", "", ZAHL_AB.gemeinden)}
           <div class="zahl"><b>${zahlText(z.sportarten)}</b><small>Sportarten</small></div>
         </div>
+        ${merkmale([["haken","Kostenlos für alle"],["schild","Sicher für Kinder"],["info","Keine Werbebanner"]])}
       </div>
       <div class="ueber-teil">
-        <h3>Warum Platzfrei</h3>
-        <p>Ich bin Cornelius, war Jugendtrainer und habe als Jugendlicher selbst erlebt,
-        wie man vom Bolzplatz geschickt wird. Platzfrei habe ich neben Schule, Training
-        und Trainerdasein gebaut, heute studiere ich Sportökonomie in Bayreuth.
-        Die App ist kostenlos, zeigt keine Werbung und ist sicher für Kinder:
-        kein Chat, keine Profile, keine Direktnachrichten.</p>
-      </div>
-      <div class="ueber-teil">
-        <h3>So können wir zusammenarbeiten</h3>
+        <h3>So kann eine Zusammenarbeit aussehen</h3>
         <div class="schritte">
-          <div class="schritt"><span class="nr">1</span><b>Jugendarbeit und Verbände</b>
-            <p>Teilt Platzfrei mit euren Vereinen, Treffs und Trainern. Gemeinsam bestätigen wir Plätze und Zeiten in eurer Region.</p></div>
-          <div class="schritt"><span class="nr">2</span><b>Stiftungen und Krankenkassen</b>
-            <p>Fördert ein Projekt für mehr Bewegung im Alltag: freie Plätze sichtbar machen, Gemeinden einbinden, Kinder aktiv halten.</p></div>
-          <div class="schritt"><span class="nr">3</span><b>Marken und Händler</b>
-            <p>Gemeinsame Aktionen wie „Platz des Monats“ oder Gewinnspiele. Keine Werbebanner in der App, dafür eure Nennung hier und bei der Aktion.</p></div>
-          <div class="schritt"><span class="nr">4</span><b>Plattformen und offene Daten</b>
-            <p>Wir tauschen Daten aus, verlinken uns gegenseitig und melden Korrekturen an OpenStreetMap zurück.</p></div>
-          <div class="schritt"><span class="nr">5</span><b>Schulen und Hochschulen</b>
-            <p>Schulhof-Zeiten auf die Karte bringen, Platzfrei als Praxis- oder Studienprojekt nutzen.</p></div>
+          ${vorteil("leute", "Jugendarbeit und Verbände", "Platzfrei mit Vereinen, Treffs und Trainern teilen und gemeinsam Plätze und Zeiten in der Region bestätigen.")}
+          ${vorteil("herz", "Stiftungen und Krankenkassen", "Ein Projekt für mehr Bewegung im Alltag fördern: freie Plätze sichtbar machen, Gemeinden einbinden, Kinder aktiv halten.")}
+          ${vorteil("tasche", "Marken und Händler", "Gemeinsame Aktionen wie „Platz des Monats“ oder Gewinnspiele. Keine Werbebanner in der App, dafür eure Nennung hier und bei der Aktion.")}
+          ${vorteil("karte", "Plattformen und offene Daten", "Daten austauschen, gegenseitig verlinken und Korrekturen an OpenStreetMap zurückmelden.")}
+          ${vorteil("hut", "Schulen und Hochschulen", "Schulhof-Zeiten auf die Karte bringen, Platzfrei als Praxis- oder Studienprojekt nutzen.")}
         </div>
       </div>
       <div class="ueber-teil">
         <h3>Was Partner bekommen</h3>
-        <div class="abschnitt"><p>Eure Nennung auf dieser Seite und bei gemeinsamen Aktionen.<br>
-          Eine Übersicht, wo in eurer Region Plätze fehlen oder ungeklärt sind.<br>
-          Gemeinsame Beiträge auf Instagram und in euren Kanälen.<br>
-          Einen direkten Draht: Wünsche und Ideen setze ich schnell um.</p></div>
+        <ul class="hakenliste">
+          <li>Eure Nennung auf dieser Seite und bei gemeinsamen Aktionen</li>
+          <li>Eine Übersicht, wo in eurer Region Plätze fehlen oder ungeklärt sind</li>
+          <li>Gemeinsame Beiträge auf Instagram und in euren Kanälen</li>
+          <li>Einen direkten Draht: Wünsche und Ideen setze ich schnell um</li>
+        </ul>
       </div>
-      <div class="ueber-teil">
-        <h3>Kontakt</h3>
-        <p>Schreib mir über das Kontaktformular. Ein kurzer Satz reicht,
-        ich melde mich schnell zurück.</p>
-        <button class="knopf" data-kontakt="partner">Nachricht schreiben</button>
-      </div>
+      ${kontaktKarte("partner", "Lust auf eine Zusammenarbeit?", "Ich bin Cornelius und habe Platzfrei gegründet. Ein kurzer Satz reicht, ich melde mich schnell zurück.")}
       ${ueberFuss()}
     </div>`;
 }
@@ -9417,7 +9513,7 @@ adminAdresseOeffnen();
 (async function start(){
   /* Wer über einen Link direkt auf eine Unterseite kommt, bekommt die
      Einführung nicht darübergelegt. */
-  if (!/^#(partner|platz=|impressum|datenschutz|admin)/.test(location.hash)) einfuehrungZeigen();
+  if (!/^#(ueber|vereine|partner|platz=|impressum|datenschutz|admin)/.test(location.hash)) einfuehrungZeigen();
   await adminPruefen();
   await datenLaden();
   await platzAusAdresse();
