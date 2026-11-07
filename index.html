@@ -1667,6 +1667,23 @@ button.team-mail{border:0;background:none;padding:0;font:inherit;cursor:pointer}
     border-radius:var(--r-pille);background:var(--verein);color:#fff;font:inherit;font-size:13px;font-weight:650;
     box-shadow:0 1px 4px rgba(15,26,21,.2)}
 }
+
+/* Handy: Ausklappmenü am Logo */
+.karten-marke .marke-pfeil{width:13px;height:13px;color:var(--tinte-3);margin:0 -4px 0 -2px;transition:transform 160ms}
+.karten-marke[aria-expanded="true"] .marke-pfeil{transform:rotate(180deg)}
+#logo-menue{position:fixed;z-index:1200;width:min(290px,calc(100vw - 32px));background:var(--flaeche);
+  border-radius:20px;box-shadow:0 0 0 1px var(--kante),var(--schatten-hoch);padding:6px;
+  animation:lm-auf 160ms var(--feder-schnell, ease-out)}
+@keyframes lm-auf{from{opacity:0;transform:translateY(-6px) scale(.98)}}
+#logo-menue > button,#logo-menue > a{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:8px 12px;
+  border:0;background:none;border-radius:14px;font:inherit;color:var(--tinte);text-align:left;text-decoration:none;cursor:pointer}
+#logo-menue > button:hover,#logo-menue > a:hover,#logo-menue > :focus-visible{background:var(--grund);outline:0}
+#logo-menue .ic{flex:0 0 auto;color:var(--gruen-tief)}
+#logo-menue .lm-verein .ic{color:var(--verein)}
+#logo-menue b{display:block;font-size:15px}
+#logo-menue small{display:block;font-size:12.5px;color:var(--tinte-3);margin-top:1px}
+#logo-menue hr{border:0;border-top:1px solid var(--kante);margin:4px 8px}
+#logo-menue .lm-klein{min-height:44px;font-size:14px;color:var(--tinte-2)}
 </style>
 <!-- Besucherzähler GoatCounter: ohne Cookies, ohne personenbezogene Daten -->
 <script data-goatcounter="https://platzfrei.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
@@ -9440,7 +9457,11 @@ const ModusKnopf = L.Control.extend({
     if (pin) marke.appendChild(pin.cloneNode(true));
     if (wort) { const w = wort.cloneNode(true); w.removeAttribute("role"); w.setAttribute("aria-hidden", "true"); marke.appendChild(w); }
     L.DomEvent.disableClickPropagation(kopf);
-    marke.addEventListener("click", () => { Z.ansicht = "ueber"; zeichne(); sheet.aufmachen(); });
+    /* Handy: Tipp aufs Logo klappt ein Menü mit allen Seiten auf. */
+    marke.setAttribute("aria-label", "Menü: Über Platzfrei, Für Vereine, Für Partner");
+    marke.setAttribute("aria-haspopup", "menu"); marke.setAttribute("aria-expanded", "false");
+    marke.insertAdjacentHTML("beforeend", `<svg class="ic marke-pfeil" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>`);
+    marke.addEventListener("click", e => { e.stopPropagation(); logoMenue(marke); });
     /* Handy: "Für Vereine" immer sichtbar, damit Vereine es sofort finden. */
     const verein = L.DomUtil.create("button", "karten-verein", kopf);
     verein.type = "button"; verein.textContent = "Für Vereine";
@@ -9459,6 +9480,32 @@ const ModusKnopf = L.Control.extend({
   }
 });
 new ModusKnopf().addTo(karte);
+
+function logoMenue(marke){
+  let m = document.getElementById("logo-menue");
+  if (m) { m.remove(); marke.setAttribute("aria-expanded", "false"); return; }
+  m = document.createElement("div");
+  m.id = "logo-menue"; m.setAttribute("role", "menu");
+  const r = marke.getBoundingClientRect();
+  m.style.top = (r.bottom + 8) + "px"; m.style.left = r.left + "px";
+  m.innerHTML = `
+    <button role="menuitem" data-gehe="ueber">${ic("info", 18)}<span><b>Über Platzfrei</b><small>Wer dahinter steckt</small></span></button>
+    <button role="menuitem" data-gehe="vereine" class="lm-verein">${ic("kalender", 18)}<span><b>Für Vereine</b><small>Trainingszeiten eintragen</small></span></button>
+    <button role="menuitem" data-gehe="partner">${ic("herz", 18)}<span><b>Für Partner</b><small>Zusammenarbeiten</small></span></button>
+    <a role="menuitem" href="/bolzplaetze/">${ic("stadt", 18)}<span><b>Plätze nach Stadt</b></span></a>
+    <hr>
+    <button role="menuitem" data-einfuehrung="1" class="lm-klein">Was bedeuten die Farben?</button>
+    <button role="menuitem" data-gehe="fehler" class="lm-klein">Fehler melden</button>
+    <button role="menuitem" data-gehe="rechtliches" class="lm-klein">Impressum &amp; Datenschutz</button>`;
+  document.body.appendChild(m);
+  marke.setAttribute("aria-expanded", "true");
+  const zu = ev => { if (ev && marke.contains(ev.target)) return;
+    m.remove(); marke.setAttribute("aria-expanded", "false");
+    document.removeEventListener("click", zu, true); document.removeEventListener("keydown", esc_, true); };
+  const esc_ = ev => { if (ev.key === "Escape") zu(); };
+  setTimeout(() => { document.addEventListener("click", zu, true); document.addEventListener("keydown", esc_, true); }, 0);
+  m.querySelector("button,a").focus({ preventScroll:true });
+}
 
 /* Legende: was Farbe UND Form der Punkte bedeuten. */
 const LegendeKnopf = L.Control.extend({
