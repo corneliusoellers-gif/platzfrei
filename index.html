@@ -5562,7 +5562,7 @@ async function kennzahlenLaden(versuch = 0){
   if (error && versuch < 2) return setTimeout(() => kennzahlenLaden(versuch + 1), 2000 * (versuch + 1));
   if (error || !data) return;
   KENNZAHLEN = data;
-  if (["ueber", "vereine", "partner"].includes(Z.ansicht)) zeichne();
+  if (["ueber", "vereine", "partner", "nutzung"].includes(Z.ansicht)) zeichne();
 }
 /* Suche über ganz Deutschland: Treffer kommen zu den geladenen Plätzen dazu. */
 let suchAnfrage = 0;
@@ -6549,6 +6549,9 @@ async function anmelden(){
 
   await adminPruefen();
   if (Z.admin) await Promise.all([vorschlaegeLaden(), bestaetigungenLaden(), fehlerLaden(), pruefungLaden()]);
+  /* Wer erst als Besucher da war, hat nur Kartenausschnitte geladen –
+     der Admin braucht ganz Deutschland (Datenbestand, Doppelte, Export). */
+  if (Z.admin && AUSSCHNITT) { Z.laedtNoch = true; datenLadenAlles(); }
   Z.ansicht = "liste";
   zeichne();
   melde(Z.admin ? "Angemeldet als Admin." : "Angemeldet – aber nicht als Admin freigeschaltet.");
@@ -7585,9 +7588,12 @@ async function nutzungLaden(){
   NUTZUNG = { ...data, geladen:Date.now() };
 }
 
-/* Review 6.11.: Datenbestand – wie viele Plätze wie sicher sind. Wird aus
-   den geladenen Plätzen gezählt (der Admin lädt ganz Deutschland), also
-   ohne neue Datenbankabfrage und ohne Personendaten. */
+/* Review 6.11.: Datenbestand – wie viele Plätze wie sicher sind. Die
+   Tabellen zählen die geladenen Plätze. Der Admin lädt normalerweise ganz
+   Deutschland; klappt das nicht (Zeitgrenze, Rückfall auf Kartenausschnitte)
+   oder lädt es noch, kommen die Gesamtzahlen oben aus kennzahlen()
+   (ganz Deutschland, aus der Datenbank) – sonst stand hier nur die Zahl der
+   gerade geladenen Plätze (z. B. 3.000 statt über 90.000). */
 function datenbestandBlock(){
   const zahl = n => Number(n || 0).toLocaleString("de-DE");
   const pro = (n, g) => g ? Math.round(n / g * 100) : 0;
@@ -7622,13 +7628,24 @@ function datenbestandBlock(){
   const QUELLE_TEXT = { "Auskunft Gemeinde":"Auskunft der Gemeinde", "Auskunft Verein":"Auskunft des Vereins",
     "Auskunft Schule":"Auskunft der Schule", "Schild vor Ort":"Schild vor Ort", "Lage (OSM)":"aus der Kartenlage (OSM)", "nur vermutet":"nur vermutet" };
   const topStaedte = Object.entries(stadtBest).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  const teil = AUSSCHNITT || Z.laedtNoch, K = KENNZAHLEN;
+  const kopfKacheln = teil && K
+    ? `<div class="saison-kachel" style="--k:#0B9463"><b>${zahl(K.plaetze)}</b><small>Plätze insgesamt</small></div>
+        <div class="saison-kachel" style="--k:#34C759"><b>${zahl(K.belegt)}</b><small>mit Beleg (${pro(K.belegt, K.plaetze)} %)</small></div>
+        <div class="saison-kachel" style="--k:#0A84FF"><b>${zahl(K.frei)}</b><small>laut Eintrag öffentlich (${pro(K.frei, K.plaetze)} %)</small></div>`
+    : `<div class="saison-kachel" style="--k:#0B9463"><b>${zahl(g)}</b><small>Plätze insgesamt</small></div>
+        <div class="saison-kachel" style="--k:#34C759"><b>${zahl(beleg + nutzer)}</b><small>sicher bestätigt (${pro(beleg + nutzer, g)} %)</small></div>
+        <div class="saison-kachel" style="--k:#0A84FF"><b>${zahl(nutzer)}</b><small>von Nutzern bestätigt</small></div>`;
+  const teilHinweis = !teil ? ``
+    : `<p class="saison-erkl">${Z.laedtNoch ? `Ganz Deutschland lädt noch.` : `Ganz Deutschland ließ sich nicht laden, gerade sind nur Kartenausschnitte da.`}
+        ${K ? `Die Zahlen oben gelten für ganz Deutschland,` : `Alle Zahlen hier`} die Tabellen darunter zählen nur die
+        ${zahl(g)} geladenen Plätze.${AUSSCHNITT && !Z.laedtNoch
+          ? ` <button class="knopf zweit" data-volladen style="margin-top:8px">Ganz Deutschland laden</button>` : ``}</p>`;
   return `<div class="abschnitt saison-block">
       <h3 class="saison-h">Datenbestand</h3>
-      ${Z.laedtNoch ? `<p class="saison-erkl">Die Plätze laden noch, die Zahlen sind noch nicht vollständig.</p>` : ``}
+      ${teilHinweis}
       <div class="saison-gitter bestand-kacheln">
-        <div class="saison-kachel" style="--k:#0B9463"><b>${zahl(g)}</b><small>Plätze sichtbar</small></div>
-        <div class="saison-kachel" style="--k:#34C759"><b>${zahl(beleg + nutzer)}</b><small>sicher bestätigt (${pro(beleg + nutzer, g)} %)</small></div>
-        <div class="saison-kachel" style="--k:#0A84FF"><b>${zahl(nutzer)}</b><small>von Nutzern bestätigt</small></div>
+        ${kopfKacheln}
         <div class="saison-kachel" style="--k:#FF9500"><b>${zahl(gespielt30)}</b><small>„Hier gespielt“ in 30 Tagen</small></div>
       </div>
       <h3 class="saison-h" style="margin-top:14px">Darf man dort spielen?</h3>
@@ -7670,6 +7687,10 @@ function datenbestandBlock(){
 
 function ansichtNutzung(){
   if (!Z.admin) { Z.ansicht = "liste"; return ansichtListe(); }
+  if (!KENNZAHLEN && ECHT && !ansichtNutzung.kz) {
+    ansichtNutzung.kz = true;
+    kennzahlenLaden().then(() => Z.ansicht === "nutzung" && zeichne());
+  }
   if (NUTZUNG === null || (NUTZUNG.geladen && Date.now() - NUTZUNG.geladen > 5 * 60e3)) {
     if (NUTZUNG === null) NUTZUNG = { laedt:true };
     nutzungLaden().then(() => Z.ansicht === "nutzung" && zeichne());
@@ -8876,8 +8897,15 @@ document.addEventListener("click", e=>{
                              "[data-suchweg],[data-teilen],[data-abmelden],[data-hierpunkt],[data-vereinszeitensenden],"+
                              "[data-neuok],[data-neuweg],[data-vzok],[data-vzweg],[data-hier],[data-hierweg],[data-frage],"+
                              "[data-jetzt],[data-einfuehrung],[data-ausltag],[data-zusage],[data-spielweg],[data-spielform],[data-spielansetzen],[data-tipp],[data-tippsoffen],[data-osmladen],[data-osmstop],"+
-                             "[data-startpunkt],[data-standort],[data-losscroll],[data-losalle],[data-filterweg],[data-korrektur],[data-modus],[data-waechstweg],[data-rangzeit],[data-saisonweg],[data-abz],[data-abzzu],[data-demo]");
+                             "[data-startpunkt],[data-standort],[data-losscroll],[data-losalle],[data-filterweg],[data-korrektur],[data-modus],[data-waechstweg],[data-rangzeit],[data-saisonweg],[data-abz],[data-abzzu],[data-demo],[data-volladen]");
   if (!t) return;
+  if (t.dataset.volladen !== undefined) {
+    if (!Z.admin || Z.laedtNoch) return;
+    melde("Lade ganz Deutschland …");
+    Z.laedtNoch = true;
+    datenLadenAlles().then(() => Z.ansicht === "nutzung" && zeichne());
+    return zeichne();
+  }
 
   if (t.dataset.demo)       {
     const an = !demoAn();
