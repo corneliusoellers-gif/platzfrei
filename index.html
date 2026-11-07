@@ -1653,6 +1653,20 @@ button.team-mail{border:0;background:none;padding:0;font:inherit;cursor:pointer}
 .info-kacheln .ic{color:var(--gruen-tief)}
 .info-kacheln b{font-size:13.5px;line-height:1.2}
 .info-kacheln small{font-size:11.5px;color:var(--tinte-3);line-height:1.3}
+
+/* Handy: "Für Vereine" immer sichtbar – auf der Karte unter dem Logo, bei hochgezogener Liste links in der Griffzeile. */
+#zu-vereine,.karten-verein{display:none}
+@media (max-width:880px){
+  .karten-kopf{flex-wrap:wrap}
+  .karten-verein{display:inline-flex;align-items:center;order:3;height:32px;padding:0 13px;border:0;cursor:pointer;
+    border-radius:var(--r-pille);background:var(--verein);color:#fff;font:inherit;font-size:13px;font-weight:650;
+    box-shadow:0 1px 4px rgba(15,26,21,.2)}
+  .karten-kopf::after{content:"";flex-basis:100%;order:2;height:0}
+  .blatt-hoch body.mit-leiste #zu-vereine{display:flex;align-items:center;position:fixed;z-index:900;left:14px;
+    bottom:calc(var(--blatt-sichtbar, 90vh) - 32px);min-height:32px;padding:5px 12px;border:0;cursor:pointer;
+    border-radius:var(--r-pille);background:var(--verein);color:#fff;font:inherit;font-size:13px;font-weight:650;
+    box-shadow:0 1px 4px rgba(15,26,21,.2)}
+}
 </style>
 <!-- Besucherzähler GoatCounter: ohne Cookies, ohne personenbezogene Daten -->
 <script data-goatcounter="https://platzfrei.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
@@ -1686,6 +1700,7 @@ button.team-mail{border:0;background:none;padding:0;font:inherit;cursor:pointer}
 </main>
 
 <div id="meldung" role="status" aria-live="polite"></div>
+<button id="zu-vereine" type="button" data-gehe="vereine">Für Vereine</button>
 <button id="zur-karte" type="button" data-modus="karte"><svg class="ic" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/></svg> Karte</button>
 
 <script>
@@ -9426,6 +9441,10 @@ const ModusKnopf = L.Control.extend({
     if (wort) { const w = wort.cloneNode(true); w.removeAttribute("role"); w.setAttribute("aria-hidden", "true"); marke.appendChild(w); }
     L.DomEvent.disableClickPropagation(kopf);
     marke.addEventListener("click", () => { Z.ansicht = "ueber"; zeichne(); sheet.aufmachen(); });
+    /* Handy: "Für Vereine" immer sichtbar, damit Vereine es sofort finden. */
+    const verein = L.DomUtil.create("button", "karten-verein", kopf);
+    verein.type = "button"; verein.textContent = "Für Vereine";
+    verein.addEventListener("click", () => { Z.ansicht = "vereine"; zeichne(); sheet.aufmachen(); });
     const box = L.DomUtil.create("div", "modus-knopf", kopf);
     box.setAttribute("role", "group");
     box.setAttribute("aria-label", "Ansicht wählen");
