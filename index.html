@@ -1503,11 +1503,17 @@ header h1 .pf-marke{height:30px;width:auto}
 .waechst-icon{color:var(--gruen)}
 .eintragen-karte > span[aria-hidden]{color:var(--gruen);display:inline-flex}
 
-/* Bündel als Ring mit Anteilen (grün / orange / grau / rot) */
-.buendel span{border:0;background:radial-gradient(closest-side,rgba(255,255,255,.97) calc(100% - 5px),transparent calc(100% - 4.5px)),var(--donut,#8E8E93);
-  box-shadow:0 2px 8px rgba(15,26,21,.22)}
+/* Bündel als Ring mit Anteilen (grün / orange / grau / rot).
+   Review 7.11.: Ring etwas dicker, innen die Zahl der freien Plätze. */
+.buendel span{border:0;background:radial-gradient(closest-side,rgba(255,255,255,.97) calc(100% - 6px),transparent calc(100% - 5.5px)),var(--donut,#8E8E93);
+  box-shadow:0 2px 8px rgba(15,26,21,.22);flex-direction:column;gap:1px}
+.buendel span b{font:750 14px/1 var(--schrift);color:#0B7A43;letter-spacing:-.02em}
+.buendel span small{font:650 9.5px/1 var(--schrift);color:#0B7A43;text-transform:none}
+.buendel span.ohne-frei b,.buendel span.ohne-frei small{color:#6B7570}
 @media (prefers-color-scheme:dark){
-  .buendel span{background:radial-gradient(closest-side,rgba(24,33,29,.96) calc(100% - 5px),transparent calc(100% - 4.5px)),var(--donut,#8E8E93)}
+  .buendel span{background:radial-gradient(closest-side,rgba(24,33,29,.96) calc(100% - 6px),transparent calc(100% - 5.5px)),var(--donut,#8E8E93)}
+  .buendel span b,.buendel span small{color:#4ADE80}
+  .buendel span.ohne-frei b,.buendel span.ohne-frei small{color:#9AA5A0}
 }
 
 /* Listenzeilen: flach, mit Abstand statt Kasten */
@@ -1528,8 +1534,15 @@ header h1 .pf-marke{height:30px;width:auto}
 .zb.rot{background:var(--zu-bg);color:var(--zu)}
 .zkm{font-size:13px;font-weight:650;color:var(--tinte);font-variant-numeric:tabular-nums}
 .zhinweis{font-size:12px;color:var(--tinte-3);overflow:hidden;text-overflow:ellipsis}
-.zsport{display:flex;align-items:center;flex-wrap:wrap;gap:2px 6px;margin-top:4px;font-size:14px;line-height:1.2}
-.zsport .marke{margin:0;font-size:11px;padding:2px 8px;gap:4px}
+/* Review 7.11.: Name und Sport-Icons in einer Zeile, Icons rechts daneben */
+.zkopf{display:flex;align-items:flex-start;gap:8px;min-width:0}
+.zkopf .zname{flex:1;min-width:0}
+.zsport{display:flex;align-items:center;gap:3px;flex-shrink:0;font-size:14px;line-height:1.3;margin-top:1px}
+.zmehr{font-size:11.5px;font-weight:650;color:var(--tinte-3);margin-left:1px}
+.zverm{font-weight:500;opacity:.8}
+.zmarken{display:flex;align-items:center;flex-wrap:wrap;gap:4px 6px;margin-top:5px}
+.zmarken .marke{margin:0;font-size:11px;padding:2px 8px;gap:4px}
+.zeile.neu .zrechts .zkm{font-size:13.5px;font-weight:700;color:var(--tinte);white-space:nowrap}
 .zeile.neu .zrechts{align-self:center}
 .zeile.neu .stern svg{display:block;fill:none}
 .zeile.neu .stern.an svg{fill:currentColor}
@@ -1654,19 +1667,7 @@ button.team-mail{border:0;background:none;padding:0;font:inherit;cursor:pointer}
 .info-kacheln b{font-size:13.5px;line-height:1.2}
 .info-kacheln small{font-size:11.5px;color:var(--tinte-3);line-height:1.3}
 
-/* Handy: "Für Vereine" immer sichtbar – auf der Karte unter dem Logo, bei hochgezogener Liste links in der Griffzeile. */
-#zu-vereine,.karten-verein{display:none}
-@media (max-width:880px){
-  .karten-kopf{flex-wrap:wrap}
-  .karten-verein{display:inline-flex;align-items:center;order:3;height:32px;padding:0 13px;border:0;cursor:pointer;
-    border-radius:var(--r-pille);background:var(--verein);color:#fff;font:inherit;font-size:13px;font-weight:650;
-    box-shadow:0 1px 4px rgba(15,26,21,.2)}
-  .karten-kopf::after{content:"";flex-basis:100%;order:2;height:0}
-  .blatt-hoch body.mit-leiste #zu-vereine{display:flex;align-items:center;position:fixed;z-index:900;left:14px;
-    bottom:calc(var(--blatt-sichtbar, 90vh) - 32px);min-height:32px;padding:5px 12px;border:0;cursor:pointer;
-    border-radius:var(--r-pille);background:var(--verein);color:#fff;font:inherit;font-size:13px;font-weight:650;
-    box-shadow:0 1px 4px rgba(15,26,21,.2)}
-}
+/* Review 7.11.: Kein eigener "Für Vereine"-Knopf mehr am Handy, die Seite steht im Logo-Menü. */
 
 /* Handy: Ausklappmenü am Logo */
 .karten-marke .marke-pfeil{width:13px;height:13px;color:var(--tinte-3);margin:0 -4px 0 -2px;transition:transform 160ms}
@@ -1718,7 +1719,6 @@ button.team-mail{border:0;background:none;padding:0;font:inherit;cursor:pointer}
 </main>
 
 <div id="meldung" role="status" aria-live="polite"></div>
-<button id="zu-vereine" type="button" data-gehe="vereine">Für Vereine</button>
 <button id="zur-karte" type="button" data-modus="karte"><svg class="ic" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/></svg> Karte</button>
 
 <script>
@@ -2907,6 +2907,15 @@ function ringText(t){
   return [t.gruen && `${z(t.gruen)} frei`, t.orange && `${z(t.orange)} vorher fragen`,
           t.grau && `${z(t.grau)} unbekannt`, t.rot && `${z(t.rot)} nicht frei`].filter(Boolean).join(" · ");
 }
+/* Review 7.11.: Im Kreis steht die Zahl der freien Plätze ("12 frei"),
+   nicht die Gesamtzahl. So beantwortet jedes Bündel direkt die Frage
+   "Kann ich hier spielen?". Die Gesamtzahl steht im Ring und im Tooltip. */
+function zahlKurz(n){
+  return n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(".", ",") + "k" : String(n);
+}
+function buendelInhalt(frei){
+  return `<b>${zahlKurz(frei)}</b><small>frei</small>`;
+}
 function buendelZeichnen(gruppe, mitte){
   const n = gruppe.length;
   let lat = 0, lon = 0;
@@ -2916,12 +2925,11 @@ function buendelZeichnen(gruppe, mitte){
     anteile[ampel(o)]++;
   }
   const max = buendelZeichnen.max || n;
-  const groesse = Math.round(Math.max(28, Math.min(buendelGroesse(n) + 10, 26 + 40 * Math.sqrt(n / max))));
-  const text = n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(".", ",") + "k" : n;
+  const groesse = Math.round(Math.max(36, Math.min(buendelGroesse(n) + 10, 30 + 40 * Math.sqrt(n / max))));
   L.marker(mitte ? karte.unproject(mitte, karte.getZoom()) : [lat / n, lon / n], {
     icon: L.divIcon({
       className: "buendel",
-      html: `<span title="${ringText(anteile)}" style="${ringStil(anteile)};width:${groesse}px;height:${groesse}px">${text}</span>${
+      html: `<span class="${anteile.gruen ? "" : "ohne-frei"}" title="${n.toLocaleString("de-DE")} Plätze: ${ringText(anteile)}" style="${ringStil(anteile)};width:${groesse}px;height:${groesse}px">${buendelInhalt(anteile.gruen)}</span>${
         gruppe.some(o => (Z.aktiv[o.id] || 0) >= 2) ? `<i title="Hier wird gerade gespielt"></i>` : ``}`,
       iconSize: [groesse, groesse]
     }),
@@ -3252,9 +3260,11 @@ function sichtbareOrte(){
   const nachEntfernung = (a,b) => entfernungKm(bezug,a) - entfernungKm(bezug,b);
 
   /* Review 6.11.: Standard "Sicher zuerst": erst frei, dann fragen, dann
-     unbekannt, innerhalb jeder Stufe nach Nähe. */
+     unbekannt. Review 7.11.: Innerhalb jeder Stufe stehen bestätigte Plätze
+     vor vermuteten, erst danach zählt die Nähe. */
   if (Z.sortierung === "sicher") {
-    const rang = new Map(gefiltert.map(o => [o, AMPEL_RANG[ampel(o)]]));
+    const rang = new Map(gefiltert.map(o => [o,
+      AMPEL_RANG[ampel(o)] * 2 + (zugangStufe(o).stufe === "bestaetigt" ? 0 : 1)]));
     return gefiltert.sort((a,b) => rang.get(a) - rang.get(b) || nachEntfernung(a,b));
   }
   if (Z.sortierung === "zustand")
@@ -3958,23 +3968,30 @@ function ansichtListe(nurListe){
        Quelle und Stand stehen im Detail. */
     const anz = anzeigeName(o);
     const sportTitel = o.sportarten.join(", ");
+    /* Review 7.11.: höchstens drei Sport-Icons rechts neben dem Namen, der
+       Rest als "+2". "Vermutet" steht im Badge selbst, damit nichts
+       abgeschnitten wird. Die Entfernung steht rechts, gut sichtbar. */
+    const sportIcons = o.sportarten.slice(0, 3).map(sp => `<span aria-hidden="true">${SPORT_ICON[sp] || "•"}</span>`).join("")
+      + (o.sportarten.length > 3 ? `<span class="zmehr" aria-hidden="true">+${o.sportarten.length - 3}</span>` : ``);
+    const badge = st.stufe === "vermutet"
+      ? { gruen:"Frei", orange:"Vorher fragen" }[st.ampel] + ` <span class="zverm">· vermutet</span>` : st.titel;
+    const marken = (bs && bs[0] === "schlecht" ? `
+          <span class="marke boden ${bs[0]}">${bs[1]}</span>` : ``) + (anzMeld >= 3 ? `
+          <span class="marke warnung">${ic("warnung", 12)} ${anzMeld}× gemeldet</span>` : ``) + (
+          naechstesSpiel(o.id) ? `
+          <span class="marke spiel-marke">${ic("kalender", 12)} Spiel ${spielZeit(naechstesSpiel(o.id).beginn)}</span>` : ``) + (
+          (Z.aktiv[o.id] || 0) >= 2 ? `
+          <span class="marke live"><span class="puls" aria-hidden="true"></span>${Z.aktiv[o.id]} spielen gerade</span>` : ``);
     return `<button class="zeile neu stufe-${st.stufe}" data-ort="${o.id}" style="--streifen:${farbe(o)}">
       ${platzBild(o)}
       <span class="zt">
-        <span class="zname">${nameHtml(o)}</span>${anz.zusatz ? `
+        <span class="zkopf"><span class="zname">${nameHtml(o)}</span><span class="zsport" title="${esc(sportTitel)}" aria-label="${esc(sportTitel)}">${sportIcons}</span></span>${anz.zusatz ? `
         <span class="zzusatz">${esc(anz.zusatz)}</span>` : ``}
-        <span class="zstatus"><span class="zb ${st.ampel}"><span class="zicon" aria-hidden="true">${st.icon}</span>${st.titel}</span>${
-          mitKm() ? `<span class="zkm">${kmKurz(km)}</span>` : ``}${st.hinweis ? `<span class="zhinweis">${st.hinweis}</span>` : ``}</span>
-        <span class="zsport" title="${esc(sportTitel)}" aria-label="${esc(sportTitel)}">${o.sportarten.slice(0, 5).map(sp =>
-          `<span aria-hidden="true">${SPORT_ICON[sp] || "•"}</span>`).join("")}${bs && bs[0] === "schlecht" ? `
-          <span class="marke boden ${bs[0]}">${bs[1]}</span>` : ``}${anzMeld >= 3 ? `
-          <span class="marke warnung">${ic("warnung", 12)} ${anzMeld}× gemeldet</span>` : ``}${
-          naechstesSpiel(o.id) ? `
-          <span class="marke spiel-marke">${ic("kalender", 12)} Spiel ${spielZeit(naechstesSpiel(o.id).beginn)}</span>` : ``}${
-          (Z.aktiv[o.id] || 0) >= 2 ? `
-          <span class="marke live"><span class="puls" aria-hidden="true"></span>${Z.aktiv[o.id]} spielen gerade</span>` : ``}</span>
+        <span class="zstatus"><span class="zb ${st.ampel}"${st.hinweis ? ` title="${st.hinweis}"` : ``}><span class="zicon" aria-hidden="true">${st.icon}</span>${badge}</span></span>${marken ? `
+        <span class="zmarken">${marken}</span>` : ``}
       </span>
-      <span class="zrechts">
+      <span class="zrechts">${mitKm() ? `
+        <span class="zkm">${kmKurz(km)}</span>` : ``}
         <span class="stern${GEMERKT.has(o.id) ? " an" : ""}" data-merken="${o.id}"
               role="button" tabindex="0"
               aria-label="${GEMERKT.has(o.id) ? "Aus Merkliste entfernen" : "Merken"}">${ic("stern", 18)}</span>
@@ -5752,12 +5769,11 @@ function rasterZeichnen(){
     for (const t of g.teile)
       if (Math.hypot(t.p.x - sx, t.p.y - sy) < Math.hypot(nah.p.x - sx, nah.p.y - sy)) nah = t;
     const mitte = L.latLng(nah.lat, nah.lon);
-    const groesse = buendelGroesse(g.n);
-    const text = g.n >= 1000 ? (g.n / 1000).toFixed(g.n >= 10000 ? 0 : 1).replace(".", ",") + "k" : g.n;
+    const groesse = Math.max(36, buendelGroesse(g.n));
     L.marker(mitte, {
       icon: L.divIcon({ className:"buendel",
         /* Weit draußen kennt die Übersicht nur "frei" und den Rest. */
-        html:`<span title="${g.frei.toLocaleString("de-DE")} frei von ${g.n.toLocaleString("de-DE")}" style="${ringStil({ gruen:g.frei, orange:0, grau:g.n - g.frei, rot:0 })};width:${groesse}px;height:${groesse}px">${text}</span>`,
+        html:`<span class="${g.frei ? "" : "ohne-frei"}" title="${g.frei.toLocaleString("de-DE")} frei von ${g.n.toLocaleString("de-DE")} Plätzen" style="${ringStil({ gruen:g.frei, orange:0, grau:g.n - g.frei, rot:0 })};width:${groesse}px;height:${groesse}px">${buendelInhalt(g.frei)}</span>`,
         iconSize:[groesse, groesse] }),
       keyboard:false
     })
@@ -8722,7 +8738,7 @@ const sheet = (function(){
   /* Rastpunkte als Anteil der Bildschirmhöhe, den das Sheet einnimmt. */
   /* Unterste Stufe: nur Griff und Suchfeld schauen heraus, die Karte hat
      fast den ganzen Bildschirm. Ihr Anteil hängt von der Bildschirmhöhe ab. */
-  const RASTEN = [0.14, 0.42, 0.6, 0.94];
+  const RASTEN = [0.14, 0.5, 0.66, 0.94];   // Review 7.11.: Start auf halber Höhe (RASTEN[1])
   const sicherUnten = (() => {        // Höhe des Home-Balkens beim iPhone
     const d = document.createElement("div");
     d.style.cssText = "position:fixed;bottom:0;padding-bottom:env(safe-area-inset-bottom,0px);visibility:hidden";
@@ -8976,7 +8992,10 @@ const sheet = (function(){
     start(){
       if (!mobil.matches) return;
       untersteRaste();
-      setzen(yFuer(Z.nurListe ? RASTEN[3] : RASTEN[0]));
+      /* Review 7.11.: Das Blatt startet immer auf halber Höhe: oben die
+         Karte, unten die ersten Plätze bzw. "Plätze in meiner Nähe".
+         Ganz offen erst, wenn man es hochzieht. */
+      setzen(yFuer(RASTEN[1]));
     },
     /* Beim Öffnen eines Platzes soll die Liste Platz machen. */
     aufmachen(){ if (mobil.matches) federZu(yFuer(RASTEN[3])); },
@@ -9444,8 +9463,9 @@ function ansichtModus(modus){
 /* Review 5.11.: Platzfrei ist eine Karten-App. Am Laptop startet sie deshalb
    immer mit Karte und Liste nebeneinander, auch wenn man vorher "Liste"
    gewählt hatte. Auf dem Handy bleibt die eigene Wahl erhalten. */
+/* Review 7.11.: Auch auf dem Handy startet Platzfrei mit Karte und halb
+   offenem Blatt, eine früher gewählte Liste wird nicht wiederhergestellt. */
 Z.nurListe = false;
-if (!breit.matches) try { Z.nurListe = localStorage.getItem("platzfrei.nurliste") === "1"; } catch {}
 const ModusKnopf = L.Control.extend({
   options:{ position:"topleft" },
   onAdd(){
@@ -9463,10 +9483,6 @@ const ModusKnopf = L.Control.extend({
     marke.setAttribute("aria-haspopup", "menu"); marke.setAttribute("aria-expanded", "false");
     marke.insertAdjacentHTML("beforeend", `<svg class="ic marke-pfeil" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>`);
     marke.addEventListener("click", e => { e.stopPropagation(); logoMenue(marke); });
-    /* Handy: "Für Vereine" immer sichtbar, damit Vereine es sofort finden. */
-    const verein = L.DomUtil.create("button", "karten-verein", kopf);
-    verein.type = "button"; verein.textContent = "Für Vereine";
-    verein.addEventListener("click", () => { Z.ansicht = "vereine"; zeichne(); sheet.aufmachen(); });
     const box = L.DomUtil.create("div", "modus-knopf", kopf);
     box.setAttribute("role", "group");
     box.setAttribute("aria-label", "Ansicht wählen");
