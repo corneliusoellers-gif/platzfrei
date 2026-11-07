@@ -1700,6 +1700,7 @@ button.team-mail{border:0;background:none;padding:0;font:inherit;cursor:pointer}
     <a href="/bolzplaetze/">Plätze nach Stadt</a>
     <button data-gehe="ueber" data-nav="ueber">Über Platzfrei</button>
     <button data-gehe="vereine" data-nav="vereine">Für Vereine</button>
+    <button data-gehe="partner" data-nav="partner">Für Partner</button>
     <button data-gehe="abzeichen" data-nav="abzeichen" id="nav-abzeichen" class="nav-abz" hidden>Abzeichen</button>
   </nav>
   <span class="kopfnotiz" id="kopfnotiz"></span>
@@ -5200,7 +5201,7 @@ function zeichne(){
   document.body.classList.toggle("nurliste", !!Z.nurListe && breit.matches);
   modusAnzeigen();
   document.querySelectorAll("[data-nav]").forEach(b =>
-    b.toggleAttribute("aria-current", b.dataset.nav === (Z.ansicht === "vereine" ? "vereine" : VOLLSEITEN.includes(Z.ansicht) ? "ueber" : "liste")));
+    b.toggleAttribute("aria-current", b.dataset.nav === (VOLLSEITEN.includes(Z.ansicht) ? Z.ansicht : "liste")));
   if (document.body.className !== klasseVorher) setTimeout(() => karte.invalidateSize(), 0);
   abzeichenNav();
 
