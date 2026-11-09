@@ -1766,6 +1766,7 @@ let DATEN = [];
 // Später eine eigene Tabelle in Supabase.
 let VORSCHLAEGE = [];
 let FEHLERBERICHTE = [];   // nur für Admins, offene Fehlermeldungen
+let FEHLERARCHIV = null;   // erledigte Meldungen, erst beim Öffnen des Archivs geladen
 
 /* Auswahllisten – identisch mit den Dropdowns in der Erfassungstabelle,
    damit App und Tabelle nicht auseinanderlaufen. */
@@ -4496,7 +4497,7 @@ function ansichtAdmin(){
       <div class="admin-liste">
         ${eintrag("pin", "Neue Plätze & Vereinszeiten", "Von Nutzern eingetragen. Prüfen und freischalten oder ablehnen.", `data-gehe="pruefen"`, pruefAnzahl(), true)}
         ${eintrag("liste", "Änderungsvorschläge", "Nutzer wollen Angaben an Plätzen ändern. Annehmen oder ablehnen, alte Änderungen zurückdrehen.", `data-gehe="verlauf"`, VORSCHLAEGE.length, true)}
-        ${eintrag("warnung", "Nachrichten & Fehlermeldungen", "Nachrichten aus dem Kontaktformular und Fehlerberichte aus der App.", `data-gehe="fehlerliste"`, FEHLERBERICHTE.length, true)}
+        ${eintrag("warnung", "Nachrichten & Fehlermeldungen", "Nachrichten aus dem Kontaktformular und Fehlerberichte aus der App, erledigte im Archiv.", `data-gehe="fehlerliste"`, FEHLERBERICHTE.length, true)}
       </div>
       <h3 class="admin-gruppe">Überblick</h3>
       <div class="admin-liste">
@@ -7588,28 +7589,55 @@ async function fehlerSenden(){
                                     + "\n\n--- Technische Angaben ---\n" + technik);
 }
 
-/* Admin: Liste der offenen Fehlermeldungen. */
+/* Admin: Nachrichten & Fehlermeldungen, Reiter "Offen" und "Archiv".
+   Erledigte Meldungen werden nie gelöscht, sie bekommen nur erledigt = true
+   und stehen dann im Archiv. Von dort lassen sie sich zurückholen. */
+async function fehlerArchivLaden(){
+  if (!ECHT) { FEHLERARCHIV = FEHLERARCHIV || []; return; }
+  const { data, error } = await db.from("fehlerberichte")
+                           .select("*").eq("erledigt", true)
+                           .order("erstellt", { ascending:false }).limit(500);
+  if (error) console.error(error);
+  FEHLERARCHIV = data || [];
+}
+
 function ansichtFehlerliste(){
   if (!Z.admin) { Z.ansicht = "liste"; return ansichtListe(); }
+  const archiv = Z.fehlerReiter === "archiv";
+  if (archiv && FEHLERARCHIV === null) {
+    fehlerArchivLaden().then(() => { if (Z.ansicht === "fehlerliste") zeichne(); });
+  }
   const datum = t => new Date(t).toLocaleString("de-DE",
     { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" });
-  seite.innerHTML = `
-    <div class="dkopf">
-      <button class="zurueck" data-gehe="admin">← Admin</button>
-      <div class="dname">Nachrichten & Fehler</div>
-      <div class="dort">${FEHLERBERICHTE.length} offen</div>
-    </div>
-    <div class="rolle">
-      ${FEHLERBERICHTE.length ? FEHLERBERICHTE.map(f => `
-        <div class="abschnitt" style="margin-top:8px">
+  const liste = archiv ? (FEHLERARCHIV || []) : FEHLERBERICHTE;
+  const karte = f => `
+        <div class="abschnitt" style="margin-top:8px${archiv ? ";opacity:.85" : ""}">
           <h3>${esc(datum(f.erstellt))}${f.kontakt
             ? ` · <a href="mailto:${esc(f.kontakt)}">${esc(f.kontakt)}</a>` : ``}</h3>
           <p style="white-space:pre-wrap">${esc(f.text)}</p>
           <details><summary>Technische Angaben</summary>
             <p style="white-space:pre-wrap;font-size:12px">${esc(f.technik || "")}</p></details>
-          <p><button class="inline-knopf" data-fehlererledigt="${f.id}">Erledigt</button></p>
-        </div>`).join("")
-        : `<div class="leer">Keine offenen Fehlermeldungen.</div>`}
+          <p>${archiv
+            ? `<button class="inline-knopf" data-fehlerzurueck="${f.id}">Zurück zu Offen</button>`
+            : `<button class="inline-knopf" data-fehlererledigt="${f.id}">Erledigt, ins Archiv</button>`}</p>
+        </div>`;
+  const leer = archiv
+    ? (FEHLERARCHIV === null ? "Archiv wird geladen …" : "Das Archiv ist noch leer.")
+    : "Keine offenen Fehlermeldungen.";
+  seite.innerHTML = `
+    <div class="dkopf">
+      <button class="zurueck" data-gehe="admin">← Admin</button>
+      <div class="dname">Nachrichten & Fehler</div>
+      <div class="dort">${archiv
+        ? (FEHLERARCHIV === null ? "Archiv" : `${FEHLERARCHIV.length} im Archiv`)
+        : `${FEHLERBERICHTE.length} offen`}</div>
+    </div>
+    <div class="rolle">
+      <div class="einst-chips" style="margin:8px 0">
+        <button data-fehlerreiter="offen" aria-pressed="${!archiv}">Offen (${FEHLERBERICHTE.length})</button>
+        <button data-fehlerreiter="archiv" aria-pressed="${archiv}">Archiv${FEHLERARCHIV ? ` (${FEHLERARCHIV.length})` : ""}</button>
+      </div>
+      ${liste.length ? liste.map(karte).join("") : `<div class="leer">${leer}</div>`}
     </div>`;
 }
 
@@ -7618,9 +7646,29 @@ async function fehlerErledigt(id){
     const { error } = await db.from("fehlerberichte").update({ erledigt:true }).eq("id", id);
     if (error) { console.error(error); return melde("Abgelehnt: " + error.message); }
   }
-  FEHLERBERICHTE = FEHLERBERICHTE.filter(f => String(f.id) !== String(id));
+  const f = FEHLERBERICHTE.find(x => String(x.id) === String(id));
+  FEHLERBERICHTE = FEHLERBERICHTE.filter(x => String(x.id) !== String(id));
+  if (f && FEHLERARCHIV) {
+    FEHLERARCHIV = [{ ...f, erledigt:true }, ...FEHLERARCHIV]
+      .sort((a, b) => new Date(b.erstellt) - new Date(a.erstellt));
+  }
   zeichne();
-  melde("Als erledigt markiert.");
+  melde("Erledigt, liegt jetzt im Archiv.");
+}
+
+async function fehlerZurueck(id){
+  if (ECHT) {
+    const { error } = await db.from("fehlerberichte").update({ erledigt:false }).eq("id", id);
+    if (error) { console.error(error); return melde("Abgelehnt: " + error.message); }
+  }
+  const f = (FEHLERARCHIV || []).find(x => String(x.id) === String(id));
+  FEHLERARCHIV = (FEHLERARCHIV || []).filter(x => String(x.id) !== String(id));
+  if (f) {
+    FEHLERBERICHTE = [{ ...f, erledigt:false }, ...FEHLERBERICHTE]
+      .sort((a, b) => new Date(b.erstellt) - new Date(a.erstellt));
+  }
+  zeichne();
+  melde("Wieder bei den offenen Meldungen.");
 }
 
 /* --------------------------------------------------------------------------
@@ -8454,8 +8502,10 @@ function ansichtRechtliches(){
         <p>Check-ins löschen wir nach einem Tag, vergangene Spiele ebenfalls.
         Bestätigungen, Tipps, Meldungen und Fotos bleiben gespeichert, solange
         der Platz in der App ist, oder bis du sie zurücknimmst bzw. uns um
-        Löschung bittest. Fehlermeldungen löschen wir, wenn der Fehler
-        behoben ist, Vereinsangaben, wenn die Platzzeiten geprüft sind.
+        Löschung bittest. Fehlermeldungen und Nachrichten bewahren wir
+        nach der Erledigung in einem Archiv auf, damit wiederkehrende Fehler
+        nachvollziehbar bleiben. Auf Wunsch löschen wir sie.
+        Vereinsangaben löschen wir, wenn die Platzzeiten geprüft sind.
         Prüfwerte zu Vorschlägen werden nach 30 Tagen gelöscht, der
         Änderungsverlauf der Plätze nach 180 Tagen.
         Was auf deinem Gerät liegt, bleibt dort, bis du es löschst.</p>
@@ -9041,7 +9091,7 @@ document.addEventListener("click", e=>{
                              "[data-export],[data-doppelte],[data-anmelden],[data-km],"+
                              "[data-merken],[data-gemerkt],[data-melden],[data-route],"+
                              "[data-nurlicht],[data-belegt],[data-sortierung],[data-bereich],[data-mehr],"+
-                             "[data-schildok],[data-schildweg],[data-loeschen],[data-fehlersenden],[data-kontaktsenden],[data-kontakt],[data-fehlererledigt],[data-vorschlag],[data-zurueckdrehen],"+
+                             "[data-schildok],[data-schildweg],[data-loeschen],[data-fehlersenden],[data-kontaktsenden],[data-kontakt],[data-fehlererledigt],[data-fehlerzurueck],[data-fehlerreiter],[data-vorschlag],[data-zurueckdrehen],"+
                              "[data-suchweg],[data-teilen],[data-abmelden],[data-hierpunkt],[data-vereinszeitensenden],"+
                              "[data-neuok],[data-neuweg],[data-vzok],[data-vzweg],[data-hier],[data-hierweg],[data-frage],"+
                              "[data-jetzt],[data-einfuehrung],[data-ausltag],[data-zusage],[data-spielweg],[data-spielform],[data-spielansetzen],[data-tipp],[data-tippsoffen],[data-osmladen],[data-osmstop],"+
@@ -9126,6 +9176,8 @@ document.addEventListener("click", e=>{
   if (t.dataset.kontaktsenden) { return kontaktSenden(); }
   if (t.dataset.kontakt)    { Z.kontaktThema = t.dataset.kontakt; Z.ansicht = "kontakt"; zeichne(); sheet.aufmachen(); return; }
   if (t.dataset.fehlererledigt) { return fehlerErledigt(t.dataset.fehlererledigt); }
+  if (t.dataset.fehlerzurueck) { return fehlerZurueck(t.dataset.fehlerzurueck); }
+  if (t.dataset.fehlerreiter) { Z.fehlerReiter = t.dataset.fehlerreiter; zeichne(); return; }
   if (t.dataset.vorschlag)  { return vorschlagEntscheiden(t.dataset.vorschlag, t.dataset.annehmen === "1"); }
   if (t.dataset.zurueckdrehen) { return aenderungZurueckdrehen(t.dataset.zurueckdrehen); }
   if (t.dataset.mehr)       { Z.filterOffen = t.dataset.mehr === "1"; return zeichne(); }
