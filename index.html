@@ -8149,7 +8149,7 @@ function kontaktKarte(thema, titel, text){
 function vorteil(icon, titel, text){
   return `<div class="schritt vorteil"><span class="vico" aria-hidden="true">${ic(icon, 20)}</span><b>${titel}</b><p>${text}</p></div>`;
 }
-const MERKMALE_KIND = [["schild","Kein Chat, keine Profile"],["leute","Spieler nur als Anzahl, ab zwei"],["haken","Keine Werbung, kostenlos"]];
+const MERKMALE_KIND = [["schild","Kein Chat, keine Profile"],["leute","Mitspieler nur als Zahl, erst ab zwei Personen"],["haken","Keine Werbung, kostenlos"]];
 function merkmale(liste = MERKMALE_KIND){
   return `<div class="merkmale">${liste.map(([i, t]) => `<span>${ic(i, 18)}${t}</span>`).join("")}</div>`;
 }
@@ -8173,9 +8173,8 @@ function ansichtUeber(){
     <div class="rolle">
       <div class="held">
         <h2>Wo darf ich <em>spielen?</em></h2>
-        <p>Platzfrei zeigt Kindern und Jugendlichen, auf welchen Bolz-, Basketball- und
-        Sportplätzen sie frei spielen dürfen – und wann. Ohne Ärger mit dem Platzwart,
-        ohne Rätselraten am Zaun.</p>
+        <p>Platzfrei zeigt dir, auf welchen Bolz-, Basketball- und Sportplätzen du frei
+        spielen darfst und wann. Kein Ärger mit dem Platzwart, kein Rätselraten am Zaun.</p>
         <div class="reihe">
           <button class="knopf" data-gehe="liste">Plätze in deiner Nähe</button>
           <button class="knopf zweit" data-einfuehrung="1">Einführung ansehen</button>
@@ -8190,28 +8189,28 @@ function ansichtUeber(){
       </div>
       <div class="ueber-teil">
         <h3>Warum es Platzfrei gibt</h3>
-        <p>Fast jedes Kind kennt das: Man kommt mit dem Ball zum Platz, und keiner weiß,
-        ob man drauf darf. Schilder fehlen oder widersprechen sich, der Platzwart schickt
-        einen weg, und im Netz steht nirgends, welcher Platz wann offen ist. Dabei gibt es
-        in Deutschland zehntausende Plätze, die frei genutzt werden dürfen. Platzfrei macht
-        sie sichtbar, damit mehr gespielt und weniger gestritten wird.</p>
+        <p>Du kommst mit dem Ball zum Platz und weißt nicht, ob du drauf darfst. Ein Schild
+        fehlt oder sagt etwas anderes als der Platzwart, und im Netz steht nirgends, wann
+        der Platz offen ist. Dabei gibt es in Deutschland tausende Plätze, auf denen du
+        spielen darfst. Platzfrei macht sie sichtbar, damit mehr gespielt und weniger
+        gestritten wird.</p>
       </div>
       <div class="ueber-teil">
         <h3>So funktioniert es</h3>
         <div class="schritte">
           <div class="schritt"><span class="nr">1</span><b>Platz finden</b>
-            <p>Karte öffnen, Sportart wählen. Die App zeigt die nächsten Plätze mit Untergrund, Flutlicht und Wetter.</p></div>
+            <p>Karte öffnen, Sportart wählen. Du siehst die nächsten Plätze mit Untergrund, Flutlicht und Wetter.</p></div>
           <div class="schritt"><span class="nr">2</span><b>Regeln sehen</b>
-            <p>Grün heißt: darfst du. Orange: vorher fragen. Grau: noch unbekannt. Belegt durch Gemeinden, Vereine oder ein Foto vom Schild.</p></div>
+            <p>Grün heißt: Du darfst. Orange: Frag vorher. Grau: noch unbekannt. Belegt von Gemeinden, Vereinen oder einem Foto vom Schild.</p></div>
           <div class="schritt"><span class="nr">3</span><b>Zusammen spielen</b>
-            <p>Einchecken, wenn man da ist, oder ein Spiel ansetzen. Andere sehen, wo gerade etwas los ist.</p></div>
+            <p>Check ein, wenn du da bist, oder setz ein Spiel an. So sehen andere, wo gerade etwas los ist.</p></div>
         </div>
       </div>
       <div class="ueber-teil">
         <h3>Woher die Daten kommen</h3>
-        <p>Platzfrei fragt Gemeinden direkt an und übernimmt ihre Antworten, nutzt offene
-        Daten der Städte und OpenStreetMap. Nutzer bestätigen vor Ort und fotografieren
-        die Schilder. Was nicht belegt ist, steht ehrlich als „noch nicht bestätigt“ in der App.</p>
+        <p>Platzfrei fragt Gemeinden direkt an und übernimmt ihre Antworten. Dazu kommen
+        offene Daten der Städte und OpenStreetMap. Vor Ort bestätigen Nutzer die Angaben
+        und fotografieren die Schilder. Was nicht belegt ist, steht ehrlich als „noch nicht bestätigt“ in der App.</p>
       </div>
       <div class="ueber-teil">
         <h3>Sicher für Kinder</h3>
@@ -8224,11 +8223,10 @@ function ansichtUeber(){
           <div class="team-text">
             <b class="team-name">Cornelius Oellers</b>
             <span class="team-rolle">Gründer von Platzfrei</span>
-            <p>Als Jugendlicher wurde Cornelius selbst oft von Plätzen geschickt, obwohl
-            dort gerade niemand trainierte. Später stand er auf der anderen Seite: als
-            Jugendtrainer und als Trainer in Fußballcamps. Platzfrei hat er neben Abitur,
-            eigenem Training und Trainerjob gebaut, heute mit über 95.000 Plätzen in ganz
-            Deutschland. Inzwischen studiert er Sportökonomie.</p>
+            <p>Als Jugendlicher wurde Cornelius oft von Plätzen geschickt, auf denen gerade
+            niemand trainierte. Später stand er auf der anderen Seite, als Jugendtrainer
+            und als Trainer in Fußballcamps. Platzfrei hat er neben Abitur, eigenem Training
+            und Trainerjob allein aufgebaut. Heute studiert er Sportökonomie.</p>
             <blockquote>„Kein Kind soll am Zaun stehen und nicht wissen, ob es reindarf.“</blockquote>
             <button class="team-mail" data-kontakt="allgemein">Nachricht an Cornelius</button>
           </div>
