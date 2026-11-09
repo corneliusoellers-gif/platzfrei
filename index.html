@@ -1281,6 +1281,26 @@ header h1 .pf-marke{height:30px;width:auto}
 .waechst .waechst-weg{position:absolute;top:4px;right:4px;width:28px;height:28px;border:0;border-radius:50%;
   background:none;color:var(--tinte-3);font-size:15px;cursor:pointer}
 .waechst .waechst-weg:hover{background:var(--flaeche)}
+/* "Hilf mit": Plätze in der Nähe, die noch eine Bestätigung brauchen */
+.hilfmit{position:relative;margin:2px 0 14px;padding:12px 40px 12px 14px;border-radius:var(--r-karte);
+  background:var(--gruen-zart);color:var(--tinte-2);font-size:13px;line-height:1.45}
+.hilfmit-kopf{display:flex;gap:10px;align-items:flex-start}
+.hilfmit-kopf .medaille{--g:40px;filter:none}
+.hilfmit-kopf .medaille .m-sterne{display:none}
+.hilfmit b{color:var(--tinte);font-size:14.5px;display:block;margin-bottom:2px}
+.hilfmit-plaetze{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 8px}
+.hilfmit-plaetze button{display:flex;align-items:center;gap:6px;min-height:36px;max-width:100%;padding:6px 12px;
+  border:0;border-radius:var(--r-pille);background:var(--flaeche);color:var(--tinte);font:inherit;font-size:13px;
+  cursor:pointer;box-shadow:0 0 0 1px var(--kante)}
+.hilfmit-plaetze button span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hilfmit-plaetze small{color:var(--tinte-3);flex:none}
+.hilfmit-fort{display:flex;align-items:center;gap:8px;font-size:12.5px}
+.hilfmit-fort .abz-balken{flex:1;max-width:160px;height:5px;border-radius:3px;background:var(--kante);overflow:hidden}
+.hilfmit-fort .abz-balken span{display:block;height:100%;background:var(--gruen)}
+.hilfmit-weg{position:absolute;top:4px;right:4px;width:32px;height:32px;border:0;border-radius:50%;
+  background:none;color:var(--tinte-3);font-size:15px;cursor:pointer}
+.hilfmit-weg:hover{background:var(--flaeche)}
+@media (max-width:760px){ .hilfmit-weg{top:0;right:0;width:44px;height:44px;font-size:16px} }
 .startpunkt{margin:-2px 0 12px;padding:12px;border-radius:12px;background:var(--flaeche);box-shadow:0 0 0 1px var(--kante)}
 .startpunkt > .knopf{width:100%}
 .startpunkt .hinweis{margin-top:8px}
@@ -4101,6 +4121,9 @@ function ansichtListe(nurListe){
        ersten sechs Plätzen. Der Medaillen-Knopf neben der Suche bleibt. */
     if (schonDabei()) zeilen.splice(Math.min(6, zeilen.length), 0, abzeichenStreifen() + saisonStreifen());
     if (los && !losOben) zeilen.splice(Math.min(4, zeilen.length), 0, los);
+    /* Ganz vorne nach zwei Plätzen: "Hilf mit" (nur mit echtem Standort). */
+    const hilf = hilfMitKarte();
+    if (hilf) zeilen.splice(Math.min(2, zeilen.length), 0, hilf);
   } else if (los && !losOben) zeilen.push(los);
   const rolleInhalt = `${ohneStandort}${adminOben}${trefferInfo}${hinweis}${ohneSuche ? losLeiste("oben") : ``}${losOben ? los : ``}${zeilen.join("")}${leer}${alleOrte.length > orte.length
       ? `<div class="leer">… und ${(alleOrte.length - orte.length).toLocaleString("de-DE")} weitere.<br>
@@ -4583,6 +4606,7 @@ function ansichtDetail(){
   if (!o) { Z.ansicht="liste"; return ansichtListe(); }
   if (!o._voll) ortVollLaden(o);
   nutzungPlatz(o.id);
+  naheFragen(o);
 
   const vermutet = o.bestaetigtDurch==="nur vermutet" || o.bestaetigtDurch==="Lage (OSM)";
   const gepruefttext = o.geprueft
@@ -6260,7 +6284,7 @@ function zugangFragen(id, immer){
     if (g) { zu(); return meldungAbgeben(g.dataset.fgrund, o.id); }
     if (e.target.closest("[data-fweiss],[data-fweg]")) {
       gefragtMerken(o.id); zu();
-      if (e.target.closest("[data-fweiss]")) melde("Kein Problem – danke fürs Einchecken.");
+      if (e.target.closest("[data-fweiss]")) melde(meinCheckin() ? "Kein Problem – danke fürs Einchecken." : "Kein Problem – danke!");
       return;
     }
     if (e.target === el) { gefragtMerken(o.id); zu(); }
@@ -6278,6 +6302,67 @@ function zugangFragen(id, immer){
   document.addEventListener("keydown", taste);
   document.body.appendChild(el);
   schritt1();
+}
+
+/* Wer einen Platz öffnet und gerade höchstens 300 m davon entfernt ist,
+   bekommt dieselbe Frage wie nach dem Check-in – auch ohne einzuchecken.
+   Pro Platz und Gerät nur einmal (gleiche Regeln wie zugangFragen). */
+const NAHE_M = 300;
+const naheGezeigt = new Set();
+function naheFragen(o){
+  if (!Z.positionEcht || !Z.position || naheGezeigt.has(String(o.id))) return;
+  if (o._doppelt || belegt(o) || BESTAETIGT.has(o.id) || nutzerBestaetigt(o) || schonGefragt(o.id)) return;
+  if (entfernungKm(Z.position, o) * 1000 > NAHE_M) return;
+  naheGezeigt.add(String(o.id));
+  setTimeout(() => {
+    if (Z.ansicht !== "detail" || String(Z.auswahlId) !== String(o.id) || document.querySelector(".einf")) return;
+    zugangFragen(o.id);
+  }, 800);
+}
+
+/* "Hilf mit": noch nicht bestätigte Plätze im Umkreis von 3 km, die
+   nächsten drei zum Antippen, dazu der Fortschritt beim Abzeichen
+   Platzprüfer. Wegklicken versteckt die Karte für 14 Tage. */
+const HILF_WEG = "platzfrei.hilfmit.weg", HILF_KM = 3, HILF_PAUSE_TAGE = 14;
+function hilfMitOffen(){
+  if (!Z.positionEcht || !Z.position) return [];
+  const p = Z.position, liste = [];
+  for (const o of DATEN) {
+    if (Math.abs(o.lat - p.lat) > 0.03 || Math.abs(o.lon - p.lon) > 0.045) continue;
+    if (o._doppelt || BESTAETIGT.has(o.id) || !passtHauptsport(o.sportarten)) continue;
+    const a = ampel(o);
+    if (a !== "gruen" && a !== "grau") continue;
+    if (zugangStufe(o).stufe === "bestaetigt") continue;
+    const km = entfernungKm(p, o);
+    if (km <= HILF_KM) liste.push({ o, km });
+  }
+  return liste.sort((x, y) => x.km - y.km);
+}
+function hilfMitKarte(){
+  try {
+    const weg = +localStorage.getItem(HILF_WEG) || 0;
+    if (Date.now() - weg < HILF_PAUSE_TAGE * 864e5) return ``;
+  } catch {}
+  const offen = hilfMitOffen();
+  if (!offen.length) return ``;
+  const n = offen.length;
+  const a = ABZEICHEN.find(x => x.id === "pruefer");
+  const st = abzStand(), stufe = st.stufe.pruefer, ziel = a.stufen[stufe];
+  const x = Math.min(st.wert.pruefer || 0, ziel || 0);
+  const fort = ziel
+    ? `<div class="hilfmit-fort"><span>Abzeichen Platzprüfer ${STUFEN[stufe].name}: ${x} von ${ziel}</span>
+        <span class="abz-balken"><span style="width:${Math.round(x / ziel * 100)}%"></span></span></div>`
+    : `<div class="hilfmit-fort"><span>Platzprüfer Legende. Danke für deine Hilfe!</span></div>`;
+  const km = k => k < 1 ? Math.round(k * 1000 / 10) * 10 + " m" : k.toFixed(1).replace(".", ",") + " km";
+  return `<div class="hilfmit" role="note">
+      <div class="hilfmit-kopf">${medaille(a, stufe, { anteil: ziel ? x / ziel : 1 })}
+        <span><b>Hilf mit: ${n === 1 ? "1 Platz" : n.toLocaleString("de-DE") + " Plätze"} in deiner Nähe ${n === 1 ? "braucht" : "brauchen"} noch eine Bestätigung</b>
+        Wenn du dort bist, sag kurz, ob man spielen darf, oder fotografiere das Schild.</span></div>
+      <div class="hilfmit-plaetze">${offen.slice(0, 3).map(({ o, km: k }) =>
+        `<button data-ort="${o.id}"><span>${esc(kurzName(o))}</span><small>${km(k)}</small></button>`).join("")}</div>
+      ${fort}
+      <button class="hilfmit-weg" data-hilfweg="1" aria-label="Hinweis für zwei Wochen ausblenden" title="Ausblenden">✕</button>
+    </div>`;
 }
 
 /* Export bleibt als Sicherheitsnetz: alles als JSON herunterladen. */
@@ -9095,7 +9180,7 @@ document.addEventListener("click", e=>{
                              "[data-suchweg],[data-teilen],[data-abmelden],[data-hierpunkt],[data-vereinszeitensenden],"+
                              "[data-neuok],[data-neuweg],[data-vzok],[data-vzweg],[data-hier],[data-hierweg],[data-frage],"+
                              "[data-jetzt],[data-einfuehrung],[data-ausltag],[data-zusage],[data-spielweg],[data-spielform],[data-spielansetzen],[data-tipp],[data-tippsoffen],[data-osmladen],[data-osmstop],"+
-                             "[data-startpunkt],[data-standort],[data-losscroll],[data-losalle],[data-filterweg],[data-korrektur],[data-modus],[data-waechstweg],[data-rangzeit],[data-saisonweg],[data-abz],[data-abzzu],[data-demo],[data-volladen]");
+                             "[data-startpunkt],[data-standort],[data-losscroll],[data-losalle],[data-filterweg],[data-korrektur],[data-modus],[data-waechstweg],[data-rangzeit],[data-saisonweg],[data-abz],[data-abzzu],[data-demo],[data-volladen],[data-hilfweg]");
   if (!t) return;
   if (t.dataset.volladen !== undefined) {
     if (!Z.admin || Z.laedtNoch) return;
@@ -9137,6 +9222,11 @@ document.addEventListener("click", e=>{
     return zeichne();
   }
   if (t.dataset.korrektur)  { return korrekturSenden(t.dataset.korrektur); }
+  if (t.dataset.hilfweg) {
+    try { localStorage.setItem(HILF_WEG, String(Date.now())); } catch {}
+    t.closest(".hilfmit")?.remove();
+    return melde("Ausgeblendet für zwei Wochen.");
+  }
   if (t.dataset.waechstweg) {
     try { localStorage.setItem("platzfrei.waechst.weg", "1"); } catch {}
     t.closest(".waechst")?.remove(); return;
