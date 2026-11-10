@@ -149,5 +149,13 @@ document.querySelectorAll('details.mehr').forEach(function(d){if(s)d.open=true})
 document.querySelectorAll('section.gruppe').forEach(function(g){
 g.hidden=!g.querySelector('ul.plaetze li:not([hidden])')})});})();
 </script>
+<script>
+(function(){try{if(navigator.webdriver||navigator.doNotTrack==="1"||navigator.globalPrivacyControl)return;
+if(localStorage.getItem("platzfrei.nutzung.aus")==="1")return;
+var s=location.pathname.split("/")[2]||"uebersicht",k="platzfrei.seite."+s;
+if(!/^[a-z0-9-]{1,80}$/.test(s)||sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");
+fetch("https://swagzrwtfbaxouunudsp.supabase.co/rest/v1/rpc/nutzung_seite",{method:"POST",keepalive:true,
+headers:{"apikey":"sb_publishable_2ENolaXEdMAJASGfvodbXA_DKTxvwD1","Content-Type":"application/json"},body:JSON.stringify({p_seite:s})}).catch(function(){})}catch(e){}})();
+</script>
 </body>
 </html>

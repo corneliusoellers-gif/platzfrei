@@ -1904,7 +1904,10 @@ function geraetId(){
    --------------------------------------------------------------------------
    Die Datenbank speichert nur Tageszahlen ("heute 37 Geräte im Web").
    Es geht keine Geräte-Nummer und kein Platz mit. Ob dieses Gerät heute
-   schon gezählt wurde, merkt sich nur das Gerät selbst. Nicht gezählt
+   oder in diesem Monat schon gezählt wurde, merkt sich nur das Gerät selbst.
+   Seit 10.11.: "monat" = erster Tag im Monat (monatlich aktive Geräte),
+   "monat_wieder" = zweiter Tag im Monat (Wiederkehrer), "vereine"/"partner"
+   = Seite "Für Vereine"/"Für Partner" geöffnet (je Sitzung einmal). Nicht gezählt
    werden: das Admin-Gerät, die Demo, Browser mit "Nicht verfolgen" und
    automatische Browser.
    -------------------------------------------------------------------------- */
@@ -1932,18 +1935,31 @@ function nutzungZaehlen(art){
   const quelle = /PlatzfreiApp\//.test(navigator.userAgent) ? "app" : "web";
   db.rpc("nutzung_zaehlen", { p_art:art, p_quelle:quelle }).then(() => {}, () => {});
 }
-/* Einmal pro Tag und Gerät: "heute geöffnet", beim allerersten Mal auch "neu". */
+/* Einmal pro Tag und Gerät: "heute geöffnet", beim allerersten Mal auch "neu".
+   Pro Monat: am ersten Tag "monat", am zweiten Tag "monat_wieder". Auf dem
+   Gerät steht nur { tag, monat, mt } (mt = Tage im Monat, höchstens 2). */
 function nutzungStart(){
   if (Z.admin) { try { localStorage.setItem(NUTZUNG_AUS, "1"); } catch {} return; }
   if (nutzungAus()) return;
   let s = null;
   try { s = JSON.parse(localStorage.getItem(NUTZUNG_SCHLUESSEL) || "null"); } catch { return; }
-  const tag = berlinTag();
+  const tag = berlinTag(), monat = tag.slice(0, 7);
   if (s?.tag === tag) return;
   const neu = !s && NUTZUNG_ERSTMALS;
-  try { localStorage.setItem(NUTZUNG_SCHLUESSEL, JSON.stringify({ tag })); } catch { return; }
+  const neuerMonat = s?.monat !== monat;
+  const mt = neuerMonat ? 1 : Math.min(2, (s.mt || 1) + 1);
+  try { localStorage.setItem(NUTZUNG_SCHLUESSEL, JSON.stringify({ tag, monat, mt })); } catch { return; }
   nutzungZaehlen("geraet");
   if (neu) nutzungZaehlen("neu");
+  if (neuerMonat) nutzungZaehlen("monat");
+  else if (mt === 2 && s.mt !== 2) nutzungZaehlen("monat_wieder");
+}
+/* "Für Vereine" / "Für Partner" geöffnet: je Seite einmal pro Sitzung. */
+const NUTZUNG_INFO = new Set();
+function nutzungInfo(art){
+  if (NUTZUNG_INFO.has(art)) return;
+  NUTZUNG_INFO.add(art);
+  nutzungZaehlen(art);
 }
 /* Platz angesehen: je Platz einmal pro Sitzung, höchstens 30 pro Sitzung. */
 const NUTZUNG_PLAETZE = new Set();
@@ -5251,6 +5267,7 @@ function zeichne(){
      neu:ansichtNeu, anmelden:ansichtAnmelden, importieren:ansichtImportieren,
      melden:ansichtMelden, rechtliches:ansichtRechtliches, vereinszeiten:ansichtVereinszeiten, pruefen:ansichtPruefen, fehler:ansichtFehler, fehlerliste:ansichtFehlerliste, verlauf:ansichtVerlauf, nutzung:ansichtNutzung, admin:ansichtAdmin, kontakt:ansichtKontakt, abzeichen:ansichtAbzeichen, saison:ansichtSaison, einstellungen:ansichtEinstellungen,
      ueber:ansichtUeber, vereine:ansichtVereine, partner:ansichtPartner })[Z.ansicht]();
+  if (Z.ansicht === "vereine" || Z.ansicht === "partner") nutzungInfo(Z.ansicht);
 
   /* §11 Nur transform und opacity bewegen – beides läuft im Compositor,
      ohne dass der Browser das Layout neu rechnen muss. */
@@ -8000,6 +8017,53 @@ function ansichtNutzung(){
     ["spiele","Mitspieler gesucht"],["tipps","Platz-Tipps"],["vereinszeiten","Vereinszeiten"],["fehler","Fehlerberichte"]];
   const top = N.top || [];
 
+  /* Seit 10.11.: Monate, Wiederkehrer, Stadtseiten, Für Vereine/Partner.
+     Fehlt das neue SQL (supabase-nutzung-kennzahlen.sql), steht ein Hinweis da. */
+  const neuSql = N.version >= 2;
+  const monate = N.monate || [];
+  const mJetzt = monate[monate.length - 1] || {};
+  const anteil = (n, g) => g ? Math.round(n / g * 100) + " %" : "–";
+  const monatName = m => m ? new Date(m + "-15T12:00").toLocaleDateString("de-DE", { month:"long", year:"numeric" }) : "";
+  const kl = N.klicks || {};
+  const ss = N.seiten_summe || {};
+  const seiten = N.seiten || [];
+  const seitenName = sl => sl === "uebersicht" ? "Übersicht aller Städte"
+    : sl.split("-").map((w, i) => !w || (i && /^(am|an|im|in|ob|der|bei|vor|auf|und)$/.test(w)) ? w : w[0].toUpperCase() + w.slice(1)).join(" ");
+  const heuteWieder = Math.max(0, (heuteT.geraete || 0) - (heuteT.neu || 0));
+  const kennzahlenBlock = !neuSql ? `<div class="abschnitt saison-block">
+        <p style="margin:0"><b>Neue Kennzahlen noch nicht eingerichtet.</b> Einmal das Skript
+        <code>supabase-nutzung-kennzahlen.sql</code> im Supabase SQL Editor ausführen, dann erscheinen hier
+        monatlich aktive Geräte, Wiederkehrer, Aufrufe je Stadtseite und Klicks auf „Für Vereine“ und „Für Partner“.</p></div>` : `
+      <div class="saison-gitter">
+        ${kachel(zahl(mJetzt.aktiv), `aktive Geräte im ${esc(monatName(mJetzt.monat).split(" ")[0])}`, "#0B9463")}
+        ${kachel(anteil(mJetzt.wieder || 0, mJetzt.aktiv), "kamen an 2+ Tagen wieder", "#5856D6")}
+        ${kachel(zahl(ss.tage7), "Aufrufe Stadtseiten (7 Tage)", "#0A84FF")}
+        ${kachel(zahl((kl.vereine?.[2] || 0) + (kl.partner?.[2] || 0)), "Klicks Vereine + Partner (30 Tage)", "#FF2D55")}
+      </div>
+      <div class="abschnitt saison-block">
+        <h3 class="saison-h">Monatlich aktive Geräte</h3>
+        <table class="nutz-tab">
+          <tr><th></th><td>aktiv</td><td>an 2+ Tagen</td><td>Anteil</td><td>neu</td></tr>
+          ${monate.slice().reverse().filter((m, i) => i === 0 || m.aktiv).map(m => `<tr><th>${esc(monatName(m.monat))}</th>
+            <td>${zahl(m.aktiv)}</td><td>${zahl(m.wieder)}</td><td>${anteil(m.wieder || 0, m.aktiv)}</td><td>${zahl(m.neu)}</td></tr>`).join("")}
+        </table>
+        <p class="saison-erkl">Jedes Gerät zählt einmal im Monat, „an 2+ Tagen“ heißt: an mindestens zwei
+          verschiedenen Tagen im Monat geöffnet. Heute kamen ${zahl(heuteWieder)} von ${zahl(heuteT.geraete)} Geräten
+          nicht zum ersten Mal (${anteil(heuteWieder, heuteT.geraete)}). Die Monatszählung läuft seit dem 10.11.2026,
+          der November ist deshalb unvollständig.</p>
+      </div>
+      <div class="abschnitt saison-block">
+        <h3 class="saison-h">Aufrufe der Stadtseiten</h3>
+        ${balken("seiten", "#0A84FF")}
+        <p class="saison-erkl">Heute ${zahl(ss.heute)}, 7 Tage ${zahl(ss.tage7)}, 30 Tage ${zahl(ss.tage30)} Aufrufe
+          auf ${zahl(ss.seiten)} verschiedenen Seiten (je Seite einmal pro Browser-Sitzung).</p>
+        ${seiten.length ? `<table class="nutz-tab">
+          <tr><th></th><td>7 Tage</td><td>30 Tage</td></tr>
+          ${seiten.map(r => `<tr><th><a href="/bolzplaetze/${r.seite === "uebersicht" ? "" : esc(r.seite) + "/"}" target="_blank" rel="noopener">${esc(seitenName(r.seite))}</a></th>
+            <td>${zahl(r.tage7)}</td><td>${zahl(r.tage30)}</td></tr>`).join("")}
+        </table>` : `<p class="saison-erkl">Noch keine Aufrufe gezählt.</p>`}
+      </div>`;
+
   seite.innerHTML = kopf + `
     <div class="rolle">
       <div class="saison-gitter">
@@ -8008,6 +8072,7 @@ function ansichtNutzung(){
         ${kachel(zahl(summe("neu", 30)), "neue Geräte in 30 Tagen", "#AF52DE")}
         ${kachel(zahl(N.jetzt), "gerade auf einem Platz", "#FF9500")}
       </div>
+      ${kennzahlenBlock}
       <div class="abschnitt saison-block">
         <h3 class="saison-h">Geräte pro Tag</h3>
         ${balken("geraete", "var(--gruen)")}
@@ -8024,6 +8089,7 @@ function ansichtNutzung(){
           ${reihe("… von Geräten", [ci.heute?.[1], ci.woche?.[1], ci.monat?.[1]])}
           ${reihe("… an Plätzen", [ci.heute?.[2], ci.woche?.[2], ci.monat?.[2]])}
           ${BEITRAG.map(([k, n]) => reihe(n, b[k])).join("")}
+          ${neuSql ? reihe("„Für Vereine“ geöffnet", kl.vereine) + reihe("„Für Partner“ geöffnet", kl.partner) : ``}
         </table>
       </div>
       ${top.length ? `<div class="abschnitt saison-block">
@@ -8037,7 +8103,8 @@ function ansichtNutzung(){
       <div class="abschnitt saison-block">
         <p class="saison-erkl" style="margin-top:0">Gezählt wird jedes Gerät einmal am Tag, ohne Geräte-Nummer.
           Nicht dabei sind dein Admin-Gerät und Browser mit „Nicht verfolgen“.
-          Die Zählung läuft seit dem 6.11.2026, Check-ins werden nach 8 Wochen gelöscht.</p>
+          Die Zählung läuft seit dem 6.11.2026 (Monate, Stadtseiten und Vereine/Partner seit dem 10.11.2026),
+          Check-ins werden nach 8 Wochen gelöscht.</p>
         ${goat}
       </div>
     </div>`;
@@ -8559,9 +8626,15 @@ function ansichtRechtliches(){
         <p>Zusätzlich zählt die App in der eigenen Datenbank (Supabase) nur
         Tagessummen: wie viele Geräte Platzfrei an einem Tag geöffnet haben
         (Web oder iPhone-App), wie viele davon zum ersten Mal, und wie oft
-        Plätze angesehen wurden. Dabei wird weder eine Geräte-Nummer noch
-        ein Platz noch eine IP-Adresse gespeichert. Ob dein Gerät heute schon
-        gezählt wurde, merkt sich nur dein Gerät (localStorage). Gegen
+        Plätze angesehen wurden; außerdem wie viele Geräte Platzfrei in einem
+        Monat geöffnet haben und wie viele davon an mindestens zwei Tagen,
+        wie oft die Seiten „Für Vereine“ und „Für Partner“ geöffnet wurden
+        und wie oft jede Stadtseite (platzfrei.app/bolzplaetze/…) aufgerufen
+        wurde. Dabei wird weder eine Geräte-Nummer noch ein Platz noch eine
+        IP-Adresse gespeichert, nur Summen pro Tag. Ob dein Gerät heute oder
+        in diesem Monat schon gezählt wurde, merkt sich nur dein Gerät
+        (localStorage, auf den Stadtseiten nur für die Dauer der
+        Browser-Sitzung im sessionStorage). Gegen
         Missbrauch wird die Anfrage wie in Abschnitt 3 beschrieben kurz mit
         einem gehashten Prüfwert deines Anschlusses gebremst. Hat dein Browser
         „Nicht verfolgen“ (Do Not Track oder Global Privacy Control)

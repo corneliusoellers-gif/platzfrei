@@ -319,6 +319,17 @@ document.querySelectorAll('section.gruppe').forEach(function(g){
 g.hidden=!g.querySelector('ul.plaetze li:not([hidden])')})});})();
 </script>"""
 
+# Zählt Aufrufe je Stadtseite (nur Seite + Tag als Summe, siehe nutzung/supabase-nutzung-kennzahlen.sql).
+# Je Seite einmal pro Browser-Sitzung; nicht bei "Nicht verfolgen", automatischen Browsern und dem Admin-Gerät.
+ZAEHL_JS = """<script>
+(function(){try{if(navigator.webdriver||navigator.doNotTrack==="1"||navigator.globalPrivacyControl)return;
+if(localStorage.getItem("platzfrei.nutzung.aus")==="1")return;
+var s=location.pathname.split("/")[2]||"uebersicht",k="platzfrei.seite."+s;
+if(!/^[a-z0-9-]{1,80}$/.test(s)||sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");
+fetch("%s/rest/v1/rpc/nutzung_seite",{method:"POST",keepalive:true,
+headers:{"apikey":"%s","Content-Type":"application/json"},body:JSON.stringify({p_seite:s})}).catch(function(){})}catch(e){}})();
+</script>""" % (SUPABASE_URL, OEFFENTLICHER_SCHLUESSEL)
+
 def karte(o, stadt):
     sp = o["sportarten"] or []
     icons = "".join(SPORT_ICON.get(x, "") for x in sp)
@@ -416,6 +427,7 @@ for s in staedte:
     t.append("</div></div>")
     t.append(FUSS)
     if len(sport) > 1: t.append(FILTER_JS)
+    t.append(ZAEHL_JS)
     t.append("</body>\n</html>\n")
     os.makedirs(f"{AUS}/bolzplaetze/{s['slug']}")
     open(f"{AUS}/bolzplaetze/{s['slug']}/index.html", "w").write("\n".join(t))
@@ -456,6 +468,7 @@ li.hidden=q&&li.dataset.name.indexOf(q)<0});var n=0;document.querySelectorAll('s
 s.hidden=!s.querySelector('li:not([hidden])');if(!s.hidden)n++});document.querySelector('.vorne').hidden=!!q;
 document.querySelector('.leer-suche').hidden=!q||n>0})})();
 </script>
+""" + ZAEHL_JS + """
 </body>
 </html>
 """)
