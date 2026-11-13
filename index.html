@@ -207,7 +207,6 @@ aside{width:420px;flex-shrink:0;background:var(--grund);
 .held{padding:34px 22px 10px}
 .held .ueber-marke{font-size:13px;font-weight:700;color:var(--gruen-tief);letter-spacing:.02em;text-transform:uppercase}
 .held h2{font-size:clamp(30px,4.4vw,46px);line-height:1.08;letter-spacing:-.03em;font-weight:800;margin:10px 0 14px}
-.held h2 em{font-style:normal;color:var(--gruen)}
 .held p{font-size:17px;line-height:1.55;color:var(--tinte-2);max-width:640px}
 .held .reihe{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
 .held .knopf{flex:0 0 auto;padding-left:22px;padding-right:22px}
@@ -315,7 +314,7 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
   color:var(--tinte);text-decoration:none}
 
 /* ---------- Status oben in der Platz-Ansicht ---------- */
-.status{display:flex;gap:14px;align-items:center;margin:0 20px 12px;padding:16px 18px;
+.status{display:flex;gap:14px;align-items:center;margin:0 0 12px;padding:16px 18px;
   border-radius:var(--r-karte);background:var(--unklar-bg);color:var(--unklar)}
 .status.frei{background:var(--frei-bg);color:var(--frei)}
 .status.absprache{background:var(--absprache-bg);color:var(--absprache)}
@@ -328,13 +327,14 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
 .status-text{display:flex;flex-direction:column;min-width:0}
 .status-text b{font-size:18px;letter-spacing:-.015em}
 .status-text span{font-size:13.5px;color:var(--tinte-2);margin-top:1px}
-.schnell{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0 20px 14px}
+.schnell{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0 0 14px}
 .schnell button{display:flex;flex-direction:column;align-items:center;gap:4px;
   padding:11px 4px 10px;border:0;border-radius:14px;background:var(--flaeche);
   box-shadow:var(--schatten);font-family:var(--schrift);font-size:12.5px;font-weight:600;
   color:var(--tinte);cursor:pointer}
-.schnell button span{font-size:18px;line-height:1;color:var(--gruen-tief)}
+.schnell button span{display:flex;font-size:18px;line-height:1;color:var(--gruen-tief)}
 .schnell button.an span{color:#F5B400}
+.schnell button.an svg{fill:currentColor}
 /* Am Desktop bleiben Route/Merken/Melden zusätzlich unten nicht doppelt. */
 .fuss.detailfuss2{display:none}
 
@@ -779,6 +779,8 @@ button.rang-zeile{cursor:pointer}
 .einf-weg{position:absolute;top:12px;right:14px;border:0;background:none;color:var(--tinte-3);font:inherit;
   font-size:14px;cursor:pointer;padding:6px}
 .einf-bild{font-size:54px;line-height:1;height:84px;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.einf-kachel{width:72px;height:72px;border-radius:22px;display:grid;place-items:center;background:var(--gruen-zart);color:var(--gruen)}
+.einf-kachel .ic{vertical-align:0}
 .einf h2{margin:0 0 8px;font-size:22px;line-height:1.2}
 .einf p{margin:0;font-size:15px;line-height:1.45;color:var(--tinte-2)}
 .einf-legende{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;margin:18px 0 0;text-align:left;font-size:13.5px}
@@ -1307,7 +1309,7 @@ header h1 .pf-marke{height:30px;width:auto}
 .status.vermutet.unklar .status-icon{background:var(--zu);color:#fff}
 .status.unklar{background:var(--unklar-bg);color:var(--tinte)}
 .status.unklar .status-icon{background:var(--unklar);color:#fff}
-.naechster{margin:0 20px 12px;padding:14px 16px;border-radius:16px;background:var(--flaeche);
+.naechster{margin:0 0 12px;padding:14px 16px;border-radius:16px;background:var(--flaeche);
   box-shadow:0 0 0 1.5px var(--absprache) inset}
 .naechster b{display:block;font-size:15px}
 .naechster p{font-size:13.5px;line-height:1.5;color:var(--tinte-2);margin-top:4px}
@@ -1772,6 +1774,36 @@ button.team-mail{border:0;background:none;padding:0;font:inherit;cursor:pointer}
 #zaehl-frage p{margin:0 0 10px}
 #zaehl-frage .zaehl-knoepfe{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 #zaehl-frage .knopf{width:100%;margin:0}
+
+/* ---------- UI-Feinschliff 13.11. (Leitfaden "unslop") ----------
+   Überschriften brechen ausgewogen um, Fließtext ohne einzelnes Wort in der
+   letzten Zeile. Zahlen, die untereinander stehen oder sich ändern, mit
+   gleich breiten Ziffern, damit nichts springt. */
+h1,h2,h3,.dname,.einf h2,.zgruppe span,.naechster b,.status-text b{text-wrap:balance}
+p,.einf p,.held p,.zzusatz,.status-text span{text-wrap:pretty}
+.anzahl-zahl,.zgruppe small,.zahl b{font-variant-numeric:tabular-nums}
+/* Ladezustand der Liste: graue Platzhalter statt "0 Plätze" */
+.lade-liste{grid-column:1/-1}
+.lade-zeile{display:flex;align-items:center;gap:12px;padding:12px 8px}
+.lade-zeile i,.lade-zeile b,.lade-zeile u{display:block;border-radius:8px;background:color-mix(in srgb,var(--tinte) 7%,transparent);
+  animation:lade-puls 1.4s ease-in-out infinite}
+.lade-zeile i{width:44px;height:44px;border-radius:12px;flex:none}
+.lade-zeile span{flex:1;display:grid;gap:7px}
+.lade-zeile b{height:13px;width:62%}
+.lade-zeile u{height:11px;width:38%}
+.lade-zeile:nth-child(2n) b{width:48%}
+.lade-zeile:nth-child(3n) u{width:52%}
+@keyframes lade-puls{50%{opacity:.45}}
+@media (prefers-reduced-motion:reduce){.lade-zeile i,.lade-zeile b,.lade-zeile u{animation:none}}
+/* Über-Seite: echtes Produkt statt nur Text */
+.held-raster{display:grid;gap:28px;align-items:center}
+@media (min-width:960px){.held-raster{grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr)}}
+.held-vorschau{border-radius:24px;padding:8px;background:var(--flaeche);box-shadow:var(--schatten-hoch);max-width:440px;width:100%;justify-self:center}
+.held-vorschau .vorschau-kopf{display:flex;align-items:center;justify-content:space-between;padding:10px 12px 6px;font-size:13px;font-weight:700}
+.held-vorschau .vorschau-kopf small{font-weight:600;color:var(--tinte-3);font-size:12px}
+.held-vorschau .zeile.neu{width:100%;border-radius:16px;pointer-events:none}
+.held-vorschau .zeile.neu::after{left:64px}
+.held-vorschau .zeile.neu:last-child::after{display:none}
 </style>
 <!-- Besucherzähler GoatCounter: lädt erst nach Zustimmung (goatLaden) -->
 </head>
@@ -3581,6 +3613,15 @@ const ICON_PFADE = {
   haken:'<path d="M20 6 9 17l-5-5"/>',
   herz:'<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
   tasche:'<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>',
+  kamera:'<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/>',
+  uhr:'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+  stift:'<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/>',
+  flagge:'<path d="M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 7.333 2q2 0 3.067-.8A1 1 0 0 1 20 4v10a1 1 0 0 1-.4.8A6 6 0 0 1 16 16c-3 0-5-2-8-2a6 6 0 0 0-4 1.528"/>',
+  route:'<polygon points="3 11 22 2 13 21 11 13 3 11"/>',
+  balken:'<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',
+  teilen:'<path d="M12 2v13"/><path d="m16 6-4-4-4 4"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>',
+  hand:'<path d="M18 11V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2"/><path d="M14 10V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/>',
+  ball:'<circle cx="12" cy="12" r="10"/><path d="m12 7 4.5 3.3-1.7 5.2H9.2l-1.7-5.2z"/><path d="M12 2v5M16.5 10.3l4.9-1.6M14.8 15.5l3 4.2M9.2 15.5l-3 4.2M7.5 10.3 2.6 8.7"/>',
   hut:'<path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>'
 };
 function ic(name, groesse = 16){
@@ -3779,7 +3820,7 @@ function auslastungBlock(o){
   if (r === undefined) { auslastungLaden(o.id); return `<div id="auslastung"></div>`; }
   if (r === "laedt") return `<div id="auslastung"></div>`;
   if (!r) return `<div class="auslastung ausl-leer" id="auslastung">
-      <p>📊 Wann hier meist was los ist, siehst du, sobald öfter jemand eincheckt.</p></div>`;
+      <p>${ic("balken", 14)} Wann hier meist was los ist, siehst du, sobald öfter jemand eincheckt.</p></div>`;
 
   const tag = Z.auslastungTag || heuteIso();
   const jetzt = new Date(), istHeute = tag === heuteIso();
@@ -3806,14 +3847,14 @@ function auslastungBlock(o){
    -------------------------------------------------------------------------- */
 const EINF_SCHLUESSEL = "platzfrei.einfuehrung";
 const EINF_SEITEN = [
-  { bild:"📍", titel:"Ab deinem Standort rechnen?",
+  { bild:`<span class="einf-kachel">${ic("ortung", 34)}</span>`, titel:"Ab deinem Standort rechnen?",
     text:"Dann siehst du Entfernungen, die nächsten Plätze zuerst und kannst einchecken. Gespeichert wird dein Standort nicht. Er verlässt dein Gerät nur beim Einchecken und gerundet fürs Wetter.",
     standort:true },
   { bild:`<svg width="54" height="71" viewBox="0 0 320 420" aria-hidden="true"><path d="M160 0C71.634 0 0 70 0 158C0 244 84 348 149 414C155 420 165 420 171 414C236 348 320 244 320 158C320 70 248.366 0 160 0Z" fill="#05B630"/><path d="M124 62V100H196V62M124 282V244H196V282M70 172H250M86 62H234C244.667 62 250 67.3333 250 78V266C250 276.667 244.667 282 234 282H86C75.3333 282 70 276.667 70 266V78C70 67.3333 75.3333 62 86 62ZM187 172C187 186.912 174.912 199 160 199C145.088 199 133 186.912 133 172C133 157.088 145.088 145 160 145C174.912 145 187 157.088 187 172Z" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
     titel:"Wo darf ich spielen?",
     text:"Platzfrei zeigt Bolz-, Basketball- und Sportplätze in deiner Nähe und ob du dort frei spielen darfst.",
     legende:true },
-  { bild:"👥", titel:"Sieh, wo was los ist",
+  { bild:`<span class="einf-kachel">${ic("leute", 34)}</span>`, titel:"Sieh, wo was los ist",
     text:"Check ein, wenn du auf dem Platz bist, oder setz ein Spiel an. Andere sehen nur, wie viele kommen, nie deinen Namen." },
 ];
 
@@ -3906,12 +3947,12 @@ function bezugName(){
 function bezugZeile(){
   const echt = Z.positionEcht;
   return `<div class="bezug${echt ? "" : " ohne"}">
-      <span class="bezug-text"><span aria-hidden="true">📍</span> Entfernungen ab <b>${esc(bezugName())}</b>${
+      <span class="bezug-text">${ic("pin", 14)} Entfernungen ab <b>${esc(bezugName())}</b>${
         !echt && !Z.startpunkt ? ` <small>(nicht dein Standort)</small>` : ``}</span>
       <button class="inline-knopf" data-startpunkt="${Z.startpunktOffen ? "zu" : "auf"}"
         aria-expanded="${Z.startpunktOffen}">${Z.startpunktOffen ? "Schließen" : "Ändern"}</button>
     </div>${Z.startpunktOffen ? `<div class="startpunkt">
-      <button class="knopf" data-standort="1">📍 Meinen Standort nutzen</button>
+      <button class="knopf" data-standort="1">${ic("ortung", 16)} Meinen Standort nutzen</button>
       <p class="hinweis">Die App rechnet mit deinem Standort Entfernungen und findet
         bei „Jetzt spielen“ den nächsten Platz. Gespeichert wird er nicht. Er verlässt
         dein Gerät nur kurz: beim Einchecken zur Abstandsprüfung und auf etwa 1 km
@@ -4086,6 +4127,10 @@ function ansichtListe(nurListe){
         : null);
 
   const ohneSuche = !Z.suche.trim();
+  /* Unter "Sicher zuerst" steht die Stufe schon als Gruppen-Überschrift
+     ("Frei zum Spielen 951"). Dann wiederholt die Zeile sie nicht, nur
+     "noch nicht bestätigt" bleibt als echte Zusatzinfo stehen. */
+  const gruppiert = Z.sortierung === "sicher";
   const zeilenListe = orte.map(o=>{
     const v = vereinsMarke(o);
     const bs = bespielbarkeit(o);
@@ -4101,8 +4146,10 @@ function ansichtListe(nurListe){
        abgeschnitten wird. Die Entfernung steht rechts, gut sichtbar. */
     const sportIcons = o.sportarten.slice(0, 3).map(sp => `<span aria-hidden="true">${SPORT_ICON[sp] || "•"}</span>`).join("")
       + (o.sportarten.length > 3 ? `<span class="zmehr" aria-hidden="true">+${o.sportarten.length - 3}</span>` : ``);
-    const badge = st.stufe === "vermutet"
-      ? { gruen:"Frei", orange:"Vorher fragen" }[st.ampel] + ` <span class="zverm">· vermutet</span>` : st.titel;
+    const badge = gruppiert
+      ? (st.stufe === "vermutet" ? "noch nicht bestätigt" : "")
+      : st.stufe === "vermutet"
+        ? { gruen:"Frei", orange:"Vorher fragen" }[st.ampel] + ` <span class="zverm">· vermutet</span>` : st.titel;
     const marken = (bs && bs[0] === "schlecht" ? `
           <span class="marke boden ${bs[0]}">${bs[1]}</span>` : ``) + (anzMeld >= 3 ? `
           <span class="marke warnung">${ic("warnung", 12)} ${anzMeld}× gemeldet</span>` : ``) + (
@@ -4115,7 +4162,8 @@ function ansichtListe(nurListe){
       <span class="zt">
         <span class="zkopf"><span class="zname">${nameHtml(o)}</span><span class="zsport" title="${esc(sportTitel)}" aria-label="${esc(sportTitel)}">${sportIcons}</span></span>${anz.zusatz ? `
         <span class="zzusatz">${esc(anz.zusatz)}</span>` : ``}
-        <span class="zstatus"><span class="zb ${st.ampel}"${st.hinweis ? ` title="${st.hinweis}"` : ``}><span class="zicon" aria-hidden="true">${st.icon}</span>${badge}</span></span>${marken ? `
+${badge ? `
+        <span class="zstatus"><span class="zb ${st.ampel}"${st.hinweis ? ` title="${st.hinweis}"` : ``}><span class="zicon" aria-hidden="true">${st.icon}</span>${badge}</span></span>` : ``}${marken ? `
         <span class="zmarken">${marken}</span>` : ``}
       </span>
       <span class="zrechts">${mitKm() ? `
@@ -4133,7 +4181,12 @@ function ansichtListe(nurListe){
       if (a !== davor) zeilenListe.splice(i, 0, `<div class="zgruppe ${a}"><span>${AMPEL_GRUPPE[a]}</span><small>${zahlen[a].toLocaleString("de-DE")}</small></div>`);
     }
   }
-  const leer = orte.length ? `` : Z.suche.trim() ? `<div class="leer"><b>Nichts gefunden für „${esc(Z.suche.trim())}“.</b><br>
+  /* Noch nichts geladen: Platzhalter-Zeilen statt "0 Plätze" und
+     "Kein Platz passt" – das wäre in den ersten Sekunden schlicht falsch. */
+  const laedtErst = !orte.length && (!DATEN.length || Z.laedtNoch) && !Z.suche.trim();
+  const leer = laedtErst ? `<div class="lade-liste" aria-hidden="true">${
+      `<div class="lade-zeile"><i></i><span><b></b><u></u></span></div>`.repeat(6)}</div>`
+    : orte.length ? `` : Z.suche.trim() ? `<div class="leer"><b>Nichts gefunden für „${esc(Z.suche.trim())}“.</b><br>
       Anders schreiben, Filter lockern – oder den Platz selbst eintragen.</div>`
     : `<div class="leer"><b>Kein Platz passt zu den Filtern.</b><br>
       Filter lockern – oder unten den fehlenden Platz eintragen.</div>`;
@@ -4166,7 +4219,8 @@ function ansichtListe(nurListe){
   const anzahl = alleOrte.length;
   const zahl = anzahl.toLocaleString("de-DE");
   const plaetze = anzahl === 1 ? "Platz" : "Plätze";
-  const ueberschrift = Z.suche.trim() ? `${zahl} Treffer für „${Z.suche.trim()}“`
+  const ueberschrift = laedtErst ? `Plätze werden geladen …`
+    : Z.suche.trim() ? `${zahl} Treffer für „${Z.suche.trim()}“`
     : Z.bereich ? `${zahl} ${plaetze} im Kartenausschnitt`
     : Z.maxKm && mitKm() ? `${zahl} ${plaetze} bis ${Z.maxKm} km`
     : Z.laedtNoch && mitKm() ? `${zahl} ${plaetze} in der Umgebung`
@@ -4180,7 +4234,8 @@ function ansichtListe(nurListe){
   ].filter(Boolean);
   const gesamt = (DATEN.length - DOPPELT).toLocaleString("de-DE");
   const trefferInfo = `<div class="anzahl" role="status" aria-live="polite"><span class="anzahl-zahl">${esc(ueberschrift)}</span>${
-      Z.laedtNoch ? `<span class="anzahl-info">${!AUSSCHNITT ? "Die Plätze in ganz Deutschland laden noch im Hintergrund …" : "Plätze werden geladen …"}</span>`
+      laedtErst ? ``
+      : Z.laedtNoch ? `<span class="anzahl-info">${!AUSSCHNITT ? "Die Plätze in ganz Deutschland laden noch im Hintergrund …" : "Plätze werden geladen …"}</span>`
       : Z.bereich ? `<span class="anzahl-info">Zeigt nur den Kartenausschnitt.
            <button class="inline-knopf" data-bereich="aus">Wieder Umgebung zeigen</button></span>`
       : filterTeile.length || Z.maxKm || Z.suche.trim()
@@ -4756,11 +4811,11 @@ function ansichtDetail(){
   /* Der nächste sinnvolle Schritt, direkt unter dem Status. */
   const schritte = [];
   if (st.stufe !== "bestaetigt") schritte.push(
-    `<label class="inline-knopf" for="schild-datei" tabindex="0" role="button">📷 Schild fotografieren</label>`,
+    `<label class="inline-knopf" for="schild-datei" tabindex="0" role="button">${ic("kamera", 14)} Schild fotografieren</label>`,
     `<button class="inline-knopf" data-geprueft="${o.id}">${BESTAETIGT.has(o.id) ? "✓ Du hast hier gespielt" : "✓ Ich habe hier gespielt"}</button>`);
-  if (zeitenFehlen) schritte.push(`<button class="inline-knopf" data-gehe="bearbeiten" data-fokus="zeiten">🕒 Zeiten ergänzen</button>`);
-  else schritte.push(`<button class="inline-knopf" data-gehe="bearbeiten">✎ Angaben ergänzen</button>`);
-  schritte.push(`<button class="inline-knopf" data-gehe="melden">⚑ Stimmt etwas nicht?</button>`);
+  if (zeitenFehlen) schritte.push(`<button class="inline-knopf" data-gehe="bearbeiten" data-fokus="zeiten">${ic("uhr", 14)} Zeiten ergänzen</button>`);
+  else schritte.push(`<button class="inline-knopf" data-gehe="bearbeiten">${ic("stift", 14)} Angaben ergänzen</button>`);
+  schritte.push(`<button class="inline-knopf" data-gehe="melden">${ic("flagge", 14)} Stimmt etwas nicht?</button>`);
   const naechsterSchritt = st.stufe === "bestaetigt" && !zeitenFehlen ? `` : `<div class="naechster">
       <b>${st.stufe === "bestaetigt" ? "Erlaubte Zeiten fehlen noch" : st.stufe === "ungeklaert" ? "Zugang prüfen, bevor du hinfährst" : "Hilf mit, den Zugang zu prüfen"}</b>
       <p>${st.stufe === "ungeklaert" ? "Ob man hier spielen darf, weiß noch niemand. Am Eingang hängt oft ein Schild mit den Regeln."
@@ -4791,10 +4846,10 @@ function ansichtDetail(){
       ${liveBlock(o)}
       ${auslastungBlock(o)}
       <div class="schnell">
-        <button data-gehe="bearbeiten"><span aria-hidden="true">✎</span>Ergänzen</button>
-        <button data-merken="${o.id}" class="${GEMERKT.has(o.id) ? "an" : ""}"><span aria-hidden="true">${GEMERKT.has(o.id) ? "★" : "☆"}</span>${GEMERKT.has(o.id) ? "Gemerkt" : "Merken"}</button>
-        <button data-teilen="${o.id}"><span aria-hidden="true">↗</span>Teilen</button>
-        <button data-gehe="melden"><span aria-hidden="true">⚑</span>Melden</button>
+        <button data-gehe="bearbeiten"><span aria-hidden="true">${ic("stift", 20)}</span>Ergänzen</button>
+        <button data-merken="${o.id}" class="${GEMERKT.has(o.id) ? "an" : ""}"><span aria-hidden="true">${ic("stern", 20)}</span>${GEMERKT.has(o.id) ? "Gemerkt" : "Merken"}</button>
+        <button data-teilen="${o.id}"><span aria-hidden="true">${ic("teilen", 20)}</span>Teilen</button>
+        <button data-gehe="melden"><span aria-hidden="true">${ic("flagge", 20)}</span>Melden</button>
       </div>
       ${spieleBlock(o)}
       ${tippsBlock(o)}
@@ -4883,7 +4938,7 @@ function ansichtDetail(){
     <div class="fuss detailfuss">
       <button class="knopf zweit" data-geprueft="${o.id}">${
         BESTAETIGT.has(o.id) ? "✓ Hier gespielt" : "Hier gespielt"}</button>
-      <button class="knopf" data-route="${o.id}"><span aria-hidden="true">➜</span> Route</button>
+      <button class="knopf" data-route="${o.id}">${ic("route", 16)} Route</button>
     </div>
     ${Z.admin ? `<div class="fuss" style="padding-top:0;border-top:0">
       <button class="knopf zweit loeschen" data-loeschen="${o.id}">Platz löschen</button>
@@ -4951,7 +5006,7 @@ function ansichtBearbeiten(){
         <textarea name="begruendung" maxlength="1000"
           placeholder="z. B. Schild am Eingang: täglich 8–20 Uhr · Gemeinde Gauting, Mail vom 20.10."></textarea>
         <label class="inline-knopf fotowahl"><span id="aend-schildtext">${Z.aendSchildFoto?.id === o.id
-            ? "✓ Schildfoto gewählt – ändern" : "🪧 Oder: Schild fotografieren"}</span>
+            ? "✓ Schildfoto gewählt – ändern" : ic("kamera", 14) + " Oder: Schild fotografieren"}</span>
           <input type="file" id="aend-schildfoto" accept="image/*" hidden></label>` : ``}
 
         <p class="hinweis">${sperr
@@ -5009,7 +5064,7 @@ function ansichtNeu(){
         <label>Position</label>
         <input value="${p ? p.lat+", "+p.lon : "noch nicht gesetzt"}" readonly
                class="${p?"":"gesperrt"}">
-        <button type="button" class="inline-knopf" data-hierpunkt="1">📍 Ich stehe gerade dort</button>
+        <button type="button" class="inline-knopf" data-hierpunkt="1">${ic("ortung", 14)} Ich stehe gerade dort</button>
         ${abstand !== null && abstand > 300 ? `<p class="hinweis">Der Punkt liegt ${abstand >= 1000
           ? (abstand/1000).toFixed(1).replace(".",",")+" km" : abstand+" m"} von deinem Standort entfernt.</p>` : ``}
 
@@ -5061,7 +5116,7 @@ function ansichtNeu(){
 
         <div id="neu-schild">
           <label>Foto vom Schild</label>
-          <label class="inline-knopf fotowahl">${Z.neuSchildFoto ? "✓ Schildfoto gewählt – ändern" : "🪧 Schild fotografieren"}
+          <label class="inline-knopf fotowahl">${Z.neuSchildFoto ? "✓ Schildfoto gewählt – ändern" : ic("kamera", 14) + " Schild fotografieren"}
             <input type="file" id="neu-schildfoto" accept="image/*" hidden></label>
           <p class="hinweis">Am besten so, dass man die Regeln und Zeiten lesen kann.</p>
         </div>
@@ -5092,7 +5147,7 @@ function ansichtNeu(){
 
         ${Z.admin ? `` : `
         <label>Foto vom Platz (Pflicht)</label>
-        <label class="inline-knopf fotowahl">${Z.neuFoto ? "✓ Foto gewählt – ändern" : "📷 Foto aufnehmen oder wählen"}
+        <label class="inline-knopf fotowahl">${Z.neuFoto ? "✓ Foto gewählt – ändern" : ic("kamera", 14) + " Foto aufnehmen oder wählen"}
           <input type="file" id="neu-foto" accept="image/*" hidden></label>
         <p class="hinweis">Damit wir sehen, dass es den Platz wirklich gibt. Am besten mit
         Toren oder Körben. Bitte keine Personen oder Autokennzeichen.</p>`}
@@ -6379,7 +6434,7 @@ function zugangFragen(id, immer){
   const schritt1 = () => {
     el.innerHTML = `<div class="einf-karte">
         <button class="einf-weg" data-fweg="1">Später</button>
-        <div class="einf-bild">⚽️</div>
+        <div class="einf-bild"><span class="einf-kachel">${ic("ball", 34)}</span></div>
         <h2>Darf man hier spielen?</h2>
         <p>Du bist gerade bei <b>${esc(o.name)}</b>. Bisher steht dort:
           ${st.icon} ${esc(st.titel)}. Deine Antwort hilft allen, die nach dir kommen.</p>
@@ -6389,7 +6444,7 @@ function zugangFragen(id, immer){
           <button class="knopf zweit" data-fweiss="1">Weiß ich nicht</button>
         </div>
         <label class="frage-klein"><input type="file" accept="image/*" hidden data-ffoto="1">
-          <span class="inline-knopf" tabindex="0" role="button">📷 Schild mit den Regeln fotografieren</span></label>
+          <span class="inline-knopf" tabindex="0" role="button">${ic("kamera", 14)} Schild mit den Regeln fotografieren</span></label>
         <small class="frage-klein">Anonym, ohne Namen. Bitte nur das Schild fotografieren, keine Personen.</small>
       </div>`;
     el.querySelector("[data-fja]").focus();
@@ -6397,11 +6452,11 @@ function zugangFragen(id, immer){
   const schritt2 = () => {
     el.innerHTML = `<div class="einf-karte">
         <button class="einf-weg" data-fweg="1">Schließen</button>
-        <div class="einf-bild">✋</div>
+        <div class="einf-bild"><span class="einf-kachel">${ic("hand", 34)}</span></div>
         <h2>Was spricht dagegen?</h2>
         <p>Wir prüfen den Platz. Der Zugang ändert sich erst, wenn wir einen Beleg haben.</p>
         <div class="frage-knoepfe">
-          <label class="knopf"><input type="file" accept="image/*" hidden data-ffoto="1">📷 Ein Schild verbietet es</label>
+          <label class="knopf"><input type="file" accept="image/*" hidden data-ffoto="1">${ic("kamera", 16)} Ein Schild verbietet es</label>
           <button class="knopf zweit" data-fgrund="weggeschickt">Ich wurde weggeschickt</button>
           <button class="knopf zweit" data-fgrund="abgesperrt">Tor ist zu oder abgesperrt</button>
           <button class="knopf zweit" data-fweiss="1">Nur so ein Gefühl</button>
@@ -8352,20 +8407,48 @@ function rasterVorschau(){
     </div>`;
 }
 
+/* Über-Seite: echte Plätze aus der Datenbank, gezeigt wie in der Liste –
+   statt das Produkt nur zu beschreiben. Bevorzugt bestätigte, freie Plätze
+   verschiedener Sportarten. Ohne Daten (lädt noch) bleibt der Platz leer. */
+function produktVorschau(){
+  const gewaehlt = [], sporte = new Set();
+  for (const o of DATEN) {
+    if (o.doppelt_von || !o.sportarten?.length) continue;
+    const st = zugangStufe(o);
+    if (st.stufe !== "bestaetigt" || st.ampel !== "gruen" || sporte.has(o.sportarten[0])) continue;
+    gewaehlt.push(o); sporte.add(o.sportarten[0]);
+    if (gewaehlt.length === 3) break;
+  }
+  if (gewaehlt.length < 3) return ``;
+  return `<div class="held-vorschau" aria-label="Beispiel aus der Platzliste">
+      <div class="vorschau-kopf"><span>So sieht es aus</span><small>echte Plätze</small></div>
+      ${gewaehlt.map(o => {
+        const st = zugangStufe(o);
+        return `<div class="zeile neu stufe-${st.stufe}" style="--streifen:${farbe(o)}">
+          ${platzBild(o)}
+          <span class="zt">
+            <span class="zkopf"><span class="zname">${nameHtml(o)}</span><span class="zsport" aria-hidden="true">${o.sportarten.slice(0, 3).map(sp => `<span>${SPORT_ICON[sp] || "•"}</span>`).join("")}</span></span>
+            <span class="zzusatz">${esc(o.ort || "")}</span>
+            <span class="zstatus"><span class="zb ${st.ampel}"><span class="zicon" aria-hidden="true">${st.icon}</span>${st.titel}</span></span>
+          </span>
+        </div>`; }).join("")}
+    </div>`;
+}
+
 function ansichtUeber(){
   const z = kennzahlen();
   seite.innerHTML = `
     ${infoKopf("ueber")}
     <div class="rolle">
-      <div class="held">
-        <h2>Wo darf ich <em>spielen?</em></h2>
+      <div class="held held-raster"><div>
+        <h2>Sieh, wo du frei spielen darfst, bevor du losgehst.</h2>
         <p>Platzfrei zeigt dir, auf welchen Bolz-, Basketball- und Sportplätzen du frei
         spielen darfst und wann. Kein Ärger mit dem Platzwart, kein Rätselraten am Zaun.</p>
         <div class="reihe">
           <button class="knopf" data-gehe="liste">Plätze in deiner Nähe</button>
           <button class="knopf zweit" data-einfuehrung="1">Einführung ansehen</button>
         </div>
-      </div>
+      </div>${produktVorschau()}</div>
       <div class="ueber-teil">
         <div class="zahlen">
           <div class="zahl"><b>${zahlText(z.plaetze)}</b><small>Plätze in ganz Deutschland</small></div>
@@ -8429,7 +8512,7 @@ function ansichtVereine(){
     ${infoKopf("vereine")}
     <div class="rolle">
       <div class="held">
-        <h2>Euer Platz. <em>Eure Zeiten.</em></h2>
+        <h2>Zeigt Kindern, wann euer Platz frei ist.</h2>
         <p>Kinder wollen kicken – oft genau auf eurem Platz. Stehen eure Trainingszeiten
         in Platzfrei, sehen sie, wann der Platz frei ist und wann nicht. Das spart Ärger
         und bringt euch den Nachwuchs von nebenan.</p>
@@ -8481,7 +8564,7 @@ function ansichtPartner(){
     ${infoKopf("partner")}
     <div class="rolle">
       <div class="held">
-        <h2>Mehr Kinder auf den Platz. <em>Gemeinsam.</em></h2>
+        <h2>Helft mit, dass Kinder freie Plätze finden.</h2>
         <p>Viele Kinder werden vom Platz geschickt und hören irgendwann auf zu suchen.
         Platzfrei zeigt ihnen, wo sie frei spielen dürfen und wann. Damit das überall
         klappt, sucht Platzfrei Partner aus Sport, Jugendarbeit, Förderung und Handel.</p>
