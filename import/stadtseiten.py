@@ -304,6 +304,7 @@ FUSS = f"""</main>
 <a href="/bolzplaetze/">Alle Städte</a>
 <a href="/#impressum">Impressum</a>
 <a href="/#datenschutz">Datenschutz</a>
+<a href="/#nutzungsbedingungen">Nutzungsbedingungen</a>
 <span>Platzdaten teils © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap-Mitwirkende</a> (ODbL) und amtliche Listen der Städte</span>
 </div></footer>
 """
@@ -320,10 +321,11 @@ g.hidden=!g.querySelector('ul.plaetze li:not([hidden])')})});})();
 </script>"""
 
 # Zählt Aufrufe je Stadtseite (nur Seite + Tag als Summe, siehe nutzung/supabase-nutzung-kennzahlen.sql).
+# Nur mit Einwilligung aus der App (platzfrei.zaehlen = "ja", seit 13.11.2026).
 # Je Seite einmal pro Browser-Sitzung; nicht bei "Nicht verfolgen", automatischen Browsern und dem Admin-Gerät.
 ZAEHL_JS = """<script>
 (function(){try{if(navigator.webdriver||navigator.doNotTrack==="1"||navigator.globalPrivacyControl)return;
-if(localStorage.getItem("platzfrei.nutzung.aus")==="1")return;
+if(localStorage.getItem("platzfrei.zaehlen")!=="ja"||localStorage.getItem("platzfrei.nutzung.aus")==="1")return;
 var s=location.pathname.split("/")[2]||"uebersicht",k="platzfrei.seite."+s;
 if(!/^[a-z0-9-]{1,80}$/.test(s)||sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");
 fetch("%s/rest/v1/rpc/nutzung_seite",{method:"POST",keepalive:true,
