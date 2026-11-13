@@ -60,8 +60,9 @@
    =========================================================================== */
 
 :root{
-  --gruen:#0B9463;
-  --gruen-tief:#087B51;
+  --gruen:#087F55;          /* 5:1 auf Weiß (vorher #0B9463, 3,9:1) */
+  --gruen-fuell:#087F55; --auf-gruen:#fff;
+  --gruen-tief:#066A46;
   --gruen-zart:#E7F5EE;
   --grund:#F6F8F6;
   --flaeche:#FFFFFF;
@@ -106,6 +107,7 @@
 }
 
 *{box-sizing:border-box;margin:0;padding:0}
+:where(a,button,input,select,textarea,summary,[tabindex]):focus-visible{outline:2px solid var(--gruen);outline-offset:2px}
 html,body{height:100%}
 
 /* §15 Tracking und Zeilenabstand sind größenabhängig – ein fester Wert
@@ -114,7 +116,7 @@ body{font-family:var(--schrift);font-size:15px;line-height:1.5;letter-spacing:0;
   color:var(--tinte);background:var(--grund);
   display:flex;flex-direction:column;overflow:hidden;
   -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
-::selection{background:var(--gruen);color:#fff}
+::selection{background:var(--gruen);color:var(--auf-gruen)}
 
 /* §1 Reaktion: Alles Drückbare antwortet beim Drücken, nicht beim Loslassen. */
 button,.zeile,.chip,.stern,[role="button"]{touch-action:manipulation;
@@ -143,7 +145,7 @@ header h1 em{font-style:normal;font-weight:400;font-size:13.5px;letter-spacing:-
   margin-right:auto;font-variant-numeric:tabular-nums}
 .adminknopf{font-family:var(--schrift);font-size:13.5px;font-weight:600;
   letter-spacing:-.005em;padding:9px 18px;border:0;border-radius:var(--r-pille);
-  background:var(--gruen);color:#fff;cursor:pointer;
+  background:var(--gruen);color:var(--auf-gruen);cursor:pointer;
   transition:background 160ms var(--feder-schnell),transform var(--druck)}
 .adminknopf:hover{background:var(--gruen-tief)}
 .adminknopf[hidden]{display:none}
@@ -164,7 +166,7 @@ aside{width:420px;flex-shrink:0;background:var(--grund);
 .leaflet-control-zoom a:last-child{border-radius:4px 4px 14px 14px!important;margin-top:3px}
 .standort-knopf{border:0!important;box-shadow:none!important}
 .standort-knopf .neu-knopf{margin-top:8px}
-.standort-knopf a.neu-knopf{background:var(--gruen)!important;color:#fff!important}
+.standort-knopf a.neu-knopf{background:var(--gruen)!important;color:var(--auf-gruen)!important}
 .standort-knopf a{display:flex!important;align-items:center;justify-content:center;
   width:34px!important;height:34px!important;border:0!important;border-radius:14px!important;
   box-shadow:var(--schatten)!important;color:var(--tinte)!important;background:var(--grund)}
@@ -297,7 +299,7 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
 .einst-chips{display:flex;flex-wrap:wrap;gap:8px}
 .einst-chips button{font:inherit;font-size:14px;font-weight:600;border:0;cursor:pointer;padding:8px 14px;
   border-radius:var(--r-pille);background:var(--flaeche);color:var(--tinte);box-shadow:inset 0 0 0 1.5px var(--kante)}
-.einst-chips button[aria-pressed=true]{background:var(--gruen);color:#fff;box-shadow:none}
+.einst-chips button[aria-pressed=true]{background:var(--gruen);color:var(--auf-gruen);box-shadow:none}
 .anzahl{padding:2px 20px 8px;font-size:13px;font-weight:600;color:var(--tinte-3);
   letter-spacing:.002em;flex-shrink:0}
 
@@ -746,7 +748,7 @@ button.rang-zeile{cursor:pointer}
 .ausl-tage{display:flex;gap:4px;margin-bottom:12px}
 .ausl-tage button{flex:1;border:0;border-radius:var(--r-pille);padding:5px 0;font:inherit;font-size:12px;
   font-weight:600;background:var(--grund);color:var(--tinte-2);cursor:pointer}
-.ausl-tage button[aria-pressed="true"]{background:var(--gruen);color:#fff}
+.ausl-tage button[aria-pressed="true"]{background:var(--gruen);color:var(--auf-gruen)}
 .ausl-balken{display:flex;align-items:flex-end;gap:3px;height:64px}
 .ausl-balken span{flex:1;background:var(--gruen);opacity:.32;border-radius:3px 3px 0 0;min-height:3px}
 .ausl-balken span.jetzt{opacity:1}
@@ -919,7 +921,7 @@ label.inline-knopf{display:inline-block;margin-top:10px}
   box-shadow:inset 0 1px 0 rgba(255,255,255,.7)}
 .knopf{flex:1;font-family:var(--schrift);font-size:14.5px;font-weight:600;
   letter-spacing:-.008em;padding:14px 16px;border:0;border-radius:var(--r-pille);
-  background:var(--gruen);color:#fff;cursor:pointer;line-height:1.25;
+  background:var(--gruen);color:var(--auf-gruen);cursor:pointer;line-height:1.25;
   transition:background 160ms var(--feder-schnell),box-shadow 200ms var(--feder),
              transform var(--druck)}
 .knopf:hover{background:var(--gruen-tief)}
@@ -1059,7 +1061,7 @@ label.inline-knopf{display:inline-block;margin-top:10px}
     background:transparent;color:var(--tinte-2);font-family:var(--schrift);font-size:14px;
     line-height:1.4;cursor:pointer}
   .eintragen-karte > span:first-child{width:40px;height:40px;flex-shrink:0;border-radius:50%;
-    display:grid;place-items:center;background:var(--gruen);color:#fff;font-size:22px;font-weight:700}
+    display:grid;place-items:center;background:var(--gruen);color:var(--auf-gruen);font-size:22px;font-weight:700}
   .eintragen-karte b{color:var(--tinte);font-size:15.5px}
   /* Stadtseiten: gleiche Form wie "Fehlt ein Platz?", aber deckend und als Link */
   a.stadt-karte{border:0;background:var(--flaeche);box-shadow:var(--schatten);margin:0 0 12px;text-decoration:none}
@@ -1127,7 +1129,7 @@ label.inline-knopf{display:inline-block;margin-top:10px}
    =========================================================================== */
 @media(prefers-color-scheme:dark){
   :root{
-    --gruen:#2BC98A;
+    --gruen:#2BC98A; --auf-gruen:#08211A;
     --gruen-tief:#22B27A;
     --gruen-zart:#12332A;
     --grund:#0E1512;
@@ -1234,7 +1236,7 @@ header h1 .pf-marke{height:30px;width:auto}
 .standort-knopf a.neu-knopf{position:relative;overflow:visible}
 .neu-blase{position:absolute;left:calc(100% + 14px);top:50%;transform:translate(-10px,-50%) scale(.9);
   transform-origin:left center;opacity:0;pointer-events:none;white-space:nowrap;
-  background:var(--gruen);color:#fff;font:600 14px/1 var(--schrift);padding:11px 15px;border-radius:14px;
+  background:var(--gruen);color:var(--auf-gruen);font:600 14px/1 var(--schrift);padding:11px 15px;border-radius:14px;
   box-shadow:0 6px 18px rgba(11,148,99,.28);transition:opacity 160ms ease,transform 260ms var(--feder)}
 .neu-blase::after{content:"";position:absolute;left:-5px;top:50%;width:12px;height:12px;background:inherit;
   border-radius:2px;transform:translateY(-50%) rotate(45deg)}
@@ -1388,7 +1390,7 @@ header h1 .pf-marke{height:30px;width:auto}
   box-shadow:0 0 0 1px var(--kante),var(--schatten)}
 .modus-knopf button{border:0;background:transparent;color:var(--tinte);font:inherit;font-size:13.5px;font-weight:600;
   padding:7px 12px;border-radius:var(--r-pille);cursor:pointer;min-height:36px}
-.modus-knopf button[aria-pressed="true"]{background:var(--gruen);color:#fff}
+.modus-knopf button[aria-pressed="true"]{background:var(--gruen);color:var(--auf-gruen)}
 .modus-knopf button:focus-visible{outline:2px solid var(--gruen);outline-offset:2px}
 .modus-zurueck{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 8px;
   font-size:13px;font-weight:600;color:var(--tinte-2)}
@@ -1435,7 +1437,7 @@ header h1 .pf-marke{height:30px;width:auto}
 @media (max-width:880px){
   .blatt-hoch #zur-karte{display:flex;left:auto;right:14px;transform:none;
     bottom:calc(var(--blatt-sichtbar, 90vh) - 32px);padding:5px 12px;font-size:13px;
-    background:var(--gruen);color:#fff;box-shadow:0 1px 4px rgba(15,26,21,.2)}
+    background:var(--gruen);color:var(--auf-gruen);box-shadow:0 1px 4px rgba(15,26,21,.2)}
 }
 /* Laptop: kein schwebender Knopf mehr (lag über "Spiel ansetzen"), "Karte zeigen" sitzt oben in der Leiste. */
 .rolle .los{margin:2px 0 12px}
@@ -1522,7 +1524,7 @@ header h1 .pf-marke{height:30px;width:auto}
   font:inherit;font-size:14px;font-weight:650;cursor:pointer;white-space:nowrap;
   background:var(--flaeche);color:var(--tinte);box-shadow:inset 0 0 0 1.5px var(--kante)}
 .leiste-knopf:hover{color:var(--gruen-tief);box-shadow:inset 0 0 0 1.5px var(--gruen)}
-.leiste-knopf.haupt{background:var(--gruen);color:#fff;box-shadow:none}
+.leiste-knopf.haupt{background:var(--gruen);color:var(--auf-gruen);box-shadow:none}
 .leiste-knopf.haupt:hover{background:var(--gruen-tief);color:#fff}
 .leiste-knopf:focus-visible{outline:2px solid var(--gruen);outline-offset:2px}
 @media (min-width:881px) and (max-width:1180px){ .leiste-knopf.haupt{font-size:0;padding:0;width:40px;justify-content:center}
@@ -1631,12 +1633,12 @@ header h1 .pf-marke{height:30px;width:auto}
 
 /* Standort als erste Aktion */
 .standort-gross{grid-column:1/-1;width:100%;display:flex;align-items:center;gap:12px;margin:4px 0 12px;padding:13px 16px;
-  border:0;border-radius:16px;background:var(--gruen);color:#fff;font:inherit;text-align:left;cursor:pointer;
+  border:0;border-radius:16px;background:var(--gruen);color:var(--auf-gruen);font:inherit;text-align:left;cursor:pointer;
   box-shadow:0 4px 14px -4px rgba(11,148,99,.55)}
 .standort-gross:hover{background:var(--gruen-tief)}
 .standort-gross:focus-visible{outline:2px solid var(--gruen);outline-offset:3px}
 .standort-gross b{display:block;font-size:16px;font-weight:700;letter-spacing:-.01em}
-.standort-gross small{display:block;font-size:12.5px;opacity:.88}
+.standort-gross small{display:block;font-size:12.5px}
 .standort-gross-icon{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.18);display:grid;place-items:center;flex-shrink:0}
 
 /* Weniger Rahmen: Hinweise als ruhige Zeilen */
@@ -1761,9 +1763,17 @@ button.team-mail{border:0;background:none;padding:0;font:inherit;cursor:pointer}
 #logo-menue small{display:block;font-size:12.5px;color:var(--tinte-3);margin-top:1px}
 #logo-menue hr{border:0;border-top:1px solid var(--kante);margin:4px 8px}
 #logo-menue .lm-klein{min-height:44px;font-size:14px;color:var(--tinte-2)}
+.recht-inhalt{display:flex;flex-wrap:wrap;gap:6px 14px;margin:6px 0 4px;font-size:14px}
+.recht-inhalt a{color:var(--gruen);font-weight:600;text-decoration:underline;padding:4px 0}
+.knopf.warn{background:var(--zu);color:#fff}
+#zaehl-frage{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0));z-index:1200;
+  max-width:440px;margin:0 auto;background:var(--flaeche);color:var(--tinte);border-radius:18px;padding:14px 16px;
+  box-shadow:var(--schatten-hoch);font-size:14px;line-height:1.45}
+#zaehl-frage p{margin:0 0 10px}
+#zaehl-frage .zaehl-knoepfe{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#zaehl-frage .knopf{width:100%;margin:0}
 </style>
-<!-- Besucherzähler GoatCounter: ohne Cookies, ohne personenbezogene Daten -->
-<script data-goatcounter="https://platzfrei.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+<!-- Besucherzähler GoatCounter: lädt erst nach Zustimmung (goatLaden) -->
 </head>
 <body>
 
@@ -1985,6 +1995,7 @@ function berlinTag(){
 function nutzungAus(){
   if (!ECHT || Z.admin || navigator.webdriver) return true;
   if (navigator.doNotTrack === "1" || navigator.globalPrivacyControl) return true;
+  if (!zaehlenErlaubt()) return true;     // 13.11.: nur mit Einwilligung (§ 25 TDDDG)
   try { return localStorage.getItem(NUTZUNG_AUS) === "1"; } catch { return true; }
 }
 function nutzungZaehlen(art){
@@ -4109,9 +4120,7 @@ function ansichtListe(nurListe){
       </span>
       <span class="zrechts">${mitKm() ? `
         <span class="zkm">${kmKurz(km)}</span>` : ``}
-        <span class="stern${GEMERKT.has(o.id) ? " an" : ""}" data-merken="${o.id}"
-              role="button" tabindex="0"
-              aria-label="${GEMERKT.has(o.id) ? "Aus Merkliste entfernen" : "Merken"}">${ic("stern", 18)}</span>
+        <span class="stern${GEMERKT.has(o.id) ? " an" : ""}" data-merken="${o.id}" aria-hidden="true">${ic("stern", 18)}</span>
       </span>
     </button>`;
   });
@@ -4686,6 +4695,14 @@ function ansichtEinstellungen(){
         ${abzeichenStreifen()}
       </div>` : ``}
       <div class="einst-gruppe">
+        <h3>Datenschutz</h3>
+        <div data-zaehlblock="1">${zaehlSchalter()}</div>
+      </div>
+      <div class="einst-gruppe">
+        <h3>Meine Daten löschen</h3>
+        <div data-datenblock="1">${datenLoeschenBlock()}</div>
+      </div>
+      <div class="einst-gruppe">
         <button class="abzeichen-link" style="margin:0" data-einfuehrung="1">ⓘ Einführung noch mal ansehen</button>
       </div>
     </div>`;
@@ -5084,7 +5101,9 @@ function ansichtNeu(){
         <textarea name="hinweis" placeholder="z. B. Tore ohne Netz, oft Hunde auf der Wiese, Toilette im Park">${esc(e.hinweis||"")}</textarea>
 
         <p class="hinweis">${Z.admin ? "Admin-Modus: der Platz ist nach dem Anlegen sofort für alle sichtbar."
-          : "Neue Orte prüfen wir, bevor sie auf der Karte erscheinen. Zugang und Zeiten übernehmen wir nur mit Beleg."}</p>
+          : `Neue Orte prüfe ich, bevor sie auf der Karte erscheinen. Zugang und Zeiten übernehme ich nur mit Beleg.
+             Mit dem Senden bestätigst du, dass die Fotos von dir sind. Es gelten die
+             <button type="button" class="link-knopf" data-gehe="rechtliches">Nutzungsbedingungen und der Datenschutz</button>.`}</p>
       </form>
     </div>
     <div class="fuss">
@@ -5134,8 +5153,10 @@ function ansichtVereinszeiten(){
         <label>E-Mail (für Rückfragen, wird nicht veröffentlicht)</label>
         <input name="kontakt" type="email" autocomplete="email">
 
-        <p class="hinweis">Wir prüfen kurz, ob die Angabe vom Verein kommt, und
-        tragen die Zeiten dann mit „Auskunft Verein“ am Platz ein.</p>
+        <p class="hinweis">Ich prüfe kurz, ob die Angabe vom Verein kommt, und
+        trage die Zeiten dann mit „Auskunft Verein“ am Platz ein. Name, Funktion und
+        Mail nutze ich nur für Rückfragen und lösche sie 30 Tage nach der Prüfung. Mehr im
+        <button type="button" class="link-knopf" data-gehe="rechtliches">Datenschutz</button>.</p>
       </form>
     </div>
     <div class="fuss">
@@ -6812,7 +6833,10 @@ async function platzAusAdresse(){
   const voll = location.hash.match(/^#(ueber|vereine|partner)$/);
   if (voll) { history.replaceState(history.state, "", location.pathname + location.search);
     Z.ansicht = voll[1]; zeichne(); sheet.aufmachen(); return; }
-  if (/^#(impressum|datenschutz)$/.test(location.hash)) { Z.ansicht = "rechtliches"; zeichne(); sheet.aufmachen(); return; }
+  const recht = location.hash.match(/^#(impressum|datenschutz|nutzungsbedingungen|cookies|daten-loeschen|barrierefreiheit)$/);
+  if (recht) { Z.ansicht = "rechtliches"; zeichne(); sheet.aufmachen();
+    if (recht[1] !== "impressum") setTimeout(() => document.getElementById(recht[1])?.scrollIntoView({ block:"start" }), 80);
+    return; }
   const m = location.hash.match(/^#platz=(.+)$/);
   if (!m) return;
   const id = decodeURIComponent(m[1]);
@@ -7651,7 +7675,7 @@ const RECHT = {
   strasse: "Rupprechtstraße 11",
   ort:     "95444 Bayreuth",
   email:   "platzfrei.app@outlook.com",
-  stand:   "Oktober 2026"
+  stand:   "13. November 2026"
 };
 function rechtFeld(w){
   return w.startsWith("[") || w.includes("[")
@@ -7694,7 +7718,7 @@ function ansichtKontakt(){
         <textarea id="kontakt-text" maxlength="4000" style="min-height:150px" required
           placeholder="${thema === "partner" ? "Wer seid ihr, und wie wollt ihr Platzfrei unterstützen?" : thema === "verein" ? "Welcher Verein, und wann ist euer Platz frei?" : "Was möchtest du uns sagen?"}"></textarea>
         <input id="kontakt-web" type="text" tabindex="-1" autocomplete="off" aria-hidden="true" class="kontakt-falle">
-        <p class="hinweis">Wir nutzen deine Angaben nur, um dir zu antworten. Mehr dazu im
+        <p class="hinweis">Ich nutze deine Angaben nur, um dir zu antworten. Mehr dazu im
           <button type="button" class="link-knopf" data-gehe="rechtliches">Datenschutz</button>.</p>
       </form>
       <div class="fuss">
@@ -7733,8 +7757,10 @@ function ansichtFehler(){
     <div class="rolle">
       <div class="abschnitt" style="margin-top:8px">
         <p>Beschreib kurz, was passiert ist und was du erwartet hättest.
-        Kein Konto nötig. Wenn wir nachfragen dürfen, gib gern deine
-        Mailadresse an.</p>
+        Kein Konto nötig. Wenn ich nachfragen darf, gib gern deine
+        Mailadresse an. Mit der Meldung gehen technische Angaben mit (Browser,
+        Bildschirmgröße, aufgerufene Seite), mehr im
+        <button type="button" class="link-knopf" data-gehe="rechtliches">Datenschutz</button>.</p>
       </div>
       <div class="form">
         <label>Was ist passiert?</label>
@@ -8373,7 +8399,7 @@ function ansichtUeber(){
         und fotografieren die Schilder. Was nicht belegt ist, steht ehrlich als „noch nicht bestätigt“ in der App.</p>
       </div>
       <div class="ueber-teil">
-        <h3>Sicher für Kinder</h3>
+        <h3>Gemacht für Kinder</h3>
         ${merkmale()}
       </div>
       <div class="ueber-teil">
@@ -8471,7 +8497,7 @@ function ansichtPartner(){
           ${kachel(z.gemeinden, "Gemeinden mit amtlichen Angaben", "", ZAHL_AB.gemeinden)}
           <div class="zahl"><b>${zahlText(z.sportarten)}</b><small>Sportarten</small></div>
         </div>
-        ${merkmale([["haken","Kostenlos für alle"],["schild","Sicher für Kinder"],["info","Keine Werbebanner"]])}
+        ${merkmale([["haken","Kostenlos für alle"],["schild","Kein Chat, keine Profile"],["info","Keine Werbebanner"]])}
       </div>
       <div class="ueber-teil">
         <h3>So kann eine Zusammenarbeit aussehen</h3>
@@ -8499,6 +8525,8 @@ function ansichtPartner(){
 
 function ansichtRechtliches(){
   const r = RECHT;
+  const inhalt = [["impressum","Impressum"],["nutzungsbedingungen","Nutzungsbedingungen"],["datenschutz","Datenschutz"],
+    ["cookies","Cookies & Speicher"],["daten-loeschen","Daten löschen"],["barrierefreiheit","Barrierefreiheit"]];
   seite.innerHTML = `
     <div class="dkopf">
       <button class="zurueck" data-gehe="liste">← Liste</button>
@@ -8506,60 +8534,105 @@ function ansichtRechtliches(){
       <div class="dort">Stand: ${esc(r.stand)}</div>
     </div>
     <div class="rolle">
-      <div class="abschnitt" style="margin-top:8px">
+      <nav class="recht-inhalt" aria-label="Inhalt dieser Seite">${inhalt.map(([id, t]) =>
+        `<a href="#${id}" data-rechtsprung="${id}">${t}</a>`).join("")}</nav>
+
+      <div class="abschnitt" id="impressum" style="margin-top:8px">
         <h3>Impressum</h3>
         <h4>Angaben gemäß § 5 DDG</h4>
         <p>${rechtFeld(r.namen)}<br>${rechtFeld(r.strasse)}<br>${rechtFeld(r.ort)}<br>Deutschland</p>
         <h4>Kontakt</h4>
         <p>E-Mail: ${rechtFeld(r.email)}<br>
-        Schnell erreichbar auch über <button class="inline-knopf" data-gehe="fehler">Fehler melden</button>
+        Oder über das <button class="inline-knopf" data-kontakt="allgemein">Kontaktformular</button>
         in der App.</p>
         <h4>Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV</h4>
         <p>Cornelius Oellers, Anschrift wie oben.</p>
         <h4>Verbraucherstreitbeilegung</h4>
-        <p>Wir sind nicht bereit und nicht verpflichtet, an
+        <p>Ich bin nicht bereit und nicht verpflichtet, an
         Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle
         teilzunehmen.</p>
-      </div>
-
-      <div class="abschnitt">
-        <h3>Ohne Gewähr</h3>
-        <p>Platzfrei sammelt Angaben dazu, wo man frei Sport treiben darf. Die
-        Angaben stammen aus Gemeinden, offenen Daten und von Nutzern und können
-        veraltet oder falsch sein. Vor Ort gelten immer die Schilder und die
-        Anweisungen der Eigentümer, Vereine und Platzwarte. Wir haften nicht
-        für Schäden, die aus falschen Angaben entstehen, außer bei Vorsatz oder
-        grober Fahrlässigkeit.</p>
-        <h4>Inhalte von Nutzern</h4>
-        <p>Angaben, Tipps, Spiele und Fotos von Nutzern prüfen wir, soweit es
-        möglich ist. Fällt dir etwas auf, das nicht stimmt oder nicht in Ordnung
-        ist, melde es bitte über „Melden“ am Platz oder per E-Mail. Wir
-        entfernen es dann umgehend.</p>
-        <h4>Links</h4>
-        <p>Für Inhalte verlinkter Seiten (z. B. Karten-Apps) sind allein deren
-        Betreiber verantwortlich. Bei Bekanntwerden von Rechtsverstößen
-        entfernen wir solche Links umgehend.</p>
         <h4>Urheberrecht</h4>
         <p>Texte, Logo und Gestaltung von Platzfrei sind urheberrechtlich
-        geschützt. Kartendaten und offene Daten Dritter stehen unter den unten
-        genannten Lizenzen.</p>
+        geschützt. Platzfrei nutzt keine gekauften Stockfotos. Das Foto auf der
+        Seite „Über Platzfrei“ ist ein eigenes. Kartendaten und offene Daten
+        Dritter stehen unter den Lizenzen, die unten unter „Quellen“ stehen.</p>
+        <h4>Links</h4>
+        <p>Für Inhalte verlinkter Seiten (z. B. Karten-Apps) sind allein deren
+        Betreiber verantwortlich. Erfahre ich von Rechtsverstößen, entferne ich
+        solche Links umgehend.</p>
+      </div>
+
+      <div class="abschnitt" id="nutzungsbedingungen">
+        <h3>Nutzungsbedingungen</h3>
+        <h4>1. Worum es geht</h4>
+        <p>Platzfrei (Website platzfrei.app und iPhone-App) zeigt, auf welchen
+        Plätzen man frei Sport treiben darf. Betreiber ist Cornelius Oellers
+        (siehe Impressum). Du kannst Platzfrei ohne Konto nutzen. Mit der
+        Nutzung gelten diese Bedingungen.</p>
+        <h4>2. Kostenlos, ohne Abo und ohne Käufe</h4>
+        <p>Platzfrei ist kostenlos. Es gibt keine Gebühren, keine Abos, keine
+        In-App-Käufe und keine Werbebanner. Weil du nichts bezahlst, gibt es
+        auch nichts zu erstatten. Sollte es irgendwann etwas Kostenpflichtiges
+        geben, steht der Preis vorher deutlich da, und es gelten dann eigene
+        Bedingungen, denen du ausdrücklich zustimmst.</p>
+        <h4>3. Angaben ohne Gewähr, vor Ort gelten die Schilder</h4>
+        <p>Die Angaben stammen von Gemeinden, aus offenen Daten und von
+        Nutzern. Sie können veraltet oder falsch sein. Vor Ort gelten immer die
+        Schilder und die Anweisungen von Eigentümern, Vereinen, Schulen und
+        Platzwarten. Ob ein Platz in gutem Zustand ist, kann ich nicht prüfen.
+        Sport treibst du auf eigene Verantwortung. Für Kinder bleiben die
+        Eltern verantwortlich.</p>
+        <h4>4. Was du beitragen kannst, und was nicht</h4>
+        <p>Du kannst Plätze eintragen, Angaben ergänzen, bestätigen, Tipps geben,
+        einchecken, Spiele ansetzen und Fotos hochladen. Bitte trag nur ein, was
+        stimmt. Fotos müssen von dir selbst sein. Auf Fotos dürfen keine
+        Personen und keine Autokennzeichen erkennbar sein. Nicht erlaubt sind
+        falsche oder erfundene Angaben, Werbung, beleidigende oder rechtswidrige
+        Inhalte und automatisierte Massenabfragen, die den Betrieb stören.</p>
+        <p>Bist du jünger als 16, frag bitte deine Eltern, bevor du ein Foto
+        hochlädst oder deine Mailadresse angibst.</p>
+        <h4>5. Rechte an deinen Beiträgen</h4>
+        <p>Deine Fotos und Angaben bleiben deine. Du erlaubst mir, sie
+        kostenlos, zeitlich und räumlich unbeschränkt in Platzfrei zu zeigen
+        (Website, App und Stadtseiten) und dafür technisch anzupassen, zum
+        Beispiel zu verkleinern oder zuzuschneiden. Diese Erlaubnis endet, wenn
+        du den Beitrag löschen lässt.</p>
+        <h4>6. Prüfen und Entfernen</h4>
+        <p>Ich prüfe neue Plätze, Zugangsangaben und Fotos, bevor sie
+        erscheinen, soweit das möglich ist. Ich darf Beiträge ablehnen, ändern
+        oder entfernen, wenn sie gegen diese Regeln verstoßen oder falsch sind.
+        Fällt dir etwas auf, melde es über „Melden“ am Platz oder per E-Mail.
+        Ich entferne es dann umgehend.</p>
+        <h4>7. Haftung</h4>
+        <p>Ich hafte unbeschränkt bei Vorsatz und grober Fahrlässigkeit, bei
+        Verletzung von Leben, Körper oder Gesundheit und nach dem
+        Produkthaftungsgesetz. Im Übrigen hafte ich für einen kostenlosen
+        Dienst nur nach den gesetzlichen Regeln, also nicht für leichte
+        Fahrlässigkeit. Einen Anspruch darauf, dass Platzfrei jederzeit
+        erreichbar ist, gibt es nicht.</p>
+        <h4>8. Änderungen und Recht</h4>
+        <p>Ändert sich Platzfrei, passe ich diese Bedingungen an. Es gilt die
+        Fassung mit dem Stand oben auf dieser Seite. Es gilt deutsches Recht.
+        Wohnst du als Verbraucher in einem anderen EU-Land, behältst du den
+        Schutz der zwingenden Regeln deines Landes.</p>
       </div>
 
       <div class="abschnitt" id="datenschutz">
         <h3>Datenschutzerklärung</h3>
 
         <h4>Kurz gesagt</h4>
-        <p>Du brauchst kein Konto. Wir fragen nie nach Namen, Alter oder
-        Telefonnummer und speichern nichts, was dich direkt erkennbar macht.
-        Es gibt keine Werbung, keine Cookies, kein Tracking und keine Profile.
-        Die Besucherzählung ist anonym. Platzfrei richtet sich auch an Kinder
-        und Jugendliche, deshalb gibt es keinen Chat und keine Freitexte, die
-        andere sehen können.</p>
+        <p>Du brauchst kein Konto. Platzfrei fragt nie nach Namen, Alter oder
+        Telefonnummer und speichert nichts, was dich direkt erkennbar macht.
+        Es gibt keine Werbung, keine Cookies und keine Profile. Gezählt wird
+        nur, wenn du dem zustimmst, und auch dann nur anonym. Platzfrei richtet
+        sich auch an Kinder und Jugendliche, deshalb gibt es keinen Chat und
+        keine Freitexte, die andere sehen können. Alles, was du beigetragen
+        hast, kannst du unten unter „Daten löschen“ selbst löschen.</p>
 
         <h4>1. Wer verantwortlich ist</h4>
         <p>${rechtFeld(r.namen)}, ${rechtFeld(r.strasse)}, ${rechtFeld(r.ort)},
-        E-Mail: ${rechtFeld(r.email)}. Einen Datenschutzbeauftragten müssen
-        wir nicht benennen. Bei Fragen schreib einfach an diese Adresse.</p>
+        E-Mail: ${rechtFeld(r.email)}. Einen Datenschutzbeauftragten muss ich
+        nicht benennen. Bei Fragen schreib einfach an diese Adresse.</p>
 
         <h4>2. Aufruf der App und Hosting</h4>
         <p>Die App liegt bei GitHub Pages (GitHub Inc., 88 Colin P. Kelly Jr.
@@ -8568,36 +8641,37 @@ function ansichtRechtliches(){
         DNS-Anfragen. Beim Aufruf verarbeiten diese Anbieter technisch nötige
         Daten wie deine IP-Adresse, Uhrzeit, aufgerufene Adresse und
         Browserkennung, um die Seite auszuliefern und vor Angriffen zu
-        schützen. Wir selbst sehen diese Daten nicht. Wie lange die Anbieter
+        schützen. Ich selbst sehe diese Daten nicht. Wie lange die Anbieter
         diese Protokolle aufbewahren, legen sie selbst fest; in der Regel
-        sind es wenige Wochen. Rechtsgrundlage ist unser berechtigtes
+        sind es wenige Wochen. Rechtsgrundlage ist mein berechtigtes
         Interesse an einem sicheren Betrieb (Art. 6 Abs. 1 lit. f DSGVO).</p>
 
         <h4>3. Datenbank</h4>
-        <p>Plätze und alles, was Nutzer beitragen, speichern wir bei Supabase
+        <p>Plätze und alles, was Nutzer beitragen, liegen bei Supabase
         (Supabase Inc., USA) auf Servern in Irland (EU). Supabase arbeitet für
-        uns als Auftragsverarbeiter (Art. 28 DSGVO). Ein Konto mit E-Mail und
-        Passwort gibt es nur für uns als Betreiber, um Beiträge zu prüfen.</p>
+        mich als Auftragsverarbeiter (Art. 28 DSGVO). Ein Konto mit E-Mail und
+        Passwort gibt es nur für mich als Betreiber, um Beiträge zu prüfen.</p>
         <p><b>Schutz vor Missbrauch:</b> Damit niemand die Karte mit falschen
         Meldungen, Spielen oder Check-ins flutet, zählt die Datenbank, wie oft
         von einem Internetanschluss aus etwas eingetragen wird. Gespeichert
         wird dafür nicht die IP-Adresse, sondern nur ein daraus berechneter
         Prüfwert, der jeden Tag wechselt und sich nicht zurückrechnen lässt.
-        Er wird nach zwei Tagen gelöscht. Rechtsgrundlage ist unser
+        Er wird nach zwei Tagen gelöscht. Rechtsgrundlage ist mein
         berechtigtes Interesse an einem sicheren Betrieb (Art. 6 Abs. 1
         lit. f DSGVO).</p>
 
         <h4>4. Die zufällige Geräte-Nummer</h4>
-        <p>Für einige Funktionen legt die App beim ersten Mal eine zufällige
-        Nummer auf deinem Gerät an. Sie sorgt dafür, dass zum Beispiel eine
-        Bestätigung oder ein Tipp pro Gerät nur einmal zählt. Die Nummer
-        enthält nichts über dich, ist öffentlich nie sichtbar und wird nicht
-        mit anderen Daten zusammengeführt. Löschst du die Website-Daten in
-        deinem Browser, entsteht beim nächsten Mal eine neue Nummer.</p>
+        <p>Wenn du zum ersten Mal etwas beiträgst (zum Beispiel einchecken,
+        bestätigen oder einen Tipp geben), legt die App eine zufällige Nummer
+        auf deinem Gerät an. Sie sorgt dafür, dass ein Beitrag pro Gerät nur
+        einmal zählt und dass du ihn später zurücknehmen oder löschen kannst.
+        Die Nummer enthält nichts über dich, ist öffentlich nie sichtbar und
+        wird nicht mit anderen Daten zusammengeführt.</p>
 
         <h4>5. Was du beitragen kannst</h4>
-        <p><b>„Hier gespielt“ und Meldungen:</b> Wir speichern den Platz, das
-        Datum und die Geräte-Nummer. Öffentlich sichtbar ist nur die Anzahl.</p>
+        <p><b>„Hier gespielt“ und Meldungen:</b> Gespeichert werden der Platz,
+        das Datum und bei „Hier gespielt“ die Geräte-Nummer. Öffentlich
+        sichtbar ist nur die Anzahl.</p>
         <p><b>„Ich bin gerade hier“:</b> Beim Einchecken prüft die App einmal
         deinen Standort, ob du höchstens 300 m vom Platz entfernt bist. Der
         Standort selbst wird nicht gespeichert. Gespeichert werden der Platz,
@@ -8605,13 +8679,13 @@ function ansichtRechtliches(){
         Stunden). Andere sehen nur, wie viele Leute gerade an einem Platz sind,
         und das erst ab zwei Personen. Mit „Wieder weg“ checkst du sofort aus,
         spätestens nach einem Tag wird der Eintrag gelöscht.</p>
-        <p><b>Wann ist meist was los:</b> Aus jedem Check-in merken wir uns
-        den Platz, den Tag, die Stunde und eine verschlüsselte Form der
-        Geräte-Nummer, damit niemand doppelt zählt. Daraus zeigt die App, zu
+        <p><b>Wann ist meist was los:</b> Aus jedem Check-in werden der Platz,
+        der Tag, die Stunde und eine verschlüsselte Form der Geräte-Nummer
+        gespeichert, damit niemand doppelt zählt. Daraus zeigt die App, zu
         welchen Zeiten an einem Platz meistens gespielt wird. Öffentlich
         sind nur Prozentwerte je Wochentag und Stunde, und erst wenn an
         mindestens fünf Tagen von drei Geräten eingecheckt wurde. Nach acht
-        Wochen löschen wir die Einträge.</p>
+        Wochen werden die Einträge gelöscht.</p>
         <p><b>Ranglisten für Städte und Plätze:</b> Aus denselben anonymen
         Besuchen zählt die App, in welchen Städten und auf welchen Plätzen am
         meisten gespielt wird. Dafür wird nichts zusätzlich gespeichert. Es
@@ -8620,17 +8694,18 @@ function ansichtRechtliches(){
         erscheint erst, wenn dort mindestens drei verschiedene Geräte
         eingecheckt haben.</p>
         <p><b>Mitspieler gesucht:</b> Wenn du ein Spiel ansetzt oder zusagst,
-        speichern wir Platz, Zeit, Sportart, die gewünschte Anzahl und die
-        Geräte-Nummer. Öffentlich sichtbar sind nur Zeit, Sportart und wie
-        viele zugesagt haben. Vergangene Spiele löschen wir nach einem Tag.</p>
-        <p><b>Platz-Tipps:</b> Wir speichern den Platz, den gewählten Tipp aus
-        einer festen Liste, das Datum und die Geräte-Nummer. Öffentlich
+        werden Platz, Zeit, Sportart, die gewünschte Anzahl und die
+        Geräte-Nummer gespeichert. Öffentlich sichtbar sind nur Zeit, Sportart
+        und wie viele zugesagt haben. Vergangene Spiele werden nach einem Tag
+        gelöscht.</p>
+        <p><b>Platz-Tipps:</b> Gespeichert werden der Platz, der gewählte Tipp
+        aus einer festen Liste, das Datum und die Geräte-Nummer. Öffentlich
         sichtbar ist nur, wie oft ein Tipp gegeben wurde. Du kannst deinen
         Tipp jederzeit zurücknehmen.</p>
-        <p><b>Angaben ergänzen und neue Plätze:</b> Wir speichern genau die
-        Angaben, die du einträgst, mit Datum. Schlägst du einen neuen Platz
-        vor und erlaubst den Standort, speichern wir zusätzlich, wie weit du
-        vom eingetragenen Punkt entfernt warst. Das sehen nur wir, um den
+        <p><b>Angaben ergänzen und neue Plätze:</b> Gespeichert werden genau
+        die Angaben, die du einträgst, mit Datum. Schlägst du einen neuen Platz
+        vor und erlaubst den Standort, wird zusätzlich gespeichert, wie weit du
+        vom eingetragenen Punkt entfernt warst. Das sehe nur ich, um den
         Vorschlag zu prüfen.</p>
         <p><b>Vorschläge von mehreren Personen:</b> Ein Vorschlag wird erst
         übernommen, wenn mehrere verschiedene Personen dasselbe melden. Damit
@@ -8641,28 +8716,29 @@ function ansichtRechtliches(){
         gespeichert.</p>
         <p><b>Änderungsverlauf:</b> Änderungen an Plätzen werden mit Datum
         bis zu 180 Tage aufbewahrt, damit sich Fehler und Missbrauch
-        rückgängig machen lassen. Den Verlauf sieht nur der Betreiber.</p>
+        rückgängig machen lassen. Den Verlauf sehe nur ich.</p>
         <p><b>Fotos:</b> Fotos werden vor dem Hochladen auf deinem Gerät
         verkleinert, dabei werden Ortungs- und Kameradaten aus der Datei
-        entfernt. Bis wir ein Foto geprüft und freigegeben haben, liegt es
+        entfernt. Bis ich ein Foto geprüft und freigegeben habe, liegt es
         in einem nicht öffentlichen Speicher. Fotos mit erkennbaren Personen
-        oder Kennzeichen löschen wir.</p>
+        oder Kennzeichen lösche ich.</p>
         <p><b>Platzzeiten von Vereinen:</b> Trägt jemand für einen Verein
-        Platzzeiten ein, speichern wir Name, Funktion und E-Mail, um bei
+        Platzzeiten ein, speichere ich Name, Funktion und E-Mail, um bei
         Rückfragen nachzuhaken. Diese Angaben werden nicht veröffentlicht und
-        nach der Prüfung nicht weiter genutzt.</p>
-        <p><b>Kontaktformular:</b> Wir speichern dein Thema, deine Nachricht,
-        deine Mailadresse und freiwillig deinen Namen, um dir zu antworten.
-        Das sehen nur wir. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO
-        (deine Anfrage beantworten).</p>
-        <p><b>Fehler melden:</b> Wir speichern deine Beschreibung, freiwillig
-        deine Mailadresse und technische Angaben (Browser und Gerätetyp,
-        Bildschirmgröße, aufgerufene Seite, zuletzt geöffneter Platz), damit
-        wir den Fehler finden. Das sehen nur wir.</p>
-        <p>Rechtsgrundlage für all das ist unser berechtigtes Interesse
+        30 Tage nach der Prüfung gelöscht.</p>
+        <p><b>Kontaktformular:</b> Gespeichert werden dein Thema, deine
+        Nachricht, deine Mailadresse und freiwillig dein Name, um dir zu
+        antworten. Das sehe nur ich.</p>
+        <p><b>Fehler melden:</b> Gespeichert werden deine Beschreibung,
+        freiwillig deine Mailadresse und technische Angaben (Browser und
+        Gerätetyp, Bildschirmgröße, aufgerufene Seite, zuletzt geöffneter
+        Platz), damit ich den Fehler finde. Das sehe nur ich.</p>
+        <p>Rechtsgrundlage für all das ist mein berechtigtes Interesse
         (Art. 6 Abs. 1 lit. f DSGVO): eine verlässliche, aktuelle Karte, auf
         der Kinder und Jugendliche erlaubte Plätze finden und sich zum Spielen
-        verabreden können, ohne dass dafür persönliche Daten nötig sind.</p>
+        verabreden können, ohne dass dafür persönliche Daten nötig sind. Beim
+        Kontaktformular und bei Fehlermeldungen ist es mein Interesse, deine
+        Anfrage zu beantworten.</p>
 
         <h4>6. Standort</h4>
         <p>Die App fragt über deinen Browser, ob sie deinen Standort nutzen
@@ -8670,7 +8746,7 @@ function ansichtRechtliches(){
         § 25 Abs. 1 TDDDG). Damit berechnet sie die Entfernung zu Plätzen;
         der Standort bleibt dafür auf deinem Gerät. Für die Wettervorhersage
         geht eine auf etwa 1 km gerundete Position an Open-Meteo, und beim
-        Einchecken einmal an unsere Datenbank zur Abstandsprüfung (siehe
+        Einchecken einmal an die Datenbank zur Abstandsprüfung (siehe
         oben), ohne dass er gespeichert wird. Rechtsgrundlage für diese
         Nutzung ist Art. 6 Abs. 1 lit. f DSGVO (Plätze in deiner Nähe zeigen).
         Ohne Freigabe zeigt die App keine Entfernungen an. Du kannst die
@@ -8678,18 +8754,20 @@ function ansichtRechtliches(){
         widerrufen. Das berührt nicht, was vorher erlaubt war.</p>
 
         <h4>7. Karten, Bilder und Bibliotheken</h4>
-        <p>Die Karte laden wir von OpenFreeMap (ersatzweise CARTO bzw. Esri), Luftbilder von Esri,
-        die Programmbibliotheken von cdnjs (Cloudflare) und jsDelivr. Öffnest du einen Platz ohne Straßenangabe, fragen wir die
-        Adresse dieses einen Platzes bei Nominatim (OpenStreetMap Foundation,
-        Großbritannien) ab; gibst du ohne Standort einen Ort ein, sucht
-        Nominatim diesen Ort. Dabei erfahren diese Anbieter technisch bedingt
-        deine IP-Adresse. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO
-        (Darstellung der Karte).</p>
+        <p>Die Karte kommt von OpenFreeMap (ersatzweise CARTO bzw. Esri),
+        Luftbilder von Esri, die Programmbibliotheken von cdnjs (Cloudflare)
+        und jsDelivr. Schriften werden nicht nachgeladen, die App nutzt die
+        Schriften deines Geräts. Öffnest du einen Platz ohne Straßenangabe,
+        fragt die App die Adresse dieses einen Platzes bei Nominatim
+        (OpenStreetMap Foundation, Großbritannien) ab; gibst du ohne Standort
+        einen Ort ein, sucht Nominatim diesen Ort. Dabei erfahren diese
+        Anbieter technisch bedingt deine IP-Adresse. Rechtsgrundlage ist
+        Art. 6 Abs. 1 lit. f DSGVO (Darstellung der Karte).</p>
         <p>Tippst du auf „Route“, öffnet sich Apple Karten oder Google Maps.
         Ab dann gelten die Datenschutzbestimmungen dieser Anbieter.</p>
 
         <h4>8. Empfänger und Übermittlung in Drittländer</h4>
-        <p>Wir verkaufen keine Daten und geben sie nicht zu Werbezwecken
+        <p>Ich verkaufe keine Daten und gebe sie nicht zu Werbezwecken
         weiter. Empfänger sind nur die Dienstleister, die für den Betrieb
         nötig sind:</p>
         <p>GitHub Inc. (USA), Hosting · Netlify Inc. (USA), Domain und DNS ·
@@ -8698,7 +8776,7 @@ function ansichtRechtliches(){
         Cloudflare Inc. (USA), cdnjs · Prospect One (Polen), jsDelivr ·
         OpenStreetMap Foundation (Großbritannien), Adresssuche ·
         Open-Meteo (Schweiz), Wetter · GoatCounter (Niederlande),
-        Besucherzählung.</p>
+        Besucherzählung, nur mit deiner Zustimmung.</p>
         <p>Für Großbritannien und die Schweiz gibt es einen
         Angemessenheitsbeschluss der EU-Kommission. Für Anbieter in den USA
         stützt sich die Übermittlung auf das EU-US Data Privacy Framework,
@@ -8709,72 +8787,66 @@ function ansichtRechtliches(){
         Tipps, freigegebene Fotos), kann jeder abrufen. Darin stecken keine
         Angaben zu deiner Person.</p>
 
-        <h4>9. Besucherstatistik</h4>
-        <p>Um zu sehen, wie viele Menschen Platzfrei nutzen, zählen wir
-        Seitenaufrufe mit GoatCounter (goatcounter.com, Niederlande). Dabei
-        werden aufgerufene Seite, Herkunftsseite, Browser, Bildschirmgröße
-        und Land erfasst. GoatCounter setzt keine Cookies, speichert keine
-        IP-Adressen und bildet keine Nutzerprofile, die Daten sind anonym.
-        Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (Verbesserung des
-        Angebots).</p>
+        <h4>9. Besucherstatistik, nur mit Zustimmung</h4>
+        <p>Beim ersten Besuch fragt Platzfrei einmal, ob anonym mitgezählt
+        werden darf. Ohne dein Ja wird nichts gezählt. Sagst du Ja, passiert
+        Folgendes:</p>
+        <p>GoatCounter (goatcounter.com, Niederlande) zählt Seitenaufrufe.
+        Dabei werden aufgerufene Seite, Herkunftsseite, Browser,
+        Bildschirmgröße und Land erfasst. GoatCounter setzt keine Cookies,
+        speichert keine IP-Adressen und bildet keine Nutzerprofile.</p>
         <p>Zusätzlich zählt die App in der eigenen Datenbank (Supabase) nur
         Tagessummen: wie viele Geräte Platzfrei an einem Tag geöffnet haben
-        (Web oder iPhone-App), wie viele davon zum ersten Mal, und wie oft
-        Plätze angesehen wurden; außerdem wie viele Geräte Platzfrei in einem
-        Monat geöffnet haben und wie viele davon an mindestens zwei Tagen,
-        wie oft die Seiten „Für Vereine“ und „Für Partner“ geöffnet wurden
-        und wie oft jede Stadtseite (platzfrei.app/bolzplaetze/…) aufgerufen
-        wurde. Dabei wird weder eine Geräte-Nummer noch ein Platz noch eine
-        IP-Adresse gespeichert, nur Summen pro Tag. Ob dein Gerät heute oder
-        in diesem Monat schon gezählt wurde, merkt sich nur dein Gerät
-        (localStorage, auf den Stadtseiten nur für die Dauer der
-        Browser-Sitzung im sessionStorage). Gegen
-        Missbrauch wird die Anfrage wie in Abschnitt 3 beschrieben kurz mit
-        einem gehashten Prüfwert deines Anschlusses gebremst. Hat dein Browser
-        „Nicht verfolgen“ (Do Not Track oder Global Privacy Control)
-        eingeschaltet, wird nichts gezählt. Rechtsgrundlage ist ebenfalls
-        Art. 6 Abs. 1 lit. f DSGVO.</p>
+        (Web oder iPhone-App), wie viele davon zum ersten Mal, wie oft Plätze
+        angesehen wurden, wie viele Geräte Platzfrei in einem Monat geöffnet
+        haben und wie viele davon an mindestens zwei Tagen, wie oft die Seiten
+        „Für Vereine“ und „Für Partner“ geöffnet wurden und wie oft jede
+        Stadtseite (platzfrei.app/bolzplaetze/…) aufgerufen wurde. Dabei wird
+        weder eine Geräte-Nummer noch ein Platz noch eine IP-Adresse
+        gespeichert, nur Summen pro Tag. Ob dein Gerät heute oder in diesem
+        Monat schon gezählt wurde, merkt sich nur dein Gerät (localStorage, auf
+        den Stadtseiten für die Dauer der Browser-Sitzung im sessionStorage).
+        Gegen Missbrauch wird die Anfrage wie in Abschnitt 3 beschrieben kurz
+        mit einem gehashten Prüfwert deines Anschlusses gebremst.</p>
+        <p>Rechtsgrundlage ist deine Einwilligung (§ 25 Abs. 1 TDDDG und
+        Art. 6 Abs. 1 lit. a DSGVO). Du kannst sie jederzeit ohne Nachteile
+        widerrufen, hier oder in den Einstellungen. Hat dein Browser „Nicht
+        verfolgen“ (Do Not Track oder Global Privacy Control) eingeschaltet,
+        fragt Platzfrei gar nicht erst und zählt nichts.</p>
+        <div class="zaehl-block" data-zaehlblock="1">${zaehlSchalter()}</div>
 
-        <h4>10. Auf deinem Gerät</h4>
-        <p>Merkliste, Geräte-Nummer, eigene Bestätigungen, Zusagen und Tipps,
-        dein aktueller Check-in, deine Abzeichen, deine Saison-Zahlen (an welchem Tag und zu welcher Stunde du an welchem Platz eingecheckt hast,
-        unter „Meine Saison“ jederzeit löschbar) und deine Einstellungen (Hauptsportart, Design) speichert die App im
-        Speicher deines Browsers (localStorage). Damit die App auch ohne Netz
-        startet, legt sie außerdem eine Kopie ihrer Dateien und der Platzliste
-        im Browser ab (Cache und IndexedDB); die Platzliste enthält keine
-        Angaben über dich.
-        Das ist für diese Funktionen unbedingt nötig (§ 25 Abs. 2 Nr. 2
-        TDDDG) und wird nicht an uns übertragen, außer wie oben beschrieben.
-        Du kannst alles jederzeit über die Browsereinstellungen löschen.
-        Cookies setzen wir nicht.</p>
-
-        <h4>11. Wie lange wir speichern</h4>
-        <p>Check-ins löschen wir nach einem Tag, vergangene Spiele ebenfalls.
+        <h4>10. Wie lange gespeichert wird</h4>
+        <p>Check-ins werden nach einem Tag gelöscht, vergangene Spiele ebenfalls.
         Bestätigungen, Tipps, Meldungen und Fotos bleiben gespeichert, solange
-        der Platz in der App ist, oder bis du sie zurücknimmst bzw. uns um
-        Löschung bittest. Fehlermeldungen und Nachrichten bewahren wir
-        nach der Erledigung in einem Archiv auf, damit wiederkehrende Fehler
-        nachvollziehbar bleiben. Auf Wunsch löschen wir sie.
-        Vereinsangaben löschen wir, wenn die Platzzeiten geprüft sind.
+        der Platz in der App ist, oder bis du sie zurücknimmst, unten selbst
+        löschst oder mich um Löschung bittest. Nachrichten und Fehlermeldungen
+        bewahre ich nach der Erledigung auf, damit wiederkehrende Fehler
+        nachvollziehbar bleiben; die Mailadresse darin lösche ich spätestens
+        zwölf Monate nach der Erledigung, auf Wunsch sofort.
+        Vereinsangaben werden 30 Tage nach der Prüfung gelöscht.
         Prüfwerte zu Vorschlägen werden nach 30 Tagen gelöscht, der
         Änderungsverlauf der Plätze nach 180 Tagen.
         Was auf deinem Gerät liegt, bleibt dort, bis du es löschst.</p>
 
-        <h4>12. Kinder und Jugendliche</h4>
-        <p>Platzfrei ist kostenlos und für alle Altersgruppen gedacht. Weil wir
-        keine Namen, kein Alter und keine Kontaktdaten abfragen (außer
-        freiwillig beim Fehler melden und bei Vereinsangaben), keine
-        Freitexte veröffentlichen und keine Nachrichten zwischen Nutzern
-        ermöglichen, können Kinder die App nutzen, ohne persönliche Daten
-        preiszugeben. Eltern können sich jederzeit an uns wenden.</p>
+        <h4>11. Kinder und Jugendliche</h4>
+        <p>Platzfrei ist kostenlos und für alle Altersgruppen gedacht. Weil die
+        App keine Namen, kein Alter und keine Kontaktdaten abfragt (außer
+        freiwillig beim Kontaktformular, beim Fehler melden und bei
+        Vereinsangaben), keine Freitexte veröffentlicht und keine Nachrichten
+        zwischen Nutzern ermöglicht, können Kinder sie nutzen, ohne
+        persönliche Daten preiszugeben. Bist du jünger als 16, frag bitte deine
+        Eltern, bevor du ein Foto hochlädst, deine Mailadresse angibst oder
+        der Besucherzählung zustimmst. Eltern können sich jederzeit an mich
+        wenden und die Löschung verlangen.</p>
 
-        <h4>13. Deine Rechte</h4>
+        <h4>12. Deine Rechte</h4>
         <p>Du hast das Recht auf Auskunft, Berichtigung, Löschung,
         Einschränkung der Verarbeitung und Datenübertragbarkeit (Art. 15–20
         DSGVO) und kannst eine erteilte Einwilligung jederzeit widerrufen.
-        Schreib uns dazu an ${rechtFeld(r.email)}. Weil wir dich nicht
-        kennen, hilft es, wenn du uns sagst, um welchen Platz und welchen Tag
-        es geht.</p>
+        Schreib mir dazu an ${rechtFeld(r.email)}. Weil ich dich nicht
+        kenne, hilft es, wenn du sagst, um welchen Platz und welchen Tag
+        es geht. Deine eigenen Beiträge kannst du auch selbst löschen (siehe
+        unten).</p>
         <p><b>Widerspruchsrecht (Art. 21 DSGVO):</b> Du kannst jederzeit aus
         Gründen, die sich aus deiner besonderen Situation ergeben, der
         Verarbeitung widersprechen, die auf Art. 6 Abs. 1 lit. f DSGVO
@@ -8783,12 +8855,53 @@ function ansichtRechtliches(){
         beschweren, zum Beispiel beim Bayerischen Landesamt für
         Datenschutzaufsicht (BayLDA), Promenade 18, 91522 Ansbach.</p>
 
-        <h4>14. Sonstiges</h4>
+        <h4>13. Sonstiges</h4>
         <p>Du musst keine Daten angeben, um Platzfrei zu nutzen. Es gibt keine
         automatisierten Entscheidungen über dich. Die Verbindung zur App und
         zur Datenbank ist verschlüsselt (HTTPS). Wenn sich die App ändert,
-        passen wir diese Erklärung an. Es gilt die Fassung mit dem Stand oben
+        passe ich diese Erklärung an. Es gilt die Fassung mit dem Stand oben
         auf dieser Seite.</p>
+      </div>
+
+      <div class="abschnitt" id="cookies">
+        <h3>Cookies und Speicher auf deinem Gerät</h3>
+        <p><b>Platzfrei setzt keine Cookies.</b> Deshalb gibt es auch kein
+        Cookie-Banner. Damit die App funktioniert, legt sie einige Angaben im
+        Speicher deines Browsers ab (localStorage, sessionStorage, IndexedDB
+        und Cache). Sie gehen nicht an mich, außer wie oben beschrieben.</p>
+        <h4>Unbedingt nötig für Funktionen, die du nutzt</h4>
+        <p>Merkliste, Geräte-Nummer (erst ab deinem ersten Beitrag), eigene
+        Bestätigungen, Meldungen, Zusagen und Tipps, dein aktueller Check-in,
+        deine Abzeichen, deine Saison-Zahlen (an welchem Tag und zu welcher
+        Stunde du an welchem Platz eingecheckt hast), deine Einstellungen
+        (Hauptsportart, Design, Startpunkt, Liste oder Karte), ob du die
+        Einführung oder einen Hinweis schon gesehen hast, und deine Antwort
+        auf die Frage nach der Besucherzählung. Damit die App auch ohne Netz
+        startet, liegt außerdem eine Kopie ihrer Dateien und der Platzliste im
+        Browser (Cache und IndexedDB); die Platzliste enthält keine Angaben
+        über dich. Dafür braucht es keine Einwilligung (§ 25 Abs. 2 Nr. 2
+        TDDDG).</p>
+        <h4>Nur mit deiner Zustimmung</h4>
+        <p>Für die Besucherstatistik (Abschnitt 9) merkt sich dein Gerät, an
+        welchem Tag und in welchem Monat es zuletzt gezählt wurde.</p>
+        <p>Löschen kannst du alles mit einem Tipp unter „Daten löschen“ oder
+        über die Einstellungen deines Browsers.</p>
+      </div>
+
+      <div class="abschnitt" id="daten-loeschen">
+        <h3>Deine Daten löschen</h3>
+        <div data-datenblock="1">${datenLoeschenBlock()}</div>
+      </div>
+
+      <div class="abschnitt" id="barrierefreiheit">
+        <h3>Barrierefreiheit</h3>
+        <p>Platzfrei soll für alle gut nutzbar sein: Texte und Knöpfe haben
+        ausreichend Kontrast, alles lässt sich mit der Tastatur bedienen, Bilder
+        haben Beschreibungen, und es gibt ein helles und ein dunkles Design.
+        Die Karte selbst ist nur eingeschränkt zugänglich; dieselben Plätze
+        findest du deshalb immer auch in der Liste. Stößt du auf eine Hürde,
+        schreib mir über das <button class="inline-knopf" data-kontakt="allgemein">Kontaktformular</button>
+        oder an ${rechtFeld(r.email)}. Ich kümmere mich darum.</p>
       </div>
 
       <div class="abschnitt">
@@ -8800,6 +8913,136 @@ function ansichtRechtliches(){
       </div>
     </div>`;
 }
+
+/* --------------------------------------------------------------------------
+   Einwilligung zur Besucherzählung und "Alle meine Daten löschen"
+   --------------------------------------------------------------------------
+   Gezählt (GoatCounter + Tageszahlen in Supabase) wird nur nach einem Ja.
+   Die Frage erscheint einmal, nicht über der Einführung, mit zwei gleich
+   großen Knöpfen. "Nicht verfolgen" im Browser gilt als Nein ohne Frage.
+   Löschen: erst auf dem Server (rpc meine_daten_loeschen, siehe
+   rechtliches/supabase-datenschutz.sql), dann alles auf dem Gerät.
+   -------------------------------------------------------------------------- */
+const ZAEHLEN_SCHLUESSEL = "platzfrei.zaehlen";   // "ja" | "nein" | fehlt = noch nicht gefragt
+function zaehlWahl(){ try { return localStorage.getItem(ZAEHLEN_SCHLUESSEL) || ""; } catch { return "nein"; } }
+function zaehlenErlaubt(){ return zaehlWahl() === "ja"; }
+function nichtVerfolgen(){ return navigator.doNotTrack === "1" || !!navigator.globalPrivacyControl; }
+function goatLaden(){
+  if (goatLaden.fertig || !zaehlenErlaubt() || nichtVerfolgen() || Z.admin || navigator.webdriver) return;
+  if (!/^https:/.test(location.protocol)) return;
+  goatLaden.fertig = true;
+  const s = document.createElement("script");
+  s.async = true; s.src = "https://gc.zgo.at/count.js";
+  s.dataset.goatcounter = "https://platzfrei.goatcounter.com/count";
+  document.head.appendChild(s);
+}
+function zaehlSetzen(ja){
+  try { localStorage.setItem(ZAEHLEN_SCHLUESSEL, ja ? "ja" : "nein"); } catch {}
+  if (ja) { goatLaden(); nutzungStart(); }
+  else { try { localStorage.removeItem(NUTZUNG_SCHLUESSEL); } catch {} }
+  document.querySelectorAll("[data-zaehlblock]").forEach(b => { b.innerHTML = zaehlSchalter(); });
+}
+function zaehlSchalter(){
+  const w = zaehlWahl();
+  if (nichtVerfolgen()) return `<p class="hinweis">Dein Browser hat „Nicht verfolgen“ eingeschaltet. Es wird nichts gezählt.</p>`;
+  return `<p class="hinweis" style="margin:8px 0 6px">Anonyme Besucherzählung: <b>${w === "ja" ? "erlaubt" : "aus"}</b></p>
+    <div class="einst-chips">
+      <button data-zaehlen="ja" aria-pressed="${w === "ja"}">Mitzählen erlauben</button>
+      <button data-zaehlen="nein" aria-pressed="${w !== "ja"}">Nicht mitzählen</button>
+    </div>`;
+}
+/* Einmalige Frage, unten am Rand, verdeckt nichts Wichtiges. */
+function zaehlFrage(versuch = 0){
+  if (zaehlWahl() || Z.admin || navigator.webdriver || !ECHT) return;
+  if (nichtVerfolgen()) return;
+  if (document.querySelector(".einf")) {               // erst nach der Einführung
+    if (versuch < 120) setTimeout(() => zaehlFrage(versuch + 1), 1500);
+    return;
+  }
+  if (document.getElementById("zaehl-frage")) return;
+  const el = document.createElement("div");
+  el.id = "zaehl-frage";
+  el.setAttribute("role", "region");
+  el.setAttribute("aria-label", "Frage zur Besucherzählung");
+  el.innerHTML = `<p><b>Darf Platzfrei anonym mitzählen?</b>
+      Ich sehe dann nur, wie viele Geräte Platzfrei am Tag öffnen und welche Seiten
+      aufgerufen werden. Keine Cookies, keine Profile, jederzeit widerrufbar.
+      <button class="link-knopf" data-zaehlmehr="1">Mehr dazu</button></p>
+    <div class="zaehl-knoepfe">
+      <button class="knopf zweit" data-zaehlen="nein">Nein</button>
+      <button class="knopf zweit" data-zaehlen="ja">Ja, gern</button>
+    </div>`;
+  document.body.appendChild(el);
+}
+
+function datenLoeschenBlock(frage = false){
+  if (frage) return `<p><b>Wirklich alles löschen?</b> Das kann ich nicht rückgängig machen.</p>
+    <div class="reihe" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="knopf zweit" data-datenwegnein="1">Abbrechen</button>
+      <button class="knopf warn" data-datenwegja="1">Ja, alles löschen</button>
+    </div>`;
+  return `<p>Hier löschst du mit einem Tipp alles, was Platzfrei zu diesem Gerät
+    gespeichert hat:</p>
+    <p><b>In der Datenbank:</b> deine Check-ins, Besuche für „Wann ist meist was
+    los“, angesetzte Spiele und Zusagen, Platz-Tipps, „Hier gespielt“ und noch
+    nicht geprüfte Platz-Vorschläge und Schildfotos. Schon geprüfte Plätze und
+    Schildfotos bleiben als Beleg am Platz, aber ohne Verbindung zu deinem Gerät.</p>
+    <p><b>Auf diesem Gerät:</b> Merkliste, Geräte-Nummer, Abzeichen, Saison-Zahlen,
+    Einstellungen und die gespeicherte Platzliste.</p>
+    <p>Nachrichten, Fehlermeldungen oder Vereinsangaben mit deiner Mailadresse
+    lösche ich auf Wunsch per Mail an ${rechtFeld(RECHT.email)}.</p>
+    <button class="knopf warn" style="margin-top:10px" data-datenweg="1">Alle meine Daten löschen</button>`;
+}
+async function meineDatenLoeschen(){
+  if (demoAn()) return melde("Im Demo-Modus wird nichts gelöscht.");
+  let id = null;
+  try { id = localStorage.getItem(GERAET_SCHLUESSEL); } catch {}
+  if (id) {
+    if (!ECHT) return melde("Gerade keine Verbindung. Bitte später noch mal.");
+    const { error } = await db.rpc("meine_daten_loeschen", { p_geraet:id });
+    if (error) {
+      console.error(error);
+      /* Geräte-Nummer behalten: Ohne sie ließe sich auf dem Server nichts mehr zuordnen. */
+      return melde(bremseText(error) || "Löschen ging gerade nicht. Bitte später noch mal oder schreib an " + RECHT.email + ".", null, 6000);
+    }
+  }
+  try {
+    const weg = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = String(localStorage.key(i));
+      if (k.startsWith("platzfrei")) weg.push(k);
+    }
+    weg.forEach(k => localStorage.removeItem(k));
+    localStorage.setItem(ZAEHLEN_SCHLUESSEL, "nein");   // nicht gleich wieder fragen
+  } catch {}
+  try { sessionStorage.clear(); } catch {}
+  try { indexedDB.deleteDatabase("platzfrei"); } catch {}
+  try { if (window.caches) for (const k of await caches.keys()) await caches.delete(k); } catch {}
+  GEMERKT.clear?.();
+  melde("Erledigt. Alles zu diesem Gerät ist gelöscht.", null, 4000);
+  setTimeout(() => location.replace(location.pathname), 1800);
+}
+document.addEventListener("click", e => {
+  const t = e.target.closest("[data-zaehlen],[data-zaehlmehr],[data-datenweg],[data-datenwegja],[data-datenwegnein],[data-rechtsprung]");
+  if (!t) return;
+  if (t.dataset.zaehlen) {
+    zaehlSetzen(t.dataset.zaehlen === "ja");
+    document.getElementById("zaehl-frage")?.remove();
+    return melde(t.dataset.zaehlen === "ja" ? "Danke! Du kannst das jederzeit in den Einstellungen ändern." : "Alles klar, es wird nichts gezählt.");
+  }
+  if (t.dataset.zaehlmehr) {
+    Z.ansicht = "rechtliches"; zeichne(); sheet.aufmachen?.();
+    return setTimeout(() => document.getElementById("datenschutz")?.scrollIntoView({ block:"start" }), 60);
+  }
+  if (t.dataset.rechtsprung) {
+    e.preventDefault();
+    return document.getElementById(t.dataset.rechtsprung)?.scrollIntoView({ block:"start", behavior:"smooth" });
+  }
+  const block = t.closest("[data-datenblock]");
+  if (t.dataset.datenweg && block) { block.innerHTML = datenLoeschenBlock(true); return block.querySelector("[data-datenwegnein]")?.focus(); }
+  if (t.dataset.datenwegnein && block) { block.innerHTML = datenLoeschenBlock(); return; }
+  if (t.dataset.datenwegja) return meineDatenLoeschen();
+});
 
 /* --------------------------------------------------------------------------
    Ganz Deutschland aus OpenStreetMap, Kachel für Kachel
@@ -9905,13 +10148,15 @@ adminAdresseOeffnen();
 (async function start(){
   /* Wer über einen Link direkt auf eine Unterseite kommt, bekommt die
      Einführung nicht darübergelegt. */
-  if (!/^#(ueber|vereine|partner|platz=|impressum|datenschutz|admin)/.test(location.hash)) einfuehrungZeigen();
+  if (!/^#(ueber|vereine|partner|platz=|impressum|datenschutz|nutzungsbedingungen|cookies|daten-loeschen|barrierefreiheit|admin)/.test(location.hash)) einfuehrungZeigen();
   await adminPruefen();
   await datenLaden();
   await platzAusAdresse();
   await Promise.all([meldungenLaden(), bestaetigungenLaden(), aktivLaden(), spieleLaden()]);
   zeichne();
-  nutzungStart();         // zählt dieses Gerät einmal pro Tag (nur Tageszahl)
+  nutzungStart();         // zählt dieses Gerät einmal pro Tag (nur Tageszahl, nur mit Zustimmung)
+  goatLaden();
+  setTimeout(zaehlFrage, 2500);
   wetterLaden();          // läuft nebenher, blockiert den Start nicht
   ranglisteLaden("woche").then(n => n && Z.ansicht === "liste" && stadtRang() && ansichtListe(true));
 })();
