@@ -92,6 +92,17 @@
   --feder:cubic-bezier(.32,.72,0,1);
   --feder-schnell:cubic-bezier(.25,.6,.15,1);
   --druck:100ms ease-out;          /* §1 Reaktion: Rückmeldung sofort */
+
+  /* Bewegung, Teil 2 (13.11.): eine Kurve pro Zweck, eine Dauer pro Größe.
+     Erscheinen = --feder, Verschwinden = --aus (kürzer, beschleunigt weg),
+     auf dem Bildschirm verschieben = --bewegen. */
+  --aus:cubic-bezier(.55,0,1,.45);
+  --bewegen:cubic-bezier(.77,0,.175,1);
+  --t-klein:160ms;                 /* Menü, Popover rein */
+  --t-klein-aus:120ms;             /* … und raus */
+  --t-meldung:240ms;               /* Meldung, Overlay rein */
+  --t-meldung-aus:170ms;           /* … und raus */
+  --t-tausch:350ms;                /* Symbol wechselt (Merken-Stern) */
 }
 
 *{box-sizing:border-box;margin:0;padding:0}
@@ -108,8 +119,11 @@ body{font-family:var(--schrift);font-size:15px;line-height:1.5;letter-spacing:0;
 /* §1 Reaktion: Alles Drückbare antwortet beim Drücken, nicht beim Loslassen. */
 button,.zeile,.chip,.stern,[role="button"]{touch-action:manipulation;
   -webkit-tap-highlight-color:transparent}
-button:active,.zeile:active,.chip:active,.knopf:active,.adminknopf:active{
+button:active,.chip:active,.knopf:active,.adminknopf:active{
   transform:scale(.97);transition:transform var(--druck)}
+/* Listenzeilen sind breit: 3 % Schrumpfen wäre dort ein Sprung.
+   Sie antworten beim Drücken mit einer dunkleren Fläche. */
+.zeile:active{background:color-mix(in srgb,var(--tinte) 6%,var(--flaeche));transition:background var(--druck)}
 
 /* ---------- Kopf: schwebende Materialschicht (§12) ---------- */
 header{position:relative;z-index:20;flex-shrink:0;height:62px;padding:0 22px;
@@ -338,7 +352,7 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
   transition:box-shadow 220ms var(--feder),transform 220ms var(--feder)}
 .zeile::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
   background:var(--streifen,var(--unklar))}
-.zeile:hover{box-shadow:var(--schatten-hoch);transform:translateY(-1px)}
+@media (hover:hover) and (pointer:fine){.zeile:hover{box-shadow:var(--schatten-hoch);transform:translateY(-1px)}}
 .zeile:focus-visible{outline:2px solid var(--gruen);outline-offset:2px}
 .punkt{display:none}
 
@@ -479,7 +493,7 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
 .abz-kachel:hover .medaille:not(.zu) .m-ring::after{animation:glanz 1.1s ease-out 1}
 @keyframes glanz{0%{transform:translateX(-120%) rotate(20deg)}55%,100%{transform:translateX(120%) rotate(20deg)}}
 @keyframes legendeFluss{to{background-position:300% 0}}
-.medaille.neu{animation:neuHuepf 1.6s var(--feder) infinite}
+.medaille.neu{animation:neuHuepf 1.6s var(--feder) 3}   /* dreimal hüpfen, dann Ruhe: man zielt darauf */
 @keyframes neuHuepf{0%,100%{transform:none}12%{transform:translateY(-5px) scale(1.06)}24%{transform:none}}
 .medaille.gross{--g:132px}
 
@@ -538,7 +552,7 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
 .suche-abz b{font-variant-numeric:tabular-nums}
 .suche-abz i{position:absolute;top:-3px;right:-3px;width:12px;height:12px;border-radius:50%;background:#E5484D;
   box-shadow:0 0 0 2px var(--flaeche)}
-.suche-abz.neu .medaille{animation:neuHuepf 1.6s var(--feder) infinite}
+.suche-abz.neu .medaille{animation:neuHuepf 1.6s var(--feder) 3}
 .nav-abz{background:linear-gradient(140deg,#FFF6D9,#FFE9B0)!important;color:#6B5310!important}
 .abz-hinweis{display:flex;align-items:center;gap:10px;flex:1 1 100%;margin-top:4px;padding:8px 10px;border:0;border-radius:12px;
   font:inherit;text-align:left;cursor:pointer;color:var(--tinte);background:color-mix(in srgb,var(--flaeche) 70%,transparent)}
@@ -557,6 +571,11 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
   background:rgba(6,12,9,.6);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);opacity:0}
 .abz-feier.zeigen{animation:feierHell 260ms ease-out forwards}
 @keyframes feierHell{to{opacity:1}}
+/* Schließen: blendet in 170 ms aus, statt hart zu verschwinden. */
+.abz-feier.weg{pointer-events:none;opacity:1;animation:feierWeg var(--t-meldung-aus) var(--aus) forwards}
+.abz-feier.weg .abz-feier-karte{animation:feierKarteWeg var(--t-meldung-aus) var(--aus) forwards}
+@keyframes feierWeg{to{opacity:0}}
+@keyframes feierKarteWeg{to{opacity:0;transform:translateY(8px) scale(.97)}}
 .abz-feier-karte{position:relative;width:100%;max-width:360px;max-height:calc(100vh - 32px);overflow:auto;
   padding:22px 22px 18px;border-radius:26px;text-align:center;background:var(--flaeche);color:var(--tinte);
   box-shadow:0 30px 80px -20px rgba(0,0,0,.55);display:flex;flex-direction:column;align-items:center;gap:8px}
@@ -739,6 +758,19 @@ button.rang-zeile{cursor:pointer}
   justify-content:center;padding:16px;font-family:var(--schrift)}
 .einf-karte{background:var(--flaeche);color:var(--tinte);border-radius:24px;max-width:380px;width:100%;
   padding:30px 24px 20px;box-shadow:var(--schatten-hoch);text-align:center;position:relative}
+/* Einführung (einmalig): Hintergrund blendet auf, Karte kommt leicht von unten.
+   Blättern: neue Seite kommt aus der Wischrichtung. Schließen: kurz ausblenden. */
+.einf{animation:einfHell var(--t-meldung) var(--feder)}
+@keyframes einfHell{from{opacity:0}}
+.einf[data-richtung="start"] .einf-karte{animation:einfKarte 300ms var(--feder) both}
+.einf[data-richtung="vor"] .einf-karte{animation:einfVor 260ms var(--feder) both}
+.einf[data-richtung="zurueck"] .einf-karte{animation:einfZurueck 260ms var(--feder) both}
+@keyframes einfKarte{from{opacity:0;transform:translateY(14px) scale(.96)}}
+@keyframes einfVor{from{opacity:0;transform:translateX(24px)}}
+@keyframes einfZurueck{from{opacity:0;transform:translateX(-24px)}}
+.einf.weg{pointer-events:none;animation:feierWeg var(--t-meldung-aus) var(--aus) forwards}
+.einf.weg .einf-karte{animation:feierKarteWeg var(--t-meldung-aus) var(--aus) forwards}
+@media (prefers-reduced-motion:reduce){.einf,.einf .einf-karte{animation:none!important}}
 .frage-knoepfe{display:grid;gap:8px;margin-top:18px}
 .frage-knoepfe .knopf{width:100%;margin:0}
 .frage-klein{display:block;margin-top:12px;font-size:12.5px;color:var(--tinte-3)}
@@ -898,12 +930,15 @@ label.inline-knopf{display:inline-block;margin-top:10px}
 
 /* ---------- Meldung ---------- */
 /* §7 Räumliche Konsistenz: taucht von unten auf und verschwindet nach unten. */
-#meldung{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(90px);
+#meldung{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(16px);
   background:var(--tinte);color:#fff;padding:14px 24px;font-size:14px;font-weight:600;
   letter-spacing:-.006em;border-radius:var(--r-pille);z-index:1000;
   max-width:88vw;text-align:center;box-shadow:0 10px 34px rgba(15,26,21,.28);
-  transition:transform 420ms var(--feder)}
-#meldung.zeigen{transform:translateX(-50%) translateY(0)}
+  opacity:0;pointer-events:none;
+  /* Weg: kurz und beschleunigt – die Aufmerksamkeit ist schon woanders. */
+  transition:opacity var(--t-meldung-aus) var(--aus),transform var(--t-meldung-aus) var(--aus)}
+#meldung.zeigen{transform:translateX(-50%) translateY(0);opacity:1;pointer-events:auto;
+  transition:opacity var(--t-meldung) var(--feder),transform var(--t-meldung) var(--feder)}
 
 /* ---------- Ansichtswechsel ---------- */
 /* §7 Symmetrische Wege: Detail kommt von rechts herein, geht nach rechts hinaus.
@@ -920,11 +955,28 @@ label.inline-knopf{display:inline-block;margin-top:10px}
 .wechsel-vor{animation:hereinRechts 320ms var(--feder) both}
 .wechsel-zurueck{animation:hereinLinks 320ms var(--feder) both}
 
+/* Hell/Dunkel: Farben wechseln in einem Bild, nicht jede Fläche mit eigenem Tempo. */
+.thema-wechsel *,.thema-wechsel *::before,.thema-wechsel *::after{transition:none!important}
+
+/* Merken: der Stern tauscht über tiefe Skalierung + kurze Unschärfe. */
+.stern.tausch,[data-merken].tausch > span{display:inline-block;
+  animation:symbolTausch var(--t-tausch) var(--feder)}
+@keyframes symbolTausch{from{transform:scale(.3);opacity:0;filter:blur(3px)}}
+
+/* Pflichtfeld fehlt beim Absenden: das Feld schüttelt kurz den Kopf. */
+.wackeln{animation:wackeln 360ms var(--bewegen)}
+@keyframes wackeln{0%,100%{transform:none}15%{transform:translateX(-10px)}30%{transform:translateX(10px)}
+  48%{transform:translateX(-6px)}66%{transform:translateX(6px)}83%{transform:translateX(-3px)}}
+
+/* Plätze sind geladen: die ersten sechs Zeilen kommen 40 ms versetzt an. */
+.zeile.ankommen{animation:zeileAn 300ms var(--feder) both;animation-delay:calc(var(--i) * 40ms)}
+@keyframes zeileAn{from{opacity:0;transform:translate3d(0,8px,0)}}
+
 /* ---------- Marker ---------- */
 .eigenermarker{background:none;border:0}
 .mk{width:15px;height:15px;border:3px solid #fff;border-radius:50%;
   box-shadow:0 2px 6px rgba(15,26,21,.3);transition:transform 180ms var(--feder)}
-.eigenermarker:hover .mk{transform:scale(1.25)}
+@media (hover:hover) and (pointer:fine){.eigenermarker:hover .mk{transform:scale(1.25)}}
 /* Bündel: mehrere Orte nah beieinander, Zahl in der Mitte. Der farbige
    Ring zeigt die beste Zugangsangabe darin (grün = mindestens ein freier). */
 .buendel{background:none;border:0}
@@ -933,7 +985,7 @@ label.inline-knopf{display:inline-block;margin-top:10px}
   color:#0F1A15;font:700 12.5px/1 var(--schrift);letter-spacing:-.01em;
   box-shadow:0 2px 8px rgba(15,26,21,.25);cursor:pointer;
   transition:transform 180ms var(--feder)}
-.buendel:hover span{transform:scale(1.08)}
+@media (hover:hover) and (pointer:fine){.buendel:hover span{transform:scale(1.08)}}
 /* Im Bündel wird gerade gespielt: kleiner grüner Punkt oben rechts.
    (.buendel bleibt position:absolute von Leaflet – relative würde die
    Bündel untereinander stapeln und auf der Karte verschieben.) */
@@ -993,7 +1045,7 @@ label.inline-knopf{display:inline-block;margin-top:10px}
   .leaflet-top{top:env(safe-area-inset-top,0)}
   #meldung{bottom:auto;top:calc(14px + env(safe-area-inset-top,0));
     font-size:13.5px;padding:11px 18px;max-width:80vw;
-    transform:translateX(-50%) translateY(-120px)}
+    transform:translateX(-50%) translateY(-16px)}
   #meldung.zeigen{transform:translateX(-50%) translateY(0)}
 
   .suche{margin:4px 16px 0}
@@ -1135,6 +1187,7 @@ label.inline-knopf{display:inline-block;margin-top:10px}
   button:active,.zeile:active,.chip:active,.knopf:active{transform:none;opacity:.7}
   #meldung{transition:opacity 200ms ease;transform:translateX(-50%) translateY(0);opacity:0}
   #meldung.zeigen{opacity:1}
+  .zeile.ankommen,.wackeln,.stern.tausch,[data-merken].tausch > span,#logo-menue,#logo-menue.zu{animation:none}
 }
 
 @media(prefers-reduced-transparency:reduce){
@@ -1694,8 +1747,11 @@ button.team-mail{border:0;background:none;padding:0;font:inherit;cursor:pointer}
 .karten-marke[aria-expanded="true"] .marke-pfeil{transform:rotate(180deg)}
 #logo-menue{position:fixed;z-index:1200;width:min(290px,calc(100vw - 32px));background:var(--flaeche);
   border-radius:20px;box-shadow:0 0 0 1px var(--kante),var(--schatten-hoch);padding:6px;
-  animation:lm-auf 160ms var(--feder-schnell, ease-out)}
-@keyframes lm-auf{from{opacity:0;transform:translateY(-6px) scale(.98)}}
+  transform-origin:top left;
+  animation:lm-auf var(--t-klein) var(--feder)}
+@keyframes lm-auf{from{opacity:0;transform:translateY(-4px) scale(.95)}}
+#logo-menue.zu{pointer-events:none;animation:lm-zu var(--t-klein-aus) var(--aus) forwards}
+@keyframes lm-zu{to{opacity:0;transform:translateY(-4px) scale(.97)}}
 #logo-menue > button,#logo-menue > a{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:8px 12px;
   border:0;background:none;border-radius:14px;font:inherit;color:var(--tinte);text-align:left;text-decoration:none;cursor:pointer}
 #logo-menue > button:hover,#logo-menue > a:hover,#logo-menue > :focus-visible{background:var(--grund);outline:0}
@@ -1875,6 +1931,7 @@ function merkenUmschalten(id){
   if (GEMERKT.has(id)) GEMERKT.delete(id); else GEMERKT.add(id);
   try { localStorage.setItem(MERK_SCHLUESSEL, JSON.stringify([...GEMERKT])); } catch {}
   zeichne();
+  document.querySelectorAll(`[data-merken="${CSS.escape(String(id))}"]`).forEach(el => el.classList.add("tausch"));
   melde(GEMERKT.has(id) ? "Gemerkt." : "Aus der Merkliste entfernt.");
 }
 
@@ -2427,7 +2484,7 @@ function abzSchliessen(wie){
   if (wie === "weiter" && abzOverlay.rest?.length)
     return abzFeiern(abzOverlay.rest, ...abzOverlay.stand);
   abzOverlay.rest = [];
-  o?.remove();
+  if (o) { o.removeAttribute("id"); weichEntfernen(o, "weg"); }
   if (wie === "alle") { Z.ansicht = "abzeichen"; zeichne(); seite.querySelector(".rolle")?.scrollTo(0, 0); sheet.aufmachen(); }
   else if (Z.ansicht === "abzeichen" || Z.ansicht === "liste") zeichne();
 }
@@ -2732,8 +2789,11 @@ function themaAnwenden(){
 function themaUmschalten(){
   THEMA = dunkelAktiv() ? "hell" : "dunkel";
   try { localStorage.setItem(THEMA_SCHLUESSEL, THEMA); } catch {}
+  const wurzel = document.documentElement;
+  wurzel.classList.add("thema-wechsel");
   themaAnwenden();
   karteThemaNeu();
+  requestAnimationFrame(() => requestAnimationFrame(() => wurzel.classList.remove("thema-wechsel")));
 }
 themaAnwenden();
 const esriAttribution = 'Kartendaten &copy; Esri, HERE, Garmin, &copy; OpenStreetMap';
@@ -3400,6 +3460,25 @@ function bespielbarkeit(o){
   return null;
 }
 
+/* Element mit Ausgangs-Animation entfernen: Klasse setzen, nach dem
+   Animationsende weg. Bei reduzierter Bewegung (keine Animation) sofort. */
+function weichEntfernen(el, klasse){
+  if (!el) return;
+  const weg = () => el.remove();
+  el.classList.add(klasse);
+  const a = el.getAnimations ? el.getAnimations() : [];
+  if (!a.length) return weg();
+  el.addEventListener("animationend", e => { if (e.target === el) weg(); });
+  setTimeout(weg, 400);                     // Sicherheitsnetz
+}
+/* Pflichtfeld fehlt: Feld schütteln, Fokus hinein, Meldung zeigen. */
+function wackeln(el){
+  if (!el) return;
+  el.classList.remove("wackeln"); void el.offsetWidth; el.classList.add("wackeln");
+  el.addEventListener("animationend", e => { if (e.target === el) el.classList.remove("wackeln"); });
+  if (el.focus && el.matches("input,select,textarea")) el.focus({ preventScroll:false });
+  else el.scrollIntoView?.({ block:"center", behavior:"smooth" });
+}
 function melde(text, gehe, dauer = 3200){
   const m = document.getElementById("meldung");
   m.textContent = text;
@@ -3746,13 +3825,14 @@ function einfuehrungZeigen(immer){
   };
   const fertig = () => {
     try { localStorage.setItem(EINF_SCHLUESSEL, "1"); } catch {}
-    el.remove();
+    weichEntfernen(el, "weg");
     document.removeEventListener("keydown", taste);
     /* Ohne Antwort geschlossen: dann fragt der Browser direkt. */
     if (!gewaehlt && !Z.positionEcht && !Z.startpunkt) standortHolen();
   };
   const taste = e => { if (e.key === "Escape") fertig(); };
-  const bauen = () => {
+  const bauen = (richtung = "vor") => {
+    el.dataset.richtung = richtung;
     const s = EINF_SEITEN[i], letzte = i === EINF_SEITEN.length - 1;
     el.innerHTML = `<div class="einf-karte">
         ${s.standort ? `` : `<button class="einf-weg" data-einfweg="1">Überspringen</button>`}
@@ -3790,11 +3870,11 @@ function einfuehrungZeigen(immer){
     const dx = e.changedTouches[0].clientX - x0; x0 = null;
     if (EINF_SEITEN[i].standort) return;   // hier bitte mit Ja oder Nein antworten
     if (dx < -50 && i < EINF_SEITEN.length - 1) { i++; bauen(); }
-    else if (dx > 50 && i > 0 && !EINF_SEITEN[i - 1].standort) { i--; bauen(); }
+    else if (dx > 50 && i > 0 && !EINF_SEITEN[i - 1].standort) { i--; bauen("zurueck"); }
   });
   document.addEventListener("keydown", taste);
   document.body.appendChild(el);
-  bauen();
+  bauen("start");
 }
 
 /* --------------------------------------------------------------------------
@@ -4191,7 +4271,19 @@ function ansichtListe(nurListe){
      kurz leer. */
   const neueRolle = seite.querySelector(".rolle");
   if (alteRolle && alteRolle._inhalt === rolleInhalt) neueRolle.replaceWith(alteRolle);
-  else neueRolle._inhalt = rolleInhalt;
+  else {
+    neueRolle._inhalt = rolleInhalt;
+    /* Die Liste war eben noch leer (Plätze laden noch) und jetzt kommen
+       Plätze an: die ersten sechs Zeilen 40 ms versetzt, der Rest steht mit
+       der sechsten da. Nicht beim Tippen in der Suche und nicht beim
+       Wechsel von einer anderen Ansicht (nur Listen-Rollen haben _inhalt). */
+    if (alteRolle && alteRolle._inhalt !== undefined && !alteRolle.querySelector(".zeile") && !Z.suche)
+      neueRolle.querySelectorAll(".zeile").forEach((z, i) => {
+        if (i > 5) return;
+        z.style.setProperty("--i", i); z.classList.add("ankommen");
+        z.addEventListener("animationend", e => { if (e.target === z) z.classList.remove("ankommen"); });
+      });
+  }
 
   /* Laptop: Suche und Filter oben über die ganze Breite, damit die Liste
      darunter mehr Höhe bekommt. Die Klicks laufen über document, deshalb
@@ -6092,8 +6184,9 @@ async function neuVorschlagen(w){
 async function neuSpeichern(){
   if (!Z.neuerPunkt) return melde("Bitte zuerst auf die Karte tippen.");
   const w = neuFormularWerte();
-  if (!w.name) return melde("Ein Name fehlt noch.");
-  if (!w.sportarten) return melde("Bitte mindestens eine Sportart wählen.");
+  const feld = sel => document.querySelector("#formular " + sel);
+  if (!w.name) { wackeln(feld("[name=name]")); return melde("Ein Name fehlt noch."); }
+  if (!w.sportarten) { wackeln(feld(".sportwahl")); return melde("Bitte mindestens eine Sportart wählen."); }
   if (w.zeitenart === "feste Uhrzeiten" && !zeitenAusRaster(w))
     return melde("Bitte mindestens einen Tag anhaken.");
   if (!Z.admin) return neuVorschlagen(w);
@@ -9714,7 +9807,8 @@ new ModusKnopf().addTo(karte);
 
 function logoMenue(marke){
   let m = document.getElementById("logo-menue");
-  if (m) { m.remove(); marke.setAttribute("aria-expanded", "false"); return; }
+  if (m && !m.classList.contains("zu")) { logoMenue.zu?.(); return; }
+  m?.remove();
   m = document.createElement("div");
   m.id = "logo-menue"; m.setAttribute("role", "menu");
   const r = marke.getBoundingClientRect();
@@ -9731,8 +9825,9 @@ function logoMenue(marke){
   document.body.appendChild(m);
   marke.setAttribute("aria-expanded", "true");
   const zu = ev => { if (ev && marke.contains(ev.target)) return;
-    m.remove(); marke.setAttribute("aria-expanded", "false");
+    weichEntfernen(m, "zu"); marke.setAttribute("aria-expanded", "false"); logoMenue.zu = null;
     document.removeEventListener("click", zu, true); document.removeEventListener("keydown", esc_, true); };
+  logoMenue.zu = zu;
   const esc_ = ev => { if (ev.key === "Escape") zu(); };
   setTimeout(() => { document.addEventListener("click", zu, true); document.addEventListener("keydown", esc_, true); }, 0);
   m.querySelector("button,a").focus({ preventScroll:true });
