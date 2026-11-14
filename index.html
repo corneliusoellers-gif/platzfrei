@@ -1327,6 +1327,11 @@ header h1 .pf-marke{height:30px;width:auto}
   background:rgba(255,255,255,.18)}
 .schild-gross b{display:block;font-size:15.5px}
 .schild-gross small{display:block;font-size:12.5px;opacity:.9;margin-top:1px}
+/* im Formular gelten sonst die Label-Regeln (dunkle Schrift, Block) */
+.form label.schild-gross{display:flex;flex-direction:row;color:#fff;margin:0 0 14px;font-weight:400;text-transform:none;letter-spacing:0}
+.form label.schild-gross b{color:#fff;font-weight:700}
+.form label.schild-gross small{color:#fff}
+.form label.schild-gross .schild-gross-icon{color:#fff}
 /* Vom Schild gelesen: Hinweis über dem Formular */
 .schild-erkannt{margin:0 0 14px;padding:12px 14px;border-radius:14px;
   background:color-mix(in srgb,var(--gruen) 9%,var(--flaeche));border:1px solid color-mix(in srgb,var(--gruen) 35%,transparent)}
@@ -5109,6 +5114,15 @@ function ansichtNeu(){
     </div>
     <div class="rolle">
       <form class="form" id="formular">
+        <div id="neu-schild">
+          <label class="schild-gross" for="neu-schildfoto" tabindex="0" role="button">
+            <span class="schild-gross-icon" aria-hidden="true">${ic("kamera", 22)}</span>
+            <span><b>${Z.neuSchildFoto ? "✓ Schild fotografiert – neues Foto" : "Mit Foto vom Schild starten"}</b>
+              <small>${Z.neuSchildFoto ? "Prüf unten, was wir eingetragen haben" : "Zeiten und Regeln werden automatisch eingetragen, die Position auch, wenn du dort stehst"}</small></span></label>
+          <input type="file" id="neu-schildfoto" accept="image/*" hidden>
+          ${Z.neuSchildFoto && Z.neuSchildGelesen ? schildKasten(Z.neuSchildGelesen) : ``}
+        </div>
+
         <p class="hinweis pflicht-hinweis">${Z.admin ? "Pflicht sind Position, Name und Sportart. Alles unter „Mehr Angaben“ ist freiwillig."
           : "Pflicht sind nur Position, Name, Sportart, ein Foto vom Platz und woher du weißt, dass man dort spielen darf. Alles unter „Mehr Angaben“ ist freiwillig."}</p>
 
@@ -5145,16 +5159,8 @@ function ansichtNeu(){
         <input name="quelledetail" placeholder="z. B. Gemeinde Gauting, Mail vom 20.10.2026"
                value="${esc(e.quelledetail||"")}">` : `
         <h4 class="form-titel">Woher weißt du, dass man dort spielen darf?</h4>
-        <p class="hinweis">Fotografiere das Schild am Platz – oder sag uns, woher du es weißt.
-        Eins von beiden brauchen wir, sonst können wir den Platz nicht eintragen.</p>
-
-        <div id="neu-schild">
-          <label>Foto vom Schild</label>
-          <label class="inline-knopf fotowahl">${Z.neuSchildFoto ? "✓ Schildfoto gewählt – ändern" : ic("kamera", 14) + " Schild fotografieren"}
-            <input type="file" id="neu-schildfoto" accept="image/*" hidden></label>
-          <p class="hinweis">Am besten so, dass man die Regeln und Zeiten lesen kann. ${SCHILD_HINWEIS}</p>
-          ${Z.neuSchildFoto && Z.neuSchildGelesen ? schildKasten(Z.neuSchildGelesen) : ``}
-        </div>
+        <p class="hinweis">${Z.neuSchildFoto ? "✓ Dein Schildfoto von oben ist der Beleg. Mehr brauchen wir nicht."
+          : "Fotografiere oben das Schild am Platz – oder sag uns hier, woher du es weißt. Eins von beiden brauchen wir, sonst können wir den Platz nicht eintragen."}</p>
 
         <label>${Z.neuSchildFoto ? "Quelle (freiwillig)" : "Oder: Woher weißt du es?"}</label>
         ${auswahlFeld("quelle", NEU_QUELLE_BESUCHER, quelle, false)}
@@ -6401,6 +6407,7 @@ async function neuSpeichern(){
     }
     DATEN.push(ausDb(data));
     speicherVeraltet();
+    if (Z.neuSchildFoto) await schildHochladen(Z.neuSchildFoto, data.id);
   } else {
     DATEN.push(ausDb({ ...zeile, id:"O"+String(DATEN.length+1).padStart(2,"0") }));
   }
@@ -10339,6 +10346,8 @@ document.addEventListener("change", e=>{
     Z.neuEntwurf = neuFormularWerte();
     zeichne();
     melde("Schildfoto gewählt.");
+    /* Wer das Schild fotografiert, steht meist am Platz: Position gleich mitnehmen. */
+    if (!Z.neuerPunkt) hierPunktSetzen();
     /* Gleich auslesen und Zeiten, Alter und Regeln vorausfüllen. */
     bildVerkleinern(datei).then(schildLesen).then(erg => {
       if (Z.ansicht !== "neu" || Z.neuSchildFoto !== datei) return;
