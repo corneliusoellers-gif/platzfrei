@@ -327,12 +327,13 @@ a.knopf{text-decoration:none;display:inline-flex;align-items:center;justify-cont
 .status-text{display:flex;flex-direction:column;min-width:0}
 .status-text b{font-size:18px;letter-spacing:-.015em}
 .status-text span{font-size:13.5px;color:var(--tinte-2);margin-top:1px}
-.schnell{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0 0 14px}
-.schnell button{display:flex;flex-direction:column;align-items:center;gap:4px;
+.schnell{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:0 0 14px}
+.schnell button,.schnell label{display:flex;flex-direction:column;align-items:center;gap:4px;
   padding:11px 4px 10px;border:0;border-radius:14px;background:var(--flaeche);
   box-shadow:var(--schatten);font-family:var(--schrift);font-size:12.5px;font-weight:600;
   color:var(--tinte);cursor:pointer}
-.schnell button span{display:flex;font-size:18px;line-height:1;color:var(--gruen-tief)}
+.schnell label{margin:0;text-align:center}
+.schnell button span,.schnell label span{display:flex;font-size:18px;line-height:1;color:var(--gruen-tief)}
 .schnell button.an span{color:#F5B400}
 .schnell button.an svg{fill:currentColor}
 /* Am Desktop bleiben Route/Merken/Melden zusätzlich unten nicht doppelt. */
@@ -901,6 +902,8 @@ label.inline-knopf{display:inline-block;margin-top:10px}
 .hinweis{font-size:13px;color:var(--tinte-3);margin-top:14px;line-height:1.6}
 .form .form-titel{font-size:15px;font-weight:700;color:var(--tinte);margin:26px 0 -4px;padding-top:16px;border-top:1px solid var(--kante)}
 .zeitraster[hidden],#neu-schild[hidden]{display:none}
+.zeitraster-trenner{grid-column:1/-1;border-top:1px solid var(--kante);margin-top:4px}
+.zeitraster .zeitraster-notiz{grid-column:1/-1;margin:0;font-size:12.5px}
 .rechtliches-link{display:block;text-align:center;font-size:12px;color:var(--tinte-3);
   padding:4px 20px 16px;line-height:1.5}
 .rechtliches-link button{background:none;border:0;padding:0;font:inherit;
@@ -1315,6 +1318,15 @@ header h1 .pf-marke{height:30px;width:auto}
 .naechster p{font-size:13.5px;line-height:1.5;color:var(--tinte-2);margin-top:4px}
 .naechster-knoepfe{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .naechster-knoepfe .inline-knopf{margin:0}
+/* Schild fotografieren: gut sichtbar direkt unter dem Status */
+.schild-gross{display:flex;align-items:center;gap:12px;margin:0 0 12px;padding:13px 16px;border-radius:16px;
+  background:var(--gruen);color:#fff;cursor:pointer;box-shadow:var(--schatten);min-height:44px}
+.schild-gross:active{transform:scale(.985)}
+.schild-gross:focus-visible{outline:3px solid var(--gruen-tief);outline-offset:2px}
+.schild-gross-icon{display:flex;flex-shrink:0;width:40px;height:40px;border-radius:12px;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.18)}
+.schild-gross b{display:block;font-size:15.5px}
+.schild-gross small{display:block;font-size:12.5px;opacity:.9;margin-top:1px}
 /* Vom Schild gelesen: Hinweis über dem Formular */
 .schild-erkannt{margin:0 0 14px;padding:12px 14px;border-radius:14px;
   background:color-mix(in srgb,var(--gruen) 9%,var(--flaeche));border:1px solid color-mix(in srgb,var(--gruen) 35%,transparent)}
@@ -4832,7 +4844,6 @@ function ansichtDetail(){
   /* Der nächste sinnvolle Schritt, direkt unter dem Status. */
   const schritte = [];
   if (st.stufe !== "bestaetigt") schritte.push(
-    `<label class="inline-knopf" for="schild-datei" tabindex="0" role="button">${ic("kamera", 14)} Schild fotografieren</label>`,
     `<button class="inline-knopf" data-geprueft="${o.id}">${BESTAETIGT.has(o.id) ? "✓ Du hast hier gespielt" : "✓ Ich habe hier gespielt"}</button>`);
   if (zeitenFehlen) schritte.push(`<button class="inline-knopf" data-gehe="bearbeiten" data-fokus="zeiten">${ic("uhr", 14)} Zeiten ergänzen</button>`);
   else schritte.push(`<button class="inline-knopf" data-gehe="bearbeiten">${ic("stift", 14)} Angaben ergänzen</button>`);
@@ -4860,6 +4871,9 @@ function ansichtDetail(){
           <span>${st.kurz}${zeitenFehlen ? ` · Zeiten unbekannt` : ` · ${esc(o.zeiten)}`}</span>
           <span class="status-quelle${o.geprueft && stand.alt ? " alt" : ""}">Quelle: ${esc(quelleText(o))}${o.geprueft ? ` · ${stand.text}` : ``}</span></span>
       </div>
+      ${st.stufe !== "bestaetigt" || zeitenFehlen ? `<label class="schild-gross" for="schild-datei" tabindex="0" role="button">
+        <span class="schild-gross-icon" aria-hidden="true">${ic("kamera", 22)}</span>
+        <span><b>Schild fotografieren</b><small>Zeiten werden automatisch eingetragen</small></span></label>` : ``}
       ${naechsterSchritt}${eigeneMeldungen(o.id).length ? `<div class="gemeldet" role="note">
         <b>Deine Meldung ist offen</b>
         ${eigeneMeldungen(o.id).slice(-3).map(m => `<span>${esc(m.titel)} · ${m.datum.split("-").reverse().join(".")}</span>`).join("")}
@@ -4868,6 +4882,7 @@ function ansichtDetail(){
       ${auslastungBlock(o)}
       <div class="schnell">
         <button data-gehe="bearbeiten"><span aria-hidden="true">${ic("stift", 20)}</span>Ergänzen</button>
+        <label for="schild-datei" tabindex="0" role="button"><span aria-hidden="true">${ic("kamera", 20)}</span>Schild</label>
         <button data-merken="${o.id}" class="${GEMERKT.has(o.id) ? "an" : ""}"><span aria-hidden="true">${ic("stern", 20)}</span>${GEMERKT.has(o.id) ? "Gemerkt" : "Merken"}</button>
         <button data-teilen="${o.id}"><span aria-hidden="true">${ic("teilen", 20)}</span>Teilen</button>
         <button data-gehe="melden"><span aria-hidden="true">${ic("flagge", 20)}</span>Melden</button>
@@ -5158,6 +5173,7 @@ function ansichtNeu(){
             <input type="time" name="von-${i}" value="${esc(e["von-"+i] || "08:00")}" aria-label="${t} von">
             <span>bis</span>
             <input type="time" name="bis-${i}" value="${esc(e["bis-"+i] || "20:00")}" aria-label="${t} bis">`).join("")}
+            ${ruheZeile(e)}
           </div>
 
           <label>Altersgrenze</label>
@@ -5227,6 +5243,7 @@ function ansichtVereinszeiten(){
           <input type="time" name="von-${i}" value="${i<5?"17:00":"10:00"}" aria-label="${t} von">
           <span>bis</span>
           <input type="time" name="bis-${i}" value="${i<5?"20:00":"18:00"}" aria-label="${t} bis">`).join("")}
+          ${ruheZeile({})}
         </div>
 
         <label>Zusatz (freiwillig)</label>
@@ -5259,8 +5276,33 @@ function ansichtVereinszeiten(){
 
 /* Aus den Häkchen einen kurzen Text machen: gleiche Zeiten an
    aufeinanderfolgenden Tagen zusammenfassen, z. B. "Mo–Fr 17:00–20:00". */
+/* Mittagsruhe im Wochenraster: gilt für alle angehakten Tage. */
+function ruheZeile(e){
+  return `<div class="zeitraster-trenner" aria-hidden="true"></div>
+    <label class="zeitraster-tag zeitraster-ruhe"><input type="checkbox" name="ruhe"${e.ruhe ? " checked" : ""}> Mittagsruhe</label>
+    <input type="time" name="ruhe-von" value="${esc(e["ruhe-von"] || "13:00")}" aria-label="Mittagsruhe von">
+    <span>bis</span>
+    <input type="time" name="ruhe-bis" value="${esc(e["ruhe-bis"] || "15:00")}" aria-label="Mittagsruhe bis">
+    <p class="hinweis zeitraster-notiz">Anhaken, wenn mittags nicht gespielt werden darf. Gilt für alle angehakten Tage.</p>`;
+}
+function ruheAusRaster(w){
+  const v = w["ruhe-von"], b = w["ruhe-bis"];
+  return w.ruhe && v && b && v < b ? [v, b] : null;
+}
+
+/* Spielzeit eines Tages, mit Mittagsruhe in zwei Teile geteilt:
+   "08:00–13:00 und 15:00–20:00". */
+function tagMitRuhe(von, bis, ruhe){
+  if (!ruhe || !von || !bis || ruhe[1] <= von || ruhe[0] >= bis) return von + "–" + bis;
+  const teile = [];
+  if (von < ruhe[0]) teile.push(von + "–" + ruhe[0]);
+  if (ruhe[1] < bis) teile.push(ruhe[1] + "–" + bis);
+  return teile.join(" und ") || von + "–" + bis;
+}
+
 function zeitenAusRaster(w){
-  const tage = WOCHENTAGE.map((t,i) => w["tag-"+i] ? (w["von-"+i]||"") + "–" + (w["bis-"+i]||"") : null);
+  const ruhe = ruheAusRaster(w);
+  const tage = WOCHENTAGE.map((t,i) => w["tag-"+i] ? tagMitRuhe(w["von-"+i]||"", w["bis-"+i]||"", ruhe) : null);
   const teile = [];
   for (let i = 0; i < 7; i++) {
     if (!tage[i]) continue;
@@ -6217,7 +6259,7 @@ function neuFormularWerte(){
     if (el.checked) sp.push(el.name.slice(3));
     delete w[el.name];
   }
-  for (const el of f.querySelectorAll("input[type=checkbox][name^='tag-']")) w[el.name] = el.checked;
+  for (const el of f.querySelectorAll("input[type=checkbox][name^='tag-'], input[type=checkbox][name='ruhe']")) w[el.name] = el.checked;
   w.sportarten = sp.join(", ");
   return w;
 }
@@ -6307,6 +6349,12 @@ async function neuSpeichern(){
   const feld = sel => document.querySelector("#formular " + sel);
   if (!w.name) { wackeln(feld("[name=name]")); return melde("Ein Name fehlt noch."); }
   if (!w.sportarten) { wackeln(feld(".sportwahl")); return melde("Bitte mindestens eine Sportart wählen."); }
+  if (w.zeitenart === "feste Uhrzeiten" && w.ruhe && !ruheAusRaster(w)) {
+    Z.neuMehrOffen = true;
+    const mehr = document.getElementById("neu-mehr");
+    if (mehr) mehr.open = true;
+    return melde("Bei der Mittagsruhe muss das Ende nach dem Anfang liegen.");
+  }
   if (w.zeitenart === "feste Uhrzeiten" && !zeitenAusRaster(w)) {
     Z.neuMehrOffen = true;
     const mehr = document.getElementById("neu-mehr");
@@ -6916,7 +6964,9 @@ function schildTextAuswerten(roh, vertrauen = 80){
   // Ruhezeiten zuerst herausnehmen, damit sie nicht als Spielzeit zählen.
   const ruheRe = new RegExp(String.raw`(mittagsruhe|mittagspause|ruhezeit(?:en)?)[^0-9]{0,25}${SCHILD_UHR}\s*(?:-|–|—|bis)\s*${SCHILD_UHR}`, "g");
   let rein = t, m;
+  let ruhe = null;
   while ((m = ruheRe.exec(t))) {
+    ruhe ||= [zweistellig(+m[2], m[3] ? +m[3] : 0), zweistellig(+m[4], m[5] ? +m[5] : 0)];
     regeln.push(`${m[1].startsWith("ruhe") ? "Ruhezeit" : "Mittagsruhe"} ${+m[2]}${m[3] && m[3] !== "00" ? ":" + m[3] : ""}–${+m[4]}${m[5] && m[5] !== "00" ? ":" + m[5] : ""} Uhr`);
     rein = rein.replace(m[0], " ");
   }
@@ -6957,10 +7007,13 @@ function schildTextAuswerten(roh, vertrauen = 80){
     const sortiert = [...liste].sort((a, b) => a.von - b.von);
     for (let k = 1; k < sortiert.length; k++) if (sortiert[k].von > sortiert[k-1].bis) {
       const r = `Pause ${Math.floor(sortiert[k-1].bis/60)}${sortiert[k-1].bis%60 ? ":" + String(sortiert[k-1].bis%60).padStart(2,"0") : ""}–${Math.floor(sortiert[k].von/60)}${sortiert[k].von%60 ? ":" + String(sortiert[k].von%60).padStart(2,"0") : ""} Uhr`;
-      if (!regeln.some(x => /pause|mittagsruhe|ruhezeit/i.test(x))) regeln.push(r);
+      if (!regeln.some(x => /pause|mittagsruhe|ruhezeit/i.test(x))) {
+        regeln.push(r);
+        ruhe ||= [zweistellig(Math.floor(sortiert[k-1].bis/60), sortiert[k-1].bis%60), zweistellig(Math.floor(sortiert[k].von/60), sortiert[k].von%60)];
+      }
     }
   });
-  if (erg.tage.length) erg.zeitenart = "feste Uhrzeiten";
+  if (erg.tage.length) { erg.zeitenart = "feste Uhrzeiten"; erg.ruhe = ruhe; }
   else if (/dunkelheit|dämmerung|sonnenuntergang/.test(t)) erg.zeitenart = "tagsüber bis Dunkelheit";
   else if (/rund um die uhr|24 stunden|jederzeit/.test(t)) erg.zeitenart = "rund um die Uhr";
 
@@ -7001,6 +7054,10 @@ function schildAlter(n){
 function schildZuWerten(e){
   const w = { zeitenart: e.zeitenart || "weiß ich nicht", alter: schildAlter(e.altersgrenze),
               zeitzusatz: (e.regeln || []).join("; ").slice(0, 300) };
+  if (w.zeitenart === "feste Uhrzeiten" && e.ruhe) {
+    Object.assign(w, { ruhe: true, "ruhe-von": e.ruhe[0], "ruhe-bis": e.ruhe[1] });
+    w.zeitzusatz = (e.regeln || []).filter(r => !/^(pause|mittagsruhe|ruhezeit)/i.test(r)).join("; ").slice(0, 300);
+  }
   if (w.zeitenart === "feste Uhrzeiten") WOCHENTAGE.forEach((t, i) => {
     const d = (e.tage || []).find(x => x.tag === t);
     w["tag-" + i] = !!d;
@@ -7020,7 +7077,7 @@ function schildBrauchbar(e){
 function schildVorschlag(e, id){
   const w = schildZuWerten(e);
   /* Ins Zeiten-Feld nur, was die Zeiten betrifft (Alter, Pausen); der Rest steht in der Begründung. */
-  const zeiten = neuZeitenText({ ...w, zeitzusatz: (e.regeln || []).filter(r => /pause|ruhe/i.test(r)).join("; ") }) || "";
+  const zeiten = neuZeitenText({ ...w, zeitzusatz: w.ruhe ? "" : (e.regeln || []).filter(r => /pause|ruhe/i.test(r)).join("; ") }) || "";
   const text = (e.text || "").replace(/\s+/g, " ").trim();
   return { id, zugang: w.zugang || null, zeiten, text, sicher: e.sicher,
            begruendung: ("Schild vor Ort fotografiert und gelesen" + (text ? ": „" + text.slice(0, 400) + "“" : "")).slice(0, 1000) };
