@@ -1497,6 +1497,10 @@ header h1 .pf-marke{height:30px;width:auto}
 .rolle .abz-streifen{margin:4px 0 14px}
 .rolle .zeile + .los{margin-top:8px}
 .detailfuss .knopf span{margin-right:2px}
+/* Schild fotografieren: immer unten sichtbar, auch wenn das Blatt klein ist */
+.detailfuss .schildfuss{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:1px;padding:6px 14px;margin:0;font-size:11.5px;color:var(--gruen-tief)}
+.detailfuss .schildfuss span{margin:0}
 
 /* iPhones zoomen in Felder unter 16 px hinein – überall 16 px auf Touch-Geräten. */
 @media (max-width:880px), (pointer:coarse){
@@ -4972,6 +4976,8 @@ function ansichtDetail(){
     <!-- Unten, wo der Daumen ist: Hinkommen zuerst. "Angaben ergänzen"
          steht oben im Prüf-Kasten und in der Knopfreihe. -->
     <div class="fuss detailfuss">
+      <label class="knopf zweit schildfuss" for="schild-datei" tabindex="0" role="button"
+             aria-label="Schild fotografieren">${ic("kamera", 18)}<span>Schild</span></label>
       <button class="knopf zweit" data-geprueft="${o.id}">${
         BESTAETIGT.has(o.id) ? "✓ Hier gespielt" : "Hier gespielt"}</button>
       <button class="knopf" data-route="${o.id}">${ic("route", 16)} Route</button>
