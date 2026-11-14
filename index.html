@@ -1315,6 +1315,24 @@ header h1 .pf-marke{height:30px;width:auto}
 .naechster p{font-size:13.5px;line-height:1.5;color:var(--tinte-2);margin-top:4px}
 .naechster-knoepfe{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .naechster-knoepfe .inline-knopf{margin:0}
+/* Vom Schild gelesen: Hinweis über dem Formular */
+.schild-erkannt{margin:0 0 14px;padding:12px 14px;border-radius:14px;
+  background:color-mix(in srgb,var(--gruen) 9%,var(--flaeche));border:1px solid color-mix(in srgb,var(--gruen) 35%,transparent)}
+.schild-erkannt b{display:flex;align-items:center;gap:6px;font-size:14.5px;color:var(--tinte)}
+.schild-erkannt p{font-size:13px;line-height:1.5;color:var(--tinte-2);margin-top:4px}
+.schild-erkannt details{margin-top:6px;font-size:13px;color:var(--tinte-2)}
+.schild-erkannt summary{cursor:pointer;min-height:32px;display:flex;align-items:center}
+/* Platz eintragen: freiwillige Angaben zum Aufklappen */
+.form .mehr-angaben{margin-top:22px;border-top:1px solid var(--kante);padding-top:6px}
+.form .mehr-angaben>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;
+  min-height:44px;font-size:15px;font-weight:700;color:var(--tinte)}
+.form .mehr-angaben>summary::-webkit-details-marker{display:none}
+.form .mehr-angaben>summary::after{content:"";margin-left:auto;width:8px;height:8px;border-right:2px solid var(--tinte-2);
+  border-bottom:2px solid var(--tinte-2);transform:rotate(45deg);transition:transform .2s}
+.form .mehr-angaben[open]>summary::after{transform:rotate(225deg)}
+.form .mehr-angaben .freiwillig{font-size:12px;font-weight:600;color:var(--tinte-3);background:color-mix(in srgb,var(--tinte) 7%,var(--flaeche));
+  padding:2px 8px;border-radius:999px}
+.form .pflicht-hinweis{margin-top:0}
 @media (max-width:880px){ .naechster{margin-left:0;margin-right:0} }
 .einf-legende i{width:18px;height:18px;display:grid;place-items:center;font-size:11px;font-weight:800;
   font-style:normal;color:#fff;line-height:1}
@@ -1867,6 +1885,9 @@ const KONFIG = {
 
 const ECHT = !KONFIG.url.startsWith("HIER_") && typeof window.supabase !== "undefined";
 const db   = ECHT ? window.supabase.createClient(KONFIG.url, KONFIG.anonKey) : null;
+/* Schild-Foto lesen (Supabase-Funktion schild-lesen, siehe schildLesen()). */
+let SCHILD_LESEN_AUS = false;
+const SCHILD_HINWEIS = "Zeiten und Regeln liest die App automatisch aus (KI-Dienst, siehe Datenschutz).";
 
 
 /* ==========================================================================
@@ -4802,7 +4823,7 @@ function ansichtDetail(){
   const vonNutzern = nutzerBestaetigt(o);
   const fotos = (Z.schilder[o.id] || []).filter(f => f.freigegeben || Z.admin);
   const schildKnopf = `<label class="inline-knopf" for="schild-datei" tabindex="0" role="button">Schild fotografieren</label>
-        <p class="hinweis">Bitte nur das Schild, keine Personen oder Autokennzeichen.</p>`;
+        <p class="hinweis">Bitte nur das Schild, keine Personen oder Autokennzeichen. ${SCHILD_HINWEIS}</p>`;
 
   const [statusArt] = markeArt(o);
   adresseErgaenzen(o);
@@ -4954,6 +4975,7 @@ function ansichtBearbeiten(){
     ortVollLaden(o);
     return;
   }
+  const sv = Z.schildVorschlag?.id === o.id ? Z.schildVorschlag : null;   // vom Schild gelesen
   const sperr = !Z.admin;   // Nicht-Admins sehen die Zugangsfelder, dürfen sie
                             // aber nur vorschlagen, nicht direkt ändern.
 
@@ -4991,11 +5013,12 @@ function ansichtBearbeiten(){
 
         <hr style="margin:16px 0;border:0;border-top:2px solid var(--tinte)">
 
+        ${sv ? schildKasten(sv) : ``}
         <label>Zugang ${sperr?"(Vorschlag)":""}</label>
-        ${auswahlFeld("zugang", AUSWAHL.zugang, o.zugang, false)}
+        ${auswahlFeld("zugang", AUSWAHL.zugang, sv?.zugang || o.zugang, false)}
 
         <label>Erlaubte Zeiten ${sperr?"(Vorschlag)":""}</label>
-        <input name="zeiten" value="${esc(o.zeiten)}">
+        <input name="zeiten" value="${esc(sv?.zeiten || o.zeiten)}">
 
         <label>Bestätigt durch</label>
         ${auswahlFeld("bestaetigtDurch", AUSWAHL.bestaetigtDurch,
@@ -5004,10 +5027,11 @@ function ansichtBearbeiten(){
         ${sperr ? `
         <label>Woher weißt du das? (Pflicht, wenn du Zugang oder Zeiten änderst)</label>
         <textarea name="begruendung" maxlength="1000"
-          placeholder="z. B. Schild am Eingang: täglich 8–20 Uhr · Gemeinde Gauting, Mail vom 20.10."></textarea>
+          placeholder="z. B. Schild am Eingang: täglich 8–20 Uhr · Gemeinde Gauting, Mail vom 20.10.">${esc(sv?.begruendung || "")}</textarea>
         <label class="inline-knopf fotowahl"><span id="aend-schildtext">${Z.aendSchildFoto?.id === o.id
             ? "✓ Schildfoto gewählt – ändern" : ic("kamera", 14) + " Oder: Schild fotografieren"}</span>
-          <input type="file" id="aend-schildfoto" accept="image/*" hidden></label>` : ``}
+          <input type="file" id="aend-schildfoto" accept="image/*" hidden></label>
+        <p class="hinweis">${SCHILD_HINWEIS}</p>` : ``}
 
         <p class="hinweis">${sperr
           ? "Änderungen an Zugang und Zeiten gehen als Vorschlag ein und werden erst nach Prüfung sichtbar. Alles andere ist sofort live."
@@ -5053,6 +5077,9 @@ function ansichtNeu(){
   const zeitenArt = e.zeitenart || "weiß ich nicht";
   const quelle = e.quelle || (Z.admin ? "weiß ich nicht" : BITTE_WAEHLEN);
   const tagAn = i => e["tag-"+i] === undefined ? true : e["tag-"+i];
+  /* "Mehr Angaben" offen lassen, wenn der Nutzer es aufgeklappt hat oder
+     das Schild schon etwas ausgefüllt hat. */
+  const mehrOffen = Z.neuMehrOffen ?? !!Z.neuSchildGelesen;
   seite.innerHTML = `
     <div class="dkopf">
       <button class="zurueck" data-gehe="liste">← Abbrechen</button>
@@ -5061,6 +5088,9 @@ function ansichtNeu(){
     </div>
     <div class="rolle">
       <form class="form" id="formular">
+        <p class="hinweis pflicht-hinweis">${Z.admin ? "Pflicht sind Position, Name und Sportart. Alles unter „Mehr Angaben“ ist freiwillig."
+          : "Pflicht sind nur Position, Name, Sportart, ein Foto vom Platz und woher du weißt, dass man dort spielen darf. Alles unter „Mehr Angaben“ ist freiwillig."}</p>
+
         <label>Position</label>
         <input value="${p ? p.lat+", "+p.lon : "noch nicht gesetzt"}" readonly
                class="${p?"":"gesperrt"}">
@@ -5071,35 +5101,18 @@ function ansichtNeu(){
         <label>Name</label>
         <input name="name" placeholder="z. B. Bolzplatz am Waldweg" value="${esc(e.name||"")}">
 
-        <label>Ort / Straße</label>
-        <input name="ort" placeholder="z. B. Gauting, Bahnhofstraße" value="${esc(e.ort||"")}">
-
         <label>Sportarten</label>
         <div class="sportwahl">${AUSWAHL.sportarten.map(sp => `
           <label class="sportwahl-punkt"><input type="checkbox" name="sp-${esc(sp)}"
             ${(e.sportarten||"Fußball").split(",").map(x=>x.trim()).includes(sp) ? "checked" : ""}>
             ${SPORT_ICON[sp]||""} ${esc(sp)}</label>`).join("")}</div>
 
-        <h4 class="form-titel">Darf man dort spielen?</h4>
-
-        <label>Zugang${Z.admin ? "" : " (deine Einschätzung)"}</label>
-        ${auswahlFeld("zugang", AUSWAHL.zugang, e.zugang || "unklar", false)}
-
-        <label>Wann darf man spielen?</label>
-        ${auswahlFeld("zeitenart", NEU_ZEITEN, zeitenArt, false)}
-        <div class="zeitraster" id="neu-raster"${zeitenArt === "feste Uhrzeiten" ? "" : " hidden"}>${WOCHENTAGE.map((t,i) => `
-          <label class="zeitraster-tag"><input type="checkbox" name="tag-${i}"${tagAn(i) ? " checked" : ""}> ${t}</label>
-          <input type="time" name="von-${i}" value="${esc(e["von-"+i] || "08:00")}" aria-label="${t} von">
-          <span>bis</span>
-          <input type="time" name="bis-${i}" value="${esc(e["bis-"+i] || "20:00")}" aria-label="${t} bis">`).join("")}
-        </div>
-
-        <label>Altersgrenze</label>
-        ${auswahlFeld("alter", NEU_ALTER, e.alter || "keine", false)}
-
-        <label>Sonst noch Regeln? (freiwillig)</label>
-        <input name="zeitzusatz" placeholder="z. B. Mittagsruhe 13–15 Uhr, nicht während Schulbetrieb"
-               value="${esc(e.zeitzusatz||"")}">
+        ${Z.admin ? `` : `
+        <label>Foto vom Platz</label>
+        <label class="inline-knopf fotowahl">${Z.neuFoto ? "✓ Foto gewählt – ändern" : ic("kamera", 14) + " Foto aufnehmen oder wählen"}
+          <input type="file" id="neu-foto" accept="image/*" hidden></label>
+        <p class="hinweis">Damit wir sehen, dass es den Platz wirklich gibt. Am besten mit
+        Toren oder Körben. Bitte keine Personen oder Autokennzeichen.</p>`}
 
         ${Z.admin ? `
         <h4 class="form-titel">Woher weißt du das?</h4>
@@ -5110,7 +5123,7 @@ function ansichtNeu(){
         <label>Wer genau, und wann? (freiwillig)</label>
         <input name="quelledetail" placeholder="z. B. Gemeinde Gauting, Mail vom 20.10.2026"
                value="${esc(e.quelledetail||"")}">` : `
-        <h4 class="form-titel">Woher weißt du, dass man dort spielen darf? (Pflicht)</h4>
+        <h4 class="form-titel">Woher weißt du, dass man dort spielen darf?</h4>
         <p class="hinweis">Fotografiere das Schild am Platz – oder sag uns, woher du es weißt.
         Eins von beiden brauchen wir, sonst können wir den Platz nicht eintragen.</p>
 
@@ -5118,7 +5131,8 @@ function ansichtNeu(){
           <label>Foto vom Schild</label>
           <label class="inline-knopf fotowahl">${Z.neuSchildFoto ? "✓ Schildfoto gewählt – ändern" : ic("kamera", 14) + " Schild fotografieren"}
             <input type="file" id="neu-schildfoto" accept="image/*" hidden></label>
-          <p class="hinweis">Am besten so, dass man die Regeln und Zeiten lesen kann.</p>
+          <p class="hinweis">Am besten so, dass man die Regeln und Zeiten lesen kann. ${SCHILD_HINWEIS}</p>
+          ${Z.neuSchildFoto && Z.neuSchildGelesen ? schildKasten(Z.neuSchildGelesen) : ``}
         </div>
 
         <label>${Z.neuSchildFoto ? "Quelle (freiwillig)" : "Oder: Woher weißt du es?"}</label>
@@ -5128,32 +5142,56 @@ function ansichtNeu(){
         <input name="quelledetail" maxlength="300" placeholder="z. B. Gemeinde Gauting, Mail vom 20.10.2026"
                value="${esc(e.quelledetail||"")}">`}
 
-        <h4 class="form-titel">Mehr zum Platz</h4>
 
-        <label>Untergrund</label>
-        ${auswahlFeld("untergrund", AUSWAHL.untergrund, e.untergrund || "Naturrasen", false)}
+        <details class="mehr-angaben" id="neu-mehr"${mehrOffen ? " open" : ""}>
+          <summary><span>Mehr Angaben</span> <span class="freiwillig">freiwillig</span></summary>
+          <p class="hinweis">Zeiten, Regeln, Untergrund und Ausstattung helfen anderen sehr. ${Z.neuSchildGelesen ? "Vom Schild haben wir schon eingetragen, was wir lesen konnten." : "Wenn du das Schild fotografierst, füllen wir Zeiten und Regeln für dich aus."}</p>
+          <h4 class="form-titel">Darf man dort spielen?</h4>
 
-        <label>Größe</label>
-        ${auswahlFeld("groesse", AUSWAHL.groesse, e.groesse || "Kleinfeld", false)}
+          <label>Zugang${Z.admin ? "" : " (deine Einschätzung)"}</label>
+          ${auswahlFeld("zugang", AUSWAHL.zugang, e.zugang || "unklar", false)}
 
-        <label>Ausstattung</label>
-        <input name="ausstattung" placeholder="2 Tore mit Netz" value="${esc(e.ausstattung||"")}">
+          <label>Wann darf man spielen?</label>
+          ${auswahlFeld("zeitenart", NEU_ZEITEN, zeitenArt, false)}
+          <div class="zeitraster" id="neu-raster"${zeitenArt === "feste Uhrzeiten" ? "" : " hidden"}>${WOCHENTAGE.map((t,i) => `
+            <label class="zeitraster-tag"><input type="checkbox" name="tag-${i}"${tagAn(i) ? " checked" : ""}> ${t}</label>
+            <input type="time" name="von-${i}" value="${esc(e["von-"+i] || "08:00")}" aria-label="${t} von">
+            <span>bis</span>
+            <input type="time" name="bis-${i}" value="${esc(e["bis-"+i] || "20:00")}" aria-label="${t} bis">`).join("")}
+          </div>
 
-        <label>Flutlicht / Beleuchtung</label>
-        ${auswahlFeld("beleuchtung", NEU_WEISSNICHT, e.beleuchtung || "weiß nicht", false)}
+          <label>Altersgrenze</label>
+          ${auswahlFeld("alter", NEU_ALTER, e.alter || "keine", false)}
 
-        <label>Umzäunt</label>
-        ${auswahlFeld("umzaeunt", NEU_WEISSNICHT, e.umzaeunt || "weiß nicht", false)}
+          <label>Sonst noch Regeln?</label>
+          <input name="zeitzusatz" placeholder="z. B. Mittagsruhe 13–15 Uhr, nicht während Schulbetrieb"
+                 value="${esc(e.zeitzusatz||"")}">
 
-        ${Z.admin ? `` : `
-        <label>Foto vom Platz (Pflicht)</label>
-        <label class="inline-knopf fotowahl">${Z.neuFoto ? "✓ Foto gewählt – ändern" : ic("kamera", 14) + " Foto aufnehmen oder wählen"}
-          <input type="file" id="neu-foto" accept="image/*" hidden></label>
-        <p class="hinweis">Damit wir sehen, dass es den Platz wirklich gibt. Am besten mit
-        Toren oder Körben. Bitte keine Personen oder Autokennzeichen.</p>`}
+          <label>Ort / Straße</label>
+          <input name="ort" placeholder="z. B. Gauting, Bahnhofstraße" value="${esc(e.ort||"")}">
 
-        <label>${Z.admin ? "Notizen" : "Sonst noch wichtig? (freiwillig)"}</label>
-        <textarea name="hinweis" placeholder="z. B. Tore ohne Netz, oft Hunde auf der Wiese, Toilette im Park">${esc(e.hinweis||"")}</textarea>
+          <h4 class="form-titel">Zum Platz</h4>
+
+          <label>Untergrund</label>
+          ${auswahlFeld("untergrund", ["weiß nicht", ...AUSWAHL.untergrund], e.untergrund || "weiß nicht", false)}
+
+          <label>Größe</label>
+          ${auswahlFeld("groesse", ["weiß nicht", ...AUSWAHL.groesse], e.groesse || "weiß nicht", false)}
+
+          <label>Ausstattung</label>
+          <input name="ausstattung" placeholder="2 Tore mit Netz" value="${esc(e.ausstattung||"")}">
+
+          <label>Flutlicht / Beleuchtung</label>
+          ${auswahlFeld("beleuchtung", NEU_WEISSNICHT, e.beleuchtung || "weiß nicht", false)}
+
+          <label>Umzäunt</label>
+          ${auswahlFeld("umzaeunt", NEU_WEISSNICHT, e.umzaeunt || "weiß nicht", false)}
+
+          <label>${Z.admin ? "Notizen" : "Sonst noch wichtig?"}</label>
+          <textarea name="hinweis" placeholder="z. B. Tore ohne Netz, oft Hunde auf der Wiese, Toilette im Park">${esc(e.hinweis||"")}</textarea>
+
+        </details>
+
 
         <p class="hinweis">${Z.admin ? "Admin-Modus: der Platz ist nach dem Anlegen sofort für alle sichtbar."
           : `Neue Orte prüfe ich, bevor sie auf der Karte erscheinen. Zugang und Zeiten übernehme ich nur mit Beleg.
@@ -5396,7 +5434,8 @@ let letzterSchluessel = "liste";
 const SCROLL = {};                 // Scrollposition je Ansicht
 
 function zeichne(){
-  if (Z.ansicht !== "bearbeiten") Z.vorgabeBeleg = null;
+  if (Z.ansicht !== "bearbeiten") { Z.vorgabeBeleg = null; Z.schildVorschlag = null; }
+  if (Z.ansicht !== "neu" && !Z.neuSchildFoto) Z.neuSchildGelesen = null;
   // Neu zeichnen (z. B. wenn im Hintergrund Plätze nachladen) darf das halb
   // ausgefüllte Formular "Ort hinzufügen" nicht leeren.
   if (Z.ansicht === "neu" && String(letzterSchluessel).startsWith("neu:")) Z.neuEntwurf = neuFormularWerte();
@@ -6109,6 +6148,7 @@ async function speichern(){
     if (aendFoto && !(await schildHochladen(aendFoto, o.id))) return;
   }
   Z.aendSchildFoto = null;
+  Z.schildVorschlag = null;
 
   // ----- offene Felder: direkt schreiben -----
   if (Object.keys(offen).length) {
@@ -6195,6 +6235,9 @@ function neuZeitenText(w){
   return extra ? `${basis} (${extra})` : basis;
 }
 
+/* Freiwillige Auswahl: "weiß nicht" wird nicht gespeichert. */
+function wissen(wert){ return !wert || wert === "weiß nicht" ? null : wert; }
+
 /* Quelle des Nutzers als Beleg, falls sie einer der Belege ist. */
 function neuBeleg(quelle){
   return AUSWAHL.bestaetigtDurch.includes(quelle) ? quelle : "nur vermutet";
@@ -6225,7 +6268,7 @@ async function neuVorschlagen(w){
     const basis = {
       name:w.name.slice(0,120), ort:w.ort || null, lat:p.lat, lon:p.lon,
       sportarten:w.sportarten.split(",").map(s=>s.trim()).filter(Boolean),
-      zugang:w.zugang || null, untergrund:w.untergrund || null,
+      zugang:w.zugang || null, untergrund:wissen(w.untergrund),
       ausstattung:w.ausstattung || null, foto:pfad,
       abstand_m: Z.positionEcht ? Math.round(entfernungKm(Z.position, p) * 1000) : null,
       geraet:geraetId() };
@@ -6235,7 +6278,7 @@ async function neuVorschlagen(w){
       quelle: w.quelle === "weiß ich nicht" || w.quelle === BITTE_WAEHLEN
               ? (schildPfad ? "Schild vor Ort" : null) : w.quelle,
       quelle_detail: w.quelledetail ? w.quelledetail.slice(0,300) : null,
-      schild_foto: schildPfad, groesse: w.groesse || null,
+      schild_foto: schildPfad, groesse: wissen(w.groesse),
       beleuchtung: w.beleuchtung === "weiß nicht" ? null : w.beleuchtung,
       umzaeunt: w.umzaeunt === "weiß nicht" ? null : w.umzaeunt };
     let { error } = await db.from("neue_orte").insert(neu);
@@ -6244,13 +6287,14 @@ async function neuVorschlagen(w){
       const zusatz = [zeiten && "Zeiten: " + zeiten,
         neu.quelle && "Quelle: " + neu.quelle + (neu.quelle_detail ? " (" + neu.quelle_detail + ")" : ""),
         schildPfad && "Schildfoto: " + schildPfad,
-        "Größe: " + w.groesse, neu.beleuchtung && "Licht: " + neu.beleuchtung,
+        neu.groesse && "Größe: " + neu.groesse, neu.beleuchtung && "Licht: " + neu.beleuchtung,
         neu.umzaeunt && "umzäunt: " + neu.umzaeunt, w.hinweis].filter(Boolean).join(" · ");
       ({ error } = await db.from("neue_orte").insert({ ...basis, hinweis:zusatz.slice(0,1000) || null }));
     }
     if (error) { console.error(error); return melde("Senden hat nicht geklappt: " + error.message); }
   }
   Z.neuerPunkt = null; Z.neuFoto = null; Z.neuSchildFoto = null; Z.neuEntwurf = null;
+  Z.neuMehrOffen = null; Z.neuSchildGelesen = null;
   Z.ansicht = "liste";
   zeichne();
   melde("Danke! Wir prüfen den Platz und schalten ihn dann frei.");
@@ -6263,8 +6307,12 @@ async function neuSpeichern(){
   const feld = sel => document.querySelector("#formular " + sel);
   if (!w.name) { wackeln(feld("[name=name]")); return melde("Ein Name fehlt noch."); }
   if (!w.sportarten) { wackeln(feld(".sportwahl")); return melde("Bitte mindestens eine Sportart wählen."); }
-  if (w.zeitenart === "feste Uhrzeiten" && !zeitenAusRaster(w))
+  if (w.zeitenart === "feste Uhrzeiten" && !zeitenAusRaster(w)) {
+    Z.neuMehrOffen = true;
+    const mehr = document.getElementById("neu-mehr");
+    if (mehr) mehr.open = true;
     return melde("Bitte mindestens einen Tag anhaken.");
+  }
   if (!Z.admin) return neuVorschlagen(w);
 
   const notizen = [w.quelledetail && "Quelle: " + w.quelle + " (" + w.quelledetail + ")", w.hinweis]
@@ -6278,8 +6326,8 @@ async function neuSpeichern(){
     zugang: w.zugang,
     zeiten: neuZeitenText(w) || "unbekannt",
     bestaetigt_durch: neuBeleg(w.quelle),
-    untergrund: w.untergrund,
-    groesse: w.groesse || "Kleinfeld",
+    untergrund: wissen(w.untergrund),
+    groesse: wissen(w.groesse),
     ausstattung: w.ausstattung || null,
     umzaeunt: w.umzaeunt === "ja" ? "ja" : "nein",
     beleuchtung: w.beleuchtung === "ja" ? "ja" : "nein",
@@ -6304,6 +6352,7 @@ async function neuSpeichern(){
   }
 
   Z.neuerPunkt = null; Z.neuSchildFoto = null; Z.neuEntwurf = null;
+  Z.neuMehrOffen = null; Z.neuSchildGelesen = null;
   Z.ansicht = "liste";
   zeichne();
   melde("Gespeichert – der Platz ist jetzt für alle auf der Karte.");
@@ -6483,7 +6532,7 @@ function zugangFragen(id, immer){
   el.addEventListener("change", e => {
     if (!e.target.matches("[data-ffoto]") || !e.target.files?.[0]) return;
     gefragtMerken(o.id); zu();
-    schildHochladen(e.target.files[0], o.id);
+    schildFotoVorOrt(e.target.files[0], o.id);
   });
   document.addEventListener("keydown", taste);
   document.body.appendChild(el);
@@ -6733,15 +6782,17 @@ async function bildVerkleinern(datei, maxPx = 1600, qualitaet = 0.82){
     c.toBlob(blob => blob ? ok(blob) : fehler(new Error("leer")), "image/jpeg", qualitaet));
 }
 
-async function schildHochladen(datei, id){
+async function schildHochladen(datei, id, schonVerkleinert = false){
   const o = ort(id ?? Z.auswahlId);
   if (!o || !datei) return;
   if (!datei.type.startsWith("image/")) return melde("Bitte ein Foto auswählen.");
 
   melde("Foto wird hochgeladen …");
-  let blob;
-  try { blob = await bildVerkleinern(datei); }
-  catch { return melde("Das Foto ließ sich nicht lesen."); }
+  let blob = datei;
+  if (!schonVerkleinert) {
+    try { blob = await bildVerkleinern(datei); }
+    catch { return melde("Das Foto ließ sich nicht lesen."); }
+  }
 
   let eintrag;
   if (ECHT) {
@@ -6767,6 +6818,158 @@ async function schildHochladen(datei, id){
   melde("Danke! Das Foto geht in die Prüfung.");
   zaehle("fotos");
   return true;
+}
+
+/* ---------- Schild-Foto lesen ----------
+   Ein Foto vom Schild wird (verkleinert, ohne GPS-Daten) an die Supabase-
+   Funktion "schild-lesen" geschickt. Die lässt Claude Zeiten und Regeln
+   auslesen und speichert das Foto nicht. Die App trägt das Ergebnis ins
+   Formular ein, der Nutzer prüft es und speichert es als Vorschlag. Ist die
+   Funktion (noch) nicht eingerichtet, läuft alles wie vorher ohne Auslesen. */
+
+function blobZuBase64(blob){
+  return new Promise((ok, fehler) => {
+    const r = new FileReader();
+    r.onload = () => ok(String(r.result).split(",")[1] || "");
+    r.onerror = fehler;
+    r.readAsDataURL(blob);
+  });
+}
+
+function meldungWeg(){
+  clearTimeout(melde.t);
+  document.getElementById("meldung")?.classList.remove("zeigen");
+}
+
+/* null = nichts gelesen (nicht eingerichtet, Fehler, Bremse), sonst das Ergebnis. */
+async function schildLesen(blob){
+  if (!ECHT || SCHILD_LESEN_AUS || !db.functions) return null;
+  melde("Schild wird gelesen …", null, 20000);
+  try {
+    const { data, error } = await db.functions.invoke("schild-lesen",
+      { body: { bild: await blobZuBase64(blob) } });
+    if (!error && data?.ok) return data;
+    let info = null;
+    try { info = await error?.context?.json(); } catch {}
+    if (info?.fehler === "bremse")
+      melde(info.grund === "anschluss"
+        ? "Gerade zu viele Schilder von deinem Anschluss gelesen. Trag die Zeiten bitte selbst ein."
+        : "Das Auslesen ist gerade ausgelastet. Trag die Zeiten bitte selbst ein.", null, 5000);
+    else if (info?.fehler === "nicht_eingerichtet" || !info?.fehler) { SCHILD_LESEN_AUS = true; meldungWeg(); }
+    else melde("Das Schild ließ sich nicht lesen. Trag die Zeiten bitte selbst ein.", null, 4500);
+  } catch (e) { console.error(e); SCHILD_LESEN_AUS = true; meldungWeg(); }
+  return null;
+}
+
+function schildAlter(n){
+  if (!n) return "keine";
+  return n <= 12 ? "bis 12 Jahre" : n <= 14 ? "bis 14 Jahre" : n <= 16 ? "bis 16 Jahre" : "bis 18 Jahre";
+}
+
+/* Ergebnis -> Werte im Stil von neuFormularWerte() (Zeitart, Raster, Alter, Regeln). */
+function schildZuWerten(e){
+  const w = { zeitenart: e.zeitenart || "weiß ich nicht", alter: schildAlter(e.altersgrenze),
+              zeitzusatz: (e.regeln || []).join("; ").slice(0, 300) };
+  if (w.zeitenart === "feste Uhrzeiten") WOCHENTAGE.forEach((t, i) => {
+    const d = (e.tage || []).find(x => x.tag === t);
+    w["tag-" + i] = !!d;
+    if (d) { w["von-" + i] = d.von; w["bis-" + i] = d.bis; }
+  });
+  if (e.zugang && e.zugang !== "unklar") w.zugang = e.zugang;
+  return w;
+}
+
+/* Hat das Auslesen etwas Brauchbares ergeben? */
+function schildBrauchbar(e){
+  return !!e && e.ist_schild && (e.zeitenart !== "weiß ich nicht" || e.zugang !== "unklar"
+         || e.altersgrenze || (e.regeln || []).length);
+}
+
+/* Für "Angaben ergänzen": Zugang, Zeitentext und Begründung. */
+function schildVorschlag(e, id){
+  const w = schildZuWerten(e);
+  const zeiten = neuZeitenText(w) || "";
+  const text = (e.text || "").replace(/\s+/g, " ").trim();
+  return { id, zugang: w.zugang || null, zeiten, text, sicher: e.sicher,
+           begruendung: ("Schild vor Ort fotografiert und gelesen" + (text ? ": „" + text.slice(0, 400) + "“" : "")).slice(0, 1000) };
+}
+
+function schildKasten(sv){
+  if (!sv) return "";
+  const knopf = Z.ansicht === "neu" ? "Vorschlagen" : "Speichern";
+  return `<div class="schild-erkannt" id="schild-erkannt" role="status">
+    <b>${ic("kamera", 14)} Vom Schild gelesen – bitte prüfen</b>
+    <p>${sv.sicher === "niedrig" ? "Das Schild war schwer zu lesen. " : ""}Wir haben eingetragen, was auf dem Schild steht.
+       Stimmt etwas nicht, ändere es einfach. Erst mit „${knopf}“ geht es als Vorschlag in die Prüfung.</p>
+    ${sv.text ? `<details><summary>Text auf dem Schild</summary><p>${esc(sv.text)}</p></details>` : ``}
+  </div>`;
+}
+
+/* "Angaben ergänzen" ist schon offen: Werte direkt ins Formular schreiben,
+   ohne die übrigen Eingaben zu verlieren. */
+function schildInsFormular(sv){
+  const f = document.getElementById("formular");
+  if (!f) return;
+  if (sv.zugang && f.zugang) f.zugang.value = sv.zugang;
+  if (sv.zeiten && f.zeiten) f.zeiten.value = sv.zeiten;
+  if (f.begruendung && !f.begruendung.value.trim()) f.begruendung.value = sv.begruendung;
+  if (f.bestaetigtDurch) f.bestaetigtDurch.value = "Schild vor Ort";
+  document.getElementById("schild-erkannt")?.remove();
+  const ziel = f.zugang?.previousElementSibling;   // das Label "Zugang"
+  if (ziel) ziel.insertAdjacentHTML("beforebegin", schildKasten(sv));
+  else f.insertAdjacentHTML("afterbegin", schildKasten(sv));
+  schildKastenZeigen();
+}
+
+/* Die gelesenen Felder stehen unten im Formular: dorthin scrollen. */
+function schildKastenZeigen(){
+  requestAnimationFrame(() => document.getElementById("schild-erkannt")
+    ?.scrollIntoView({ block: "start", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }));
+}
+
+/* Werte ins offene Formular schreiben (Häkchen über true/false). */
+function formularSetzen(w){
+  const f = document.getElementById("formular");
+  if (!f) return;
+  for (const [name, wert] of Object.entries(w)) {
+    const el = f.querySelector(`[name="${name}"]`);
+    if (!el || wert == null) continue;
+    if (el.type === "checkbox") el.checked = !!wert;
+    else if (el.tagName !== "SELECT" || [...el.options].some(op => op.value === wert)) el.value = wert;
+  }
+}
+
+/* Prüfung vor dem Hochladen: Personen auf dem Foto? Dann nicht speichern. */
+function schildMitPersonen(e){
+  if (!e?.personen_erkennbar) return false;
+  melde("Auf dem Foto sind Personen zu erkennen. Bitte fotografiere nur das Schild.", null, 5000);
+  return true;
+}
+
+/* Detailansicht und Check-in-Frage: Schild fotografieren -> lesen ->
+   hochladen -> "Angaben ergänzen" mit den gelesenen Werten öffnen. */
+async function schildFotoVorOrt(datei, id){
+  const o = ort(id ?? Z.auswahlId);
+  if (!o || !datei) return;
+  if (!datei.type.startsWith("image/")) return melde("Bitte ein Foto auswählen.");
+  let blob;
+  try { blob = await bildVerkleinern(datei); }
+  catch { return melde("Das Foto ließ sich nicht lesen."); }
+  const e = await schildLesen(blob);
+  if (schildMitPersonen(e)) return;
+  if (!(await schildHochladen(blob, o.id, true))) return;
+  if (!schildBrauchbar(e)) {
+    if (e) melde("Danke! Zeiten konnten wir auf dem Foto nicht erkennen. Das Foto geht in die Prüfung.", null, 4500);
+    return;
+  }
+  Z.auswahlId = o.id;
+  Z.schildVorschlag = schildVorschlag(e, o.id);
+  Z.aendSchildFoto = { id: o.id, datei: null, hochgeladen: true };
+  Z.vorgabeBeleg = "Schild vor Ort";
+  Z.ansicht = "bearbeiten";
+  zeichne();
+  schildKastenZeigen();
+  melde("Vom Schild übernommen. Bitte prüfen und speichern.", null, 4500);
 }
 
 /* Admin: Foto freigeben und gleich den Zugang mit "Schild vor Ort"
@@ -8805,6 +9008,23 @@ function ansichtRechtliches(){
         entfernt. Bis ich ein Foto geprüft und freigegeben habe, liegt es
         in einem nicht öffentlichen Speicher. Fotos mit erkennbaren Personen
         oder Kennzeichen lösche ich.</p>
+        <p><b>Schild-Fotos automatisch lesen:</b> Fotografierst du ein Schild,
+        schickt die App das verkleinerte Foto (ohne Ortungsdaten) über
+        Supabase an Anthropic (Anthropic PBC, USA). Dort liest ein KI-Modell
+        Öffnungszeiten und Regeln aus und schickt sie als Text zurück. Die App
+        trägt sie ins Formular ein, du prüfst sie und entscheidest, ob du sie
+        als Vorschlag abschickst. Anthropic arbeitet dafür als
+        Auftragsverarbeiter (Art. 28 DSGVO), nutzt die Fotos nicht zum
+        Trainieren seiner Modelle und speichert sie nur befristet, um
+        Missbrauch zu erkennen. Für das Auslesen selbst speichert Platzfrei
+        das Foto nicht; gespeichert wird es nur wie oben beschrieben als
+        Schildfoto zur Prüfung. Erkennt das Modell Personen auf dem Foto, wird
+        es nicht hochgeladen. Gegen Missbrauch zählt die Funktion, wie oft von
+        einem Anschluss aus gelesen wird (nur ein Prüfwert aus der
+        IP-Adresse, nach 2 Tagen gelöscht). Rechtsgrundlage ist dein Wunsch,
+        das Schild auszulesen (Art. 6 Abs. 1 lit. b DSGVO), und mein
+        berechtigtes Interesse an richtigen Platzangaben (Art. 6 Abs. 1 lit. f
+        DSGVO).</p>
         <p><b>Platzzeiten von Vereinen:</b> Trägt jemand für einen Verein
         Platzzeiten ein, speichere ich Name, Funktion und E-Mail, um bei
         Rückfragen nachzuhaken. Diese Angaben werden nicht veröffentlicht und
@@ -8855,6 +9075,7 @@ function ansichtRechtliches(){
         nötig sind:</p>
         <p>GitHub Inc. (USA), Hosting · Netlify Inc. (USA), Domain und DNS ·
         Supabase Inc. (USA, Server in Irland), Datenbank und Fotos ·
+        Anthropic PBC (USA), Auslesen von Schild-Fotos ·
         OpenFreeMap (openfreemap.org), CARTO (CartoDB Inc., USA) und Esri Inc. (USA), Kartenbilder ·
         Cloudflare Inc. (USA), cdnjs · Prospect One (Polen), jsDelivr ·
         OpenStreetMap Foundation (Großbritannien), Adresssuche ·
@@ -9885,11 +10106,16 @@ document.addEventListener("change", e => {
   zeichne();
 });
 
+/* "Mehr Angaben" beim Platz eintragen: auf/zu über das Neuzeichnen retten. */
+document.addEventListener("toggle", e => {
+  if (e.target.id === "neu-mehr") Z.neuMehrOffen = e.target.open;
+}, true);
+
 document.addEventListener("change", e=>{
   if (e.target.id === "importdatei" && e.target.files?.[0])
     importVerarbeiten(e.target.files[0]);
   if (e.target.id === "schild-datei" && e.target.files?.[0])
-    schildHochladen(e.target.files[0]);
+    schildFotoVorOrt(e.target.files[0]);
   if (e.target.id === "neu-foto" && e.target.files?.[0]) {
     if (!e.target.files[0].type.startsWith("image/")) return melde("Bitte ein Foto auswählen.");
     Z.neuFoto = e.target.files[0];
@@ -9899,17 +10125,51 @@ document.addEventListener("change", e=>{
   }
   if (e.target.id === "aend-schildfoto" && e.target.files?.[0]) {
     if (!e.target.files[0].type.startsWith("image/")) return melde("Bitte ein Foto auswählen.");
-    Z.aendSchildFoto = { id: Z.auswahlId, datei: e.target.files[0] };
+    const datei = e.target.files[0], id = Z.auswahlId;
+    Z.aendSchildFoto = { id, datei };
     const t = document.getElementById("aend-schildtext");
     if (t) t.textContent = "✓ Schildfoto gewählt – ändern";
     melde("Schildfoto gewählt. Es wird beim Speichern mitgeschickt.");
+    /* Gleich auslesen und Zugang, Zeiten und Begründung vorausfüllen. */
+    bildVerkleinern(datei).then(schildLesen).then(erg => {
+      if (Z.ansicht !== "bearbeiten" || Z.auswahlId !== id || Z.aendSchildFoto?.datei !== datei) return;
+      if (schildMitPersonen(erg)) {
+        Z.aendSchildFoto = null;
+        if (t) t.innerHTML = ic("kamera", 14) + " Oder: Schild fotografieren";
+        return;
+      }
+      if (!schildBrauchbar(erg)) {
+        if (erg) melde("Zeiten konnten wir auf dem Foto nicht erkennen. Das Foto wird trotzdem mitgeschickt.", null, 4500);
+        return;
+      }
+      Z.schildVorschlag = schildVorschlag(erg, id);
+      schildInsFormular(Z.schildVorschlag);
+      melde("Vom Schild übernommen. Bitte prüfen und speichern.", null, 4500);
+    }).catch(() => {});
   }
   if (e.target.id === "neu-schildfoto" && e.target.files?.[0]) {
     if (!e.target.files[0].type.startsWith("image/")) return melde("Bitte ein Foto auswählen.");
-    Z.neuSchildFoto = e.target.files[0];
+    const datei = e.target.files[0];
+    Z.neuSchildFoto = datei;
+    Z.neuSchildGelesen = null;
     Z.neuEntwurf = neuFormularWerte();
     zeichne();
     melde("Schildfoto gewählt.");
+    /* Gleich auslesen und Zeiten, Alter und Regeln vorausfüllen. */
+    bildVerkleinern(datei).then(schildLesen).then(erg => {
+      if (Z.ansicht !== "neu" || Z.neuSchildFoto !== datei) return;
+      if (schildMitPersonen(erg)) { Z.neuSchildFoto = null; Z.neuEntwurf = neuFormularWerte(); zeichne(); return; }
+      if (!schildBrauchbar(erg)) {
+        if (erg) melde("Zeiten konnten wir auf dem Foto nicht erkennen. Trag sie bitte selbst ein.", null, 4500);
+        return;
+      }
+      Z.neuSchildGelesen = schildVorschlag(erg, null);
+      Z.neuMehrOffen = true;
+      /* zeichne() liest das Formular neu ein, deshalb die Werte erst dort eintragen. */
+      formularSetzen({ ...schildZuWerten(erg), quelle: "Schild vor Ort" });
+      zeichne();
+      melde("Vom Schild übernommen. Bitte prüfen.", null, 4500);
+    }).catch(() => {});
   }
   // "Ort hinzufügen": Wochenraster und Schildfoto nur zeigen, wenn sie passen.
   if (Z.ansicht === "neu" && e.target.name === "zeitenart") {
